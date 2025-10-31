@@ -24,10 +24,14 @@ class LoginWindow:
 
         # Configurar ventana principal
         self.root.title("HUTCHISON PORTS - Login")
-        self.root.geometry("1200x700")
 
-        # Centrar ventana en pantalla
-        self.center_window()
+        # Obtener dimensiones de la pantalla
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        # Establecer ventana en pantalla completa
+        self.root.geometry(f"{screen_width}x{screen_height}+0+0")
+        self.root.state('zoomed')  # Maximizar ventana
 
         # Variables de entrada
         self.username_var = ctk.StringVar()

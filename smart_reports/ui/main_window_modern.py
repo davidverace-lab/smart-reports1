@@ -106,6 +106,7 @@ class MainWindow:
             'dashboard': self.show_dashboard_panel,
             'consultas': self.show_consultas_panel,
             'actualizar': self.show_actualizar_panel,
+            'reportes': self.show_reportes_panel,
             'configuracion': self.show_configuracion_panel,
         }
 
@@ -872,6 +873,129 @@ class MainWindow:
         )
         card4.grid(row=1, column=1, padx=15, pady=15, sticky='nsew')
 
+    def show_reportes_panel(self):
+        """Panel de generación de reportes"""
+        self.clear_content_area()
+        self.current_panel = 'reportes'
+
+        # Frame principal
+        main_frame = ctk.CTkFrame(self.content_area, fg_color='transparent')
+        main_frame.pack(fill='both', expand=True, padx=20, pady=20)
+
+        # Header
+        header = ctk.CTkFrame(main_frame, fg_color='transparent')
+        header.pack(fill='x', pady=(0, 30))
+
+        theme = self.theme_manager.get_current_theme()
+
+        title = ctk.CTkLabel(
+            header,
+            text='Generar Reportes',
+            font=('Montserrat', 32, 'bold'),
+            text_color=theme['text']
+        )
+        title.pack(side='left')
+
+        # Grid frame para layout 2x2
+        grid_frame = ctk.CTkFrame(main_frame, fg_color='transparent')
+        grid_frame.pack(fill='both', expand=True)
+
+        # Configurar grid 2x2
+        grid_frame.grid_columnconfigure((0, 1), weight=1)
+        grid_frame.grid_rowconfigure((0, 1), weight=1)
+
+        # Definir PRIMARY_COLORS con colores Hutchison Ports
+        PRIMARY_COLORS = {
+            'accent_blue': HUTCHISON_COLORS['ports_sky_blue'],
+            'accent_green': HUTCHISON_COLORS['success'],
+            'accent_orange': HUTCHISON_COLORS['warning'],
+            'accent_purple': HUTCHISON_COLORS['ports_sea_blue']
+        }
+
+        # Card 1: Reporte de Progreso por Usuario
+        card1 = ConfigCard(
+            grid_frame,
+            icon='👤',
+            title='Progreso por Usuario',
+            description='Generar reporte PDF del progreso de módulos por usuario individual.',
+            button_text='Generar',
+            button_color=PRIMARY_COLORS['accent_blue'],
+            command=self.generate_user_progress_report
+        )
+        card1.grid(row=0, column=0, padx=15, pady=15, sticky='nsew')
+
+        # Card 2: Reporte de Progreso por Unidad
+        card2 = ConfigCard(
+            grid_frame,
+            icon='🏢',
+            title='Progreso por Unidad',
+            description='Generar reporte PDF del progreso de capacitaciones por unidad de negocio.',
+            button_text='Generar',
+            button_color=PRIMARY_COLORS['accent_green'],
+            command=self.generate_unit_progress_report
+        )
+        card2.grid(row=0, column=1, padx=15, pady=15, sticky='nsew')
+
+        # Card 3: Reporte Global de Capacitaciones
+        card3 = ConfigCard(
+            grid_frame,
+            icon='📊',
+            title='Reporte Global',
+            description='Generar reporte PDF completo con estadísticas generales del instituto.',
+            button_text='Generar',
+            button_color=PRIMARY_COLORS['accent_orange'],
+            command=self.generate_global_report
+        )
+        card3.grid(row=1, column=0, padx=15, pady=15, sticky='nsew')
+
+        # Card 4: Reporte de Certificaciones
+        card4 = ConfigCard(
+            grid_frame,
+            icon='🎓',
+            title='Certificaciones',
+            description='Generar certificados de finalización para usuarios que completaron módulos.',
+            button_text='Generar',
+            button_color=PRIMARY_COLORS['accent_purple'],
+            command=self.generate_certificates_report
+        )
+        card4.grid(row=1, column=1, padx=15, pady=15, sticky='nsew')
+
+    def generate_user_progress_report(self):
+        """Generar reporte de progreso por usuario"""
+        messagebox.showinfo(
+            "Reporte por Usuario",
+            "Función 'Progreso por Usuario' en desarrollo.\n\n" +
+            "Esta funcionalidad generará un reporte PDF detallado\n" +
+            "del progreso de módulos de un usuario específico."
+        )
+
+    def generate_unit_progress_report(self):
+        """Generar reporte de progreso por unidad"""
+        messagebox.showinfo(
+            "Reporte por Unidad",
+            "Función 'Progreso por Unidad' en desarrollo.\n\n" +
+            "Esta funcionalidad generará un reporte PDF con el\n" +
+            "progreso de capacitaciones de una unidad de negocio."
+        )
+
+    def generate_global_report(self):
+        """Generar reporte global"""
+        messagebox.showinfo(
+            "Reporte Global",
+            "Función 'Reporte Global' en desarrollo.\n\n" +
+            "Esta funcionalidad generará un reporte PDF completo\n" +
+            "con estadísticas generales del instituto."
+        )
+
+    def generate_certificates_report(self):
+        """Generar certificados"""
+        messagebox.showinfo(
+            "Certificados",
+            "Función 'Certificados' en desarrollo.\n\n" +
+            "Esta funcionalidad generará certificados de finalización\n" +
+            "para usuarios que completaron módulos."
+        )
+
     def _create_config_card(self, parent, icon, title, description, color, command):
         """Crear card de configuración"""
         card = ctk.CTkFrame(
@@ -1511,6 +1635,8 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
             self.show_consultas_panel()
         elif self.current_panel == 'actualizar':
             self.show_actualizar_panel()
+        elif self.current_panel == 'reportes':
+            self.show_reportes_panel()
         elif self.current_panel == 'configuracion':
             self.show_configuracion_panel()
 
