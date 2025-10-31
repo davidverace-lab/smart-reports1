@@ -1,0 +1,41 @@
+# ============================================
+# SMART REPORTS - DEPENDENCIES
+# Instituto Hutchison Ports v2.0
+# ============================================
+
+# Base de datos
+pyodbc>=5.0.0                      # SQL Server
+mysql-connector-python>=8.0.33     # MySQL
+
+# Procesamiento de datos
+pandas>=2.0.0
+numpy>=1.24.0
+openpyxl>=3.1.0                    # Excel
+
+# Interfaz gráfica
+customtkinter>=5.2.0               # UI moderna
+tkinterdnd2-universal>=1.7.3       # Drag & drop
+pillow>=10.0.0                     # Imágenes
+
+# Gráficos y visualización
+plotly>=5.17.0                     # Gráficos interactivos
+kaleido>=0.2.1                     # Exportar gráficos Plotly a imágenes estáticas
+matplotlib>=3.7.0                  # Gráficos estáticos (compatibilidad)
+seaborn>=0.12.0                    # Gráficos estadísticos avanzados
+
+# Reportes PDF
+reportlab>=4.0.0                   # Generación de PDFs
+
+# Utilidades
+python-dateutil>=2.8.2             # Manejo de fechas
+colorama>=0.4.6                    # Colores en terminal (debugging)
+
+# Empaquetado
+pyinstaller>=6.0.0
+
+# NOTAS DE INSTALACIÓN:
+# =====================
+# 1. Ejecutar: pip install -r requirements.txt
+# 2. Si kaleido falla en Windows, usar: pip install kaleido==0.1.0.post1
+# 3. Para desarrollo: pip install --upgrade --force-reinstall customtkinter
+# 4. PIL viene incluido con pillow, no instalar por separado
