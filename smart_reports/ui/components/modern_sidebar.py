@@ -104,7 +104,6 @@ class ModernSidebar(ctk.CTkFrame):
             ('🔍', 'Consultas', 'consultas'),
             ('📤', 'Actualizar Datos', 'actualizar'),
             ('📄', 'Generar Reportes', 'reportes'),
-            ('⚙️', 'Configuración', 'configuracion'),
         ]
 
         for icon, text, key in nav_items:
