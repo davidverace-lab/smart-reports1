@@ -56,7 +56,6 @@ class TopBar(ctk.CTkFrame):
     def _create_content(self):
         """Crear contenido del top bar"""
         theme = self.theme_manager.get_current_theme()
-        brand_color = self._get_brand_color()
 
         # Destruir widgets existentes si los hay
         for widget in self.winfo_children():
@@ -64,13 +63,13 @@ class TopBar(ctk.CTkFrame):
 
         # Container principal con padding
         container = ctk.CTkFrame(self, fg_color='transparent')
-        container.pack(fill='both', expand=True, padx=30, pady=15)
+        container.pack(fill='both', expand=True, padx=30, pady=0)
 
-        # === LADO IZQUIERDO: Bienvenida ===
+        # === LADO IZQUIERDO: Bienvenida (centrada verticalmente) ===
         left_frame = ctk.CTkFrame(container, fg_color='transparent')
-        left_frame.pack(side='left', fill='y')
+        left_frame.pack(side='left', fill='both', expand=True)
 
-        # Saludo con nombre de usuario
+        # Saludo con nombre de usuario (centrado verticalmente)
         self.greeting_label = ctk.CTkLabel(
             left_frame,
             text=f"¡Bienvenido, {self.username}!",
@@ -78,21 +77,21 @@ class TopBar(ctk.CTkFrame):
             text_color=theme['text'],
             anchor='w'
         )
-        self.greeting_label.pack(side='top', anchor='w')
+        self.greeting_label.pack(side='left', anchor='w', pady=0)
 
-        # === LADO DERECHO: Branding (solo texto) ===
+        # === LADO DERECHO: Branding (centrado verticalmente) ===
         right_frame = ctk.CTkFrame(container, fg_color='transparent')
-        right_frame.pack(side='right', fill='y')
+        right_frame.pack(side='right', fill='both', expand=True)
 
-        # Texto "HUTCHISON PORTS" - solo diseño, sin botón
+        # Texto "HUTCHISON PORTS" - BLANCO siempre
         self.brand_label = ctk.CTkLabel(
             right_frame,
             text="HUTCHISON PORTS",
             font=('Montserrat', 24, 'bold'),
-            text_color=brand_color,
+            text_color='#FFFFFF',  # Blanco siempre
             anchor='e'
         )
-        self.brand_label.pack(side='right')
+        self.brand_label.pack(side='right', anchor='e', pady=0)
 
         # Línea divisoria inferior
         self.bottom_border = ctk.CTkFrame(
