@@ -1,5 +1,5 @@
 """
-Componente ConfigCard - Card para opciones de configuración
+Componente ConfigCard - Card para opciones de configuración (Rediseñado con colores dinámicos)
 """
 import customtkinter as ctk
 from smart_reports.config.theme_manager import get_theme_manager
@@ -8,7 +8,7 @@ from smart_reports.config.theme_manager import get_theme_manager
 class ConfigCard(ctk.CTkFrame):
     """Card para opciones de configuración con icono, título, descripción y botón"""
 
-    def __init__(self, parent, icon, title, description, button_text, button_color='#6c63ff', command=None, **kwargs):
+    def __init__(self, parent, icon, title, description, button_text, command=None, **kwargs):
         """
         Args:
             parent: Widget padre
@@ -16,7 +16,6 @@ class ConfigCard(ctk.CTkFrame):
             title: Título de la opción
             description: Descripción de la funcionalidad
             button_text: Texto del botón
-            button_color: Color del botón (hex)
             command: Función a ejecutar al hacer clic
         """
         # Obtener tema actual
@@ -32,44 +31,83 @@ class ConfigCard(ctk.CTkFrame):
             **kwargs
         )
 
+        self.icon = icon
+        self.title = title
+        self.description = description
+        self.button_text = button_text
         self.command = command
+
+        # Crear contenido
+        self._create_content()
+
+        # Registrar callback para cambios de tema
+        self.theme_manager.register_callback(self._on_theme_changed)
+
+    def _get_button_color(self):
+        """
+        Obtener color de botones según el tema actual
+        - Modo claro: #002E6D (navy blue de sidebar)
+        - Modo oscuro: #009BDE (cyan - Hutchison Ports blue)
+        """
+        theme = self.theme_manager.get_current_theme()
+        if theme['background'] == '#1a1a1a':  # Dark theme
+            return '#009BDE'  # Cyan
+        else:  # Light theme
+            return '#002E6D'  # Navy blue
+
+    def _get_icon_color(self):
+        """
+        Obtener color del icono según el tema actual
+        Usa el mismo esquema que los botones
+        """
+        return self._get_button_color()
+
+    def _create_content(self):
+        """Crear contenido del card con colores dinámicos"""
+        theme = self.theme_manager.get_current_theme()
+        button_color = self._get_button_color()
+        icon_color = self._get_icon_color()
+
+        # Destruir widgets existentes si los hay
+        for widget in self.winfo_children():
+            widget.destroy()
 
         # Container principal con padding más grande
         main_container = ctk.CTkFrame(self, fg_color='transparent')
         main_container.pack(fill='both', expand=True, padx=30, pady=30)
 
-        # Icono con color (más grande)
-        icon_label = ctk.CTkLabel(
+        # Icono con color dinámico (más grande)
+        self.icon_label = ctk.CTkLabel(
             main_container,
-            text=icon,
-            font=('Segoe UI', 56),  # Aumentado de 48 a 56
-            text_color=button_color,
+            text=self.icon,
+            font=('Segoe UI', 56),
+            text_color=icon_color,
             anchor='center'
         )
-        icon_label.pack(pady=(0, 20))
+        self.icon_label.pack(pady=(0, 20))
 
         # Título (más grande)
-        title_label = ctk.CTkLabel(
+        self.title_label = ctk.CTkLabel(
             main_container,
-            text=title,
-            font=('Segoe UI', 22, 'bold'),  # Aumentado de 20 a 22
+            text=self.title,
+            font=('Segoe UI', 22, 'bold'),
             text_color=theme['text'],
             anchor='center'
         )
-        title_label.pack(pady=(0, 12))
+        self.title_label.pack(pady=(0, 12))
 
         # Descripción (solo si no está vacía) (más grande)
-        if description:
-            desc_label = ctk.CTkLabel(
+        if self.description:
+            self.desc_label = ctk.CTkLabel(
                 main_container,
-                text=description,
-                font=('Segoe UI', 13),  # Aumentado de 12 a 13
+                text=self.description,
+                font=('Segoe UI', 13),
                 text_color=theme['text_secondary'],
                 anchor='center',
-                wraplength=280,  # Aumentado de 250 a 280
+                wraplength=280,
                 justify='center'
             )
-            desc_label.pack(pady=(0, 25))
+            self.desc_label.pack(pady=(0, 25))
         else:
             # Espacio en blanco si no hay descripción
             spacer_desc = ctk.CTkFrame(main_container, fg_color='transparent', height=25)
@@ -79,15 +117,15 @@ class ConfigCard(ctk.CTkFrame):
         spacer = ctk.CTkFrame(main_container, fg_color='transparent')
         spacer.pack(fill='both', expand=True)
 
-        # Botón de acción (MÁS GRANDE Y VISIBLE)
+        # Botón de acción con color dinámico (MÁS GRANDE Y VISIBLE)
         self.action_btn = ctk.CTkButton(
             main_container,
-            text=button_text,
-            font=('Arial', 16, 'bold'),  # Aumentado de 14 a 16 y cambiado a Arial
+            text=self.button_text,
+            font=('Arial', 16, 'bold'),
             fg_color=button_color,
-            hover_color=self._darken_color(button_color),
+            hover_color=self._get_hover_color(button_color),
             corner_radius=12,
-            height=52,  # Aumentado de 45 a 52
+            height=52,
             border_width=0,
             command=self._on_button_click
         )
@@ -98,9 +136,25 @@ class ConfigCard(ctk.CTkFrame):
         if self.command:
             self.command()
 
+    def _get_hover_color(self, base_color):
+        """Generar color hover más claro/oscuro que el color base"""
+        if base_color == '#002E6D':  # Navy blue
+            return '#003D8F'  # Más claro
+        elif base_color == '#009BDE':  # Cyan
+            return '#00B5FF'  # Más claro
+        return self._darken_color(base_color)
+
     def _darken_color(self, hex_color, factor=0.8):
         """Oscurecer un color hex para el estado hover"""
         hex_color = hex_color.lstrip('#')
         rgb = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
         darkened_rgb = tuple(int(c * factor) for c in rgb)
         return f"#{darkened_rgb[0]:02x}{darkened_rgb[1]:02x}{darkened_rgb[2]:02x}"
+
+    def _on_theme_changed(self, theme_colors: dict):
+        """Actualizar colores cuando cambia el tema - RECREA TODO"""
+        # Actualizar el fondo del card
+        self.configure(fg_color=theme_colors['surface'], border_color=theme_colors['border'])
+
+        # Recrear todo el contenido con los nuevos colores
+        self._create_content()

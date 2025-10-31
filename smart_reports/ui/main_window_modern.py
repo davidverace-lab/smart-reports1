@@ -93,6 +93,31 @@ class MainWindow:
         except Exception as e:
             print(f"Error verificando tablas: {e}")
 
+    def get_button_color(self):
+        """
+        Obtener color de botones según el tema actual
+        - Modo claro: #002E6D (navy blue de sidebar)
+        - Modo oscuro: #009BDE (cyan - Hutchison Ports blue)
+        """
+        theme = self.theme_manager.get_current_theme()
+        if theme['background'] == '#1a1a1a':  # Dark theme
+            return '#009BDE'  # Cyan
+        else:  # Light theme
+            return '#002E6D'  # Navy blue
+
+    def get_button_hover_color(self, base_color=None):
+        """
+        Obtener color hover para botones
+        """
+        if base_color is None:
+            base_color = self.get_button_color()
+
+        if base_color == '#002E6D':  # Navy blue
+            return '#003D8F'  # Más claro
+        elif base_color == '#009BDE':  # Cyan
+            return '#00B5FF'  # Más claro
+        return base_color
+
     def create_modern_interface(self):
         """Crear interfaz moderna con customtkinter"""
         theme = self.theme_manager.get_current_theme()
@@ -286,8 +311,8 @@ class MainWindow:
             card1,
             text='📁  Seleccionar Archivo Transcript Status',
             font=('Arial', 16, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=50,
             command=self.select_transcript_file
@@ -318,8 +343,8 @@ class MainWindow:
             card2,
             text='🔄  Actualizar Base de Datos (Cruce de Datos)',
             font=('Arial', 16, 'bold'),
-            fg_color=HUTCHISON_COLORS['success'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=50,
             command=self.update_database_from_file
@@ -357,8 +382,8 @@ class MainWindow:
             card3,
             text='📊  Ver Estadísticas Actuales',
             font=('Arial', 14),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=40,
             command=self.show_progress_stats
@@ -435,8 +460,8 @@ class MainWindow:
             search_id_frame,
             text='Buscar',
             font=('Arial', 14),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=40,
             width=120,
@@ -478,8 +503,8 @@ class MainWindow:
             search_unit_frame,
             text='Consultar',
             font=('Arial', 14),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=40,
             width=120,
@@ -504,7 +529,7 @@ class MainWindow:
             font=('Arial', 14, 'bold'),
             fg_color=filters_btn_bg,
             text_color=theme['text'],
-            hover_color=HUTCHISON_COLORS['ports_sky_blue'],
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=40,
             anchor='w',
@@ -625,8 +650,8 @@ class MainWindow:
             filters_row3,
             text='✅ Aplicar Filtros',
             font=('Arial', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['success'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=40,
             width=180,
@@ -637,8 +662,8 @@ class MainWindow:
             filters_row3,
             text='🔄 Limpiar Filtros',
             font=('Arial', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['warning'],
-            hover_color=HUTCHISON_COLORS['danger'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=40,
             width=180,
@@ -673,8 +698,8 @@ class MainWindow:
             quick_frame,
             text='📋  Todos los Usuarios',
             font=('Arial', 14),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=40,
             command=self.query_new_users
@@ -686,8 +711,8 @@ class MainWindow:
             quick_frame,
             text='👁️  Ver Datos de Ejemplo',
             font=('Arial', 14),
-            fg_color=HUTCHISON_COLORS['success'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=self.get_button_color(),
+            hover_color=self.get_button_hover_color(),
             corner_radius=10,
             height=40,
             command=self.show_example_data
@@ -787,7 +812,7 @@ class MainWindow:
             self.results_tree.tag_configure('evenrow', background='#ffffff')
 
     def show_configuracion_panel(self):
-        """Panel de configuración con diseño 2x2"""
+        """Panel de configuración con diseño 2x2 (Rediseñado con colores dinámicos)"""
         self.clear_content_area()
         self.current_panel = 'configuracion'
 
@@ -817,58 +842,46 @@ class MainWindow:
         grid_frame.grid_columnconfigure((0, 1), weight=1, minsize=350)
         grid_frame.grid_rowconfigure((0, 1), weight=1, minsize=280)
 
-        # Definir PRIMARY_COLORS con colores Hutchison Ports
-        PRIMARY_COLORS = {
-            'accent_blue': HUTCHISON_COLORS['ports_sky_blue'],
-            'accent_green': HUTCHISON_COLORS['success'],
-            'accent_orange': HUTCHISON_COLORS['warning'],
-            'accent_cyan': HUTCHISON_COLORS['ports_horizon_blue']
-        }
-
-        # Card 1: Gestión de Usuarios
+        # Card 1: Gestión de Usuarios (colores dinámicos navy/cyan)
         card1 = ConfigCard(
             grid_frame,
             icon='👥',
             title='Gestión de Usuarios',
             description='Agregar, editar o consultar usuarios del sistema.',
             button_text='Gestionar',
-            button_color=PRIMARY_COLORS['accent_blue'],
             command=self.show_user_management
         )
         card1.grid(row=0, column=0, padx=15, pady=15, sticky='nsew')
 
-        # Card 2: Ticket de Soporte
+        # Card 2: Ticket de Soporte (colores dinámicos navy/cyan)
         card2 = ConfigCard(
             grid_frame,
             icon='🎫',
             title='Ticket de Soporte',
             description='Crear un nuevo ticket de soporte para asistencia técnica.',
             button_text='Crear Ticket',
-            button_color=PRIMARY_COLORS['accent_green'],
             command=self.open_support_ticket
         )
         card2.grid(row=0, column=1, padx=15, pady=15, sticky='nsew')
 
-        # Card 3: Historial de Reportes
+        # Card 3: Historial de Reportes (colores dinámicos navy/cyan)
         card3 = ConfigCard(
             grid_frame,
             icon='📋',
             title='Historial de Reportes',
             description='Ver y descargar reportes PDF generados anteriormente.',
             button_text='Ver Historial',
-            button_color=PRIMARY_COLORS['accent_orange'],
             command=self.open_report_history
         )
         card3.grid(row=1, column=0, padx=15, pady=15, sticky='nsew')
 
-        # Card 4: Acerca de
+        # Card 4: Acerca de (colores dinámicos navy/cyan)
         card4 = ConfigCard(
             grid_frame,
             icon='ℹ️',
             title='Acerca de',
             description='Información de la versión y del desarrollador.',
             button_text='Ver Info',
-            button_color=PRIMARY_COLORS['accent_cyan'],
             command=self.show_about
         )
         card4.grid(row=1, column=1, padx=15, pady=15, sticky='nsew')
@@ -896,7 +909,7 @@ class MainWindow:
             header,
             text='📄 Generar Reportes',
             font=('Montserrat', 36, 'bold'),
-            text_color=HUTCHISON_COLORS['ports_sky_blue']
+            text_color=self.get_button_color()
         )
         title.pack(side='left', padx=30, pady=30)
 
@@ -912,48 +925,42 @@ class MainWindow:
         reports_container = ctk.CTkFrame(scroll_frame, fg_color='transparent')
         reports_container.pack(fill='both', expand=True)
 
-        # Lista de reportes con diseño horizontal
+        # Lista de reportes con diseño horizontal (colores dinámicos navy/cyan)
         reports = [
             {
                 'icon': '👤',
                 'title': 'Progreso por Usuario',
                 'desc': 'Reporte detallado del progreso individual',
-                'color': HUTCHISON_COLORS['ports_sky_blue'],
                 'command': self.generate_user_progress_report
             },
             {
                 'icon': '🏢',
                 'title': 'Progreso por Unidad',
                 'desc': 'Avance de capacitaciones por unidad de negocio',
-                'color': HUTCHISON_COLORS['success'],
                 'command': self.generate_unit_progress_report
             },
             {
                 'icon': '📊',
                 'title': 'Reporte Global',
                 'desc': 'Estadísticas completas del instituto',
-                'color': HUTCHISON_COLORS['warning'],
                 'command': self.generate_global_report
             },
             {
                 'icon': '🎓',
                 'title': 'Certificaciones',
                 'desc': 'Certificados de finalización de módulos',
-                'color': HUTCHISON_COLORS['ports_sea_blue'],
                 'command': self.generate_certificates_report
             },
             {
                 'icon': '📈',
                 'title': 'Análisis de Tendencias',
                 'desc': 'Tendencias y proyecciones de capacitación',
-                'color': HUTCHISON_COLORS['ports_horizon_blue'],
                 'command': self.generate_trends_report
             },
             {
                 'icon': '⏱️',
                 'title': 'Reporte por Periodo',
                 'desc': 'Reportes filtrados por rango de fechas',
-                'color': HUTCHISON_COLORS['sunset_orange'],
                 'command': self.generate_period_report
             }
         ]
@@ -962,7 +969,10 @@ class MainWindow:
             self._create_report_card(reports_container, report, theme)
 
     def _create_report_card(self, parent, report, theme):
-        """Crear card de reporte con diseño horizontal"""
+        """Crear card de reporte con diseño horizontal (colores dinámicos)"""
+        # Obtener color dinámico para este card
+        button_color = self.get_button_color()
+
         # Frame principal del card
         card_frame = ctk.CTkFrame(
             parent,
@@ -979,12 +989,12 @@ class MainWindow:
         left_section = ctk.CTkFrame(card_frame, fg_color='transparent')
         left_section.pack(side='left', fill='both', expand=True, padx=25, pady=20)
 
-        # Icono grande
+        # Icono grande (color dinámico)
         icon_label = ctk.CTkLabel(
             left_section,
             text=report['icon'],
             font=('Segoe UI', 42),
-            text_color=report['color']
+            text_color=button_color
         )
         icon_label.pack(side='left', padx=(0, 20))
 
@@ -1010,13 +1020,13 @@ class MainWindow:
         )
         desc_label.pack(anchor='w', pady=(5, 0))
 
-        # Lado derecho: Botón de acción
+        # Lado derecho: Botón de acción (color dinámico)
         button = ctk.CTkButton(
             card_frame,
             text='Generar Reporte',
             font=('Arial', 16, 'bold'),
-            fg_color=report['color'],
-            hover_color=self._darken_color(report['color']),
+            fg_color=button_color,
+            hover_color=self.get_button_hover_color(button_color),
             corner_radius=10,
             width=200,
             height=60,
@@ -1736,8 +1746,22 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
         Args:
             theme_colors: Diccionario con los colores del nuevo tema
         """
-        # Este método permite que otros componentes también actualicen sus colores
-        pass
+        # Actualizar el fondo del contenedor principal
+        self.main_container.configure(fg_color=theme_colors['background'])
+
+        # Recargar el panel actual para que use los nuevos colores
+        if self.current_panel:
+            panel_methods = {
+                'dashboard': self.show_dashboard_panel,
+                'consultas': self.show_consultas_panel,
+                'actualizar': self.show_actualizar_panel,
+                'reportes': self.show_reportes_panel,
+                'configuracion': self.show_configuracion_panel,
+            }
+
+            # Recargar el panel actual
+            if self.current_panel in panel_methods:
+                panel_methods[self.current_panel]()
 
 
 def main():
