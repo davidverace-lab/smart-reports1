@@ -132,7 +132,6 @@ class MainWindow:
             'consultas': self.show_consultas_panel,
             'actualizar': self.show_actualizar_panel,
             'reportes': self.show_reportes_panel,
-            'configuracion': self.show_configuracion_panel,
         }
 
         self.sidebar = ModernSidebar(
@@ -970,8 +969,14 @@ class MainWindow:
 
     def _create_report_card(self, parent, report, theme):
         """Crear card de reporte con diseño horizontal (colores dinámicos)"""
-        # Obtener color dinámico para este card
+        # Obtener color dinámico para botones
         button_color = self.get_button_color()
+
+        # Color de iconos: blanco en modo oscuro, dinámico en modo claro
+        if theme['background'] == '#1a1a1a':  # Dark mode
+            icon_color = '#FFFFFF'  # Blanco
+        else:  # Light mode
+            icon_color = button_color  # Navy blue
 
         # Frame principal del card
         card_frame = ctk.CTkFrame(
@@ -989,12 +994,12 @@ class MainWindow:
         left_section = ctk.CTkFrame(card_frame, fg_color='transparent')
         left_section.pack(side='left', fill='both', expand=True, padx=25, pady=20)
 
-        # Icono grande (color dinámico)
+        # Icono grande (blanco en oscuro, dinámico en claro)
         icon_label = ctk.CTkLabel(
             left_section,
             text=report['icon'],
             font=('Segoe UI', 42),
-            text_color=button_color
+            text_color=icon_color
         )
         icon_label.pack(side='left', padx=(0, 20))
 
@@ -1736,8 +1741,6 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
             self.show_actualizar_panel()
         elif self.current_panel == 'reportes':
             self.show_reportes_panel()
-        elif self.current_panel == 'configuracion':
-            self.show_configuracion_panel()
 
     def _on_theme_changed(self, theme_colors: dict):
         """
@@ -1756,7 +1759,6 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
                 'consultas': self.show_consultas_panel,
                 'actualizar': self.show_actualizar_panel,
                 'reportes': self.show_reportes_panel,
-                'configuracion': self.show_configuracion_panel,
             }
 
             # Recargar el panel actual
