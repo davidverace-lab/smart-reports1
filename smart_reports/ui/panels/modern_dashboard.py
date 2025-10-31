@@ -8,6 +8,7 @@ from matplotlib.figure import Figure
 import numpy as np
 from smart_reports.ui.components.matplotlib_chart_card import MatplotlibChartCard
 from smart_reports.ui.components.metric_card import MetricCard
+from smart_reports.ui.panels.interactive_charts_panel import InteractiveChartsPanel
 from smart_reports.config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from smart_reports.config.theme_manager import get_theme_manager
 
@@ -81,6 +82,7 @@ class ModernDashboard(ctk.CTkFrame):
         self._general_loaded = False
         self._progreso_loaded = False
         self._jerarquico_loaded = False
+        self._interactivo_loaded = False
 
         # Referencias a componentes
         self.progreso_bar_card = None
@@ -157,7 +159,7 @@ class ModernDashboard(ctk.CTkFrame):
         # CTkSegmentedButton para pestañas
         self.tab_selector = ctk.CTkSegmentedButton(
             header_frame,
-            values=["General", "Progreso por Módulo", "Avance Jerárquico"],
+            values=["General", "Progreso por Módulo", "Avance Jerárquico", "Dashboards Interactivos"],
             font=('Montserrat Bold', 14),
             height=40,
             fg_color=seg_fg_color,
@@ -180,6 +182,7 @@ class ModernDashboard(ctk.CTkFrame):
         self.general_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
         self.progreso_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
         self.jerarquico_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
+        self.interactivo_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
 
         # Configurar grids de los frames
         self.general_frame.grid_columnconfigure(0, weight=1)
@@ -191,19 +194,25 @@ class ModernDashboard(ctk.CTkFrame):
         self.jerarquico_frame.grid_columnconfigure((0, 1), weight=1)
         self.jerarquico_frame.grid_rowconfigure(0, weight=1)
 
+        self.interactivo_frame.grid_columnconfigure(0, weight=1)
+        self.interactivo_frame.grid_rowconfigure(0, weight=1)
+
         # Colocar todos los frames en la misma posición (solo uno visible a la vez)
         self.general_frame.grid(row=0, column=0, sticky='nsew')
         self.progreso_frame.grid(row=0, column=0, sticky='nsew')
         self.jerarquico_frame.grid(row=0, column=0, sticky='nsew')
+        self.interactivo_frame.grid(row=0, column=0, sticky='nsew')
 
         # Ocultar todos excepto el primero
         self.progreso_frame.grid_remove()
         self.jerarquico_frame.grid_remove()
+        self.interactivo_frame.grid_remove()
 
         # Almacenar referencias a las pestañas (para compatibilidad)
         self.tab_general = self.general_frame
         self.tab_progreso = self.progreso_frame
         self.tab_jerarquico = self.jerarquico_frame
+        self.tab_interactivo = self.interactivo_frame
 
     def on_tab_change(self, value):
         """Callback cuando cambia la pestaña - Lazy loading y cambio de vista"""
@@ -211,6 +220,7 @@ class ModernDashboard(ctk.CTkFrame):
         self.general_frame.grid_remove()
         self.progreso_frame.grid_remove()
         self.jerarquico_frame.grid_remove()
+        self.interactivo_frame.grid_remove()
 
         # Mostrar el frame correspondiente y cargar datos si es necesario
         if value == "General":
@@ -228,6 +238,11 @@ class ModernDashboard(ctk.CTkFrame):
             if not self._jerarquico_loaded:
                 self.load_jerarquico_charts()
                 self._jerarquico_loaded = True
+        elif value == "Dashboards Interactivos":
+            self.interactivo_frame.grid(row=0, column=0, sticky='nsew')
+            if not self._interactivo_loaded:
+                self.load_interactivo_charts()
+                self._interactivo_loaded = True
 
     def load_general_charts(self):
         """Cargar pestaña General (lazy loading)"""
@@ -252,6 +267,19 @@ class ModernDashboard(ctk.CTkFrame):
 
         self._create_tab_comportamiento_jerarquico(self.tab_jerarquico)
         self._jerarquico_loaded = True
+
+    def load_interactivo_charts(self):
+        """Cargar pestaña Dashboards Interactivos (lazy loading)"""
+        if self._interactivo_loaded:
+            return
+
+        # Crear panel de gráficos interactivos de Plotly
+        interactive_panel = InteractiveChartsPanel(
+            self.tab_interactivo,
+            self.db
+        )
+        interactive_panel.pack(fill='both', expand=True)
+        self._interactivo_loaded = True
 
     # ==================== PESTAÑA GENERAL ====================
 
@@ -397,37 +425,57 @@ class ModernDashboard(ctk.CTkFrame):
 
     def _create_tab_progreso_modulo(self, parent):
         """Crear pestaña de Progreso por Módulo con gráfico dinámico"""
-        # Frame para selector
+        # Frame para selector con diseño mejorado
         selector_frame = ctk.CTkFrame(parent, fg_color='transparent')
         selector_frame.grid(row=0, column=0, sticky='ew', padx=15, pady=(15, 10))
 
         theme = self.theme_manager.get_current_theme()
 
+        # Label
         label = ctk.CTkLabel(
             selector_frame,
-            text='Seleccionar Unidad de Negocio:',
-            font=('Arial', 14, 'bold'),
+            text='📍 Seleccionar Unidad de Negocio:',
+            font=('Arial', 16, 'bold'),
             text_color=theme['text']
         )
-        label.pack(side='left', padx=(0, 15))
+        label.pack(side='left', padx=(10, 20))
 
-        # Segmented button para seleccionar unidad
-        seg_btn_fg = theme['surface_light'] if self.theme_manager.is_dark_mode() else '#e8e8e8'
-        seg_btn_unsel = theme['surface']
-        seg_btn_hover = theme['surface_light'] if self.theme_manager.is_dark_mode() else '#d0d0d0'
+        # Lista de unidades de negocio (11 unidades)
+        business_units = [
+            'TNG',
+            'CONTAINER CARE',
+            'ECV-EIT',
+            'OPERACIONES PORTUARIAS',
+            'LOGÍSTICA',
+            'MANTENIMIENTO',
+            'ADMINISTRACIÓN',
+            'RECURSOS HUMANOS',
+            'FINANZAS',
+            'SEGURIDAD',
+            'TECNOLOGÍA'
+        ]
 
-        self.unit_selector = ctk.CTkSegmentedButton(
+        # Usar OptionMenu más grande y visible
+        dropdown_fg = theme['surface_light'] if self.theme_manager.is_dark_mode() else '#FFFFFF'
+        dropdown_border = PRIMARY_COLORS['accent_blue']
+
+        self.unit_selector = ctk.CTkOptionMenu(
             selector_frame,
-            values=['TNG', 'CONTAINER CARE', 'ECV-EIT'],
-            font=('Arial', 12, 'bold'),
-            fg_color=seg_btn_fg,
-            selected_color=PRIMARY_COLORS['accent_blue'],
-            selected_hover_color='#5a52d5',
-            unselected_color=seg_btn_unsel,
-            unselected_hover_color=seg_btn_hover,
+            values=business_units,
+            font=('Arial', 14, 'bold'),
+            dropdown_font=('Arial', 13),
+            width=350,
+            height=50,
+            corner_radius=12,
+            fg_color=dropdown_fg,
+            button_color=PRIMARY_COLORS['accent_blue'],
+            button_hover_color='#007bb5',
+            dropdown_fg_color=dropdown_fg,
+            dropdown_hover_color=PRIMARY_COLORS['accent_blue'],
+            text_color=theme['text'],
             command=self._on_unit_change
         )
-        self.unit_selector.pack(side='left')
+        self.unit_selector.pack(side='left', padx=(0, 10))
         self.unit_selector.set('TNG')
         self.current_unit = 'TNG'
 
@@ -744,6 +792,7 @@ class ModernDashboard(ctk.CTkFrame):
         self._general_loaded = False
         self._progreso_loaded = False
         self._jerarquico_loaded = False
+        self._interactivo_loaded = False
 
         # Recargar pestaña actual
         current_tab = self.tab_selector.get()

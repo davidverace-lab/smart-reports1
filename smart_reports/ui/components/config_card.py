@@ -34,63 +34,64 @@ class ConfigCard(ctk.CTkFrame):
 
         self.command = command
 
-        # Container principal con padding
+        # Container principal con padding más grande
         main_container = ctk.CTkFrame(self, fg_color='transparent')
-        main_container.pack(fill='both', expand=True, padx=25, pady=25)
+        main_container.pack(fill='both', expand=True, padx=30, pady=30)
 
-        # Icono con color
+        # Icono con color (más grande)
         icon_label = ctk.CTkLabel(
             main_container,
             text=icon,
-            font=('Segoe UI', 48),
-            text_color=button_color,  # Color del icono igual al del botón
+            font=('Segoe UI', 56),  # Aumentado de 48 a 56
+            text_color=button_color,
             anchor='center'
         )
-        icon_label.pack(pady=(0, 15))
+        icon_label.pack(pady=(0, 20))
 
-        # Título
+        # Título (más grande)
         title_label = ctk.CTkLabel(
             main_container,
             text=title,
-            font=('Segoe UI', 20, 'bold'),
+            font=('Segoe UI', 22, 'bold'),  # Aumentado de 20 a 22
             text_color=theme['text'],
             anchor='center'
         )
-        title_label.pack(pady=(0, 10))
+        title_label.pack(pady=(0, 12))
 
-        # Descripción (solo si no está vacía)
+        # Descripción (solo si no está vacía) (más grande)
         if description:
             desc_label = ctk.CTkLabel(
                 main_container,
                 text=description,
-                font=('Segoe UI', 12),
+                font=('Segoe UI', 13),  # Aumentado de 12 a 13
                 text_color=theme['text_secondary'],
                 anchor='center',
-                wraplength=250,
+                wraplength=280,  # Aumentado de 250 a 280
                 justify='center'
             )
-            desc_label.pack(pady=(0, 20))
+            desc_label.pack(pady=(0, 25))
         else:
             # Espacio en blanco si no hay descripción
-            spacer_desc = ctk.CTkFrame(main_container, fg_color='transparent', height=20)
+            spacer_desc = ctk.CTkFrame(main_container, fg_color='transparent', height=25)
             spacer_desc.pack()
 
         # Spacer para empujar el botón al fondo
         spacer = ctk.CTkFrame(main_container, fg_color='transparent')
         spacer.pack(fill='both', expand=True)
 
-        # Botón de acción
+        # Botón de acción (MÁS GRANDE Y VISIBLE)
         self.action_btn = ctk.CTkButton(
             main_container,
             text=button_text,
-            font=('Segoe UI', 14, 'bold'),
+            font=('Arial', 16, 'bold'),  # Aumentado de 14 a 16 y cambiado a Arial
             fg_color=button_color,
             hover_color=self._darken_color(button_color),
-            corner_radius=10,
-            height=45,
+            corner_radius=12,
+            height=52,  # Aumentado de 45 a 52
+            border_width=0,
             command=self._on_button_click
         )
-        self.action_btn.pack(fill='x')
+        self.action_btn.pack(fill='x', pady=(0, 5))
 
     def _on_button_click(self):
         """Ejecutar comando del botón"""
