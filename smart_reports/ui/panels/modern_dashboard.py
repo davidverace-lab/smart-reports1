@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 import numpy as np
 from smart_reports.ui.components.matplotlib_chart_card import MatplotlibChartCard
 from smart_reports.ui.components.metric_card import MetricCard
-from smart_reports.ui.panels.interactive_charts_panel import InteractiveChartsPanel
+from smart_reports.ui.panels.matplotlib_interactive_panel import MatplotlibInteractivePanel
 from smart_reports.config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from smart_reports.config.theme_manager import get_theme_manager
 
@@ -273,12 +273,12 @@ class ModernDashboard(ctk.CTkFrame):
         if self._interactivo_loaded:
             return
 
-        # Crear panel de gráficos interactivos de Plotly
-        interactive_panel = InteractiveChartsPanel(
+        # Crear panel de gráficos interactivos con Matplotlib
+        interactive_panel = MatplotlibInteractivePanel(
             self.tab_interactivo,
             self.db
         )
-        interactive_panel.pack(fill='both', expand=True)
+        interactive_panel.pack(fill='both', expand=True, padx=5, pady=5)
         self._interactivo_loaded = True
 
     # ==================== PESTAÑA GENERAL ====================
@@ -440,20 +440,24 @@ class ModernDashboard(ctk.CTkFrame):
         )
         label.pack(side='left', padx=(10, 20))
 
-        # Lista de unidades de negocio (11 unidades)
-        business_units = [
-            'TNG',
-            'CONTAINER CARE',
-            'ECV-EIT',
-            'OPERACIONES PORTUARIAS',
-            'LOGÍSTICA',
-            'MANTENIMIENTO',
-            'ADMINISTRACIÓN',
-            'RECURSOS HUMANOS',
-            'FINANZAS',
-            'SEGURIDAD',
-            'TECNOLOGÍA'
-        ]
+        # Obtener unidades de negocio desde la base de datos
+        business_units = self._get_business_units_from_db()
+
+        # Si no hay unidades en BD, usar lista por defecto
+        if not business_units:
+            business_units = [
+                'TNG',
+                'CONTAINER CARE',
+                'ECV-EIT',
+                'OPERACIONES PORTUARIAS',
+                'LOGÍSTICA',
+                'MANTENIMIENTO',
+                'ADMINISTRACIÓN',
+                'RECURSOS HUMANOS',
+                'FINANZAS',
+                'SEGURIDAD',
+                'TECNOLOGÍA'
+            ]
 
         # Usar OptionMenu más grande y visible
         dropdown_fg = theme['surface_light'] if self.theme_manager.is_dark_mode() else '#FFFFFF'
@@ -476,8 +480,11 @@ class ModernDashboard(ctk.CTkFrame):
             command=self._on_unit_change
         )
         self.unit_selector.pack(side='left', padx=(0, 10))
-        self.unit_selector.set('TNG')
-        self.current_unit = 'TNG'
+
+        # Establecer primera unidad como seleccionada
+        if business_units:
+            self.unit_selector.set(business_units[0])
+            self.current_unit = business_units[0]
 
         # Frame para gráficos con layout mejorado
         charts_frame = ctk.CTkFrame(parent, fg_color='transparent')
@@ -501,7 +508,39 @@ class ModernDashboard(ctk.CTkFrame):
         self.progreso_donut_card.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
 
         # Crear gráficos iniciales
-        self._update_progreso_charts('TNG')
+        if business_units:
+            self._update_progreso_charts(business_units[0])
+
+    def _get_business_units_from_db(self):
+        """Obtener lista de unidades de negocio desde la base de datos"""
+        if not self.cursor:
+            return []
+
+        try:
+            # Intentar obtener de la tabla UnidadDeNegocio
+            self.cursor.execute("""
+                SELECT DISTINCT NombreUnidad
+                FROM UnidadDeNegocio
+                WHERE NombreUnidad IS NOT NULL
+                ORDER BY NombreUnidad
+            """)
+            units = [row[0] for row in self.cursor.fetchall()]
+
+            # Si no hay resultados, intentar otras tablas comunes
+            if not units:
+                self.cursor.execute("""
+                    SELECT DISTINCT Unidad
+                    FROM Usuarios
+                    WHERE Unidad IS NOT NULL AND Unidad != ''
+                    ORDER BY Unidad
+                """)
+                units = [row[0] for row in self.cursor.fetchall()]
+
+            return units if units else []
+
+        except Exception as e:
+            print(f"Error obteniendo unidades de negocio: {e}")
+            return []
 
     def _on_unit_change(self, value):
         """Callback cuando cambia la unidad seleccionada"""

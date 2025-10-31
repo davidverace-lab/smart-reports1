@@ -803,19 +803,19 @@ class MainWindow:
 
         title = ctk.CTkLabel(
             header,
-            text='Configuración',
+            text='⚙️ Configuración',
             font=('Montserrat', 32, 'bold'),
             text_color=theme['text']
         )
         title.pack(side='left')
 
-        # Grid frame para layout 2x2
+        # Grid frame para layout 2x2 con altura mínima
         grid_frame = ctk.CTkFrame(main_frame, fg_color='transparent')
         grid_frame.pack(fill='both', expand=True)
 
-        # Configurar grid 2x2
-        grid_frame.grid_columnconfigure((0, 1), weight=1)
-        grid_frame.grid_rowconfigure((0, 1), weight=1)
+        # Configurar grid 2x2 con tamaños mínimos
+        grid_frame.grid_columnconfigure((0, 1), weight=1, minsize=350)
+        grid_frame.grid_rowconfigure((0, 1), weight=1, minsize=280)
 
         # Definir PRIMARY_COLORS con colores Hutchison Ports
         PRIMARY_COLORS = {
@@ -874,91 +874,162 @@ class MainWindow:
         card4.grid(row=1, column=1, padx=15, pady=15, sticky='nsew')
 
     def show_reportes_panel(self):
-        """Panel de generación de reportes"""
+        """Panel de generación de reportes con diseño creativo"""
         self.clear_content_area()
         self.current_panel = 'reportes'
 
-        # Frame principal
-        main_frame = ctk.CTkFrame(self.content_area, fg_color='transparent')
-        main_frame.pack(fill='both', expand=True, padx=20, pady=20)
-
-        # Header
-        header = ctk.CTkFrame(main_frame, fg_color='transparent')
-        header.pack(fill='x', pady=(0, 30))
-
         theme = self.theme_manager.get_current_theme()
+
+        # Scroll frame principal
+        scroll_frame = ctk.CTkScrollableFrame(
+            self.content_area,
+            fg_color='transparent'
+        )
+        scroll_frame.pack(fill='both', expand=True, padx=20, pady=20)
+
+        # Header con gradiente simulado
+        header = ctk.CTkFrame(scroll_frame, fg_color=theme['surface'], corner_radius=15, height=100)
+        header.pack(fill='x', pady=(0, 25))
+        header.pack_propagate(False)
 
         title = ctk.CTkLabel(
             header,
-            text='Generar Reportes',
-            font=('Montserrat', 32, 'bold'),
-            text_color=theme['text']
+            text='📄 Generar Reportes',
+            font=('Montserrat', 36, 'bold'),
+            text_color=HUTCHISON_COLORS['ports_sky_blue']
         )
-        title.pack(side='left')
+        title.pack(side='left', padx=30, pady=30)
 
-        # Grid frame para layout 2x2
-        grid_frame = ctk.CTkFrame(main_frame, fg_color='transparent')
-        grid_frame.pack(fill='both', expand=True)
-
-        # Configurar grid 2x2
-        grid_frame.grid_columnconfigure((0, 1), weight=1)
-        grid_frame.grid_rowconfigure((0, 1), weight=1)
-
-        # Definir PRIMARY_COLORS con colores Hutchison Ports
-        PRIMARY_COLORS = {
-            'accent_blue': HUTCHISON_COLORS['ports_sky_blue'],
-            'accent_green': HUTCHISON_COLORS['success'],
-            'accent_orange': HUTCHISON_COLORS['warning'],
-            'accent_purple': HUTCHISON_COLORS['ports_sea_blue']
-        }
-
-        # Card 1: Reporte de Progreso por Usuario
-        card1 = ConfigCard(
-            grid_frame,
-            icon='👤',
-            title='Progreso por Usuario',
-            description='Generar reporte PDF del progreso de módulos por usuario individual.',
-            button_text='Generar',
-            button_color=PRIMARY_COLORS['accent_blue'],
-            command=self.generate_user_progress_report
+        subtitle = ctk.CTkLabel(
+            header,
+            text='Selecciona el tipo de reporte que deseas generar',
+            font=('Arial', 14),
+            text_color=theme['text_secondary']
         )
-        card1.grid(row=0, column=0, padx=15, pady=15, sticky='nsew')
+        subtitle.pack(side='left', padx=(0, 30))
 
-        # Card 2: Reporte de Progreso por Unidad
-        card2 = ConfigCard(
-            grid_frame,
-            icon='🏢',
-            title='Progreso por Unidad',
-            description='Generar reporte PDF del progreso de capacitaciones por unidad de negocio.',
-            button_text='Generar',
-            button_color=PRIMARY_COLORS['accent_green'],
-            command=self.generate_unit_progress_report
-        )
-        card2.grid(row=0, column=1, padx=15, pady=15, sticky='nsew')
+        # Contenedor de reportes con diseño tipo lista horizontal
+        reports_container = ctk.CTkFrame(scroll_frame, fg_color='transparent')
+        reports_container.pack(fill='both', expand=True)
 
-        # Card 3: Reporte Global de Capacitaciones
-        card3 = ConfigCard(
-            grid_frame,
-            icon='📊',
-            title='Reporte Global',
-            description='Generar reporte PDF completo con estadísticas generales del instituto.',
-            button_text='Generar',
-            button_color=PRIMARY_COLORS['accent_orange'],
-            command=self.generate_global_report
-        )
-        card3.grid(row=1, column=0, padx=15, pady=15, sticky='nsew')
+        # Lista de reportes con diseño horizontal
+        reports = [
+            {
+                'icon': '👤',
+                'title': 'Progreso por Usuario',
+                'desc': 'Reporte detallado del progreso individual',
+                'color': HUTCHISON_COLORS['ports_sky_blue'],
+                'command': self.generate_user_progress_report
+            },
+            {
+                'icon': '🏢',
+                'title': 'Progreso por Unidad',
+                'desc': 'Avance de capacitaciones por unidad de negocio',
+                'color': HUTCHISON_COLORS['success'],
+                'command': self.generate_unit_progress_report
+            },
+            {
+                'icon': '📊',
+                'title': 'Reporte Global',
+                'desc': 'Estadísticas completas del instituto',
+                'color': HUTCHISON_COLORS['warning'],
+                'command': self.generate_global_report
+            },
+            {
+                'icon': '🎓',
+                'title': 'Certificaciones',
+                'desc': 'Certificados de finalización de módulos',
+                'color': HUTCHISON_COLORS['ports_sea_blue'],
+                'command': self.generate_certificates_report
+            },
+            {
+                'icon': '📈',
+                'title': 'Análisis de Tendencias',
+                'desc': 'Tendencias y proyecciones de capacitación',
+                'color': HUTCHISON_COLORS['ports_horizon_blue'],
+                'command': self.generate_trends_report
+            },
+            {
+                'icon': '⏱️',
+                'title': 'Reporte por Periodo',
+                'desc': 'Reportes filtrados por rango de fechas',
+                'color': HUTCHISON_COLORS['sunset_orange'],
+                'command': self.generate_period_report
+            }
+        ]
 
-        # Card 4: Reporte de Certificaciones
-        card4 = ConfigCard(
-            grid_frame,
-            icon='🎓',
-            title='Certificaciones',
-            description='Generar certificados de finalización para usuarios que completaron módulos.',
-            button_text='Generar',
-            button_color=PRIMARY_COLORS['accent_purple'],
-            command=self.generate_certificates_report
+        for idx, report in enumerate(reports):
+            self._create_report_card(reports_container, report, theme)
+
+    def _create_report_card(self, parent, report, theme):
+        """Crear card de reporte con diseño horizontal"""
+        # Frame principal del card
+        card_frame = ctk.CTkFrame(
+            parent,
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=2,
+            border_color=theme['border'],
+            height=110
         )
-        card4.grid(row=1, column=1, padx=15, pady=15, sticky='nsew')
+        card_frame.pack(fill='x', pady=10)
+        card_frame.pack_propagate(False)
+
+        # Lado izquierdo: Icono y título
+        left_section = ctk.CTkFrame(card_frame, fg_color='transparent')
+        left_section.pack(side='left', fill='both', expand=True, padx=25, pady=20)
+
+        # Icono grande
+        icon_label = ctk.CTkLabel(
+            left_section,
+            text=report['icon'],
+            font=('Segoe UI', 42),
+            text_color=report['color']
+        )
+        icon_label.pack(side='left', padx=(0, 20))
+
+        # Textos
+        text_container = ctk.CTkFrame(left_section, fg_color='transparent')
+        text_container.pack(side='left', fill='both', expand=True)
+
+        title_label = ctk.CTkLabel(
+            text_container,
+            text=report['title'],
+            font=('Montserrat', 18, 'bold'),
+            text_color=theme['text'],
+            anchor='w'
+        )
+        title_label.pack(anchor='w')
+
+        desc_label = ctk.CTkLabel(
+            text_container,
+            text=report['desc'],
+            font=('Arial', 12),
+            text_color=theme['text_secondary'],
+            anchor='w'
+        )
+        desc_label.pack(anchor='w', pady=(5, 0))
+
+        # Lado derecho: Botón de acción
+        button = ctk.CTkButton(
+            card_frame,
+            text='Generar Reporte',
+            font=('Arial', 16, 'bold'),
+            fg_color=report['color'],
+            hover_color=self._darken_color(report['color']),
+            corner_radius=10,
+            width=200,
+            height=60,
+            command=report['command']
+        )
+        button.pack(side='right', padx=25, pady=25)
+
+    def _darken_color(self, hex_color, factor=0.8):
+        """Oscurecer un color hex para el estado hover"""
+        hex_color = hex_color.lstrip('#')
+        rgb = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        darkened_rgb = tuple(int(c * factor) for c in rgb)
+        return f"#{darkened_rgb[0]:02x}{darkened_rgb[1]:02x}{darkened_rgb[2]:02x}"
 
     def generate_user_progress_report(self):
         """Generar reporte de progreso por usuario"""
@@ -994,6 +1065,24 @@ class MainWindow:
             "Función 'Certificados' en desarrollo.\n\n" +
             "Esta funcionalidad generará certificados de finalización\n" +
             "para usuarios que completaron módulos."
+        )
+
+    def generate_trends_report(self):
+        """Generar análisis de tendencias"""
+        messagebox.showinfo(
+            "Análisis de Tendencias",
+            "Función 'Análisis de Tendencias' en desarrollo.\n\n" +
+            "Esta funcionalidad generará reportes con tendencias\n" +
+            "y proyecciones de capacitación."
+        )
+
+    def generate_period_report(self):
+        """Generar reporte por periodo"""
+        messagebox.showinfo(
+            "Reporte por Periodo",
+            "Función 'Reporte por Periodo' en desarrollo.\n\n" +
+            "Esta funcionalidad generará reportes filtrados\n" +
+            "por rangos de fechas específicos."
         )
 
     def _create_config_card(self, parent, icon, title, description, color, command):
