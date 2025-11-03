@@ -2,7 +2,7 @@
 CustomTabButton - Botones de pestañas personalizados más grandes y elegantes
 """
 import customtkinter as ctk
-from smart_reports.config.settings import HUTCHISON_COLORS
+from config.settings import HUTCHISON_COLORS
 
 
 class CustomTabButton(ctk.CTkButton):

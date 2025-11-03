@@ -5,8 +5,8 @@ Smart Reports v2.0
 import customtkinter as ctk
 from tkinter import messagebox
 import tkinter.ttk as ttk
-from smart_reports.config.theme_manager import get_theme_manager
-from smart_reports.ui.components.config_card import ConfigCard
+from config.theme_manager import get_theme_manager
+from ui.components.config_card import ConfigCard
 
 
 class ConfiguracionPanel(ctk.CTkFrame):

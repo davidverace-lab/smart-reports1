@@ -2,7 +2,7 @@
 UnitSelector - Selector elegante de unidad de negocio con dropdown
 """
 import customtkinter as ctk
-from smart_reports.config.settings import HUTCHISON_COLORS
+from config.settings import HUTCHISON_COLORS
 
 
 class UnitSelector(ctk.CTkFrame):

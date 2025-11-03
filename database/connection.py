@@ -10,7 +10,7 @@ except ImportError:
     mysql = None
     MySQLError = Exception
 
-from smart_reports.config.settings import DB_TYPE, DATABASE_CONFIG, SQLSERVER_CONFIG, MYSQL_CONFIG
+from config.settings import DB_TYPE, DATABASE_CONFIG, SQLSERVER_CONFIG, MYSQL_CONFIG
 
 
 class DatabaseConnection:

@@ -6,8 +6,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib.pyplot as plt
 import numpy as np
-from smart_reports.config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
-from smart_reports.config.theme_manager import get_theme_manager
+from config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
+from config.theme_manager import get_theme_manager
 
 
 class MatplotlibInteractivePanel(ctk.CTkFrame):

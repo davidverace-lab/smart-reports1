@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-from smart_reports.config.theme_manager import get_theme_manager
+from config.theme_manager import get_theme_manager
 
 
 class MatplotlibChartCard(ctk.CTkFrame):

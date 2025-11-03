@@ -6,9 +6,9 @@ from tkinter import messagebox
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
-from smart_reports.ui.components.matplotlib_chart_card import MatplotlibChartCard
-from smart_reports.ui.components.metric_card import MetricCard
-from smart_reports.config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
+from ui.components.matplotlib_chart_card import MatplotlibChartCard
+from ui.components.metric_card import MetricCard
+from config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 
 
 # Datos de ejemplo basados en las imágenes proporcionadas

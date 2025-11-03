@@ -7,13 +7,15 @@ Versión 2.0
 import sys
 import os
 
-# Agregar el directorio padre al path para imports absolutos
+# Agregar el directorio actual al path para imports absolutos
 if __name__ == "__main__":
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if current_dir not in sys.path:
+        sys.path.insert(0, current_dir)
 
 import customtkinter as ctk
-from smart_reports.ui.login_window import LoginWindow
-from smart_reports.ui.main_window_modern import MainWindow
+from ui.login_window import LoginWindow
+from ui.main_window_modern import MainWindow
 
 
 def main():
