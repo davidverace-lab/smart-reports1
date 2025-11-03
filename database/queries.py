@@ -2,7 +2,7 @@
 Todas las consultas SQL del sistema
 Compatible con SQL Server y MySQL
 """
-from .connection import DatabaseConnection
+from database.connection import DatabaseConnection
 
 
 class DatabaseQueries:
