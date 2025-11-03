@@ -652,8 +652,8 @@ class ConfiguracionPanel(ctk.CTkFrame):
                     d.NombreDepartamento,
                     u.Position,
                     u.Ubicacion
-                FROM Instituto.Usuario u
-                LEFT JOIN Instituto.Departamento d ON u.IdDepartamento = d.IdDepartamento
+                FROM dbo.Instituto_Usuario u
+                LEFT JOIN dbo.Instituto_Departamento d ON u.IdDepartamento = d.IdDepartamento
                 WHERE u.UserId LIKE ? OR u.UserName LIKE ?
                 ORDER BY u.UserId
             """, (f'%{search_term}%', f'%{search_term}%'))
@@ -681,8 +681,8 @@ class ConfiguracionPanel(ctk.CTkFrame):
                     d.NombreDepartamento,
                     u.Position,
                     u.Ubicacion
-                FROM Instituto.Usuario u
-                LEFT JOIN Instituto.Departamento d ON u.IdDepartamento = d.IdDepartamento
+                FROM dbo.Instituto_Usuario u
+                LEFT JOIN dbo.Instituto_Departamento d ON u.IdDepartamento = d.IdDepartamento
                 ORDER BY u.UserId
             """)
 
@@ -749,7 +749,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         try:
             # Verificar si el usuario ya existe
-            self.cursor.execute("SELECT COUNT(*) FROM Instituto.Usuario WHERE UserId = ?", (user_id,))
+            self.cursor.execute("SELECT COUNT(*) FROM dbo.Instituto_Usuario WHERE UserId = ?", (user_id,))
             if self.cursor.fetchone()[0] > 0:
                 messagebox.showerror("Error", f"El User ID '{user_id}' ya existe")
                 return
@@ -762,7 +762,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
             # Insertar usuario
             self.cursor.execute("""
-                INSERT INTO Instituto.Usuario
+                INSERT INTO dbo.Instituto_Usuario
                 (UserId, UserName, UserEmail, IdDepartamento, Position, Ubicacion, Activo)
                 VALUES (?, ?, ?, ?, ?, ?, 1)
             """, (
@@ -805,7 +805,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
             # Actualizar usuario
             self.cursor.execute("""
-                UPDATE Instituto.Usuario
+                UPDATE dbo.Instituto_Usuario
                 SET UserName = ?,
                     UserEmail = ?,
                     IdDepartamento = ?,
@@ -855,7 +855,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
         try:
             # Soft delete (marcar como inactivo)
             self.cursor.execute("""
-                UPDATE Instituto.Usuario
+                UPDATE dbo.Instituto_Usuario
                 SET Activo = 0
                 WHERE UserId = ?
             """, (user_id,))
@@ -889,7 +889,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
             # Buscar departamento existente
             self.cursor.execute("""
                 SELECT IdDepartamento
-                FROM Instituto.Departamento
+                FROM dbo.Instituto_Departamento
                 WHERE NombreDepartamento = ?
             """, (nombre_departamento,))
 
@@ -899,7 +899,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
             # Crear nuevo departamento
             self.cursor.execute("""
-                INSERT INTO Instituto.Departamento (NombreDepartamento, IdUnidadDeNegocio)
+                INSERT INTO dbo.Instituto_Departamento (NombreDepartamento, IdUnidadDeNegocio)
                 VALUES (?, NULL)
             """, (nombre_departamento,))
 

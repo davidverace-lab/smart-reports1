@@ -206,7 +206,7 @@ class DataSyncManager:
         # Buscar módulo existente por nombre normalizado
         self.cursor.execute("""
             SELECT IdModulo, NombreModulo
-            FROM Instituto.Modulo
+            FROM dbo.Instituto_Modulo
         """)
 
         for row in self.cursor.fetchall():
@@ -222,7 +222,7 @@ class DataSyncManager:
             clean_name = f"Módulo {module_number}: {module_name}"
 
         self.cursor.execute("""
-            INSERT INTO Instituto.Modulo (NombreModulo, Activo)
+            INSERT INTO dbo.Instituto_Modulo (NombreModulo, Activo)
             VALUES (?, 1)
         """, (clean_name,))
 
@@ -253,7 +253,7 @@ class DataSyncManager:
         # Buscar departamento existente
         self.cursor.execute("""
             SELECT IdDepartamento
-            FROM Instituto.Departamento
+            FROM dbo.Instituto_Departamento
             WHERE NombreDepartamento = ?
         """, (department_name,))
 
@@ -263,7 +263,7 @@ class DataSyncManager:
 
         # No existe, crear nuevo
         self.cursor.execute("""
-            INSERT INTO Instituto.Departamento (NombreDepartamento, IdUnidadDeNegocio)
+            INSERT INTO dbo.Instituto_Departamento (NombreDepartamento, IdUnidadDeNegocio)
             VALUES (?, ?)
         """, (department_name, unit_id))
 
@@ -289,7 +289,7 @@ class DataSyncManager:
         """
         self.cursor.execute("""
             SELECT Id
-            FROM Instituto.Usuario
+            FROM dbo.Instituto_Usuario
             WHERE UserId = ?
         """, (user_id,))
 
@@ -315,7 +315,7 @@ class DataSyncManager:
 
         # No existe, crear nuevo usuario
         self.cursor.execute("""
-            INSERT INTO Instituto.Usuario (UserId, UserName, UserEmail, Activo)
+            INSERT INTO dbo.Instituto_Usuario (UserId, UserName, UserEmail, Activo)
             VALUES (?, ?, ?, 1)
         """, (user_id, user_name or user_id, user_email))
 
@@ -342,7 +342,7 @@ class DataSyncManager:
         """
         self.cursor.execute("""
             SELECT IdInscripcion
-            FROM Instituto.ProgresoModulo
+            FROM dbo.Instituto_ProgresoModulo
             WHERE UserId = ? AND IdModulo = ?
         """, (user_id_interno, module_id))
 
@@ -356,11 +356,11 @@ class DataSyncManager:
         Sincronizar datos de transcripciones desde Excel
 
         Mapeo de columnas:
-        - "Identificación de usuario" -> Instituto.Usuario.UserId
-        - "Título de la capacitación" -> Instituto.Modulo.NombreModulo
-        - "Estado del expediente" -> Instituto.ProgresoModulo.EstatusModulo
-        - "Fecha de registro de la transcripción" -> Instituto.ProgresoModulo.FechaAsignacion
-        - "Fecha de finalización del expediente" -> Instituto.ProgresoModulo.FechaFinalizacion
+        - "Identificación de usuario" -> dbo.Instituto_Usuario.UserId
+        - "Título de la capacitación" -> dbo.Instituto_Modulo.NombreModulo
+        - "Estado del expediente" -> dbo.Instituto_ProgresoModulo.EstatusModulo
+        - "Fecha de registro de la transcripción" -> dbo.Instituto_ProgresoModulo.FechaAsignacion
+        - "Fecha de finalización del expediente" -> dbo.Instituto_ProgresoModulo.FechaFinalizacion
 
         Args:
             excel_path: Ruta al archivo Excel
@@ -460,10 +460,10 @@ class DataSyncManager:
         Sincronizar datos de puntuaciones desde Excel
 
         Mapeo de columnas:
-        - "Identificación de usuario" -> Instituto.Usuario.UserId
-        - "Título de la capacitación" -> Instituto.Modulo.NombreModulo
-        - "Puntuación de la transcripción" -> Instituto.ResultadoEvaluacion.PuntajeObtenido
-        - "Estado del expediente" (Fallo/Fallido) -> Instituto.ResultadoEvaluacion.Aprobado = 0
+        - "Identificación de usuario" -> dbo.Instituto_Usuario.UserId
+        - "Título de la capacitación" -> dbo.Instituto_Modulo.NombreModulo
+        - "Puntuación de la transcripción" -> dbo.Instituto_ResultadoEvaluacion.PuntajeObtenido
+        - "Estado del expediente" (Fallo/Fallido) -> dbo.Instituto_ResultadoEvaluacion.Aprobado = 0
 
         Args:
             excel_path: Ruta al archivo Excel
@@ -546,11 +546,11 @@ class DataSyncManager:
         Sincronizar datos de usuario (actualizar email, departamento, cargo, ubicación)
 
         Mapeo de columnas:
-        - "Identificación de usuario" -> Instituto.Usuario.UserId
-        - "Usuario - Correo electrónico del usuario" -> Instituto.Usuario.UserEmail
-        - "Usuario - Departamento" -> Instituto.Departamento.NombreDepartamento
-        - "Usuario - Cargo" -> Instituto.Usuario.Position
-        - "Usuario - Ubicación" -> Instituto.Usuario.Ubicacion
+        - "Identificación de usuario" -> dbo.Instituto_Usuario.UserId
+        - "Usuario - Correo electrónico del usuario" -> dbo.Instituto_Usuario.UserEmail
+        - "Usuario - Departamento" -> dbo.Instituto_Departamento.NombreDepartamento
+        - "Usuario - Cargo" -> dbo.Instituto_Usuario.Position
+        - "Usuario - Ubicación" -> dbo.Instituto_Usuario.Ubicacion
 
         Args:
             excel_path: Ruta al archivo Excel
@@ -608,7 +608,7 @@ class DataSyncManager:
 
                     # Actualizar usuario
                     self.cursor.execute("""
-                        UPDATE Instituto.Usuario
+                        UPDATE dbo.Instituto_Usuario
                         SET UserEmail = COALESCE(?, UserEmail),
                             IdDepartamento = COALESCE(?, IdDepartamento),
                             Position = COALESCE(?, Position),
@@ -642,14 +642,14 @@ class DataSyncManager:
         fecha_vencimiento: Optional[datetime] = None
     ):
         """
-        Insertar o actualizar registro en Instituto.ProgresoModulo
+        Insertar o actualizar registro en dbo.Instituto_ProgresoModulo
 
         Usa UNIQUE KEY (UserId, IdModulo) para hacer UPSERT
         """
         # Verificar si ya existe
         self.cursor.execute("""
             SELECT IdInscripcion
-            FROM Instituto.ProgresoModulo
+            FROM dbo.Instituto_ProgresoModulo
             WHERE UserId = ? AND IdModulo = ?
         """, (user_id, module_id))
 
@@ -658,7 +658,7 @@ class DataSyncManager:
         if existing:
             # Actualizar
             update_query = """
-                UPDATE Instituto.ProgresoModulo
+                UPDATE dbo.Instituto_ProgresoModulo
                 SET EstatusModulo = ?
             """
             params = [status]
@@ -683,7 +683,7 @@ class DataSyncManager:
         else:
             # Insertar
             self.cursor.execute("""
-                INSERT INTO Instituto.ProgresoModulo
+                INSERT INTO dbo.Instituto_ProgresoModulo
                 (UserId, IdModulo, EstatusModulo, FechaAsignacion, FechaFinalizacion, FechaVencimiento)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (user_id, module_id, status, fecha_asignacion, fecha_finalizacion, fecha_vencimiento))
@@ -698,14 +698,14 @@ class DataSyncManager:
             # Verificar si ya existe una evaluación
             self.cursor.execute("""
                 SELECT IdResultado
-                FROM Instituto.ResultadoEvaluacion
+                FROM dbo.Instituto_ResultadoEvaluacion
                 WHERE IdInscripcion = ?
             """, (inscripcion_id,))
 
             if self.cursor.fetchone():
                 # Ya existe, actualizar
                 self.cursor.execute("""
-                    UPDATE Instituto.ResultadoEvaluacion
+                    UPDATE dbo.Instituto_ResultadoEvaluacion
                     SET PuntajeObtenido = ?,
                         Aprobado = ?
                     WHERE IdInscripcion = ?
@@ -713,7 +713,7 @@ class DataSyncManager:
             else:
                 # No existe, insertar
                 self.cursor.execute("""
-                    INSERT INTO Instituto.ResultadoEvaluacion
+                    INSERT INTO dbo.Instituto_ResultadoEvaluacion
                     (IdInscripcion, PuntajeObtenido, Aprobado, FechaEvaluacion)
                     VALUES (?, ?, ?, GETDATE())
                 """, (inscripcion_id, puntaje, aprobado))
