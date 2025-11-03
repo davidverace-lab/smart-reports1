@@ -6,11 +6,11 @@ from tkinter import messagebox
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
-from smart_reports.ui.components.matplotlib_chart_card import MatplotlibChartCard
-from smart_reports.ui.components.metric_card import MetricCard
-from smart_reports.ui.panels.matplotlib_interactive_panel import MatplotlibInteractivePanel
-from smart_reports.config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
-from smart_reports.config.theme_manager import get_theme_manager
+from ui.components.matplotlib_chart_card import MatplotlibChartCard
+from ui.components.metric_card import MetricCard
+from ui.panels.matplotlib_interactive_panel import MatplotlibInteractivePanel
+from config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
+from config.theme_manager import get_theme_manager
 
 
 # Datos de ejemplo basados en las imágenes proporcionadas

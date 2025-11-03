@@ -2,7 +2,7 @@
 Componente ConfigCard - Card para opciones de configuración (Rediseñado con colores dinámicos)
 """
 import customtkinter as ctk
-from smart_reports.config.theme_manager import get_theme_manager
+from config.theme_manager import get_theme_manager
 
 
 class ConfigCard(ctk.CTkFrame):

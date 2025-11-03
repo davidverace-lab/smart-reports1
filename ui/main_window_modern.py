@@ -14,16 +14,16 @@ except ImportError:
     DRAG_DROP_AVAILABLE = False
     print("Warning: tkinterdnd2 no disponible. Drag & drop deshabilitado.")
 
-from smart_reports.config.settings import APP_CONFIG, HUTCHISON_COLORS
-from smart_reports.config.theme_manager import get_theme_manager
-from smart_reports.database.connection import DatabaseConnection
-from smart_reports.services.data_processor import TranscriptProcessor
-from smart_reports.services.data_sync import DataSyncManager
-from smart_reports.ui.components.modern_sidebar import ModernSidebar
-from smart_reports.ui.components.top_bar import TopBar
-from smart_reports.ui.panels.modern_dashboard import ModernDashboard
-from smart_reports.ui.panels.configuracion_panel import ConfiguracionPanel
-from smart_reports.ui.dialogs.user_management_dialog import UserManagementDialog
+from config.settings import APP_CONFIG, HUTCHISON_COLORS
+from config.theme_manager import get_theme_manager
+from database.connection import DatabaseConnection
+from services.data_processor import TranscriptProcessor
+from services.data_sync import DataSyncManager
+from ui.components.modern_sidebar import ModernSidebar
+from ui.components.top_bar import TopBar
+from ui.panels.modern_dashboard import ModernDashboard
+from ui.panels.configuracion_panel import ConfiguracionPanel
+from ui.dialogs.user_management_dialog import UserManagementDialog
 
 
 class MainWindow:
@@ -1601,7 +1601,7 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
 
     def backup_database(self):
         """Crear respaldo de la base de datos"""
-        from smart_reports.config.settings import DB_TYPE
+        from config.settings import DB_TYPE
 
         try:
             if DB_TYPE == 'sqlserver':
@@ -1624,7 +1624,7 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
 
     def show_database_config(self):
         """Mostrar configuración de base de datos"""
-        from smart_reports.config.settings import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
+        from config.settings import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
 
         current = "SQL Server (Trabajo)" if DB_TYPE == 'sqlserver' else "MySQL (Casa)"
 

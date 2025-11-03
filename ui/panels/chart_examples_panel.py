@@ -2,7 +2,7 @@
 Panel de Ejemplos de Gráficos - Muestra todos los tipos de gráficos disponibles
 """
 import customtkinter as ctk
-from smart_reports.ui.components.chart_card import ChartCard
+from ui.components.chart_card import ChartCard
 
 
 class ChartExamplesPanel(ctk.CTkFrame):
