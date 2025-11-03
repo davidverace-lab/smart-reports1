@@ -18,9 +18,11 @@ from smart_reports.config.settings import APP_CONFIG, HUTCHISON_COLORS
 from smart_reports.config.theme_manager import get_theme_manager
 from smart_reports.database.connection import DatabaseConnection
 from smart_reports.services.data_processor import TranscriptProcessor
+from smart_reports.services.data_sync import DataSyncManager
 from smart_reports.ui.components.modern_sidebar import ModernSidebar
 from smart_reports.ui.components.top_bar import TopBar
 from smart_reports.ui.panels.modern_dashboard import ModernDashboard
+from smart_reports.ui.panels.configuracion_panel import ConfiguracionPanel
 from smart_reports.ui.dialogs.user_management_dialog import UserManagementDialog
 
 
@@ -1032,116 +1034,13 @@ class MainWindow:
         )
 
     def show_configuracion_panel(self):
-        """Panel de configuración con diseño moderno y creativo"""
+        """Panel de configuración con diseño moderno y navegación interna"""
         self.clear_content_area()
         self.current_panel = 'configuracion'
 
-        theme = self.theme_manager.get_current_theme()
-
-        # Scroll frame principal
-        scroll_frame = ctk.CTkScrollableFrame(
-            self.content_area,
-            fg_color='transparent'
-        )
-        scroll_frame.pack(fill='both', expand=True, padx=20, pady=20)
-
-        # Header con título
-        header = ctk.CTkFrame(scroll_frame, fg_color='transparent', height=80)
-        header.pack(fill='x', pady=(0, 30))
-        header.pack_propagate(False)
-
-        # Color del título: blanco en modo oscuro, azul marino en modo claro
-        is_dark = self.theme_manager.is_dark_mode()
-        title_color = '#FFFFFF' if is_dark else '#002E6D'
-
-        title = ctk.CTkLabel(
-            header,
-            text='Configuración',
-            font=('Montserrat', 36, 'bold'),
-            text_color=title_color
-        )
-        title.pack(side='left', pady=20)
-
-        subtitle = ctk.CTkLabel(
-            header,
-            text='Gestiona las opciones del sistema',
-            font=('Arial', 14),
-            text_color=theme['text_secondary']
-        )
-        subtitle.pack(side='left', padx=(20, 0), pady=20)
-
-        # Contenedor principal con grid 2x2
-        grid_container = ctk.CTkFrame(scroll_frame, fg_color='transparent')
-        grid_container.pack(fill='both', expand=True)
-
-        # Configurar grid
-        grid_container.grid_columnconfigure((0, 1), weight=1)
-        grid_container.grid_rowconfigure((0, 1), weight=1)
-
-        # Colores dinámicos para cards
-        is_dark = self.theme_manager.is_dark_mode()
-        if is_dark:  # Modo oscuro
-            icon_color = '#FFFFFF'
-            card_hover_border = '#009BDE'
-        else:  # Modo claro
-            icon_color = '#002E6D'
-            card_hover_border = '#002E6D'
-
-        # Card 1: Gestión de Usuarios
-        card1 = self._create_modern_config_card(
-            grid_container,
-            icon='👥',
-            icon_color=icon_color,
-            title='Gestión de Usuarios',
-            description='Agregar, editar o consultar usuarios del sistema',
-            button_text='Gestionar',
-            command=self.show_user_management,
-            theme=theme,
-            hover_border=card_hover_border
-        )
-        card1.grid(row=0, column=0, padx=15, pady=15, sticky='nsew')
-
-        # Card 2: Ticket de Soporte
-        card2 = self._create_modern_config_card(
-            grid_container,
-            icon='🎫',
-            icon_color=icon_color,
-            title='Ticket de Soporte',
-            description='Crear un nuevo ticket de soporte para asistencia técnica',
-            button_text='Crear Ticket',
-            command=self.open_support_ticket,
-            theme=theme,
-            hover_border=card_hover_border
-        )
-        card2.grid(row=0, column=1, padx=15, pady=15, sticky='nsew')
-
-        # Card 3: Historial de Reportes
-        card3 = self._create_modern_config_card(
-            grid_container,
-            icon='📋',
-            icon_color=icon_color,
-            title='Historial de Reportes',
-            description='Ver y descargar reportes PDF generados anteriormente',
-            button_text='Ver Historial',
-            command=self.open_report_history,
-            theme=theme,
-            hover_border=card_hover_border
-        )
-        card3.grid(row=1, column=0, padx=15, pady=15, sticky='nsew')
-
-        # Card 4: Acerca de
-        card4 = self._create_modern_config_card(
-            grid_container,
-            icon='ℹ️',
-            icon_color=icon_color,
-            title='Acerca de',
-            description='Información de la versión y del desarrollador',
-            button_text='Ver Info',
-            command=self.show_about,
-            theme=theme,
-            hover_border=card_hover_border
-        )
-        card4.grid(row=1, column=1, padx=15, pady=15, sticky='nsew')
+        # Crear panel de configuración con navegación interna
+        self.configuracion_panel = ConfiguracionPanel(self.content_area, self.conn)
+        self.configuracion_panel.pack(fill='both', expand=True)
 
     def _create_modern_config_card(self, parent, icon, icon_color, title, description, button_text, command, theme, hover_border):
         """Crear card de configuración moderna"""
@@ -1274,7 +1173,7 @@ class MainWindow:
             f"Archivo cargado: {filename}\n\nAhora haz clic en 'Actualizar Base de Datos'")
 
     def update_database_from_file(self):
-        """Actualizar base de datos desde archivo cargado"""
+        """Actualizar base de datos desde archivo cargado usando DataSyncManager"""
         if self.conn is None:
             messagebox.showerror("Error de Conexión",
                 "No hay conexión a la base de datos.\nNo se puede actualizar.")
@@ -1282,36 +1181,152 @@ class MainWindow:
 
         if not self.current_file:
             messagebox.showwarning("Sin Archivo",
-                "Primero debes seleccionar un archivo Transcript Status")
+                "Primero debes seleccionar un archivo Excel de Cornerstone")
             return
 
         try:
             self.log_movement("="*50)
-            self.log_movement("🔄 INICIANDO ACTUALIZACIÓN DE BASE DE DATOS")
+            self.log_movement("🔄 INICIANDO CRUCE DE DATOS (DATA SYNC)")
             self.log_movement("="*50)
+            self.log_movement(f"Archivo: {self.current_file}")
+            self.log_movement("")
 
-            # Crear procesador
-            processor = TranscriptProcessor(self.conn)
+            # Preguntar al usuario qué tipo de archivo es
+            from tkinter import Toplevel
+            dialog = Toplevel(self.root)
+            dialog.title("Tipo de Archivo")
+            dialog.geometry("400x250")
+            dialog.transient(self.root)
+            dialog.grab_set()
 
-            # Procesar archivo
-            stats = processor.process_file(self.current_file)
+            theme = self.theme_manager.get_current_theme()
 
-            # Mostrar estadísticas detalladas
-            self.show_processing_stats(stats)
+            ctk.CTkLabel(
+                dialog,
+                text="Seleccione el tipo de archivo Excel:",
+                font=('Arial', 14, 'bold')
+            ).pack(pady=20)
+
+            file_type_var = tk.StringVar(value='transcripts')
+
+            ctk.CTkRadioButton(
+                dialog,
+                text="Transcripciones (Título, Estado, Fechas)",
+                variable=file_type_var,
+                value='transcripts',
+                font=('Arial', 12)
+            ).pack(pady=5)
+
+            ctk.CTkRadioButton(
+                dialog,
+                text="Puntuaciones y Fallos",
+                variable=file_type_var,
+                value='scores',
+                font=('Arial', 12)
+            ).pack(pady=5)
+
+            ctk.CTkRadioButton(
+                dialog,
+                text="Datos de Usuario (Email, Departamento, etc.)",
+                variable=file_type_var,
+                value='users',
+                font=('Arial', 12)
+            ).pack(pady=5)
+
+            selected_type = {'value': None}
+
+            def on_confirm():
+                selected_type['value'] = file_type_var.get()
+                dialog.destroy()
+
+            def on_cancel():
+                selected_type['value'] = None
+                dialog.destroy()
+
+            btn_frame = ctk.CTkFrame(dialog, fg_color='transparent')
+            btn_frame.pack(pady=20)
+
+            button_color = self.get_button_color()
+
+            ctk.CTkButton(
+                btn_frame,
+                text='Confirmar',
+                font=('Arial', 12, 'bold'),
+                fg_color=button_color,
+                hover_color=self.get_button_hover_color(button_color),
+                width=120,
+                command=on_confirm
+            ).pack(side='left', padx=5)
+
+            ctk.CTkButton(
+                btn_frame,
+                text='Cancelar',
+                font=('Arial', 12, 'bold'),
+                fg_color='#666666',
+                hover_color='#555555',
+                width=120,
+                command=on_cancel
+            ).pack(side='left', padx=5)
+
+            # Esperar a que el usuario seleccione
+            self.root.wait_window(dialog)
+
+            if not selected_type['value']:
+                self.log_movement("✗ Operación cancelada por el usuario")
+                return
+
+            file_type = selected_type['value']
+            self.log_movement(f"Tipo de archivo seleccionado: {file_type}")
+            self.log_movement("")
+
+            # Crear DataSyncManager
+            sync_manager = DataSyncManager(self.conn)
+
+            # Procesar archivo según el tipo
+            if file_type == 'transcripts':
+                self.log_movement("📄 Procesando transcripciones...")
+                stats = sync_manager.sync_transcript_data(self.current_file)
+            elif file_type == 'scores':
+                self.log_movement("📊 Procesando puntuaciones...")
+                stats = sync_manager.sync_scores_data(self.current_file)
+            elif file_type == 'users':
+                self.log_movement("👤 Procesando datos de usuario...")
+                stats = sync_manager.sync_user_data(self.current_file)
+
+            # Mostrar estadísticas
+            self.log_movement("")
+            self.log_movement("📊 ESTADÍSTICAS DEL PROCESO:")
+            self.log_movement(f"  • Usuarios creados: {stats['usuarios_creados']}")
+            self.log_movement(f"  • Usuarios actualizados: {stats['usuarios_actualizados']}")
+            self.log_movement(f"  • Módulos creados: {stats['modulos_creados']}")
+            self.log_movement(f"  • Inscripciones creadas: {stats['inscripciones_creadas']}")
+            self.log_movement(f"  • Inscripciones actualizadas: {stats['inscripciones_actualizadas']}")
+            self.log_movement(f"  • Evaluaciones creadas: {stats['evaluaciones_creadas']}")
+            self.log_movement(f"  • Departamentos creados: {stats['departamentos_creados']}")
+            self.log_movement(f"  • Errores encontrados: {len(stats['errores'])}")
+
+            if stats['errores']:
+                self.log_movement("")
+                self.log_movement("⚠️ ERRORES (primeros 10):")
+                for error in stats['errores'][:10]:
+                    self.log_movement(f"  • {error}")
 
             # Mensaje de éxito
-            messagebox.showinfo("Actualización Exitosa",
-                f"✓ Base de datos actualizada correctamente\n\n" +
-                f"Registros procesados: {stats['total_registros']:,}\n" +
-                f"Usuarios nuevos: {stats['usuarios_nuevos']}\n" +
-                f"Módulos nuevos: {stats['modulos_nuevos']}\n" +
-                f"Inscripciones actualizadas: {stats['inscripciones_actualizadas']}")
+            messagebox.showinfo("Cruce de Datos Exitoso",
+                f"✓ Sincronización completada correctamente\n\n" +
+                f"Usuarios creados: {stats['usuarios_creados']}\n" +
+                f"Usuarios actualizados: {stats['usuarios_actualizados']}\n" +
+                f"Módulos creados: {stats['modulos_creados']}\n" +
+                f"Inscripciones creadas: {stats['inscripciones_creadas']}\n" +
+                f"Inscripciones actualizadas: {stats['inscripciones_actualizadas']}\n\n" +
+                f"Errores: {len(stats['errores'])}")
 
-            self.log_movement("✓ Actualización completada exitosamente")
+            self.log_movement("")
+            self.log_movement("✓ Cruce de datos completado exitosamente")
             self.log_movement("="*50 + "\n")
 
         except Exception as e:
-            error_msg = f"Error al actualizar base de datos: {str(e)}"
+            error_msg = f"Error en cruce de datos: {str(e)}"
             messagebox.showerror("Error", error_msg)
             self.log_movement(f"✗ ERROR: {str(e)}")
             import traceback
@@ -1805,6 +1820,10 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
         """
         # Actualizar el fondo del contenedor principal
         self.main_container.configure(fg_color=theme_colors['background'])
+
+        # Actualizar el panel de configuración si existe
+        if hasattr(self, 'configuracion_panel') and self.configuracion_panel:
+            self.configuracion_panel.configure(fg_color=theme_colors['background'])
 
         # Recargar el panel actual para que use los nuevos colores
         if self.current_panel:
