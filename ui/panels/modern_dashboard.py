@@ -393,10 +393,10 @@ class ModernDashboard(ctk.CTkFrame):
             # Añadir valores en las barras
             for bar in bars:
                 width = bar.get_width()
-                ax1.text(width, bar.get_y() + bar.get_height()/2,
+                ax1.text(width + 5, bar.get_y() + bar.get_height()/2,
                         f'{int(width)}',
                         ha='left', va='center', fontsize=9,
-                        fontweight='bold', pad=5)
+                        fontweight='bold')
 
             fig1.tight_layout()
             chart1.set_figure(fig1)
