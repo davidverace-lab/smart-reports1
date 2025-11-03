@@ -5,7 +5,7 @@ Pantalla de autenticación con diseño corporativo
 
 import customtkinter as ctk
 from tkinter import messagebox
-from ..config.settings import HUTCHISON_COLORS, DARK_THEME
+from config.settings import HUTCHISON_COLORS, DARK_THEME
 
 
 class LoginWindow:
