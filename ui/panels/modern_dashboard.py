@@ -1070,13 +1070,13 @@ class ModernDashboard(ctk.CTkFrame):
         )
         chart_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos corregidos (usuarios de TNG en los primeros puestos)
+        # Datos estáticos (usuarios de otras unidades con mejores calificaciones)
         top_usuarios = [
-            'Colaborador TNG #1',
-            'Colaborador TNG #2',
-            'Colaborador TNG #3',
-            'Colaborador TNG #4',
-            'Cristina Ruiz (ICAVE)'
+            'Cristina Ruiz (ICAVE)',
+            'Roberto Mendoza (HPMX)',
+            'Patricia Morales (ECV)',
+            'Fernando Silva (Container Care)',
+            'Andrea López (Logística)'
         ]
         calificaciones = [98.5, 97.8, 97.2, 96.9, 95.5]
 
@@ -1128,13 +1128,13 @@ class ModernDashboard(ctk.CTkFrame):
         leaderboard_frame = ctk.CTkFrame(cuadro_frame, fg_color='transparent')
         leaderboard_frame.pack(fill='both', expand=True, padx=20, pady=(0, 20))
 
-        # Datos del leaderboard (CORREGIDO - usuarios de TNG que terminaron primero)
+        # Datos del leaderboard (usuarios más proactivos de otras unidades)
         leaderboard_data = [
-            ('🥇', '1. Colaborador TNG #1', 'Prom. 15 días antes'),
-            ('🥈', '2. Colaborador TNG #2', 'Prom. 13 días antes'),
-            ('🥉', '3. Colaborador TNG #3', 'Prom. 12 días antes'),
-            ('🎯', '4. Colaborador TNG #4', 'Prom. 11 días antes'),
-            ('⭐', '5. Colaborador TNG #5', 'Prom. 10 días antes')
+            ('🥇', '1. David Rodriguez (ICAVE)', 'Prom. 15 días antes'),
+            ('🥈', '2. Javier Miranda (HPMX)', 'Prom. 13 días antes'),
+            ('🥉', '3. Sofia Reyes (ECV)', 'Prom. 12 días antes'),
+            ('🎯', '4. Roberto Campos (Container Care)', 'Prom. 11 días antes'),
+            ('⭐', '5. Andrea Vega (Logística)', 'Prom. 10 días antes')
         ]
 
         for emoji, nombre, tiempo in leaderboard_data:
