@@ -1072,10 +1072,10 @@ class ModernDashboard(ctk.CTkFrame):
 
         # Datos estáticos corregidos (usuarios de TNG en los primeros puestos)
         top_usuarios = [
-            'Elena Navarro (TNG)',
-            'Miguel Ángel Castro (TNG)',
-            'Patricia Moreno (TNG)',
-            'Ricardo Jiménez (TNG)',
+            'Colaborador TNG #1',
+            'Colaborador TNG #2',
+            'Colaborador TNG #3',
+            'Colaborador TNG #4',
             'Cristina Ruiz (ICAVE)'
         ]
         calificaciones = [98.5, 97.8, 97.2, 96.9, 95.5]
@@ -1130,11 +1130,11 @@ class ModernDashboard(ctk.CTkFrame):
 
         # Datos del leaderboard (CORREGIDO - usuarios de TNG que terminaron primero)
         leaderboard_data = [
-            ('🥇', '1. David Rodriguez (TNG)', 'Prom. 15 días antes'),
-            ('🥈', '2. Javier Miranda (TNG)', 'Prom. 13 días antes'),
-            ('🥉', '3. Sofia Reyes (TNG)', 'Prom. 12 días antes'),
-            ('🎯', '4. Roberto Campos (TNG)', 'Prom. 11 días antes'),
-            ('⭐', '5. Andrea Vega (TNG)', 'Prom. 10 días antes')
+            ('🥇', '1. Colaborador TNG #1', 'Prom. 15 días antes'),
+            ('🥈', '2. Colaborador TNG #2', 'Prom. 13 días antes'),
+            ('🥉', '3. Colaborador TNG #3', 'Prom. 12 días antes'),
+            ('🎯', '4. Colaborador TNG #4', 'Prom. 11 días antes'),
+            ('⭐', '5. Colaborador TNG #5', 'Prom. 10 días antes')
         ]
 
         for emoji, nombre, tiempo in leaderboard_data:
