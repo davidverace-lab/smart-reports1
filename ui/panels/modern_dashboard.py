@@ -392,10 +392,10 @@ class ModernDashboard(ctk.CTkFrame):
         )
         chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
-        # Chart 2: Distribución por Unidad (Barras Horizontales)
+        # Chart 2: Progreso General por UN (Donut) - MOVIDO desde Reportes Gerenciales
         chart2 = MatplotlibChartCard(
             charts_frame,
-            title='Distribución por Unidad de Negocio',
+            title='Progreso General por Unidad de Negocio (Total Módulos)',
             export_callback=self.export_chart_to_plotly
         )
         chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
@@ -412,15 +412,15 @@ class ModernDashboard(ctk.CTkFrame):
             units = [row[0] for row in units_data]
             counts = [row[1] for row in units_data]
 
-            # Usar paleta ejecutiva Hutchison Ports para gráficos
-            colors = EXECUTIVE_CHART_COLORS[:len(units)]
+            # Usar paleta GERENCIAL_PALETTE (azules y verdes armoniosos)
+            colors = [GERENCIAL_PALETTE[i % len(GERENCIAL_PALETTE)] for i in range(len(units))]
 
             # Gráfico 1: Barras horizontales
             fig1 = Figure(figsize=(8, 5))
             ax1 = fig1.add_subplot(111)
 
             bars = ax1.barh(units, counts, color=colors, edgecolor='none')
-            ax1.set_xlabel('Número de Usuarios', fontsize=11)
+            ax1.set_xlabel('Número de Usuarios', fontsize=11, fontfamily='Arial')
             ax1.set_ylabel('', fontsize=11)
             ax1.tick_params(labelsize=10)
             ax1.spines['top'].set_visible(False)
@@ -438,28 +438,50 @@ class ModernDashboard(ctk.CTkFrame):
             fig1.tight_layout()
             chart1.set_figure(fig1)
 
-            # Gráfico 2: Barras Horizontales (mismo dataset)
-            fig2 = Figure(figsize=(8, 5))
-            ax2 = fig2.add_subplot(111)
+        # Gráfico 2: Donut de Progreso General por UN
+        theme = self.theme_manager.get_current_theme()
 
-            bars2 = ax2.barh(units, counts, color=colors, edgecolor='none')
-            ax2.set_xlabel('Número de Usuarios', fontsize=11)
-            ax2.set_ylabel('', fontsize=11)
-            ax2.tick_params(labelsize=10)
-            ax2.spines['top'].set_visible(False)
-            ax2.spines['right'].set_visible(False)
-            ax2.grid(axis='x', alpha=0.3)
+        # Datos estáticos para el gráfico de donut (alineados con la realidad del negocio)
+        unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
+        porcentajes_completado = [100, 85, 78, 72, 65]
 
-            # Añadir valores en las barras
-            for bar in bars2:
-                width = bar.get_width()
-                ax2.text(width + 5, bar.get_y() + bar.get_height()/2,
-                        f'{int(width)}',
-                        ha='left', va='center', fontsize=9,
-                        fontweight='bold')
+        # Colores armoniosos de la paleta
+        colors_donut = [GERENCIAL_PALETTE[i] for i in [0, 1, 3, 5, 7]]
 
-            fig2.tight_layout()
-            chart2.set_figure(fig2)
+        fig2 = Figure(figsize=(7, 6))
+        ax2 = fig2.add_subplot(111)
+
+        wedges, texts, autotexts = ax2.pie(
+            porcentajes_completado,
+            labels=unidades_negocio,
+            colors=colors_donut,
+            autopct='%1.0f%%',
+            startangle=90,
+            pctdistance=0.85,
+            wedgeprops=dict(width=0.5, edgecolor=theme['surface'], linewidth=3)
+        )
+
+        # Estilo de textos
+        for text in texts:
+            text.set_fontsize(11)
+            text.set_fontfamily('Montserrat')
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontsize(10)
+            autotext.set_weight('bold')
+            autotext.set_fontfamily('Arial')
+
+        # Leyenda
+        ax2.legend(
+            wedges, unidades_negocio,
+            title="Unidades de Negocio",
+            loc='center left',
+            bbox_to_anchor=(1, 0, 0.5, 1),
+            fontsize=10
+        )
+
+        fig2.tight_layout()
+        chart2.set_figure(fig2)
 
     # ==================== PESTAÑA PROGRESO POR MÓDULO ====================
 
@@ -887,65 +909,15 @@ class ModernDashboard(ctk.CTkFrame):
         # Configurar grid del scrollable frame (2 columnas)
         scrollable_frame.grid_columnconfigure((0, 1), weight=1)
 
-        # ===== ROW 0: Progreso General por UN (NUEVO) + Top 5 UN con Mayor Incumplimiento =====
+        # ===== ROW 0: Top 5 UN con Mayor Incumplimiento + Top 3 UN más Lentas =====
 
-        # Gráfico NUEVO: Progreso General por Unidad de Negocio (Donut)
-        chart_progreso_un = MatplotlibChartCard(
-            scrollable_frame,
-            title='Progreso General por Unidad de Negocio (Total Módulos)',
-            export_callback=self.export_chart_to_plotly
-        )
-        chart_progreso_un.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
-
-        # Datos estáticos para el nuevo gráfico (alineados con la realidad del negocio)
-        unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
-        porcentajes_completado = [100, 85, 78, 72, 65]
-
-        # Colores armoniosos de la paleta
-        colors_donut = [GERENCIAL_PALETTE[i] for i in [0, 1, 3, 5, 7]]
-
-        fig_progreso = Figure(figsize=(7, 6))
-        ax_progreso = fig_progreso.add_subplot(111)
-
-        wedges, texts, autotexts = ax_progreso.pie(
-            porcentajes_completado,
-            labels=unidades_negocio,
-            colors=colors_donut,
-            autopct='%1.0f%%',
-            startangle=90,
-            pctdistance=0.85,
-            wedgeprops=dict(width=0.5, edgecolor=theme['surface'], linewidth=3)
-        )
-
-        # Estilo de textos
-        for text in texts:
-            text.set_fontsize(11)
-            text.set_fontfamily('Montserrat')
-        for autotext in autotexts:
-            autotext.set_color('white')
-            autotext.set_fontsize(10)
-            autotext.set_weight('bold')
-            autotext.set_fontfamily('Arial')
-
-        # Leyenda
-        ax_progreso.legend(
-            wedges, unidades_negocio,
-            title="Unidades de Negocio",
-            loc='center left',
-            bbox_to_anchor=(1, 0, 0.5, 1),
-            fontsize=10
-        )
-
-        fig_progreso.tight_layout()
-        chart_progreso_un.set_figure(fig_progreso)
-
-        # Gráfico: Top 5 UN con Mayor Incumplimiento (CORREGIDO - sin TNG)
+        # Gráfico: Top 5 UN con Mayor Incumplimiento (sin TNG)
         chart_incumplimiento = MatplotlibChartCard(
             scrollable_frame,
             title='Top 5 UN con Mayor Incumplimiento (Módulo 8)',
             export_callback=self.export_chart_to_plotly
         )
-        chart_incumplimiento.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
+        chart_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
         # Datos estáticos corregidos (sin TNG ya que están al 100%)
         unidades_incumplimiento = ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística']
@@ -975,9 +947,9 @@ class ModernDashboard(ctk.CTkFrame):
         fig_incump.tight_layout()
         chart_incumplimiento.set_figure(fig_incump)
 
-        # ===== ROW 1: Top 10 Usuarios Más Atrasados + Top 3 UN más Lentas =====
+        # ===== ROW 1: Top 10 Usuarios Más Atrasados + Cuadro de Honor =====
 
-        # Gráfico: Top 10 Usuarios Más Atrasados (CORREGIDO - sin usuarios de TNG)
+        # Gráfico: Top 10 Usuarios Más Atrasados (sin usuarios de TNG)
         chart_atrasados = MatplotlibChartCard(
             scrollable_frame,
             title='Top 10 Usuarios Más Atrasados (Gen 1-4)',
@@ -1030,7 +1002,7 @@ class ModernDashboard(ctk.CTkFrame):
             title='Top 3 UN más Lentas (Tiempo a 80%)',
             export_callback=self.export_chart_to_plotly
         )
-        chart_lentas.grid(row=1, column=1, sticky='nsew', padx=10, pady=10)
+        chart_lentas.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
         # Datos estáticos corregidos (TNG incluido con valor bajo = más rápidos)
         unidades_lentas = ['TNG', 'ICAVE', 'ECV']
@@ -1060,9 +1032,9 @@ class ModernDashboard(ctk.CTkFrame):
         fig_lentas.tight_layout()
         chart_lentas.set_figure(fig_lentas)
 
-        # ===== ROW 2: Usuarios con Mejor Calificación + Cuadro de Honor =====
+        # ===== ROW 2: Usuarios con Mejor Calificación =====
 
-        # Gráfico: Usuarios con Mejor Calificación (CORREGIDO - dominado por TNG)
+        # Gráfico: Usuarios con Mejor Calificación (usuarios de otras unidades)
         chart_calificacion = MatplotlibChartCard(
             scrollable_frame,
             title='Usuarios con Mejor Calificación Promedio',
@@ -1105,7 +1077,7 @@ class ModernDashboard(ctk.CTkFrame):
         fig_calif.tight_layout()
         chart_calificacion.set_figure(fig_calif)
 
-        # Cuadro de Honor (CORREGIDO - usuarios de TNG)
+        # Cuadro de Honor (usuarios de otras unidades)
         cuadro_frame = ctk.CTkFrame(
             scrollable_frame,
             fg_color=theme['surface'],
@@ -1113,7 +1085,7 @@ class ModernDashboard(ctk.CTkFrame):
             border_width=1,
             border_color=theme['border']
         )
-        cuadro_frame.grid(row=2, column=1, sticky='nsew', padx=10, pady=10)
+        cuadro_frame.grid(row=1, column=1, sticky='nsew', padx=10, pady=10)
 
         # Título del cuadro de honor
         title_label = ctk.CTkLabel(
