@@ -58,9 +58,14 @@ class ConfigCard(ctk.CTkFrame):
     def _get_icon_color(self):
         """
         Obtener color del icono según el tema actual
-        Usa el mismo esquema que los botones
+        - Modo claro: #002E6D (navy blue)
+        - Modo oscuro: #FFFFFF (blanco para visibilidad)
         """
-        return self._get_button_color()
+        theme = self.theme_manager.get_current_theme()
+        if theme['background'] == '#1a1a1a':  # Dark theme
+            return '#FFFFFF'  # Blanco para máxima visibilidad
+        else:  # Light theme
+            return '#002E6D'  # Navy blue
 
     def _create_content(self):
         """Crear contenido del card con colores dinámicos"""

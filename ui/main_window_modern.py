@@ -214,7 +214,7 @@ class MainWindow:
 
         title = ctk.CTkLabel(
             header,
-            text='Actualizar Datos',
+            text='Cruce de Datos (Cornerstone)',
             font=('Montserrat', 32, 'bold'),
             text_color=theme['text']
         )
@@ -426,7 +426,7 @@ class MainWindow:
 
         title = ctk.CTkLabel(
             header,
-            text='Consultas de Usuarios',
+            text='Consulta de Empleados y Progreso',
             font=('Montserrat', 32, 'bold'),
             text_color=theme['text']
         )

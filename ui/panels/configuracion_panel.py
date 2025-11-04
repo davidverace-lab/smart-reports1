@@ -101,24 +101,24 @@ class ConfiguracionPanel(ctk.CTkFrame):
         grid_container.grid_columnconfigure((0, 1), weight=1)
         grid_container.grid_rowconfigure((0, 1), weight=1)
 
-        # Card 1: Gestión de Usuarios
+        # Card 1: Gestionar Empleados
         card1 = ConfigCard(
             grid_container,
             icon='👥',
-            title='Gestión de Usuarios',
-            description='Agregar, editar o consultar usuarios del sistema',
+            title='Gestionar Empleados',
+            description='Agregar, editar o consultar empleados del sistema',
             button_text='Gestionar',
             command=self.show_user_manager_frame
         )
         card1.grid(row=0, column=0, padx=15, pady=15, sticky='nsew')
 
-        # Card 2: Ticket de Soporte
+        # Card 2: Solicitar Soporte Técnico
         card2 = ConfigCard(
             grid_container,
             icon='🎫',
-            title='Ticket de Soporte',
+            title='Solicitar Soporte Técnico',
             description='Crear un nuevo ticket de soporte para asistencia técnica',
-            button_text='Crear Ticket',
+            button_text='Crear Solicitud',
             command=self.show_support_ticket_frame
         )
         card2.grid(row=0, column=1, padx=15, pady=15, sticky='nsew')
@@ -182,7 +182,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         title = ctk.CTkLabel(
             header,
-            text='👥 Gestión de Usuarios',
+            text='👥 Gestionar Empleados',
             font=('Montserrat', 28, 'bold'),
             text_color=title_color
         )
@@ -492,7 +492,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         title = ctk.CTkLabel(
             header,
-            text='🎫 Crear Ticket de Soporte',
+            text='🎫 Solicitar Soporte Técnico',
             font=('Montserrat', 28, 'bold'),
             text_color=title_color
         )

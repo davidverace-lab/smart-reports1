@@ -61,6 +61,9 @@ PRIMARY_COLORS = {
     'accent_purple': HUTCHISON_COLORS['ports_sea_blue']
 }
 
+# Paleta de colores azules para Reportes Gerenciales
+GERENCIAL_PALETTE = ['#009BDE', '#002E6D', '#9ACAEB', '#005C8A', '#60C8FF']
+
 
 class ModernDashboard(ctk.CTkFrame):
     """Dashboard optimizado con lazy loading y pestañas"""
@@ -83,7 +86,7 @@ class ModernDashboard(ctk.CTkFrame):
         self._general_loaded = False
         self._progreso_loaded = False
         self._jerarquico_loaded = False
-        self._interactivo_loaded = False
+        self._gerencial_loaded = False
 
         # Referencias a componentes
         self.progreso_bar_card = None
@@ -169,7 +172,7 @@ class ModernDashboard(ctk.CTkFrame):
             ("General", "General"),
             ("Progreso por Módulo", "Progreso por Módulo"),
             ("Avance Jerárquico", "Avance Jerárquico"),
-            ("Dashboards Interactivos", "Dashboards Interactivos")
+            ("Reportes Gerenciales", "Reportes Gerenciales")
         ]
 
         # Crear botones con diseño invertido (inactivo=navy, seleccionado=gris claro)
@@ -199,7 +202,7 @@ class ModernDashboard(ctk.CTkFrame):
         self.general_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
         self.progreso_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
         self.jerarquico_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
-        self.interactivo_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
+        self.gerencial_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
 
         # Configurar grids de los frames
         self.general_frame.grid_columnconfigure(0, weight=1)
@@ -211,25 +214,25 @@ class ModernDashboard(ctk.CTkFrame):
         self.jerarquico_frame.grid_columnconfigure((0, 1), weight=1)
         self.jerarquico_frame.grid_rowconfigure(0, weight=1)
 
-        self.interactivo_frame.grid_columnconfigure(0, weight=1)
-        self.interactivo_frame.grid_rowconfigure(0, weight=1)
+        self.gerencial_frame.grid_columnconfigure((0, 1), weight=1)
+        self.gerencial_frame.grid_rowconfigure((0, 1, 2), weight=1)
 
         # Colocar todos los frames en la misma posición (solo uno visible a la vez)
         self.general_frame.grid(row=0, column=0, sticky='nsew')
         self.progreso_frame.grid(row=0, column=0, sticky='nsew')
         self.jerarquico_frame.grid(row=0, column=0, sticky='nsew')
-        self.interactivo_frame.grid(row=0, column=0, sticky='nsew')
+        self.gerencial_frame.grid(row=0, column=0, sticky='nsew')
 
         # Ocultar todos excepto el primero
         self.progreso_frame.grid_remove()
         self.jerarquico_frame.grid_remove()
-        self.interactivo_frame.grid_remove()
+        self.gerencial_frame.grid_remove()
 
         # Almacenar referencias a las pestañas (para compatibilidad)
         self.tab_general = self.general_frame
         self.tab_progreso = self.progreso_frame
         self.tab_jerarquico = self.jerarquico_frame
-        self.tab_interactivo = self.interactivo_frame
+        self.tab_gerencial = self.gerencial_frame
 
         # Seleccionar pestaña inicial DESPUÉS de crear los frames
         self._on_tab_button_click("General")
@@ -264,7 +267,7 @@ class ModernDashboard(ctk.CTkFrame):
         self.general_frame.grid_remove()
         self.progreso_frame.grid_remove()
         self.jerarquico_frame.grid_remove()
-        self.interactivo_frame.grid_remove()
+        self.gerencial_frame.grid_remove()
 
         # Mostrar el frame correspondiente y cargar datos si es necesario
         if value == "General":
@@ -282,11 +285,11 @@ class ModernDashboard(ctk.CTkFrame):
             if not self._jerarquico_loaded:
                 self.load_jerarquico_charts()
                 self._jerarquico_loaded = True
-        elif value == "Dashboards Interactivos":
-            self.interactivo_frame.grid(row=0, column=0, sticky='nsew')
-            if not self._interactivo_loaded:
-                self.load_interactivo_charts()
-                self._interactivo_loaded = True
+        elif value == "Reportes Gerenciales":
+            self.gerencial_frame.grid(row=0, column=0, sticky='nsew')
+            if not self._gerencial_loaded:
+                self.load_gerencial_charts()
+                self._gerencial_loaded = True
 
     def load_general_charts(self):
         """Cargar pestaña General (lazy loading)"""
@@ -312,18 +315,13 @@ class ModernDashboard(ctk.CTkFrame):
         self._create_tab_comportamiento_jerarquico(self.tab_jerarquico)
         self._jerarquico_loaded = True
 
-    def load_interactivo_charts(self):
-        """Cargar pestaña Dashboards Interactivos (lazy loading)"""
-        if self._interactivo_loaded:
+    def load_gerencial_charts(self):
+        """Cargar pestaña Reportes Gerenciales (lazy loading)"""
+        if self._gerencial_loaded:
             return
 
-        # Crear panel de gráficos interactivos con Matplotlib
-        interactive_panel = MatplotlibInteractivePanel(
-            self.tab_interactivo,
-            self.db
-        )
-        interactive_panel.pack(fill='both', expand=True, padx=5, pady=5)
-        self._interactivo_loaded = True
+        self._create_tab_reportes_gerenciales(self.tab_gerencial)
+        self._gerencial_loaded = True
 
     # ==================== PESTAÑA GENERAL ====================
 
@@ -336,8 +334,6 @@ class ModernDashboard(ctk.CTkFrame):
 
         # Obtener datos reales
         total_users = self._get_total_users()
-        active_modules = self._get_active_modules()
-        completion_rate = self._get_completion_rate()
 
         # Metric Card 1: Total Usuarios
         metric1 = MetricCard(
@@ -345,29 +341,32 @@ class ModernDashboard(ctk.CTkFrame):
             title='Total de Usuarios',
             value=f'{total_users:,}',
             icon='👥',
-            color=PRIMARY_COLORS['accent_blue']
+            color=PRIMARY_COLORS['accent_blue'],
+            height=90  # Reducido de tamaño
         )
-        metric1.grid(row=0, column=0, sticky='ew', padx=10, pady=10)
+        metric1.grid(row=0, column=0, sticky='ew', padx=10, pady=8)
 
-        # Metric Card 2: Módulos Activos
+        # Metric Card 2: Módulo Actual (estático)
         metric2 = MetricCard(
             metrics_frame,
-            title='Módulos Activos',
-            value=f'{active_modules}/14',
+            title='Módulo Actual',
+            value='Módulo 8 - Procesos de Recursos Humanos',
             icon='📚',
-            color=PRIMARY_COLORS['accent_cyan']
+            color=PRIMARY_COLORS['accent_cyan'],
+            height=90  # Reducido de tamaño
         )
-        metric2.grid(row=0, column=1, sticky='ew', padx=10, pady=10)
+        metric2.grid(row=0, column=1, sticky='ew', padx=10, pady=8)
 
-        # Metric Card 3: Tasa de Completado
+        # Metric Card 3: Tasa de Completado (estático)
         metric3 = MetricCard(
             metrics_frame,
             title='Tasa de Completado',
-            value=f'{completion_rate:.1f}%',
+            value='70.0%',
             icon='✓',
-            color=PRIMARY_COLORS['accent_green']
+            color=PRIMARY_COLORS['accent_green'],
+            height=90  # Reducido de tamaño
         )
-        metric3.grid(row=0, column=2, sticky='ew', padx=10, pady=10)
+        metric3.grid(row=0, column=2, sticky='ew', padx=10, pady=8)
 
         # Row 2: Gráficos (2 cards)
         charts_frame = ctk.CTkFrame(parent, fg_color='transparent')
@@ -383,10 +382,10 @@ class ModernDashboard(ctk.CTkFrame):
         )
         chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
-        # Chart 2: Distribución Porcentual (Donut)
+        # Chart 2: Distribución por Unidad (Barras Horizontales)
         chart2 = MatplotlibChartCard(
             charts_frame,
-            title='Distribución Porcentual',
+            title='Distribución por Unidad de Negocio',
             export_callback=self.export_chart_to_plotly
         )
         chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
@@ -429,40 +428,25 @@ class ModernDashboard(ctk.CTkFrame):
             fig1.tight_layout()
             chart1.set_figure(fig1)
 
-            # Gráfico 2: Donut
+            # Gráfico 2: Barras Horizontales (mismo dataset)
             fig2 = Figure(figsize=(8, 5))
             ax2 = fig2.add_subplot(111)
 
-            theme = self.theme_manager.get_current_theme()
-            edge_color = theme['surface']
+            bars2 = ax2.barh(units, counts, color=colors, edgecolor='none')
+            ax2.set_xlabel('Número de Usuarios', fontsize=11)
+            ax2.set_ylabel('', fontsize=11)
+            ax2.tick_params(labelsize=10)
+            ax2.spines['top'].set_visible(False)
+            ax2.spines['right'].set_visible(False)
+            ax2.grid(axis='x', alpha=0.3)
 
-            wedges, texts, autotexts = ax2.pie(
-                counts,
-                labels=units,
-                colors=colors,
-                autopct='%1.1f%%',
-                startangle=90,
-                pctdistance=0.85,
-                wedgeprops=dict(width=0.5, edgecolor=edge_color, linewidth=3)
-            )
-
-            # Estilo de textos
-            for text in texts:
-                text.set_fontsize(10)
-            for autotext in autotexts:
-                autotext.set_color('white')
-                autotext.set_fontsize(9)
-                autotext.set_weight('bold')
-
-            # Leyenda horizontal
-            ax2.legend(
-                wedges, units,
-                loc='upper center',
-                bbox_to_anchor=(0.5, -0.05),
-                ncol=min(len(units), 3),
-                fontsize=9,
-                frameon=True
-            )
+            # Añadir valores en las barras
+            for bar in bars2:
+                width = bar.get_width()
+                ax2.text(width + 5, bar.get_y() + bar.get_height()/2,
+                        f'{int(width)}',
+                        ha='left', va='center', fontsize=9,
+                        fontweight='bold')
 
             fig2.tight_layout()
             chart2.set_figure(fig2)
@@ -875,13 +859,230 @@ class ModernDashboard(ctk.CTkFrame):
                 ('Seguridad', 101)
             ]
 
+    # ==================== PESTAÑA REPORTES GERENCIALES ====================
+
+    def _create_tab_reportes_gerenciales(self, parent):
+        """Crear pestaña de Reportes Gerenciales con 5 gráficos estáticos"""
+
+        # Row 0: Top 10 Usuarios Más Atrasados (izquierda) + Top 5 UN con Mayor Incumplimiento (derecha)
+        row0_frame = ctk.CTkFrame(parent, fg_color='transparent')
+        row0_frame.grid(row=0, column=0, columnspan=2, sticky='nsew', padx=15, pady=10)
+        row0_frame.grid_columnconfigure((0, 1), weight=1)
+        row0_frame.grid_rowconfigure(0, weight=1)
+
+        # Gráfico 1: Top 10 Usuarios Más Atrasados
+        chart1 = MatplotlibChartCard(
+            row0_frame,
+            title='Top 10 Usuarios Más Atrasados (Gen 1-4)',
+            export_callback=self.export_chart_to_plotly
+        )
+        chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 7))
+
+        # Datos estáticos para gráfico 1
+        usuarios_atrasados = [
+            'Juan Pérez', 'María García', 'Carlos López', 'Ana Martínez', 'Pedro Sánchez',
+            'Laura Rodríguez', 'José Hernández', 'Carmen González', 'Francisco Torres', 'Isabel Ramírez'
+        ]
+        dias_retraso = [45, 42, 38, 35, 32, 28, 25, 22, 18, 15]
+
+        fig1 = Figure(figsize=(10, 6))
+        ax1 = fig1.add_subplot(111)
+        bars1 = ax1.barh(usuarios_atrasados, dias_retraso, color=GERENCIAL_PALETTE[0], edgecolor='none')
+        ax1.set_xlabel('Días de Retraso', fontsize=11)
+        ax1.tick_params(labelsize=10)
+        ax1.spines['top'].set_visible(False)
+        ax1.spines['right'].set_visible(False)
+        ax1.grid(axis='x', alpha=0.3)
+
+        for bar in bars1:
+            width = bar.get_width()
+            ax1.text(width + 1, bar.get_y() + bar.get_height()/2,
+                    f'{int(width)}',
+                    ha='left', va='center', fontsize=9,
+                    fontweight='bold')
+
+        fig1.tight_layout()
+        chart1.set_figure(fig1)
+
+        # Gráfico 2: Top 5 UN con Mayor Incumplimiento
+        chart2 = MatplotlibChartCard(
+            row0_frame,
+            title='Top 5 UN con Mayor Incumplimiento (Módulo 8)',
+            export_callback=self.export_chart_to_plotly
+        )
+        chart2.grid(row=0, column=1, sticky='nsew', padx=(7, 0))
+
+        # Datos estáticos para gráfico 2
+        unidades = ['TNG', 'ICAVE', 'HPMX', 'Container Care', 'ECV']
+        usuarios_pendientes = [87, 65, 52, 43, 38]
+
+        fig2 = Figure(figsize=(8, 6))
+        ax2 = fig2.add_subplot(111)
+        bars2 = ax2.bar(unidades, usuarios_pendientes, color=GERENCIAL_PALETTE, edgecolor='none')
+        ax2.set_ylabel('Usuarios Pendientes', fontsize=11)
+        ax2.tick_params(labelsize=10)
+        ax2.spines['top'].set_visible(False)
+        ax2.spines['right'].set_visible(False)
+        ax2.grid(axis='y', alpha=0.3)
+
+        for bar in bars2:
+            height = bar.get_height()
+            ax2.text(bar.get_x() + bar.get_width()/2, height,
+                    f'{int(height)}',
+                    ha='center', va='bottom', fontsize=9,
+                    fontweight='bold')
+
+        fig2.tight_layout()
+        chart2.set_figure(fig2)
+
+        # Row 1: Top 3 UN más Lentas (izquierda) + Cuadro de Honor (derecha)
+        row1_frame = ctk.CTkFrame(parent, fg_color='transparent')
+        row1_frame.grid(row=1, column=0, columnspan=2, sticky='nsew', padx=15, pady=10)
+        row1_frame.grid_columnconfigure((0, 1), weight=1)
+        row1_frame.grid_rowconfigure(0, weight=1)
+
+        # Gráfico 3: Top 3 UN más Lentas
+        chart3 = MatplotlibChartCard(
+            row1_frame,
+            title='Top 3 UN más Lentas (Tiempo a 80%)',
+            export_callback=self.export_chart_to_plotly
+        )
+        chart3.grid(row=0, column=0, sticky='nsew', padx=(0, 7))
+
+        # Datos estáticos para gráfico 3
+        unidades_lentas = ['Container Care', 'ECV', 'ICAVE']
+        dias_promedio = [125, 108, 95]
+
+        fig3 = Figure(figsize=(8, 5))
+        ax3 = fig3.add_subplot(111)
+        bars3 = ax3.barh(unidades_lentas, dias_promedio, color=GERENCIAL_PALETTE[:3], edgecolor='none')
+        ax3.set_xlabel('Días Promedio para 80%', fontsize=11)
+        ax3.tick_params(labelsize=10)
+        ax3.spines['top'].set_visible(False)
+        ax3.spines['right'].set_visible(False)
+        ax3.grid(axis='x', alpha=0.3)
+
+        for bar in bars3:
+            width = bar.get_width()
+            ax3.text(width + 2, bar.get_y() + bar.get_height()/2,
+                    f'{int(width)}',
+                    ha='left', va='center', fontsize=9,
+                    fontweight='bold')
+
+        fig3.tight_layout()
+        chart3.set_figure(fig3)
+
+        # Gráfico 4: Cuadro de Honor (Frame estilizado)
+        theme = self.theme_manager.get_current_theme()
+        cuadro_frame = ctk.CTkFrame(
+            row1_frame,
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
+        )
+        cuadro_frame.grid(row=0, column=1, sticky='nsew', padx=(7, 0))
+
+        # Título del cuadro de honor
+        title_label = ctk.CTkLabel(
+            cuadro_frame,
+            text='🏆 Cuadro de Honor: Los Más Proactivos',
+            font=('Segoe UI', 16, 'bold'),
+            text_color=theme['text']
+        )
+        title_label.pack(pady=(20, 15), padx=20)
+
+        # Contenedor de leaderboard
+        leaderboard_frame = ctk.CTkFrame(cuadro_frame, fg_color='transparent')
+        leaderboard_frame.pack(fill='both', expand=True, padx=20, pady=(0, 20))
+
+        # Datos del leaderboard
+        leaderboard_data = [
+            ('🥇', '1. David Rodriguez', 'Prom. 12 días antes'),
+            ('🥈', '2. Javier Miranda', 'Prom. 10 días antes'),
+            ('🥉', '3. Sofia Reyes', 'Prom. 9 días antes'),
+            ('🎯', '4. Roberto Campos', 'Prom. 8 días antes'),
+            ('⭐', '5. Andrea Vega', 'Prom. 7 días antes')
+        ]
+
+        for emoji, nombre, tiempo in leaderboard_data:
+            item_frame = ctk.CTkFrame(leaderboard_frame, fg_color='transparent')
+            item_frame.pack(fill='x', pady=8)
+
+            emoji_label = ctk.CTkLabel(
+                item_frame,
+                text=emoji,
+                font=('Arial', 20),
+                width=40
+            )
+            emoji_label.pack(side='left', padx=(0, 10))
+
+            text_frame = ctk.CTkFrame(item_frame, fg_color='transparent')
+            text_frame.pack(side='left', fill='x', expand=True)
+
+            nombre_label = ctk.CTkLabel(
+                text_frame,
+                text=nombre,
+                font=('Arial', 13, 'bold'),
+                text_color=theme['text'],
+                anchor='w'
+            )
+            nombre_label.pack(fill='x')
+
+            tiempo_label = ctk.CTkLabel(
+                text_frame,
+                text=tiempo,
+                font=('Arial', 11),
+                text_color=theme['text_secondary'],
+                anchor='w'
+            )
+            tiempo_label.pack(fill='x')
+
+        # Row 2: Usuarios con Mejor Calificación
+        row2_frame = ctk.CTkFrame(parent, fg_color='transparent')
+        row2_frame.grid(row=2, column=0, columnspan=2, sticky='nsew', padx=15, pady=10)
+        row2_frame.grid_columnconfigure(0, weight=1)
+        row2_frame.grid_rowconfigure(0, weight=1)
+
+        # Gráfico 5: Usuarios con Mejor Calificación
+        chart5 = MatplotlibChartCard(
+            row2_frame,
+            title='Usuarios con Mejor Calificación Promedio',
+            export_callback=self.export_chart_to_plotly
+        )
+        chart5.grid(row=0, column=0, sticky='nsew')
+
+        # Datos estáticos para gráfico 5
+        top_usuarios = ['Elena Navarro', 'Miguel Ángel Castro', 'Patricia Moreno', 'Ricardo Jiménez', 'Cristina Ruiz']
+        calificaciones = [98.5, 97.8, 97.2, 96.9, 96.5]
+
+        fig5 = Figure(figsize=(12, 5))
+        ax5 = fig5.add_subplot(111)
+        bars5 = ax5.barh(top_usuarios, calificaciones, color=GERENCIAL_PALETTE[0], edgecolor='none')
+        ax5.set_xlabel('Calificación Promedio', fontsize=11)
+        ax5.set_xlim(90, 100)
+        ax5.tick_params(labelsize=10)
+        ax5.spines['top'].set_visible(False)
+        ax5.spines['right'].set_visible(False)
+        ax5.grid(axis='x', alpha=0.3)
+
+        for bar in bars5:
+            width = bar.get_width()
+            ax5.text(width + 0.2, bar.get_y() + bar.get_height()/2,
+                    f'{width:.1f}',
+                    ha='left', va='center', fontsize=9,
+                    fontweight='bold')
+
+        fig5.tight_layout()
+        chart5.set_figure(fig5)
+
     def refresh_all_data(self):
         """Refrescar todos los datos del dashboard"""
         # Resetear flags
         self._general_loaded = False
         self._progreso_loaded = False
         self._jerarquico_loaded = False
-        self._interactivo_loaded = False
+        self._gerencial_loaded = False
 
         # Recargar pestaña actual
         current_tab = self.active_tab if self.active_tab else "General"
