@@ -61,17 +61,17 @@ PRIMARY_COLORS = {
     'accent_purple': HUTCHISON_COLORS['ports_sea_blue']
 }
 
-# Paleta de colores azules y verdes para Reportes Gerenciales (teoría de los colores)
-# Combinación de análogos (azules) y complementarios (verdes) para armonía visual
+# Paleta de colores azules para Reportes Gerenciales (varios tonos de azul)
+# Desde azul claro hasta azul oscuro para consistencia y elegancia
 GERENCIAL_PALETTE = [
-    '#009BDE',  # Azul cielo (principal)
-    '#00C896',  # Verde agua (complementario)
-    '#002E6D',  # Azul marino (oscuro)
-    '#28B463',  # Verde esmeralda (vibrante)
-    '#60C8FF',  # Azul claro (acento)
-    '#1ABC9C',  # Verde turquesa (intermedio)
-    '#005C8A',  # Azul medio
-    '#27AE60'   # Verde bosque (profundo)
+    '#1E90FF',  # Azul Dodger (brillante)
+    '#4169E1',  # Azul Royal (medio brillante)
+    '#0066CC',  # Azul Azure (corporativo)
+    '#003D82',  # Azul Marino Medio
+    '#87CEEB',  # Azul Cielo (claro)
+    '#5B9BD5',  # Azul Medio Suave
+    '#002E6D',  # Azul Marino Oscuro
+    '#6495ED'   # Azul Cornflower (suave)
 ]
 
 
