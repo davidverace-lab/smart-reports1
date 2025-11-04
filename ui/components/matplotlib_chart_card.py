@@ -7,18 +7,20 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from config.theme_manager import get_theme_manager
+from config.settings import HUTCHISON_COLORS
 
 
 class MatplotlibChartCard(ctk.CTkFrame):
     """Card con gráficos Matplotlib embebidos"""
 
-    def __init__(self, parent, title='', width=500, height=400, **kwargs):
+    def __init__(self, parent, title='', width=500, height=400, export_callback=None, **kwargs):
         """
         Args:
             parent: Widget padre
             title: Título del gráfico
             width: Ancho del card
             height: Altura del card
+            export_callback: Función a llamar cuando se hace clic en exportar
         """
         # Obtener tema actual
         self.theme_manager = get_theme_manager()
@@ -38,6 +40,7 @@ class MatplotlibChartCard(ctk.CTkFrame):
         self._title = title
         self._width = width
         self._height = height
+        self.export_callback = export_callback
 
         # Aplicar configuración de matplotlib según tema
         self._apply_matplotlib_theme()
@@ -55,6 +58,22 @@ class MatplotlibChartCard(ctk.CTkFrame):
                 anchor='w'
             )
             self.title_label.pack(side='left', fill='x', expand=True)
+
+            # Botón de exportar a Plotly
+            if export_callback:
+                self.export_btn = ctk.CTkButton(
+                    header,
+                    text='📊 Exportar Interactivo',
+                    font=('Arial', 11, 'bold'),
+                    fg_color=HUTCHISON_COLORS['ports_sky_blue'],
+                    hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+                    text_color='white',
+                    height=32,
+                    width=160,
+                    corner_radius=8,
+                    command=self._on_export_click
+                )
+                self.export_btn.pack(side='right', padx=(10, 0))
 
         # Container para el gráfico
         chart_bg = theme['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
@@ -120,6 +139,11 @@ class MatplotlibChartCard(ctk.CTkFrame):
         canvas_widget = self.canvas.get_tk_widget()
         canvas_widget.configure(bg=canvas_bg, highlightthickness=0)
         canvas_widget.pack(fill='both', expand=True, padx=5, pady=5)
+
+    def _on_export_click(self):
+        """Llamar al callback de exportación con la figura actual"""
+        if self.export_callback and self.current_fig:
+            self.export_callback(self.current_fig, self._title)
 
     def clear(self):
         """Limpiar el gráfico"""

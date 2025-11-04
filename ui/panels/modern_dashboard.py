@@ -11,6 +11,7 @@ from ui.components.metric_card import MetricCard
 from ui.panels.matplotlib_interactive_panel import MatplotlibInteractivePanel
 from config.settings import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from config.theme_manager import get_theme_manager
+from services.chart_exporter import get_chart_exporter
 
 
 # Datos de ejemplo basados en las imágenes proporcionadas
@@ -100,6 +101,29 @@ class ModernDashboard(ctk.CTkFrame):
         # Cargar pestaña General al inicio (después de crear widgets)
         self.after(50, self.load_general_charts)
 
+        # Obtener instancia del exportador
+        self.chart_exporter = get_chart_exporter()
+
+    def export_chart_to_plotly(self, fig, title):
+        """
+        Exportar gráfico Matplotlib a Plotly interactivo
+
+        Args:
+            fig: Figura de Matplotlib
+            title: Título del gráfico
+        """
+        try:
+            self.chart_exporter.export_to_plotly(fig, title)
+            messagebox.showinfo(
+                "Exportación Exitosa",
+                f"El gráfico '{title}' ha sido exportado y abierto en su navegador."
+            )
+        except Exception as e:
+            messagebox.showerror(
+                "Error de Exportación",
+                f"No se pudo exportar el gráfico:\n{str(e)}"
+            )
+
     def _create_tabbed_content(self):
         """Crear contenedor con pestañas usando CTkSegmentedButton"""
         # Frame principal con padding
@@ -148,15 +172,15 @@ class ModernDashboard(ctk.CTkFrame):
             ("Dashboards Interactivos", "Dashboards Interactivos")
         ]
 
-        # Crear botones con el estilo de Consultas
+        # Crear botones con diseño invertido (inactivo=navy, seleccionado=gris claro)
         for tab_name, tab_key in tabs:
             btn = ctk.CTkButton(
                 buttons_container,
                 text=tab_name,
                 font=('Arial', 14, 'bold'),
-                fg_color='#002E6D',  # Azul navy por defecto
+                fg_color='#002E6D',  # Azul navy por defecto (inactivo)
                 hover_color='#003D8F',  # Navy más claro para hover
-                text_color='#FFFFFF',  # Texto blanco
+                text_color='#FFFFFF',  # Texto blanco (inactivo)
                 corner_radius=10,
                 height=40,
                 width=180,
@@ -212,19 +236,21 @@ class ModernDashboard(ctk.CTkFrame):
 
     def _on_tab_button_click(self, tab_key):
         """Callback cuando se hace clic en un botón de pestaña"""
-        # Actualizar estilos de botones
+        # Actualizar estilos de botones (diseño invertido)
         for key, btn in self.tab_buttons.items():
             if key == tab_key:
-                # Botón activo: mantener azul navy
+                # Botón activo/seleccionado: gris claro con texto azul navy
                 btn.configure(
-                    fg_color='#002E6D',
-                    hover_color='#003D8F'
+                    fg_color='#D3D3D3',
+                    hover_color='#E5E7EB',
+                    text_color='#002E6D'
                 )
             else:
-                # Botones inactivos: gris más claro
+                # Botones inactivos: azul navy con texto blanco
                 btn.configure(
-                    fg_color='#6B7280',
-                    hover_color='#9CA3AF'
+                    fg_color='#002E6D',
+                    hover_color='#003D8F',
+                    text_color='#FFFFFF'
                 )
 
         self.active_tab = tab_key
@@ -352,14 +378,16 @@ class ModernDashboard(ctk.CTkFrame):
         # Chart 1: Usuarios por Unidad (Barras Horizontales)
         chart1 = MatplotlibChartCard(
             charts_frame,
-            title='Usuarios por Unidad de Negocio'
+            title='Usuarios por Unidad de Negocio',
+            export_callback=self.export_chart_to_plotly
         )
         chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
         # Chart 2: Distribución Porcentual (Donut)
         chart2 = MatplotlibChartCard(
             charts_frame,
-            title='Distribución Porcentual'
+            title='Distribución Porcentual',
+            export_callback=self.export_chart_to_plotly
         )
         chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
 
@@ -514,14 +542,16 @@ class ModernDashboard(ctk.CTkFrame):
         # Card para gráfico de barras agrupadas (izquierda, más grande)
         self.progreso_bar_card = MatplotlibChartCard(
             charts_frame,
-            title='Progreso por Módulo - Comparativa'
+            title='Progreso por Módulo - Comparativa',
+            export_callback=self.export_chart_to_plotly
         )
         self.progreso_bar_card.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
         # Card para gráfico de dona ÚNICO Y DINÁMICO (derecha, más pequeño)
         self.progreso_donut_card = MatplotlibChartCard(
             charts_frame,
-            title='Estado General TNG'  # Título inicial
+            title='Estado General TNG',  # Título inicial
+            export_callback=self.export_chart_to_plotly
         )
         self.progreso_donut_card.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
 
@@ -677,14 +707,16 @@ class ModernDashboard(ctk.CTkFrame):
         # Card para gráfico de líneas
         jerarquico_line_card = MatplotlibChartCard(
             parent,
-            title='Evolución de Población por Puesto'
+            title='Evolución de Población por Puesto',
+            export_callback=self.export_chart_to_plotly
         )
         jerarquico_line_card.grid(row=0, column=0, sticky='nsew', padx=(15, 10), pady=15)
 
         # Card para gráfico de barras comparativo
         jerarquico_bar_card = MatplotlibChartCard(
             parent,
-            title='Comparativa M1 vs M8 - Retención por Puesto'
+            title='Comparativa M1 vs M8 - Retención por Puesto',
+            export_callback=self.export_chart_to_plotly
         )
         jerarquico_bar_card.grid(row=0, column=1, sticky='nsew', padx=(10, 15), pady=15)
 
