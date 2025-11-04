@@ -61,8 +61,18 @@ PRIMARY_COLORS = {
     'accent_purple': HUTCHISON_COLORS['ports_sea_blue']
 }
 
-# Paleta de colores azules para Reportes Gerenciales
-GERENCIAL_PALETTE = ['#009BDE', '#002E6D', '#9ACAEB', '#005C8A', '#60C8FF']
+# Paleta de colores azules y verdes para Reportes Gerenciales (teoría de los colores)
+# Combinación de análogos (azules) y complementarios (verdes) para armonía visual
+GERENCIAL_PALETTE = [
+    '#009BDE',  # Azul cielo (principal)
+    '#00C896',  # Verde agua (complementario)
+    '#002E6D',  # Azul marino (oscuro)
+    '#28B463',  # Verde esmeralda (vibrante)
+    '#60C8FF',  # Azul claro (acento)
+    '#1ABC9C',  # Verde turquesa (intermedio)
+    '#005C8A',  # Azul medio
+    '#27AE60'   # Verde bosque (profundo)
+]
 
 
 class ModernDashboard(ctk.CTkFrame):
@@ -862,132 +872,254 @@ class ModernDashboard(ctk.CTkFrame):
     # ==================== PESTAÑA REPORTES GERENCIALES ====================
 
     def _create_tab_reportes_gerenciales(self, parent):
-        """Crear pestaña de Reportes Gerenciales con 5 gráficos estáticos"""
+        """Crear pestaña de Reportes Gerenciales con scrollbar y 6 gráficos estáticos"""
 
-        # Row 0: Top 10 Usuarios Más Atrasados (izquierda) + Top 5 UN con Mayor Incumplimiento (derecha)
-        row0_frame = ctk.CTkFrame(parent, fg_color='transparent')
-        row0_frame.grid(row=0, column=0, columnspan=2, sticky='nsew', padx=15, pady=10)
-        row0_frame.grid_columnconfigure((0, 1), weight=1)
-        row0_frame.grid_rowconfigure(0, weight=1)
+        # Crear CTkScrollableFrame para permitir scroll vertical
+        theme = self.theme_manager.get_current_theme()
+        scrollable_frame = ctk.CTkScrollableFrame(
+            parent,
+            fg_color='transparent',
+            scrollbar_button_color=PRIMARY_COLORS['accent_blue'],
+            scrollbar_button_hover_color='#007bb5'
+        )
+        scrollable_frame.pack(fill='both', expand=True, padx=10, pady=10)
 
-        # Gráfico 1: Top 10 Usuarios Más Atrasados
-        chart1 = MatplotlibChartCard(
-            row0_frame,
-            title='Top 10 Usuarios Más Atrasados (Gen 1-4)',
+        # Configurar grid del scrollable frame (2 columnas)
+        scrollable_frame.grid_columnconfigure((0, 1), weight=1)
+
+        # ===== ROW 0: Progreso General por UN (NUEVO) + Top 5 UN con Mayor Incumplimiento =====
+
+        # Gráfico NUEVO: Progreso General por Unidad de Negocio (Donut)
+        chart_progreso_un = MatplotlibChartCard(
+            scrollable_frame,
+            title='Progreso General por Unidad de Negocio (Total Módulos)',
             export_callback=self.export_chart_to_plotly
         )
-        chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 7))
+        chart_progreso_un.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos para gráfico 1
-        usuarios_atrasados = [
-            'Juan Pérez', 'María García', 'Carlos López', 'Ana Martínez', 'Pedro Sánchez',
-            'Laura Rodríguez', 'José Hernández', 'Carmen González', 'Francisco Torres', 'Isabel Ramírez'
-        ]
-        dias_retraso = [45, 42, 38, 35, 32, 28, 25, 22, 18, 15]
+        # Datos estáticos para el nuevo gráfico (alineados con la realidad del negocio)
+        unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
+        porcentajes_completado = [100, 85, 78, 72, 65]
 
-        fig1 = Figure(figsize=(10, 6))
-        ax1 = fig1.add_subplot(111)
-        bars1 = ax1.barh(usuarios_atrasados, dias_retraso, color=GERENCIAL_PALETTE[0], edgecolor='none')
-        ax1.set_xlabel('Días de Retraso', fontsize=11)
-        ax1.tick_params(labelsize=10)
-        ax1.spines['top'].set_visible(False)
-        ax1.spines['right'].set_visible(False)
-        ax1.grid(axis='x', alpha=0.3)
+        # Colores armoniosos de la paleta
+        colors_donut = [GERENCIAL_PALETTE[i] for i in [0, 1, 3, 5, 7]]
 
-        for bar in bars1:
-            width = bar.get_width()
-            ax1.text(width + 1, bar.get_y() + bar.get_height()/2,
-                    f'{int(width)}',
-                    ha='left', va='center', fontsize=9,
-                    fontweight='bold')
+        fig_progreso = Figure(figsize=(7, 6))
+        ax_progreso = fig_progreso.add_subplot(111)
 
-        fig1.tight_layout()
-        chart1.set_figure(fig1)
+        wedges, texts, autotexts = ax_progreso.pie(
+            porcentajes_completado,
+            labels=unidades_negocio,
+            colors=colors_donut,
+            autopct='%1.0f%%',
+            startangle=90,
+            pctdistance=0.85,
+            wedgeprops=dict(width=0.5, edgecolor=theme['surface'], linewidth=3)
+        )
 
-        # Gráfico 2: Top 5 UN con Mayor Incumplimiento
-        chart2 = MatplotlibChartCard(
-            row0_frame,
+        # Estilo de textos
+        for text in texts:
+            text.set_fontsize(11)
+            text.set_fontfamily('Montserrat')
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontsize(10)
+            autotext.set_weight('bold')
+            autotext.set_fontfamily('Arial')
+
+        # Leyenda
+        ax_progreso.legend(
+            wedges, unidades_negocio,
+            title="Unidades de Negocio",
+            loc='center left',
+            bbox_to_anchor=(1, 0, 0.5, 1),
+            fontsize=10
+        )
+
+        fig_progreso.tight_layout()
+        chart_progreso_un.set_figure(fig_progreso)
+
+        # Gráfico: Top 5 UN con Mayor Incumplimiento (CORREGIDO - sin TNG)
+        chart_incumplimiento = MatplotlibChartCard(
+            scrollable_frame,
             title='Top 5 UN con Mayor Incumplimiento (Módulo 8)',
             export_callback=self.export_chart_to_plotly
         )
-        chart2.grid(row=0, column=1, sticky='nsew', padx=(7, 0))
+        chart_incumplimiento.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos para gráfico 2
-        unidades = ['TNG', 'ICAVE', 'HPMX', 'Container Care', 'ECV']
-        usuarios_pendientes = [87, 65, 52, 43, 38]
+        # Datos estáticos corregidos (sin TNG ya que están al 100%)
+        unidades_incumplimiento = ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística']
+        usuarios_pendientes = [65, 58, 52, 43, 38]
 
-        fig2 = Figure(figsize=(8, 6))
-        ax2 = fig2.add_subplot(111)
-        bars2 = ax2.bar(unidades, usuarios_pendientes, color=GERENCIAL_PALETTE, edgecolor='none')
-        ax2.set_ylabel('Usuarios Pendientes', fontsize=11)
-        ax2.tick_params(labelsize=10)
-        ax2.spines['top'].set_visible(False)
-        ax2.spines['right'].set_visible(False)
-        ax2.grid(axis='y', alpha=0.3)
+        fig_incump = Figure(figsize=(8, 6))
+        ax_incump = fig_incump.add_subplot(111)
+        bars_incump = ax_incump.bar(
+            unidades_incumplimiento,
+            usuarios_pendientes,
+            color=[GERENCIAL_PALETTE[i] for i in [1, 2, 3, 4, 5]],
+            edgecolor='none'
+        )
+        ax_incump.set_ylabel('Usuarios Pendientes', fontsize=11, fontfamily='Arial')
+        ax_incump.tick_params(labelsize=10)
+        ax_incump.spines['top'].set_visible(False)
+        ax_incump.spines['right'].set_visible(False)
+        ax_incump.grid(axis='y', alpha=0.3)
 
-        for bar in bars2:
+        for bar in bars_incump:
             height = bar.get_height()
-            ax2.text(bar.get_x() + bar.get_width()/2, height,
+            ax_incump.text(bar.get_x() + bar.get_width()/2, height,
                     f'{int(height)}',
                     ha='center', va='bottom', fontsize=9,
                     fontweight='bold')
 
-        fig2.tight_layout()
-        chart2.set_figure(fig2)
+        fig_incump.tight_layout()
+        chart_incumplimiento.set_figure(fig_incump)
 
-        # Row 1: Top 3 UN más Lentas (izquierda) + Cuadro de Honor (derecha)
-        row1_frame = ctk.CTkFrame(parent, fg_color='transparent')
-        row1_frame.grid(row=1, column=0, columnspan=2, sticky='nsew', padx=15, pady=10)
-        row1_frame.grid_columnconfigure((0, 1), weight=1)
-        row1_frame.grid_rowconfigure(0, weight=1)
+        # ===== ROW 1: Top 10 Usuarios Más Atrasados + Top 3 UN más Lentas =====
 
-        # Gráfico 3: Top 3 UN más Lentas
-        chart3 = MatplotlibChartCard(
-            row1_frame,
-            title='Top 3 UN más Lentas (Tiempo a 80%)',
+        # Gráfico: Top 10 Usuarios Más Atrasados (CORREGIDO - sin usuarios de TNG)
+        chart_atrasados = MatplotlibChartCard(
+            scrollable_frame,
+            title='Top 10 Usuarios Más Atrasados (Gen 1-4)',
             export_callback=self.export_chart_to_plotly
         )
-        chart3.grid(row=0, column=0, sticky='nsew', padx=(0, 7))
+        chart_atrasados.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos para gráfico 3
-        unidades_lentas = ['Container Care', 'ECV', 'ICAVE']
-        dias_promedio = [125, 108, 95]
+        # Datos estáticos corregidos (usuarios de ICAVE, HPMX, ECV, etc.)
+        usuarios_atrasados = [
+            'Juan Pérez (ICAVE)',
+            'María García (HPMX)',
+            'Carlos López (ECV)',
+            'Ana Martínez (Container Care)',
+            'Pedro Sánchez (ICAVE)',
+            'Laura Rodríguez (HPMX)',
+            'José Hernández (ECV)',
+            'Carmen González (Logística)',
+            'Francisco Torres (ICAVE)',
+            'Isabel Ramírez (HPMX)'
+        ]
+        dias_retraso = [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
 
-        fig3 = Figure(figsize=(8, 5))
-        ax3 = fig3.add_subplot(111)
-        bars3 = ax3.barh(unidades_lentas, dias_promedio, color=GERENCIAL_PALETTE[:3], edgecolor='none')
-        ax3.set_xlabel('Días Promedio para 80%', fontsize=11)
-        ax3.tick_params(labelsize=10)
-        ax3.spines['top'].set_visible(False)
-        ax3.spines['right'].set_visible(False)
-        ax3.grid(axis='x', alpha=0.3)
+        fig_atrasados = Figure(figsize=(9, 6))
+        ax_atrasados = fig_atrasados.add_subplot(111)
+        bars_atrasados = ax_atrasados.barh(
+            usuarios_atrasados,
+            dias_retraso,
+            color=GERENCIAL_PALETTE[2],
+            edgecolor='none'
+        )
+        ax_atrasados.set_xlabel('Días de Retraso', fontsize=11, fontfamily='Arial')
+        ax_atrasados.tick_params(labelsize=9)
+        ax_atrasados.spines['top'].set_visible(False)
+        ax_atrasados.spines['right'].set_visible(False)
+        ax_atrasados.grid(axis='x', alpha=0.3)
 
-        for bar in bars3:
+        for bar in bars_atrasados:
             width = bar.get_width()
-            ax3.text(width + 2, bar.get_y() + bar.get_height()/2,
+            ax_atrasados.text(width + 1, bar.get_y() + bar.get_height()/2,
                     f'{int(width)}',
                     ha='left', va='center', fontsize=9,
                     fontweight='bold')
 
-        fig3.tight_layout()
-        chart3.set_figure(fig3)
+        fig_atrasados.tight_layout()
+        chart_atrasados.set_figure(fig_atrasados)
 
-        # Gráfico 4: Cuadro de Honor (Frame estilizado)
-        theme = self.theme_manager.get_current_theme()
+        # Gráfico: Top 3 UN más Lentas (CORREGIDO - TNG con 10 días como los más rápidos)
+        chart_lentas = MatplotlibChartCard(
+            scrollable_frame,
+            title='Top 3 UN más Lentas (Tiempo a 80%)',
+            export_callback=self.export_chart_to_plotly
+        )
+        chart_lentas.grid(row=1, column=1, sticky='nsew', padx=10, pady=10)
+
+        # Datos estáticos corregidos (TNG incluido con valor bajo = más rápidos)
+        unidades_lentas = ['TNG', 'ICAVE', 'ECV']
+        dias_promedio = [10, 95, 108]
+
+        fig_lentas = Figure(figsize=(8, 5))
+        ax_lentas = fig_lentas.add_subplot(111)
+        bars_lentas = ax_lentas.barh(
+            unidades_lentas,
+            dias_promedio,
+            color=[GERENCIAL_PALETTE[i] for i in [0, 1, 3]],
+            edgecolor='none'
+        )
+        ax_lentas.set_xlabel('Días Promedio para 80%', fontsize=11, fontfamily='Arial')
+        ax_lentas.tick_params(labelsize=10)
+        ax_lentas.spines['top'].set_visible(False)
+        ax_lentas.spines['right'].set_visible(False)
+        ax_lentas.grid(axis='x', alpha=0.3)
+
+        for bar in bars_lentas:
+            width = bar.get_width()
+            ax_lentas.text(width + 2, bar.get_y() + bar.get_height()/2,
+                    f'{int(width)}',
+                    ha='left', va='center', fontsize=9,
+                    fontweight='bold')
+
+        fig_lentas.tight_layout()
+        chart_lentas.set_figure(fig_lentas)
+
+        # ===== ROW 2: Usuarios con Mejor Calificación + Cuadro de Honor =====
+
+        # Gráfico: Usuarios con Mejor Calificación (CORREGIDO - dominado por TNG)
+        chart_calificacion = MatplotlibChartCard(
+            scrollable_frame,
+            title='Usuarios con Mejor Calificación Promedio',
+            export_callback=self.export_chart_to_plotly
+        )
+        chart_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
+
+        # Datos estáticos corregidos (usuarios de TNG en los primeros puestos)
+        top_usuarios = [
+            'Elena Navarro (TNG)',
+            'Miguel Ángel Castro (TNG)',
+            'Patricia Moreno (TNG)',
+            'Ricardo Jiménez (TNG)',
+            'Cristina Ruiz (ICAVE)'
+        ]
+        calificaciones = [98.5, 97.8, 97.2, 96.9, 95.5]
+
+        fig_calif = Figure(figsize=(9, 5))
+        ax_calif = fig_calif.add_subplot(111)
+        bars_calif = ax_calif.barh(
+            top_usuarios,
+            calificaciones,
+            color=GERENCIAL_PALETTE[0],
+            edgecolor='none'
+        )
+        ax_calif.set_xlabel('Calificación Promedio', fontsize=11, fontfamily='Arial')
+        ax_calif.set_xlim(90, 100)
+        ax_calif.tick_params(labelsize=10)
+        ax_calif.spines['top'].set_visible(False)
+        ax_calif.spines['right'].set_visible(False)
+        ax_calif.grid(axis='x', alpha=0.3)
+
+        for bar in bars_calif:
+            width = bar.get_width()
+            ax_calif.text(width + 0.2, bar.get_y() + bar.get_height()/2,
+                    f'{width:.1f}',
+                    ha='left', va='center', fontsize=9,
+                    fontweight='bold')
+
+        fig_calif.tight_layout()
+        chart_calificacion.set_figure(fig_calif)
+
+        # Cuadro de Honor (CORREGIDO - usuarios de TNG)
         cuadro_frame = ctk.CTkFrame(
-            row1_frame,
+            scrollable_frame,
             fg_color=theme['surface'],
             corner_radius=15,
             border_width=1,
             border_color=theme['border']
         )
-        cuadro_frame.grid(row=0, column=1, sticky='nsew', padx=(7, 0))
+        cuadro_frame.grid(row=2, column=1, sticky='nsew', padx=10, pady=10)
 
         # Título del cuadro de honor
         title_label = ctk.CTkLabel(
             cuadro_frame,
             text='🏆 Cuadro de Honor: Los Más Proactivos',
-            font=('Segoe UI', 16, 'bold'),
+            font=('Montserrat', 16, 'bold'),
             text_color=theme['text']
         )
         title_label.pack(pady=(20, 15), padx=20)
@@ -996,13 +1128,13 @@ class ModernDashboard(ctk.CTkFrame):
         leaderboard_frame = ctk.CTkFrame(cuadro_frame, fg_color='transparent')
         leaderboard_frame.pack(fill='both', expand=True, padx=20, pady=(0, 20))
 
-        # Datos del leaderboard
+        # Datos del leaderboard (CORREGIDO - usuarios de TNG que terminaron primero)
         leaderboard_data = [
-            ('🥇', '1. David Rodriguez', 'Prom. 12 días antes'),
-            ('🥈', '2. Javier Miranda', 'Prom. 10 días antes'),
-            ('🥉', '3. Sofia Reyes', 'Prom. 9 días antes'),
-            ('🎯', '4. Roberto Campos', 'Prom. 8 días antes'),
-            ('⭐', '5. Andrea Vega', 'Prom. 7 días antes')
+            ('🥇', '1. David Rodriguez (TNG)', 'Prom. 15 días antes'),
+            ('🥈', '2. Javier Miranda (TNG)', 'Prom. 13 días antes'),
+            ('🥉', '3. Sofia Reyes (TNG)', 'Prom. 12 días antes'),
+            ('🎯', '4. Roberto Campos (TNG)', 'Prom. 11 días antes'),
+            ('⭐', '5. Andrea Vega (TNG)', 'Prom. 10 días antes')
         ]
 
         for emoji, nombre, tiempo in leaderboard_data:
@@ -1037,44 +1169,6 @@ class ModernDashboard(ctk.CTkFrame):
                 anchor='w'
             )
             tiempo_label.pack(fill='x')
-
-        # Row 2: Usuarios con Mejor Calificación
-        row2_frame = ctk.CTkFrame(parent, fg_color='transparent')
-        row2_frame.grid(row=2, column=0, columnspan=2, sticky='nsew', padx=15, pady=10)
-        row2_frame.grid_columnconfigure(0, weight=1)
-        row2_frame.grid_rowconfigure(0, weight=1)
-
-        # Gráfico 5: Usuarios con Mejor Calificación
-        chart5 = MatplotlibChartCard(
-            row2_frame,
-            title='Usuarios con Mejor Calificación Promedio',
-            export_callback=self.export_chart_to_plotly
-        )
-        chart5.grid(row=0, column=0, sticky='nsew')
-
-        # Datos estáticos para gráfico 5
-        top_usuarios = ['Elena Navarro', 'Miguel Ángel Castro', 'Patricia Moreno', 'Ricardo Jiménez', 'Cristina Ruiz']
-        calificaciones = [98.5, 97.8, 97.2, 96.9, 96.5]
-
-        fig5 = Figure(figsize=(12, 5))
-        ax5 = fig5.add_subplot(111)
-        bars5 = ax5.barh(top_usuarios, calificaciones, color=GERENCIAL_PALETTE[0], edgecolor='none')
-        ax5.set_xlabel('Calificación Promedio', fontsize=11)
-        ax5.set_xlim(90, 100)
-        ax5.tick_params(labelsize=10)
-        ax5.spines['top'].set_visible(False)
-        ax5.spines['right'].set_visible(False)
-        ax5.grid(axis='x', alpha=0.3)
-
-        for bar in bars5:
-            width = bar.get_width()
-            ax5.text(width + 0.2, bar.get_y() + bar.get_height()/2,
-                    f'{width:.1f}',
-                    ha='left', va='center', fontsize=9,
-                    fontweight='bold')
-
-        fig5.tight_layout()
-        chart5.set_figure(fig5)
 
     def refresh_all_data(self):
         """Refrescar todos los datos del dashboard"""
