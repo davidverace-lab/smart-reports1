@@ -373,6 +373,9 @@ class DataSyncManager:
             # Leer Excel
             df = pd.read_excel(excel_path, sheet_name=sheet_name)
 
+            # CRÍTICO: Limpiar espacios en blanco de los nombres de columnas
+            df.columns = df.columns.str.strip()
+
             # Mapeo de columnas (flexibles para diferentes formatos)
             col_map = {
                 'user_id': None,
@@ -475,6 +478,9 @@ class DataSyncManager:
         try:
             df = pd.read_excel(excel_path, sheet_name=sheet_name)
 
+            # CRÍTICO: Limpiar espacios en blanco de los nombres de columnas
+            df.columns = df.columns.str.strip()
+
             # Detectar columnas
             col_map = {
                 'user_id': None,
@@ -561,6 +567,9 @@ class DataSyncManager:
         """
         try:
             df = pd.read_excel(excel_path, sheet_name=sheet_name)
+
+            # CRÍTICO: Limpiar espacios en blanco de los nombres de columnas
+            df.columns = df.columns.str.strip()
 
             # Detectar columnas
             col_map = {
