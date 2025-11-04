@@ -45,32 +45,32 @@ class MetricCard(ctk.CTkFrame):
             icon_label = ctk.CTkLabel(
                 self,
                 text=icon,
-                font=('Segoe UI', 32),
+                font=('Segoe UI', 24),  # Reducido de 32 a 24
                 text_color=color
             )
-            icon_label.grid(row=row, column=0, padx=20, pady=(20, 5), sticky='w')
+            icon_label.grid(row=row, column=0, padx=20, pady=(15, 5), sticky='w')
             row += 1
 
         # Título
         self.title_label = ctk.CTkLabel(
             self,
             text=title,
-            font=('Arial', 14),
+            font=('Arial', 11),  # Reducido de 14 a 11
             text_color=theme['text_secondary'],
             anchor='w'
         )
-        self.title_label.grid(row=row, column=0, padx=20, pady=(10 if icon else 20, 5), sticky='w')
+        self.title_label.grid(row=row, column=0, padx=20, pady=(8 if icon else 15, 5), sticky='w')
         row += 1
 
         # Valor principal
         self.value_label = ctk.CTkLabel(
             self,
             text=str(value),
-            font=('Montserrat', 48, 'bold'),
+            font=('Montserrat', 28, 'bold'),  # Reducido de 48 a 28
             text_color=theme['text'],
             anchor='w'
         )
-        self.value_label.grid(row=row, column=0, padx=20, pady=(0, 10), sticky='w')
+        self.value_label.grid(row=row, column=0, padx=20, pady=(0, 8), sticky='w')
         row += 1
 
         # Indicador de cambio (opcional)
@@ -109,6 +109,6 @@ class MetricCard(ctk.CTkFrame):
             if isinstance(child, ctk.CTkLabel):
                 # Identificar label de valor por su font size
                 font_info = child.cget('font')
-                if '48' in str(font_info):
+                if '28' in str(font_info):  # Actualizado de 48 a 28
                     child.configure(text=str(new_value))
                     break
