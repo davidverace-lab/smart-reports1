@@ -216,7 +216,8 @@ class ModernDashboard(ctk.CTkFrame):
 
         # Configurar grids de los frames
         self.general_frame.grid_columnconfigure(0, weight=1)
-        self.general_frame.grid_rowconfigure((0, 1), weight=1)
+        self.general_frame.grid_rowconfigure(0, weight=0)  # Métricas: tamaño fijo
+        self.general_frame.grid_rowconfigure(1, weight=1)  # Gráficos: expansible
 
         self.progreso_frame.grid_columnconfigure(0, weight=1)
         self.progreso_frame.grid_rowconfigure(1, weight=1)
@@ -337,10 +338,11 @@ class ModernDashboard(ctk.CTkFrame):
 
     def _create_tab_general(self, parent):
         """Crear pestaña General con métricas y gráficos"""
-        # Row 1: Métricas (3 cards)
+        # Row 0: Métricas (3 cards)
         metrics_frame = ctk.CTkFrame(parent, fg_color='transparent')
-        metrics_frame.grid(row=0, column=0, sticky='ew', padx=15, pady=(15, 10))
+        metrics_frame.grid(row=0, column=0, sticky='nsew', padx=15, pady=(15, 10))
         metrics_frame.grid_columnconfigure((0, 1, 2), weight=1)
+        metrics_frame.grid_rowconfigure(0, weight=0)  # Height fijo para las métricas
 
         # Obtener datos reales
         total_users = self._get_total_users()
