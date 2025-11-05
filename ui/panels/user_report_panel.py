@@ -23,7 +23,7 @@ except ImportError:
     REPORTLAB_AVAILABLE = False
     print("ReportLab no está instalado. Instala con: pip install reportlab")
 
-from ui.theme_manager import ThemeManager
+from config.theme_manager import get_theme_manager
 
 
 class UserReportPanel(ctk.CTkFrame):
@@ -34,7 +34,7 @@ class UserReportPanel(ctk.CTkFrame):
 
         self.db = db
         self.cursor = cursor
-        self.theme_manager = theme_manager or ThemeManager()
+        self.theme_manager = theme_manager or get_theme_manager()
 
         # Variables para el reporte
         self.current_pdf_buffer = None
