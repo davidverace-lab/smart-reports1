@@ -395,11 +395,12 @@ class ModernDashboard(ctk.CTkFrame):
         theme = self.theme_manager.get_current_theme()
 
         # Datos estáticos para el gráfico de donut (alineados con la realidad del negocio)
-        unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
-        porcentajes_completado = [100, 85, 78, 72, 65]
+        # TNG al 100% completado (8 módulos), otras unidades en progreso
+        unidades_negocio = ['TNG\n100%', 'ICAVE\n82%', 'ECV\n75%', 'Container Care\n68%', 'HPMX\n62%']
+        porcentajes_completado = [100, 82, 75, 68, 62]
 
-        # Colores armoniosos de la paleta
-        colors_donut = [GERENCIAL_PALETTE[i] for i in [0, 1, 3, 5, 7]]
+        # Colores distintivos: TNG en verde (#28A745) por estar completo, otros en tonos azules
+        colors_donut = ['#28A745', '#009BDE', '#0077B6', '#005A8D', '#003D5C']
 
         fig2 = Figure(figsize=(7, 6))
         ax2 = fig2.add_subplot(111)
@@ -408,29 +409,33 @@ class ModernDashboard(ctk.CTkFrame):
             porcentajes_completado,
             labels=unidades_negocio,
             colors=colors_donut,
-            autopct='%1.0f%%',
+            autopct='',  # No mostrar % dentro (ya está en labels)
             startangle=90,
-            pctdistance=0.85,
             wedgeprops=dict(width=0.5, edgecolor=theme['surface'], linewidth=3)
         )
 
-        # Estilo de textos
+        # Estilo de textos - más grandes y legibles
         for text in texts:
-            text.set_fontsize(11)
-            text.set_fontfamily('Montserrat')
-        for autotext in autotexts:
-            autotext.set_color('white')
-            autotext.set_fontsize(10)
-            autotext.set_weight('bold')
-            autotext.set_fontfamily('Arial')
+            text.set_fontsize(12)
+            text.set_fontfamily('Arial')
+            text.set_weight('bold')
 
-        # Leyenda
+        # Leyenda mejorada con información completa
+        legend_labels = [
+            'TNG - 100% (8/8 módulos)',
+            'ICAVE - 82% (6.5/8 módulos)',
+            'ECV - 75% (6/8 módulos)',
+            'Container Care - 68% (5.5/8 módulos)',
+            'HPMX - 62% (5/8 módulos)'
+        ]
+
         ax2.legend(
-            wedges, unidades_negocio,
-            title="Unidades de Negocio",
+            wedges, legend_labels,
+            title="Progreso por Unidad",
             loc='center left',
             bbox_to_anchor=(1, 0, 0.5, 1),
-            fontsize=10
+            fontsize=10,
+            title_fontsize=11
         )
 
         fig2.tight_layout()

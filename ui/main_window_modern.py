@@ -23,6 +23,7 @@ from ui.components.modern_sidebar import ModernSidebar
 from ui.components.top_bar import TopBar
 from ui.panels.modern_dashboard import ModernDashboard
 from ui.panels.configuracion_panel import ConfiguracionPanel
+from ui.panels.user_report_panel import UserReportPanel
 from ui.dialogs.user_management_dialog import UserManagementDialog
 
 
@@ -968,13 +969,18 @@ class MainWindow:
         return f"#{darkened_rgb[0]:02x}{darkened_rgb[1]:02x}{darkened_rgb[2]:02x}"
 
     def generate_user_progress_report(self):
-        """Generar reporte de progreso por usuario"""
-        messagebox.showinfo(
-            "Reporte por Usuario",
-            "Función 'Progreso por Usuario' en desarrollo.\n\n" +
-            "Esta funcionalidad generará un reporte PDF detallado\n" +
-            "del progreso de módulos de un usuario específico."
+        """Generar reporte de progreso por usuario - Abre panel de generación PDF"""
+        self.clear_content_area()
+        self.current_panel = 'user_report'
+
+        # Crear panel de generación de reportes con vista previa PDF
+        self.user_report_panel = UserReportPanel(
+            self.content_area,
+            db=self.conn,
+            cursor=self.cursor,
+            theme_manager=self.theme_manager
         )
+        self.user_report_panel.pack(fill='both', expand=True)
 
     def generate_unit_progress_report(self):
         """Generar reporte de progreso por unidad"""
