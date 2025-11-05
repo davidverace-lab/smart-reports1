@@ -747,20 +747,20 @@ class ConfiguracionPanel(ctk.CTkFrame):
             return
 
         try:
-            # Buscar por User ID o Nombre (LIKE) con campos completos
+            # Buscar por User ID o Nombre (solo columnas reales)
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    COALESCE(u.NombreCompleto, u.UserName) as Nombre,
-                    u.UserEmail,
-                    COALESCE(u.Nivel, '') as Nivel,
-                    COALESCE(u.Division, '') as Division,
-                    COALESCE(u.Position, '') as Position,
-                    COALESCE(u.Grupo, '') as Grupo,
-                    COALESCE(u.Ubicacion, '') as Ubicacion,
-                    COALESCE(u.UserStatus, 'Activo') as Status
+                    u.Nombre,
+                    u.Email,
+                    '' as Nivel,
+                    '' as Division,
+                    '' as Position,
+                    '' as Grupo,
+                    '' as Ubicacion,
+                    u.TipoDeCorreo as Status
                 FROM Instituto_Usuario u
-                WHERE u.UserId LIKE ? OR COALESCE(u.NombreCompleto, u.UserName) LIKE ?
+                WHERE u.UserId LIKE ? OR u.Nombre LIKE ?
                 ORDER BY u.UserId
             """, (f'%{search_term}%', f'%{search_term}%'))
 
@@ -782,14 +782,14 @@ class ConfiguracionPanel(ctk.CTkFrame):
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    COALESCE(u.NombreCompleto, u.UserName) as Nombre,
-                    u.UserEmail,
-                    COALESCE(u.Nivel, '') as Nivel,
-                    COALESCE(u.Division, '') as Division,
-                    COALESCE(u.Position, '') as Position,
-                    COALESCE(u.Grupo, '') as Grupo,
-                    COALESCE(u.Ubicacion, '') as Ubicacion,
-                    COALESCE(u.UserStatus, 'Activo') as Status
+                    u.Nombre,
+                    u.Email,
+                    '' as Nivel,
+                    '' as Division,
+                    '' as Position,
+                    '' as Grupo,
+                    '' as Ubicacion,
+                    u.TipoDeCorreo as Status
                 FROM Instituto_Usuario u
                 ORDER BY u.UserId
             """)
@@ -820,8 +820,8 @@ class ConfiguracionPanel(ctk.CTkFrame):
         item = self.user_results_tree.item(selection[0])
         values = item['values']
 
-        if values and len(values) >= 9:
-            # Cargar datos en el formulario
+        if values and len(values) >= 3:
+            # Cargar datos en el formulario (solo campos reales)
             self.form_userid.delete(0, 'end')
             self.form_userid.insert(0, values[0])
 
@@ -831,22 +831,17 @@ class ConfiguracionPanel(ctk.CTkFrame):
             self.form_email.delete(0, 'end')
             self.form_email.insert(0, values[2])
 
-            self.form_nivel.delete(0, 'end')
-            self.form_nivel.insert(0, values[3])
-
-            self.form_division.delete(0, 'end')
-            self.form_division.insert(0, values[4])
-
-            self.form_cargo.delete(0, 'end')
-            self.form_cargo.insert(0, values[5])
-
-            self.form_grupo.delete(0, 'end')
-            self.form_grupo.insert(0, values[6])
-
-            self.form_ubicacion.delete(0, 'end')
-            self.form_ubicacion.insert(0, values[7])
-
-            self.form_status.set(values[8])
+            # Los demás campos se dejan vacíos (no existen en BD)
+            try:
+                self.form_nivel.delete(0, 'end')
+                self.form_division.delete(0, 'end')
+                self.form_cargo.delete(0, 'end')
+                self.form_grupo.delete(0, 'end')
+                self.form_ubicacion.delete(0, 'end')
+                if len(values) >= 9:
+                    self.form_status.set(values[8])
+            except:
+                pass
 
             # Cargar historial de soportes del usuario
             self._load_user_support_history(values[0])
@@ -873,21 +868,16 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 messagebox.showerror("Error", f"El User ID '{user_id}' ya existe")
                 return
 
-            # Insertar usuario con todos los campos
+            # Insertar usuario (solo columnas reales)
             self.cursor.execute("""
                 INSERT INTO Instituto_Usuario
-                (UserId, NombreCompleto, UserEmail, Nivel, Division, Position, Grupo, Ubicacion, UserStatus)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (UserId, Nombre, Email, TipoDeCorreo)
+                VALUES (?, ?, ?, ?)
             """, (
                 user_id,
                 nombre,
                 email or None,
-                self.form_nivel.get().strip() or None,
-                self.form_division.get().strip() or None,
-                self.form_cargo.get().strip() or None,
-                self.form_grupo.get().strip() or None,
-                self.form_ubicacion.get().strip() or None,
-                self.form_status.get()
+                'Corporativo'  # Valor por defecto
             ))
 
             self.db.commit()
@@ -913,27 +903,15 @@ class ConfiguracionPanel(ctk.CTkFrame):
             return
 
         try:
-            # Actualizar usuario con todos los campos
+            # Actualizar usuario (solo columnas reales)
             self.cursor.execute("""
                 UPDATE Instituto_Usuario
-                SET NombreCompleto = ?,
-                    UserEmail = ?,
-                    Nivel = ?,
-                    Division = ?,
-                    Position = ?,
-                    Grupo = ?,
-                    Ubicacion = ?,
-                    UserStatus = ?
+                SET Nombre = ?,
+                    Email = ?
                 WHERE UserId = ?
             """, (
                 self.form_nombre.get().strip(),
                 self.form_email.get().strip() or None,
-                self.form_nivel.get().strip() or None,
-                self.form_division.get().strip() or None,
-                self.form_cargo.get().strip() or None,
-                self.form_grupo.get().strip() or None,
-                self.form_ubicacion.get().strip() or None,
-                self.form_status.get(),
                 user_id
             ))
 
@@ -962,22 +940,21 @@ class ConfiguracionPanel(ctk.CTkFrame):
         confirm = messagebox.askyesno(
             "Confirmar Eliminación",
             f"¿Está seguro de eliminar el usuario '{user_id}'?\n\n"
-            "Esta acción marcará el usuario como Inactivo."
+            "ADVERTENCIA: Esta acción es permanente y no se puede deshacer."
         )
 
         if not confirm:
             return
 
         try:
-            # Soft delete (marcar como inactivo)
+            # Delete permanente (la tabla no tiene campo UserStatus)
             self.cursor.execute("""
-                UPDATE Instituto_Usuario
-                SET UserStatus = 'Inactivo'
+                DELETE FROM Instituto_Usuario
                 WHERE UserId = ?
             """, (user_id,))
 
             self.db.commit()
-            messagebox.showinfo("Éxito", f"Usuario '{user_id}' marcado como Inactivo")
+            messagebox.showinfo("Éxito", f"Usuario '{user_id}' eliminado correctamente")
 
             # Limpiar formulario y recargar tabla
             self._clear_form()
@@ -992,12 +969,16 @@ class ConfiguracionPanel(ctk.CTkFrame):
         self.form_userid.delete(0, 'end')
         self.form_nombre.delete(0, 'end')
         self.form_email.delete(0, 'end')
-        self.form_nivel.delete(0, 'end')
-        self.form_division.delete(0, 'end')
-        self.form_cargo.delete(0, 'end')
-        self.form_grupo.delete(0, 'end')
-        self.form_ubicacion.delete(0, 'end')
-        self.form_status.set('Activo')
+        # Los demás campos no se usan pero los dejamos vacíos
+        try:
+            self.form_nivel.delete(0, 'end')
+            self.form_division.delete(0, 'end')
+            self.form_cargo.delete(0, 'end')
+            self.form_grupo.delete(0, 'end')
+            self.form_ubicacion.delete(0, 'end')
+            self.form_status.set('Corporativo')
+        except:
+            pass
 
         # Limpiar historial de soportes
         for item in self.support_history_tree.get_children():
