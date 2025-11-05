@@ -1013,18 +1013,57 @@ class ConfiguracionPanel(ctk.CTkFrame):
             for item in self.support_history_tree.get_children():
                 self.support_history_tree.delete(item)
 
-            # Consultar soportes del usuario
-            self.cursor.execute("""
-                SELECT
-                    CONVERT(VARCHAR, FechaRegistro, 120) as Fecha,
-                    Asunto,
-                    Categoria,
-                    LEFT(Descripcion, 100) + CASE WHEN LEN(Descripcion) > 100 THEN '...' ELSE '' END as DescripcionCorta
-                FROM Instituto_Soporte
-                WHERE UserId = ?
-                ORDER BY FechaRegistro DESC
-            """, (userid,))
+            # Detectar tipo de base de datos
+            from config.settings import DB_TYPE
+            is_mysql = DB_TYPE == 'mysql'
+            placeholder = '%s' if is_mysql else '?'
 
+            # Verificar si la tabla existe (compatible con ambas BD)
+            if is_mysql:
+                self.cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.TABLES
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Instituto_Soporte'
+                """)
+            else:
+                self.cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.TABLES
+                    WHERE TABLE_NAME = 'Instituto_Soporte'
+                """)
+
+            tabla_existe = self.cursor.fetchone()[0] > 0
+
+            if not tabla_existe:
+                # Tabla no existe, mostrar mensaje informativo
+                self.support_history_tree.insert('', 'end', values=('', 'Tabla de soportes no creada. Ejecuta create_soporte_table.sql', '', ''))
+                return
+
+            # Consultar soportes del usuario (compatible con ambas BD)
+            if is_mysql:
+                query = f"""
+                    SELECT
+                        DATE_FORMAT(FechaRegistro, '%Y-%m-%d %H:%i:%s') as Fecha,
+                        Asunto,
+                        Categoria,
+                        CONCAT(LEFT(Descripcion, 100), IF(LENGTH(Descripcion) > 100, '...', '')) as DescripcionCorta
+                    FROM Instituto_Soporte
+                    WHERE UserId = {placeholder}
+                    ORDER BY FechaRegistro DESC
+                """
+            else:
+                query = f"""
+                    SELECT
+                        CONVERT(VARCHAR, FechaRegistro, 120) as Fecha,
+                        Asunto,
+                        Categoria,
+                        LEFT(Descripcion, 100) + CASE WHEN LEN(Descripcion) > 100 THEN '...' ELSE '' END as DescripcionCorta
+                    FROM Instituto_Soporte
+                    WHERE UserId = {placeholder}
+                    ORDER BY FechaRegistro DESC
+                """
+
+            self.cursor.execute(query, (userid,))
             soportes = self.cursor.fetchall()
 
             # Insertar soportes en la tabla
@@ -1038,6 +1077,8 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         except Exception as e:
             print(f"Error cargando historial de soportes: {e}")
+            # Mostrar mensaje amigable en la tabla
+            self.support_history_tree.insert('', 'end', values=('', f'Error al cargar soportes: {str(e)}', '', ''))
 
     # ==================== FUNCIONES DE REGISTRO DE SOPORTE ====================
 
@@ -1057,19 +1098,59 @@ class ConfiguracionPanel(ctk.CTkFrame):
             return
 
         try:
+            # Detectar tipo de base de datos
+            from config.settings import DB_TYPE
+            is_mysql = DB_TYPE == 'mysql'
+            placeholder = '%s' if is_mysql else '?'
+
+            # Verificar que la tabla existe (compatible con ambas BD)
+            if is_mysql:
+                self.cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.TABLES
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Instituto_Soporte'
+                """)
+            else:
+                self.cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.TABLES
+                    WHERE TABLE_NAME = 'Instituto_Soporte'
+                """)
+
+            tabla_existe = self.cursor.fetchone()[0] > 0
+
+            if not tabla_existe:
+                db_name = "MySQL" if is_mysql else "SQL Server Management Studio"
+                messagebox.showerror(
+                    "Error - Tabla No Existe",
+                    f"La tabla 'Instituto_Soporte' no existe en la base de datos.\n\n"
+                    f"Por favor, ejecuta el script SQL:\n"
+                    f"database/create_soporte_table.sql\n\n"
+                    f"en {db_name} para crear la tabla."
+                )
+                return
+
             # Verificar que el usuario existe
-            self.cursor.execute("SELECT UserId FROM Instituto_Usuario WHERE UserId = ?", (userid,))
+            self.cursor.execute(f"SELECT UserId FROM Instituto_Usuario WHERE UserId = {placeholder}", (userid,))
             if not self.cursor.fetchone():
                 messagebox.showerror("Error", f"El User ID '{userid}' no existe en el sistema")
                 return
 
-            # Insertar el registro de soporte
-            self.cursor.execute("""
-                INSERT INTO Instituto_Soporte
-                (UserId, Asunto, Descripcion, Categoria, FechaRegistro)
-                VALUES (?, ?, ?, ?, GETDATE())
-            """, (userid, asunto, descripcion, categoria))
+            # Insertar el registro de soporte (compatible con ambas BD)
+            if is_mysql:
+                insert_query = f"""
+                    INSERT INTO Instituto_Soporte
+                    (UserId, Asunto, Descripcion, Categoria, FechaRegistro)
+                    VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, NOW())
+                """
+            else:
+                insert_query = f"""
+                    INSERT INTO Instituto_Soporte
+                    (UserId, Asunto, Descripcion, Categoria, FechaRegistro)
+                    VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, GETDATE())
+                """
 
+            self.cursor.execute(insert_query, (userid, asunto, descripcion, categoria))
             self.db.commit()
 
             messagebox.showinfo(
@@ -1086,7 +1167,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         except Exception as e:
             self.db.rollback()
-            messagebox.showerror("Error", f"Error al guardar registro de soporte: {str(e)}")
+            messagebox.showerror("Error", f"Error al guardar registro de soporte:\n\n{str(e)}")
 
     def _clear_ticket_form(self):
         """Limpiar formulario de registro de soporte"""
