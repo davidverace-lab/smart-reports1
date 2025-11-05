@@ -26,6 +26,7 @@ from ui.panels.configuracion_panel import ConfiguracionPanel
 from ui.panels.user_report_panel import UserReportPanel
 from ui.panels.unit_report_panel import UnitReportPanel
 from ui.panels.period_report_panel import PeriodReportPanel
+from ui.panels.global_report_panel import GlobalReportPanel
 from ui.dialogs.user_management_dialog import UserManagementDialog
 
 
@@ -999,13 +1000,18 @@ class MainWindow:
         self.unit_report_panel.pack(fill='both', expand=True)
 
     def generate_global_report(self):
-        """Generar reporte global"""
-        messagebox.showinfo(
-            "Reporte Global",
-            "Función 'Reporte Global' en desarrollo.\n\n" +
-            "Esta funcionalidad generará un reporte PDF completo\n" +
-            "con estadísticas generales del instituto."
+        """Generar reporte global - Abre panel de generación PDF global"""
+        self.clear_content_area()
+        self.current_panel = 'global_report'
+
+        # Crear panel de generación de reportes globales con vista previa
+        self.global_report_panel = GlobalReportPanel(
+            self.content_area,
+            db=self.conn,
+            cursor=self.cursor,
+            theme_manager=self.theme_manager
         )
+        self.global_report_panel.pack(fill='both', expand=True)
 
     def generate_certificates_report(self):
         """Generar certificados"""
