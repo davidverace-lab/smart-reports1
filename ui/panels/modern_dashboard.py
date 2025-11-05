@@ -178,15 +178,15 @@ class ModernDashboard(ctk.CTkFrame):
             ("Reportes Gerenciales", "Reportes Gerenciales")
         ]
 
-        # Crear botones con diseño invertido (inactivo=navy, seleccionado=gris claro)
+        # Crear botones (inactivo=gris, seleccionado=azul)
         for tab_name, tab_key in tabs:
             btn = ctk.CTkButton(
                 buttons_container,
                 text=tab_name,
                 font=('Arial', 14, 'bold'),
-                fg_color='#002E6D',  # Azul navy por defecto (inactivo)
-                hover_color='#003D8F',  # Navy más claro para hover
-                text_color='#FFFFFF',  # Texto blanco (inactivo)
+                fg_color='#D3D3D3',  # Gris por defecto (inactivo)
+                hover_color='#E5E7EB',  # Gris más claro para hover
+                text_color='#002E6D',  # Texto azul oscuro (inactivo)
                 corner_radius=10,
                 height=40,
                 width=180,
@@ -232,18 +232,18 @@ class ModernDashboard(ctk.CTkFrame):
         # Actualizar estilos de botones (diseño invertido)
         for key, btn in self.tab_buttons.items():
             if key == tab_key:
-                # Botón activo/seleccionado: gris claro con texto azul navy
+                # Botón activo/seleccionado: azul con texto blanco
                 btn.configure(
-                    fg_color='#D3D3D3',
-                    hover_color='#E5E7EB',
-                    text_color='#002E6D'
+                    fg_color='#009BDE',  # Azul Hutchison
+                    hover_color='#00B5FF',
+                    text_color='#FFFFFF'
                 )
             else:
-                # Botones inactivos: azul navy con texto blanco
+                # Botones inactivos: gris con texto oscuro
                 btn.configure(
-                    fg_color='#002E6D',
-                    hover_color='#003D8F',
-                    text_color='#FFFFFF'
+                    fg_color='#D3D3D3',  # Gris claro
+                    hover_color='#E5E7EB',
+                    text_color='#002E6D'
                 )
 
         self.active_tab = tab_key
@@ -348,7 +348,7 @@ class ModernDashboard(ctk.CTkFrame):
         # Chart 2: Progreso General por UN (Donut) - MOVIDO desde Reportes Gerenciales
         chart2 = MatplotlibChartCard(
             charts_frame,
-            title='Progreso General por Unidad de Negocio (Total Módulos)',
+            title='Progreso General por Unidad de Negocio (TNG 100% - 8 Módulos)',
             export_callback=self.export_chart_to_plotly
         )
         chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
@@ -531,7 +531,7 @@ class ModernDashboard(ctk.CTkFrame):
         # Gráfico: Top 5 UN con Mayor Incumplimiento (sin TNG)
         chart_incumplimiento = MatplotlibChartCard(
             scrollable_frame,
-            title='Top 5 UN con Mayor Incumplimiento (Módulo 8)',
+            title='UN con Mayor Incumplimiento (Módulo 8)',
             export_callback=self.export_chart_to_plotly
         )
         chart_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
@@ -569,7 +569,7 @@ class ModernDashboard(ctk.CTkFrame):
         # Gráfico: Top 10 Usuarios Más Atrasados (sin usuarios de TNG)
         chart_atrasados = MatplotlibChartCard(
             scrollable_frame,
-            title='Top 10 Usuarios Más Atrasados (Gen 1-4)',
+            title='Usuarios Más Atrasados (Gen 1-4)',
             export_callback=self.export_chart_to_plotly
         )
         chart_atrasados.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
@@ -613,17 +613,17 @@ class ModernDashboard(ctk.CTkFrame):
         fig_atrasados.tight_layout()
         chart_atrasados.set_figure(fig_atrasados)
 
-        # Gráfico: Top 3 UN más Lentas (CORREGIDO - TNG con 10 días como los más rápidos)
+        # Gráfico: UN más Lentas (Tiempo a 80%)
         chart_lentas = MatplotlibChartCard(
             scrollable_frame,
-            title='Top 3 UN más Lentas (Tiempo a 80%)',
+            title='UN más Lentas (Tiempo a 80%)',
             export_callback=self.export_chart_to_plotly
         )
         chart_lentas.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos corregidos (TNG incluido con valor bajo = más rápidos)
-        unidades_lentas = ['TNG', 'ICAVE', 'ECV']
-        dias_promedio = [10, 95, 108]
+        # Datos estáticos (sin TNG)
+        unidades_lentas = ['Logística', 'ICAVE', 'ECV']
+        dias_promedio = [112, 95, 108]
 
         fig_lentas = Figure(figsize=(8, 5))
         ax_lentas = fig_lentas.add_subplot(111)
