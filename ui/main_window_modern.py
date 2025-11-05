@@ -877,18 +877,6 @@ class MainWindow:
                 'command': self.generate_global_report
             },
             {
-                'icon': '🎓',
-                'title': 'Certificaciones',
-                'desc': 'Certificados de finalización de módulos',
-                'command': self.generate_certificates_report
-            },
-            {
-                'icon': '📈',
-                'title': 'Análisis de Tendencias',
-                'desc': 'Tendencias y proyecciones de capacitación',
-                'command': self.generate_trends_report
-            },
-            {
                 'icon': '⏱️',
                 'title': 'Reporte por Periodo',
                 'desc': 'Reportes filtrados por rango de fechas',

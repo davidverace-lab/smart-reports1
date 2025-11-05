@@ -94,15 +94,10 @@ class ModernDashboard(ctk.CTkFrame):
 
         # Flags para lazy loading (según especificación)
         self._general_loaded = False
-        self._progreso_loaded = False
-        self._jerarquico_loaded = False
         self._gerencial_loaded = False
 
         # Referencias a componentes
-        self.progreso_bar_card = None
-        self.progreso_donut_card = None
-        self.unit_selector = None
-        self.current_unit = 'TNG'
+        # (reservado para futuras referencias si son necesarias)
 
         # Configurar grid principal
         self.grid_columnconfigure(0, weight=1)
@@ -180,8 +175,6 @@ class ModernDashboard(ctk.CTkFrame):
         # Definir las pestañas
         tabs = [
             ("General", "General"),
-            ("Progreso por Módulo", "Progreso por Módulo"),
-            ("Avance Jerárquico", "Avance Jerárquico"),
             ("Reportes Gerenciales", "Reportes Gerenciales")
         ]
 
@@ -210,8 +203,6 @@ class ModernDashboard(ctk.CTkFrame):
 
         # Crear frames para cada pestaña (todos en la misma celda)
         self.general_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
-        self.progreso_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
-        self.jerarquico_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
         self.gerencial_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
 
         # Configurar grids de los frames
@@ -219,30 +210,18 @@ class ModernDashboard(ctk.CTkFrame):
         self.general_frame.grid_rowconfigure(0, weight=0)  # Métricas: tamaño fijo
         self.general_frame.grid_rowconfigure(1, weight=1)  # Gráficos: expansible
 
-        self.progreso_frame.grid_columnconfigure(0, weight=1)
-        self.progreso_frame.grid_rowconfigure(1, weight=1)
-
-        self.jerarquico_frame.grid_columnconfigure((0, 1), weight=1)
-        self.jerarquico_frame.grid_rowconfigure(0, weight=1)
-
         self.gerencial_frame.grid_columnconfigure((0, 1), weight=1)
         self.gerencial_frame.grid_rowconfigure((0, 1, 2), weight=1)
 
         # Colocar todos los frames en la misma posición (solo uno visible a la vez)
         self.general_frame.grid(row=0, column=0, sticky='nsew')
-        self.progreso_frame.grid(row=0, column=0, sticky='nsew')
-        self.jerarquico_frame.grid(row=0, column=0, sticky='nsew')
         self.gerencial_frame.grid(row=0, column=0, sticky='nsew')
 
         # Ocultar todos excepto el primero
-        self.progreso_frame.grid_remove()
-        self.jerarquico_frame.grid_remove()
         self.gerencial_frame.grid_remove()
 
         # Almacenar referencias a las pestañas (para compatibilidad)
         self.tab_general = self.general_frame
-        self.tab_progreso = self.progreso_frame
-        self.tab_jerarquico = self.jerarquico_frame
         self.tab_gerencial = self.gerencial_frame
 
         # Seleccionar pestaña inicial DESPUÉS de crear los frames
@@ -276,8 +255,6 @@ class ModernDashboard(ctk.CTkFrame):
         """Callback cuando cambia la pestaña - Lazy loading y cambio de vista"""
         # Ocultar todos los frames
         self.general_frame.grid_remove()
-        self.progreso_frame.grid_remove()
-        self.jerarquico_frame.grid_remove()
         self.gerencial_frame.grid_remove()
 
         # Mostrar el frame correspondiente y cargar datos si es necesario
@@ -286,16 +263,6 @@ class ModernDashboard(ctk.CTkFrame):
             if not self._general_loaded:
                 self.load_general_charts()
                 self._general_loaded = True
-        elif value == "Progreso por Módulo":
-            self.progreso_frame.grid(row=0, column=0, sticky='nsew')
-            if not self._progreso_loaded:
-                self.load_progreso_charts()
-                self._progreso_loaded = True
-        elif value == "Avance Jerárquico":
-            self.jerarquico_frame.grid(row=0, column=0, sticky='nsew')
-            if not self._jerarquico_loaded:
-                self.load_jerarquico_charts()
-                self._jerarquico_loaded = True
         elif value == "Reportes Gerenciales":
             self.gerencial_frame.grid(row=0, column=0, sticky='nsew')
             if not self._gerencial_loaded:
@@ -309,22 +276,6 @@ class ModernDashboard(ctk.CTkFrame):
 
         self._create_tab_general(self.tab_general)
         self._general_loaded = True
-
-    def load_progreso_charts(self):
-        """Cargar pestaña Progreso (lazy loading)"""
-        if self._progreso_loaded:
-            return
-
-        self._create_tab_progreso_modulo(self.tab_progreso)
-        self._progreso_loaded = True
-
-    def load_jerarquico_charts(self):
-        """Cargar pestaña Jerárquico (lazy loading)"""
-        if self._jerarquico_loaded:
-            return
-
-        self._create_tab_comportamiento_jerarquico(self.tab_jerarquico)
-        self._jerarquico_loaded = True
 
     def load_gerencial_charts(self):
         """Cargar pestaña Reportes Gerenciales (lazy loading)"""
@@ -484,342 +435,6 @@ class ModernDashboard(ctk.CTkFrame):
 
         fig2.tight_layout()
         chart2.set_figure(fig2)
-
-    # ==================== PESTAÑA PROGRESO POR MÓDULO ====================
-
-    def _create_tab_progreso_modulo(self, parent):
-        """Crear pestaña de Progreso por Módulo con gráfico dinámico"""
-        # Frame para selector con diseño mejorado
-        selector_frame = ctk.CTkFrame(parent, fg_color='transparent')
-        selector_frame.grid(row=0, column=0, sticky='ew', padx=15, pady=(15, 10))
-
-        theme = self.theme_manager.get_current_theme()
-
-        # Label
-        label = ctk.CTkLabel(
-            selector_frame,
-            text='📍 Seleccionar Unidad de Negocio:',
-            font=('Arial', 16, 'bold'),
-            text_color=theme['text']
-        )
-        label.pack(side='left', padx=(10, 20))
-
-        # Obtener unidades de negocio desde la base de datos
-        business_units = self._get_business_units_from_db()
-
-        # Si no hay unidades en BD, usar lista por defecto
-        if not business_units:
-            business_units = [
-                'TNG',
-                'CONTAINER CARE',
-                'ECV-EIT',
-                'OPERACIONES PORTUARIAS',
-                'LOGÍSTICA',
-                'MANTENIMIENTO',
-                'ADMINISTRACIÓN',
-                'RECURSOS HUMANOS',
-                'FINANZAS',
-                'SEGURIDAD',
-                'TECNOLOGÍA'
-            ]
-
-        # Usar OptionMenu más grande y visible
-        dropdown_fg = theme['surface_light'] if self.theme_manager.is_dark_mode() else '#FFFFFF'
-        dropdown_border = PRIMARY_COLORS['accent_blue']
-
-        self.unit_selector = ctk.CTkOptionMenu(
-            selector_frame,
-            values=business_units,
-            font=('Arial', 14, 'bold'),
-            dropdown_font=('Arial', 13),
-            width=350,
-            height=50,
-            corner_radius=12,
-            fg_color=dropdown_fg,
-            button_color=PRIMARY_COLORS['accent_blue'],
-            button_hover_color='#007bb5',
-            dropdown_fg_color=dropdown_fg,
-            dropdown_hover_color=PRIMARY_COLORS['accent_blue'],
-            text_color=theme['text'],
-            command=self._on_unit_change
-        )
-        self.unit_selector.pack(side='left', padx=(0, 10))
-
-        # Establecer primera unidad como seleccionada
-        if business_units:
-            self.unit_selector.set(business_units[0])
-            self.current_unit = business_units[0]
-
-        # Frame para gráficos con layout mejorado
-        charts_frame = ctk.CTkFrame(parent, fg_color='transparent')
-        charts_frame.grid(row=1, column=0, sticky='nsew', padx=15, pady=(0, 15))
-        charts_frame.grid_columnconfigure(0, weight=2)  # Gráfico de barras más grande
-        charts_frame.grid_columnconfigure(1, weight=1)  # Gráfico de dona más pequeño
-        charts_frame.grid_rowconfigure(0, weight=1)
-
-        # Card para gráfico de barras agrupadas (izquierda, más grande)
-        self.progreso_bar_card = MatplotlibChartCard(
-            charts_frame,
-            title='Progreso por Módulo - Comparativa',
-            export_callback=self.export_chart_to_plotly
-        )
-        self.progreso_bar_card.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
-
-        # Card para gráfico de dona ÚNICO Y DINÁMICO (derecha, más pequeño)
-        self.progreso_donut_card = MatplotlibChartCard(
-            charts_frame,
-            title='Estado General TNG',  # Título inicial
-            export_callback=self.export_chart_to_plotly
-        )
-        self.progreso_donut_card.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
-
-        # Crear gráficos iniciales
-        if business_units:
-            self._update_progreso_charts(business_units[0])
-
-    def _get_business_units_from_db(self):
-        """Obtener lista de unidades de negocio desde la base de datos"""
-        if not self.cursor:
-            return []
-
-        try:
-            # Intentar obtener de la tabla UnidadDeNegocio
-            self.cursor.execute("""
-                SELECT DISTINCT NombreUnidad
-                FROM UnidadDeNegocio
-                WHERE NombreUnidad IS NOT NULL
-                ORDER BY NombreUnidad
-            """)
-            units = [row[0] for row in self.cursor.fetchall()]
-
-            # Si no hay resultados, intentar otras tablas comunes
-            if not units:
-                self.cursor.execute("""
-                    SELECT DISTINCT Unidad
-                    FROM Usuarios
-                    WHERE Unidad IS NOT NULL AND Unidad != ''
-                    ORDER BY Unidad
-                """)
-                units = [row[0] for row in self.cursor.fetchall()]
-
-            return units if units else []
-
-        except Exception as e:
-            print(f"Error obteniendo unidades de negocio: {e}")
-            return []
-
-    def _on_unit_change(self, value):
-        """Callback cuando cambia la unidad seleccionada"""
-        self.current_unit = value
-        self._update_progreso_charts(value)
-
-    def _update_progreso_charts(self, unit):
-        """Actualizar AMBOS gráficos según unidad (barras + dona dinámico)"""
-        # Seleccionar datos
-        if unit == 'TNG':
-            data = DATOS_TNG
-        elif unit == 'CONTAINER CARE':
-            data = DATOS_CONTAINER_CARE
-        else:  # ECV-EIT
-            data = DATOS_ECV_EIT
-
-        # ===== GRÁFICO DE BARRAS AGRUPADAS (izquierda) =====
-        fig_bar = Figure(figsize=(10, 6))
-        ax_bar = fig_bar.add_subplot(111)
-
-        x = np.arange(len(data['modulos']))
-        width = 0.25
-
-        # Barras agrupadas
-        bars1 = ax_bar.bar(x - width, data['sin_iniciar'], width,
-                          label='Sin Iniciar', color=PRIMARY_COLORS['accent_red'],
-                          edgecolor='none')
-        bars2 = ax_bar.bar(x, data['en_proceso'], width,
-                          label='En Proceso', color=PRIMARY_COLORS['accent_yellow'],
-                          edgecolor='none')
-        bars3 = ax_bar.bar(x + width, data['completado'], width,
-                          label='Completado', color=PRIMARY_COLORS['accent_green'],
-                          edgecolor='none')
-
-        ax_bar.set_xlabel('Módulo', fontsize=11)
-        ax_bar.set_ylabel('Número de Personas', fontsize=11)
-        ax_bar.set_xticks(x)
-        ax_bar.set_xticklabels(data['modulos'], fontsize=10)
-        ax_bar.tick_params(labelsize=10)
-        ax_bar.spines['top'].set_visible(False)
-        ax_bar.spines['right'].set_visible(False)
-        ax_bar.grid(axis='y', alpha=0.3)
-
-        # Leyenda
-        ax_bar.legend(
-            loc='upper right',
-            fontsize=10,
-            frameon=True
-        )
-
-        fig_bar.tight_layout()
-        self.progreso_bar_card.set_figure(fig_bar)
-
-        # ===== GRÁFICO DE DONA DINÁMICO (derecha) =====
-        # Calcular totales
-        total_sin_iniciar = sum(data['sin_iniciar'])
-        total_en_proceso = sum(data['en_proceso'])
-        total_completado = sum(data['completado'])
-
-        fig_donut = Figure(figsize=(7, 6))
-        ax_donut = fig_donut.add_subplot(111)
-
-        labels = ['Completado', 'En Proceso', 'Sin Iniciar']
-        values = [total_completado, total_en_proceso, total_sin_iniciar]
-        colors_donut = [
-            PRIMARY_COLORS['accent_green'],
-            PRIMARY_COLORS['accent_yellow'],
-            PRIMARY_COLORS['accent_red']
-        ]
-
-        theme = self.theme_manager.get_current_theme()
-        edge_color = theme['surface']
-
-        wedges, texts, autotexts = ax_donut.pie(
-            values,
-            labels=labels,
-            colors=colors_donut,
-            autopct='%1.1f%%',
-            startangle=90,
-            pctdistance=0.85,
-            wedgeprops=dict(width=0.5, edgecolor=edge_color, linewidth=3)
-        )
-
-        # Estilo de textos
-        for text in texts:
-            text.set_fontsize(10)
-        for autotext in autotexts:
-            autotext.set_color('white')
-            autotext.set_fontsize(9)
-            autotext.set_weight('bold')
-
-        # Leyenda horizontal
-        ax_donut.legend(
-            wedges, labels,
-            loc='upper center',
-            bbox_to_anchor=(0.5, -0.05),
-            ncol=3,
-            fontsize=9,
-            frameon=True
-        )
-
-        fig_donut.tight_layout()
-
-        # Actualizar título dinámicamente
-        if hasattr(self.progreso_donut_card, 'title_label'):
-            self.progreso_donut_card.title_label.configure(
-                text=f'Estado General {unit}'
-            )
-
-        self.progreso_donut_card.set_figure(fig_donut)
-
-    # ==================== PESTAÑA COMPORTAMIENTO JERÁRQUICO ====================
-
-    def _create_tab_comportamiento_jerarquico(self, parent):
-        """Crear pestaña de Comportamiento Jerárquico"""
-        # Card para gráfico de líneas
-        jerarquico_line_card = MatplotlibChartCard(
-            parent,
-            title='Evolución de Población por Puesto',
-            export_callback=self.export_chart_to_plotly
-        )
-        jerarquico_line_card.grid(row=0, column=0, sticky='nsew', padx=(15, 10), pady=15)
-
-        # Card para gráfico de barras comparativo
-        jerarquico_bar_card = MatplotlibChartCard(
-            parent,
-            title='Comparativa M1 vs M8 - Retención por Puesto',
-            export_callback=self.export_chart_to_plotly
-        )
-        jerarquico_bar_card.grid(row=0, column=1, sticky='nsew', padx=(10, 15), pady=15)
-
-        # Crear gráficos
-        self._create_jerarquico_charts(jerarquico_line_card, jerarquico_bar_card)
-
-    def _create_jerarquico_charts(self, line_card, bar_card):
-        """Crear gráficos de comportamiento jerárquico"""
-        # ===== GRÁFICO DE LÍNEAS =====
-        fig_line = Figure(figsize=(10, 6))
-        ax_line = fig_line.add_subplot(111)
-
-        # Usar paleta ejecutiva Hutchison Ports para gráficos de líneas
-        colors = EXECUTIVE_CHART_COLORS
-
-        for idx, (puesto, poblacion) in enumerate(DATOS_JERARQUICO['puestos'].items()):
-            theme = self.theme_manager.get_current_theme()
-            edge_color = theme['surface']
-
-            ax_line.plot(
-                DATOS_JERARQUICO['fases'],
-                poblacion,
-                marker='o',
-                markersize=6,
-                linewidth=2,
-                color=colors[idx % len(colors)],
-                label=puesto,
-                markeredgecolor=edge_color,
-                markeredgewidth=1.5
-            )
-
-        ax_line.set_xlabel('Fase', fontsize=11)
-        ax_line.set_ylabel('Población', fontsize=11)
-        ax_line.tick_params(labelsize=10)
-        ax_line.spines['top'].set_visible(False)
-        ax_line.spines['right'].set_visible(False)
-        ax_line.grid(axis='both', alpha=0.3)
-
-        # Leyenda a la derecha
-        ax_line.legend(
-            loc='center left',
-            bbox_to_anchor=(1.02, 0.5),
-            fontsize=9,
-            frameon=True
-        )
-
-        fig_line.tight_layout()
-        line_card.set_figure(fig_line)
-
-        # ===== GRÁFICO DE BARRAS COMPARATIVO =====
-        puestos = list(DATOS_JERARQUICO['puestos'].keys())
-        m1_values = [DATOS_JERARQUICO['puestos'][p][0] for p in puestos]
-        m8_values = [DATOS_JERARQUICO['puestos'][p][7] for p in puestos]
-
-        fig_bar = Figure(figsize=(10, 6))
-        ax_bar = fig_bar.add_subplot(111)
-
-        x = np.arange(len(puestos))
-        width = 0.35
-
-        bars1 = ax_bar.bar(x - width/2, m1_values, width,
-                          label='M1 (Inicial)', color=PRIMARY_COLORS['accent_blue'],
-                          edgecolor='none')
-        bars2 = ax_bar.bar(x + width/2, m8_values, width,
-                          label='M8 (Final)', color=PRIMARY_COLORS['accent_green'],
-                          edgecolor='none')
-
-        ax_bar.set_xlabel('Puesto', fontsize=11)
-        ax_bar.set_ylabel('Población', fontsize=11)
-        ax_bar.set_xticks(x)
-        ax_bar.set_xticklabels(puestos, rotation=45, ha='right', fontsize=9)
-        ax_bar.tick_params(labelsize=10)
-        ax_bar.spines['top'].set_visible(False)
-        ax_bar.spines['right'].set_visible(False)
-        ax_bar.grid(axis='y', alpha=0.3)
-
-        # Leyenda
-        ax_bar.legend(
-            loc='upper right',
-            fontsize=10,
-            frameon=True
-        )
-
-        fig_bar.tight_layout()
-        bar_card.set_figure(fig_bar)
 
     # ==================== MÉTODOS DE DATOS ====================
 
