@@ -769,6 +769,32 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
             if not results:
                 messagebox.showinfo("Sin resultados", f"No se encontraron usuarios con el término '{search_term}'")
+            elif len(results) == 1:
+                # Si hay exactamente 1 resultado, autocompletar campos inmediatamente
+                user_data = results[0]
+                self.form_userid.delete(0, 'end')
+                self.form_userid.insert(0, user_data[0])
+
+                self.form_nombre.delete(0, 'end')
+                self.form_nombre.insert(0, user_data[1])
+
+                self.form_email.delete(0, 'end')
+                self.form_email.insert(0, user_data[2] if user_data[2] else '')
+
+                # Limpiar campos que no existen en BD
+                try:
+                    self.form_nivel.delete(0, 'end')
+                    self.form_division.delete(0, 'end')
+                    self.form_cargo.delete(0, 'end')
+                    self.form_grupo.delete(0, 'end')
+                    self.form_ubicacion.delete(0, 'end')
+                    if len(user_data) >= 9:
+                        self.form_status.set(user_data[8])
+                except:
+                    pass
+
+                # Cargar historial de soportes del usuario
+                self._load_user_support_history(user_data[0])
 
         except Exception as e:
             messagebox.showerror("Error", f"Error en búsqueda: {str(e)}")
