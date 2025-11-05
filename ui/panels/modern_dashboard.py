@@ -232,10 +232,10 @@ class ModernDashboard(ctk.CTkFrame):
         # Actualizar estilos de botones (diseño invertido)
         for key, btn in self.tab_buttons.items():
             if key == tab_key:
-                # Botón activo/seleccionado: azul con texto blanco
+                # Botón activo/seleccionado: azul navy con texto blanco
                 btn.configure(
-                    fg_color='#009BDE',  # Azul Hutchison
-                    hover_color='#00B5FF',
+                    fg_color='#002E6D',  # Azul Navy
+                    hover_color='#003D8F',
                     text_color='#FFFFFF'
                 )
             else:
