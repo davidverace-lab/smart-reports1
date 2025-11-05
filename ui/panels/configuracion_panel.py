@@ -475,6 +475,63 @@ class ConfiguracionPanel(ctk.CTkFrame):
         # Bind click en la tabla para cargar datos en el formulario
         self.user_results_tree.bind('<ButtonRelease-1>', self._on_user_select)
 
+        # Card de historial de soportes
+        support_history_card = ctk.CTkFrame(
+            scroll_frame,
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
+        )
+        support_history_card.pack(fill='both', expand=True, pady=(0, 15))
+
+        support_history_header = ctk.CTkLabel(
+            support_history_card,
+            text='📋 Historial de Soportes',
+            font=('Arial', 18, 'bold'),
+            text_color=theme['text']
+        )
+        support_history_header.pack(padx=20, pady=(15, 10), anchor='w')
+
+        # Container para tabla de soportes
+        support_table_container = ctk.CTkFrame(support_history_card, fg_color=table_container_bg, corner_radius=10)
+        support_table_container.pack(fill='both', expand=True, padx=20, pady=(10, 20))
+
+        # Scrollbars para tabla de soportes
+        support_vsb = ttk.Scrollbar(support_table_container, orient="vertical")
+        support_hsb = ttk.Scrollbar(support_table_container, orient="horizontal")
+
+        self.support_history_tree = ttk.Treeview(
+            support_table_container,
+            columns=('Fecha', 'Asunto', 'Categoria', 'Descripcion'),
+            show='headings',
+            yscrollcommand=support_vsb.set,
+            xscrollcommand=support_hsb.set,
+            style='UserMgmt.Treeview',
+            height=6
+        )
+
+        # Configurar columnas
+        self.support_history_tree.heading('Fecha', text='Fecha')
+        self.support_history_tree.heading('Asunto', text='Asunto')
+        self.support_history_tree.heading('Categoria', text='Categoría')
+        self.support_history_tree.heading('Descripcion', text='Descripción')
+
+        self.support_history_tree.column('Fecha', width=140, minwidth=120)
+        self.support_history_tree.column('Asunto', width=250, minwidth=200)
+        self.support_history_tree.column('Categoria', width=120, minwidth=100)
+        self.support_history_tree.column('Descripcion', width=400, minwidth=300)
+
+        support_vsb.config(command=self.support_history_tree.yview)
+        support_hsb.config(command=self.support_history_tree.xview)
+
+        self.support_history_tree.grid(row=0, column=0, sticky='nsew')
+        support_vsb.grid(row=0, column=1, sticky='ns')
+        support_hsb.grid(row=1, column=0, sticky='ew')
+
+        support_table_container.grid_rowconfigure(0, weight=1)
+        support_table_container.grid_columnconfigure(0, weight=1)
+
     def _setup_support_ticket_frame(self):
         """Configurar frame de Registro de Soporte Brindado"""
         theme = self.theme_manager.get_current_theme()
@@ -791,6 +848,9 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
             self.form_status.set(values[8])
 
+            # Cargar historial de soportes del usuario
+            self._load_user_support_history(values[0])
+
     def _create_user(self):
         """Crear nuevo usuario"""
         if not self.cursor:
@@ -939,10 +999,54 @@ class ConfiguracionPanel(ctk.CTkFrame):
         self.form_ubicacion.delete(0, 'end')
         self.form_status.set('Activo')
 
+        # Limpiar historial de soportes
+        for item in self.support_history_tree.get_children():
+            self.support_history_tree.delete(item)
+
+    def _load_user_support_history(self, userid):
+        """Cargar historial de soportes del usuario seleccionado"""
+        if not self.cursor:
+            return
+
+        try:
+            # Limpiar tabla de soportes
+            for item in self.support_history_tree.get_children():
+                self.support_history_tree.delete(item)
+
+            # Consultar soportes del usuario
+            self.cursor.execute("""
+                SELECT
+                    CONVERT(VARCHAR, FechaRegistro, 120) as Fecha,
+                    Asunto,
+                    Categoria,
+                    LEFT(Descripcion, 100) + CASE WHEN LEN(Descripcion) > 100 THEN '...' ELSE '' END as DescripcionCorta
+                FROM Instituto_Soporte
+                WHERE UserId = ?
+                ORDER BY FechaRegistro DESC
+            """, (userid,))
+
+            soportes = self.cursor.fetchall()
+
+            # Insertar soportes en la tabla
+            for soporte in soportes:
+                values = [str(v) if v is not None else '' for v in soporte]
+                self.support_history_tree.insert('', 'end', values=values)
+
+            if not soportes:
+                # Insertar mensaje informativo si no hay soportes
+                self.support_history_tree.insert('', 'end', values=('', 'No hay registros de soporte para este usuario', '', ''))
+
+        except Exception as e:
+            print(f"Error cargando historial de soportes: {e}")
+
     # ==================== FUNCIONES DE REGISTRO DE SOPORTE ====================
 
     def _submit_ticket(self):
         """Guardar registro de soporte brindado"""
+        if not self.cursor:
+            messagebox.showerror("Error", "No hay conexión a la base de datos")
+            return
+
         userid = self.soporte_userid.get().strip()
         asunto = self.ticket_asunto.get().strip()
         descripcion = self.ticket_descripcion.get("1.0", "end-1c").strip()
@@ -952,19 +1056,37 @@ class ConfiguracionPanel(ctk.CTkFrame):
             messagebox.showwarning("Campos Requeridos", "User ID, Asunto y Descripción son obligatorios")
             return
 
-        # Aquí se implementaría la lógica real de guardado en BD
-        # Por ahora, solo mostramos un mensaje de confirmación
-        messagebox.showinfo(
-            "Registro Guardado",
-            f"Registro de soporte guardado exitosamente\n\n"
-            f"Usuario: {userid}\n"
-            f"Asunto: {asunto}\n"
-            f"Categoría: {categoria}\n\n"
-            f"El registro ha sido almacenado en el sistema."
-        )
+        try:
+            # Verificar que el usuario existe
+            self.cursor.execute("SELECT UserId FROM Instituto_Usuario WHERE UserId = ?", (userid,))
+            if not self.cursor.fetchone():
+                messagebox.showerror("Error", f"El User ID '{userid}' no existe en el sistema")
+                return
 
-        # Limpiar formulario
-        self._clear_ticket_form()
+            # Insertar el registro de soporte
+            self.cursor.execute("""
+                INSERT INTO Instituto_Soporte
+                (UserId, Asunto, Descripcion, Categoria, FechaRegistro)
+                VALUES (?, ?, ?, ?, GETDATE())
+            """, (userid, asunto, descripcion, categoria))
+
+            self.db.commit()
+
+            messagebox.showinfo(
+                "Registro Guardado",
+                f"Registro de soporte guardado exitosamente\n\n"
+                f"Usuario: {userid}\n"
+                f"Asunto: {asunto}\n"
+                f"Categoría: {categoria}\n\n"
+                f"El registro ha sido almacenado en el sistema."
+            )
+
+            # Limpiar formulario
+            self._clear_ticket_form()
+
+        except Exception as e:
+            self.db.rollback()
+            messagebox.showerror("Error", f"Error al guardar registro de soporte: {str(e)}")
 
     def _clear_ticket_form(self):
         """Limpiar formulario de registro de soporte"""
