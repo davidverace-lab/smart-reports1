@@ -158,8 +158,27 @@ class ConfigCard(ctk.CTkFrame):
 
     def _on_theme_changed(self, theme_colors: dict):
         """Actualizar colores cuando cambia el tema - RECREA TODO"""
-        # Actualizar el fondo del card
-        self.configure(fg_color=theme_colors['surface'], border_color=theme_colors['border'])
+        try:
+            # Verificar si el widget todavía existe
+            if not self.winfo_exists():
+                return
 
-        # Recrear todo el contenido con los nuevos colores
-        self._create_content()
+            # Actualizar el fondo del card
+            self.configure(fg_color=theme_colors['surface'], border_color=theme_colors['border'])
+
+            # Recrear todo el contenido con los nuevos colores
+            self._create_content()
+        except Exception as e:
+            # Si hay cualquier error, desregistrar el callback silenciosamente
+            pass
+
+    def destroy(self):
+        """Override destroy para desregistrar callback de tema"""
+        try:
+            # Desregistrar callback antes de destruir
+            self.theme_manager.unregister_callback(self._on_theme_changed)
+        except:
+            pass
+
+        # Llamar al destroy original
+        super().destroy()

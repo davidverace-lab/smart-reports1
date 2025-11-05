@@ -175,7 +175,7 @@ class ModernDashboard(ctk.CTkFrame):
         # Definir las pestañas
         tabs = [
             ("General", "General"),
-            ("Reportes Gerenciales", "Reportes Gerenciales")
+            ("Dashboards Gerenciales", "Dashboards Gerenciales")
         ]
 
         # Crear botones (inactivo=gris, seleccionado=azul)
@@ -263,7 +263,7 @@ class ModernDashboard(ctk.CTkFrame):
             if not self._general_loaded:
                 self.load_general_charts()
                 self._general_loaded = True
-        elif value == "Reportes Gerenciales":
+        elif value == "Dashboards Gerenciales":
             self.gerencial_frame.grid(row=0, column=0, sticky='nsew')
             if not self._gerencial_loaded:
                 self.load_gerencial_charts()
@@ -278,7 +278,7 @@ class ModernDashboard(ctk.CTkFrame):
         self._general_loaded = True
 
     def load_gerencial_charts(self):
-        """Cargar pestaña Reportes Gerenciales (lazy loading)"""
+        """Cargar pestaña Dashboards Gerenciales (lazy loading)"""
         if self._gerencial_loaded:
             return
 
@@ -511,7 +511,7 @@ class ModernDashboard(ctk.CTkFrame):
     # ==================== PESTAÑA REPORTES GERENCIALES ====================
 
     def _create_tab_reportes_gerenciales(self, parent):
-        """Crear pestaña de Reportes Gerenciales con scrollbar y 6 gráficos estáticos"""
+        """Crear pestaña de Dashboards Gerenciales con scrollbar y 6 gráficos estáticos"""
 
         # Crear CTkScrollableFrame para permitir scroll vertical
         theme = self.theme_manager.get_current_theme()
