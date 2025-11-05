@@ -344,7 +344,7 @@ class PeriodReportPanel(ctk.CTkFrame):
             self.end_date_entry.grid()
 
     def _generate_sample_data(self, module_filter, start_date, end_date):
-        """Generar 20 usuarios de ejemplo con fechas y módulos variables"""
+        """Generar 20 usuarios con UserIDs reales de BD y fechas/módulos variables"""
         # Nombres de ejemplo
         nombres = [
             'Juan Carlos Pérez', 'María González', 'Roberto Martínez', 'Ana López',
@@ -354,8 +354,29 @@ class PeriodReportPanel(ctk.CTkFrame):
             'Pedro Gómez', 'Lucía Romero', 'Diego Vargas', 'Sofía Ortiz'
         ]
 
-        # IDs de ejemplo
-        user_ids = [f'USR{1001+i}' for i in range(20)]
+        # Obtener UserIDs reales de la BD
+        user_ids = []
+        if self.cursor:
+            try:
+                # Intentar obtener 20 UserIDs aleatorios de la BD
+                self.cursor.execute("""
+                    SELECT TOP 20 UserId
+                    FROM Instituto_Usuario
+                    ORDER BY NEWID()
+                """)
+                results = self.cursor.fetchall()
+                user_ids = [row[0] for row in results]
+            except Exception as e:
+                print(f"Error obteniendo UserIDs: {e}")
+                # Fallback a IDs de ejemplo
+                user_ids = [f'USR{1001+i}' for i in range(20)]
+        else:
+            # Si no hay cursor, usar IDs de ejemplo
+            user_ids = [f'USR{1001+i}' for i in range(20)]
+
+        # Asegurar que tenemos 20 IDs
+        while len(user_ids) < 20:
+            user_ids.append(f'USR{1001+len(user_ids)}')
 
         # Generar datos
         data = []
