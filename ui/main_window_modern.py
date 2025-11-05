@@ -25,6 +25,7 @@ from ui.panels.modern_dashboard import ModernDashboard
 from ui.panels.configuracion_panel import ConfiguracionPanel
 from ui.panels.user_report_panel import UserReportPanel
 from ui.panels.unit_report_panel import UnitReportPanel
+from ui.panels.period_report_panel import PeriodReportPanel
 from ui.dialogs.user_management_dialog import UserManagementDialog
 
 
@@ -1025,13 +1026,18 @@ class MainWindow:
         )
 
     def generate_period_report(self):
-        """Generar reporte por periodo"""
-        messagebox.showinfo(
-            "Reporte por Periodo",
-            "Función 'Reporte por Periodo' en desarrollo.\n\n" +
-            "Esta funcionalidad generará reportes filtrados\n" +
-            "por rangos de fechas específicos."
+        """Generar reporte por periodo - Abre panel de generación PDF por periodo"""
+        self.clear_content_area()
+        self.current_panel = 'period_report'
+
+        # Crear panel de generación de reportes por periodo con vista previa
+        self.period_report_panel = PeriodReportPanel(
+            self.content_area,
+            db=self.conn,
+            cursor=self.cursor,
+            theme_manager=self.theme_manager
         )
+        self.period_report_panel.pack(fill='both', expand=True)
 
     def show_configuracion_panel(self):
         """Panel de configuración con diseño moderno y navegación interna"""
