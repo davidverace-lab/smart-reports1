@@ -24,6 +24,7 @@ from ui.components.top_bar import TopBar
 from ui.panels.modern_dashboard import ModernDashboard
 from ui.panels.configuracion_panel import ConfiguracionPanel
 from ui.panels.user_report_panel import UserReportPanel
+from ui.panels.unit_report_panel import UnitReportPanel
 from ui.dialogs.user_management_dialog import UserManagementDialog
 
 
@@ -983,13 +984,18 @@ class MainWindow:
         self.user_report_panel.pack(fill='both', expand=True)
 
     def generate_unit_progress_report(self):
-        """Generar reporte de progreso por unidad"""
-        messagebox.showinfo(
-            "Reporte por Unidad",
-            "Función 'Progreso por Unidad' en desarrollo.\n\n" +
-            "Esta funcionalidad generará un reporte PDF con el\n" +
-            "progreso de capacitaciones de una unidad de negocio."
+        """Generar reporte de progreso por unidad - Abre panel de generación PDF por unidad"""
+        self.clear_content_area()
+        self.current_panel = 'unit_report'
+
+        # Crear panel de generación de reportes por unidad con vista previa
+        self.unit_report_panel = UnitReportPanel(
+            self.content_area,
+            db=self.conn,
+            cursor=self.cursor,
+            theme_manager=self.theme_manager
         )
+        self.unit_report_panel.pack(fill='both', expand=True)
 
     def generate_global_report(self):
         """Generar reporte global"""

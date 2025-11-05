@@ -1,6 +1,6 @@
 """
-Panel de Generación de Reportes de Usuario
-Permite generar reportes PDF detallados por usuario con vista previa
+Panel de Generación de Reportes por Unidad de Negocio
+Permite generar reportes PDF detallados por unidad con vista previa
 """
 
 import customtkinter as ctk
@@ -15,7 +15,7 @@ try:
     from reportlab.lib.pagesizes import letter
     from reportlab.lib import colors
     from reportlab.lib.units import inch
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image as RLImage
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.enums import TA_CENTER, TA_LEFT
     REPORTLAB_AVAILABLE = True
@@ -26,8 +26,8 @@ except ImportError:
 from config.theme_manager import get_theme_manager
 
 
-class UserReportPanel(ctk.CTkFrame):
-    """Panel para generar reportes PDF de usuarios con vista previa"""
+class UnitReportPanel(ctk.CTkFrame):
+    """Panel para generar reportes PDF por unidad de negocio con vista previa"""
 
     def __init__(self, parent, db=None, cursor=None, theme_manager=None):
         super().__init__(parent, fg_color='transparent')
@@ -38,7 +38,8 @@ class UserReportPanel(ctk.CTkFrame):
 
         # Variables para el reporte
         self.current_pdf_buffer = None
-        self.current_user_data = None
+        self.current_unit_data = None
+        self.current_module = None
 
         # Configurar layout principal
         self.grid_columnconfigure(0, weight=1)
@@ -56,13 +57,17 @@ class UserReportPanel(ctk.CTkFrame):
             if not self.winfo_exists():
                 return
 
-            # Guardar el estado actual del preview y userid
-            current_userid = ''
+            # Guardar el estado actual
+            current_unit = ''
+            current_module = ''
             preview_content = ''
             save_button_state = 'disabled'
 
-            if hasattr(self, 'userid_entry') and self.userid_entry.winfo_exists():
-                current_userid = self.userid_entry.get()
+            if hasattr(self, 'unit_dropdown') and self.unit_dropdown.winfo_exists():
+                current_unit = self.unit_dropdown.get()
+
+            if hasattr(self, 'module_dropdown') and self.module_dropdown.winfo_exists():
+                current_module = self.module_dropdown.get()
 
             if hasattr(self, 'preview_text') and self.preview_text.winfo_exists():
                 preview_content = self.preview_text.get('1.0', 'end-1c')
@@ -74,9 +79,11 @@ class UserReportPanel(ctk.CTkFrame):
             self._create_main_content()
 
             # Restaurar el estado
-            if current_userid and hasattr(self, 'userid_entry'):
-                self.userid_entry.delete(0, 'end')
-                self.userid_entry.insert(0, current_userid)
+            if current_unit and hasattr(self, 'unit_dropdown'):
+                self.unit_dropdown.set(current_unit)
+
+            if current_module and hasattr(self, 'module_dropdown'):
+                self.module_dropdown.set(current_module)
 
             if preview_content and preview_content.strip() and hasattr(self, 'preview_text'):
                 self.preview_text.configure(state='normal')
@@ -125,49 +132,72 @@ class UserReportPanel(ctk.CTkFrame):
 
         ctk.CTkLabel(
             header_frame,
-            text='📄 Generación de Reportes de Usuario',
+            text='🏢 Generación de Reportes por Unidad de Negocio',
             font=('Montserrat', 28, 'bold'),
             text_color=title_color
         ).grid(row=0, column=0, sticky='w', columnspan=2)
 
         ctk.CTkLabel(
             header_frame,
-            text='Genera reportes PDF detallados del progreso de usuarios',
+            text='Genera reportes PDF detallados del progreso por unidad de negocio',
             font=('Arial', 14),
             text_color=theme['text_secondary']
         ).grid(row=1, column=0, sticky='w', columnspan=2, pady=(5, 0))
 
-        # Sección de entrada de usuario
+        # Sección de selección
         input_section = ctk.CTkFrame(
             scroll_frame,
             fg_color=theme['surface'],
             corner_radius=15
         )
         input_section.grid(row=1, column=0, sticky='ew', pady=(0, 20))
-        input_section.grid_columnconfigure(1, weight=1)
+        input_section.grid_columnconfigure((1, 2), weight=1)
 
         # Padding interno
         input_content = ctk.CTkFrame(input_section, fg_color='transparent')
         input_content.pack(fill='both', expand=True, padx=30, pady=30)
-        input_content.grid_columnconfigure(1, weight=1)
+        input_content.grid_columnconfigure((1, 3), weight=1)
 
-        # Label User ID
+        # Label Unidad de Negocio
         ctk.CTkLabel(
             input_content,
-            text='User ID:',
+            text='Unidad de Negocio:',
             font=('Arial', 16, 'bold'),
             text_color=theme['text']
         ).grid(row=0, column=0, sticky='w', pady=10, padx=(0, 15))
 
-        # Entry User ID
-        self.userid_entry = ctk.CTkEntry(
+        # Dropdown Unidad de Negocio
+        units = self._get_units_from_db()
+        self.unit_dropdown = ctk.CTkOptionMenu(
             input_content,
-            placeholder_text='Ingrese el User ID',
+            values=units if units else ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX'],
             font=('Arial', 14),
+            width=250,
             height=45,
             corner_radius=10
         )
-        self.userid_entry.grid(row=0, column=1, sticky='ew', pady=10)
+        self.unit_dropdown.grid(row=0, column=1, sticky='ew', pady=10, padx=(0, 20))
+
+        # Label Módulo
+        ctk.CTkLabel(
+            input_content,
+            text='Módulo:',
+            font=('Arial', 16, 'bold'),
+            text_color=theme['text']
+        ).grid(row=0, column=2, sticky='w', pady=10, padx=(0, 15))
+
+        # Dropdown Módulo
+        modules = ['Todos'] + [f'Módulo {i}' for i in range(1, 9)]
+        self.module_dropdown = ctk.CTkOptionMenu(
+            input_content,
+            values=modules,
+            font=('Arial', 14),
+            width=200,
+            height=45,
+            corner_radius=10
+        )
+        self.module_dropdown.set('Todos')
+        self.module_dropdown.grid(row=0, column=3, sticky='ew', pady=10, padx=(0, 20))
 
         # Botón generar
         button_color = '#002E6D'  # Navy blue
@@ -181,7 +211,7 @@ class UserReportPanel(ctk.CTkFrame):
             height=50,
             width=250,
             command=self._generate_preview
-        ).grid(row=0, column=2, sticky='e', pady=10, padx=(15, 0))
+        ).grid(row=0, column=4, sticky='e', pady=10, padx=(20, 0))
 
         # Sección de vista previa
         preview_section = ctk.CTkFrame(
@@ -205,7 +235,7 @@ class UserReportPanel(ctk.CTkFrame):
             text_color=theme['text']
         ).grid(row=0, column=0, sticky='w')
 
-        # Botón guardar (inicialmente oculto)
+        # Botón guardar (inicialmente deshabilitado)
         self.save_button = ctk.CTkButton(
             preview_header,
             text='💾 Guardar PDF',
@@ -230,8 +260,46 @@ class UserReportPanel(ctk.CTkFrame):
         self.preview_text.pack(fill='both', expand=True, padx=30, pady=(0, 30))
 
         # Mensaje inicial
-        self.preview_text.insert('1.0', 'Ingrese un User ID y haga clic en "Generar Vista Previa" para ver el reporte.')
+        self.preview_text.insert('1.0', 'Seleccione una Unidad de Negocio y Módulo, luego haga clic en "Generar Vista Previa" para ver el reporte.')
         self.preview_text.configure(state='disabled')
+
+    def _get_units_from_db(self):
+        """Obtener unidades de negocio desde la base de datos"""
+        if not self.cursor:
+            return None
+
+        try:
+            # Intentar obtener las unidades de la BD
+            self.cursor.execute("""
+                SELECT DISTINCT NombreUnidad
+                FROM Instituto_UnidadDeNegocio
+                ORDER BY NombreUnidad
+            """)
+            results = self.cursor.fetchall()
+            if results:
+                return [row[0] for row in results]
+        except Exception as e:
+            print(f"Error obteniendo unidades: {e}")
+
+        return None
+
+    def _get_unit_population(self, unit_name):
+        """Obtener población asignada de una unidad desde BD"""
+        if not self.cursor:
+            return 150  # Valor por defecto
+
+        try:
+            self.cursor.execute("""
+                SELECT COUNT(*)
+                FROM Instituto_Usuario u
+                JOIN Instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+                WHERE un.NombreUnidad = ?
+            """, (unit_name,))
+            result = self.cursor.fetchone()
+            return result[0] if result else 150
+        except Exception as e:
+            print(f"Error obteniendo población: {e}")
+            return 150
 
     def _generate_preview(self):
         """Generar vista previa del reporte"""
@@ -244,34 +312,29 @@ class UserReportPanel(ctk.CTkFrame):
             )
             return
 
-        if not self.cursor:
-            messagebox.showerror("Error", "No hay conexión a la base de datos")
-            return
+        unit = self.unit_dropdown.get()
+        module = self.module_dropdown.get()
 
-        userid = self.userid_entry.get().strip()
-        if not userid:
-            messagebox.showwarning("Advertencia", "Ingrese un User ID")
+        if not unit:
+            messagebox.showwarning("Advertencia", "Seleccione una Unidad de Negocio")
             return
 
         try:
-            # Obtener datos del usuario
-            self.cursor.execute("""
-                SELECT UserId, Nombre, Email
-                FROM Instituto_Usuario
-                WHERE UserId = ?
-            """, (userid,))
+            # Obtener población real de la unidad
+            population = self._get_unit_population(unit)
 
-            user = self.cursor.fetchone()
-
-            if not user:
-                messagebox.showerror("Error", f"No se encontró el usuario '{userid}'")
-                return
+            # Guardar datos actuales
+            self.current_unit_data = {
+                'name': unit,
+                'population': population
+            }
+            self.current_module = module
 
             # Generar PDF
-            self._generate_pdf_report(user)
+            self._generate_pdf_report(unit, module, population)
 
             # Mostrar vista previa en texto
-            self._show_preview_text(user)
+            self._show_preview_text(unit, module, population)
 
             # Habilitar botón de guardar
             self.save_button.configure(state='normal')
@@ -279,15 +342,16 @@ class UserReportPanel(ctk.CTkFrame):
             messagebox.showinfo(
                 "Vista Previa Generada",
                 f"Reporte generado para:\n\n"
-                f"User ID: {user[0]}\n"
-                f"Nombre: {user[1]}\n\n"
+                f"Unidad: {unit}\n"
+                f"Módulo(s): {module}\n"
+                f"Población: {population} usuarios\n\n"
                 f"Puede guardar el PDF usando el botón 'Guardar PDF'"
             )
 
         except Exception as e:
             messagebox.showerror("Error", f"Error al generar reporte:\n\n{str(e)}")
 
-    def _generate_pdf_report(self, user):
+    def _generate_pdf_report(self, unit, module, population):
         """Generar el PDF del reporte"""
         # Crear buffer en memoria
         buffer = io.BytesIO()
@@ -312,15 +376,6 @@ class UserReportPanel(ctk.CTkFrame):
             fontName='Helvetica-Bold'
         )
 
-        subtitle_style = ParagraphStyle(
-            'CustomSubtitle',
-            parent=styles['Normal'],
-            fontSize=12,
-            textColor=colors.HexColor('#666666'),
-            spaceAfter=20,
-            alignment=TA_CENTER
-        )
-
         section_style = ParagraphStyle(
             'SectionTitle',
             parent=styles['Heading2'],
@@ -332,20 +387,21 @@ class UserReportPanel(ctk.CTkFrame):
         )
 
         # Título del reporte
-        elements.append(Paragraph("Reporte de Progreso - Instituto Hutchison Ports", title_style))
-        elements.append(Spacer(1, 0.1*inch))
+        elements.append(Paragraph(f"Reporte de Progreso - {unit}", title_style))
+        elements.append(Paragraph("Instituto Hutchison Ports", title_style))
+        elements.append(Spacer(1, 0.2*inch))
 
-        # Información del usuario
-        elements.append(Paragraph("Información del Usuario", section_style))
-        user_info = [
-            ['User ID:', user[0]],
-            ['Nombre:', user[1]],
-            ['Email:', user[2] if user[2] else 'N/A'],
+        # Información general
+        elements.append(Paragraph("Información General", section_style))
+        general_info = [
+            ['Unidad de Negocio:', unit],
+            ['Módulo(s):', module],
+            ['Población Total:', f'{population} usuarios'],
             ['Fecha de Reporte:', datetime.now().strftime('%d/%m/%Y %H:%M')]
         ]
 
-        user_table = Table(user_info, colWidths=[1.5*inch, 5*inch])
-        user_table.setStyle(TableStyle([
+        general_table = Table(general_info, colWidths=[2*inch, 4.5*inch])
+        general_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 11),
             ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
@@ -357,36 +413,49 @@ class UserReportPanel(ctk.CTkFrame):
             ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ]))
 
-        elements.append(user_table)
+        elements.append(general_table)
         elements.append(Spacer(1, 0.3*inch))
 
-        # Tabla de módulos
+        # Tabla de progreso por módulo
         elements.append(Paragraph("Progreso por Módulo", section_style))
 
-        # Datos inventados para demostración
-        modulos_data = [
-            ['Módulo', 'Completado', 'Fecha Finalización', 'Calificación'],
-            ['Módulo 1 - Introducción', 'Sí', '15/01/2024', '95%'],
-            ['Módulo 2 - Seguridad', 'Sí', '22/01/2024', '88%'],
-            ['Módulo 3 - Operaciones', 'Sí', '05/02/2024', '92%'],
-            ['Módulo 4 - Logística', 'Sí', '18/02/2024', '90%'],
-            ['Módulo 5 - Calidad', 'Sí', '10/03/2024', '87%'],
-            ['Módulo 6 - Medio Ambiente', 'Sí', '25/03/2024', '91%'],
-            ['Módulo 7 - Administración', 'Sí', '08/04/2024', '89%'],
-            ['Módulo 8 - RR.HH.', 'No', 'Pendiente', 'N/A']
+        # Generar datos de tabla según selección
+        if module == 'Todos':
+            modules_list = list(range(1, 9))
+        else:
+            module_num = int(module.split()[1])
+            modules_list = [module_num]
+
+        # Datos de la tabla (estáticos por ahora)
+        table_data = [
+            ['Módulo', 'Población\nAsignada', 'Sin Iniciar', 'En Proceso', 'Completado']
         ]
 
-        modulos_table = Table(modulos_data, colWidths=[2.8*inch, 1.1*inch, 1.5*inch, 1.1*inch])
-        modulos_table.setStyle(TableStyle([
+        for mod_num in modules_list:
+            # Valores estáticos de ejemplo (distribuidos de la población)
+            sin_iniciar = int(population * 0.15)
+            en_proceso = int(population * 0.25)
+            completado = population - sin_iniciar - en_proceso
+
+            table_data.append([
+                f'Módulo {mod_num}',
+                str(population),
+                f'{sin_iniciar}\n({(sin_iniciar/population*100):.1f}%)',
+                f'{en_proceso}\n({(en_proceso/population*100):.1f}%)',
+                f'{completado}\n({(completado/population*100):.1f}%)'
+            ])
+
+        progress_table = Table(table_data, colWidths=[1.5*inch, 1.3*inch, 1.3*inch, 1.3*inch, 1.3*inch])
+        progress_table.setStyle(TableStyle([
             # Header
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#002E6D')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
             ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
             # Body
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
             ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
             ('ALIGN', (0, 1), (0, -1), 'LEFT'),
             # Borders
@@ -395,21 +464,29 @@ class UserReportPanel(ctk.CTkFrame):
             # Padding
             ('LEFTPADDING', (0, 0), (-1, -1), 8),
             ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
             # Colores alternados
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')]),
         ]))
 
-        elements.append(modulos_table)
+        elements.append(progress_table)
         elements.append(Spacer(1, 0.3*inch))
 
         # Resumen
-        elements.append(Paragraph("Resumen de Desempeño", section_style))
+        elements.append(Paragraph("Resumen General", section_style))
+
+        # Calcular totales
+        total_sin_iniciar = len(modules_list) * int(population * 0.15)
+        total_en_proceso = len(modules_list) * int(population * 0.25)
+        total_completado = len(modules_list) * population - total_sin_iniciar - total_en_proceso
+        total_registros = len(modules_list) * population
+
         summary_data = [
-            ['Módulos Completados:', '7 / 8'],
-            ['Promedio General:', '90.3%'],
-            ['Estado:', 'En Progreso'],
+            ['Total de Registros:', f'{total_registros}'],
+            ['Sin Iniciar:', f'{total_sin_iniciar} ({(total_sin_iniciar/total_registros*100):.1f}%)'],
+            ['En Proceso:', f'{total_en_proceso} ({(total_en_proceso/total_registros*100):.1f}%)'],
+            ['Completado:', f'{total_completado} ({(total_completado/total_registros*100):.1f}%)'],
         ]
 
         summary_table = Table(summary_data, colWidths=[2*inch, 4.5*inch])
@@ -444,35 +521,50 @@ class UserReportPanel(ctk.CTkFrame):
         # Guardar buffer
         buffer.seek(0)
         self.current_pdf_buffer = buffer
-        self.current_user_data = user
 
-    def _show_preview_text(self, user):
+    def _show_preview_text(self, unit, module, population):
         """Mostrar vista previa en formato profesional"""
         self.preview_text.configure(state='normal')
         self.preview_text.delete('1.0', 'end')
 
-        theme = self.theme_manager.get_current_theme()
-        is_dark = self.theme_manager.is_dark_mode()
+        # Generar datos de tabla según selección
+        if module == 'Todos':
+            modules_list = list(range(1, 9))
+        else:
+            module_num = int(module.split()[1])
+            modules_list = [module_num]
 
-        # Colores para el preview
-        title_color = '#009BDE' if is_dark else '#002E6D'
-        header_bg = '#1E1E1E' if is_dark else '#F0F4F8'
-        text_color = '#FFFFFF' if is_dark else '#1A1A1A'
+        # Construir tabla de módulos
+        table_rows = []
+        for mod_num in modules_list:
+            sin_iniciar = int(population * 0.15)
+            en_proceso = int(population * 0.25)
+            completado = population - sin_iniciar - en_proceso
 
-        # Crear preview con mejor formato
+            table_rows.append(
+                f"    │ Módulo {mod_num:<2} │    {population:<6} │   {sin_iniciar:<4}  │   {en_proceso:<4}   │   {completado:<4}    │"
+            )
+
+        # Calcular totales
+        total_sin_iniciar = len(modules_list) * int(population * 0.15)
+        total_en_proceso = len(modules_list) * int(population * 0.25)
+        total_completado = len(modules_list) * population - total_sin_iniciar - total_en_proceso
+        total_registros = len(modules_list) * population
+
         preview = f"""
 ════════════════════════════════════════════════════════════════════════════════
-                    REPORTE DE PROGRESO DEL USUARIO
-                     Instituto Hutchison Ports
+                  REPORTE DE PROGRESO POR UNIDAD DE NEGOCIO
+                          {unit}
+                       Instituto Hutchison Ports
 ════════════════════════════════════════════════════════════════════════════════
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ INFORMACIÓN DEL USUARIO                                                     │
+│ INFORMACIÓN GENERAL                                                         │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-    User ID:              {user[0]}
-    Nombre Completo:      {user[1]}
-    Correo Electrónico:   {user[2] if user[2] else 'N/A'}
+    Unidad de Negocio:    {unit}
+    Módulo(s):            {module}
+    Población Total:      {population} usuarios
     Fecha de Reporte:     {datetime.now().strftime('%d de %B de %Y - %H:%M hrs')}
 
 
@@ -480,28 +572,22 @@ class UserReportPanel(ctk.CTkFrame):
 │ PROGRESO POR MÓDULO                                                         │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-    ┌────────────────────────────────┬────────────┬─────────────────┬──────────────┐
-    │ Módulo                         │ Completado │ Fecha Final.    │ Calificación │
-    ├────────────────────────────────┼────────────┼─────────────────┼──────────────┤
-    │ Módulo 1 - Introducción        │     ✓ Sí   │   15/01/2024    │     95%      │
-    │ Módulo 2 - Seguridad           │     ✓ Sí   │   22/01/2024    │     88%      │
-    │ Módulo 3 - Operaciones         │     ✓ Sí   │   05/02/2024    │     92%      │
-    │ Módulo 4 - Logística           │     ✓ Sí   │   18/02/2024    │     90%      │
-    │ Módulo 5 - Calidad             │     ✓ Sí   │   10/03/2024    │     87%      │
-    │ Módulo 6 - Medio Ambiente      │     ✓ Sí   │   25/03/2024    │     91%      │
-    │ Módulo 7 - Administración      │     ✓ Sí   │   08/04/2024    │     89%      │
-    │ Módulo 8 - RR.HH.              │     ✗ No   │   Pendiente     │     N/A      │
-    └────────────────────────────────┴────────────┴─────────────────┴──────────────┘
+    ┌────────────┬────────────┬──────────┬────────────┬─────────────┐
+    │   Módulo   │ Población  │   Sin    │     En     │ Completado  │
+    │            │  Asignada  │ Iniciar  │  Proceso   │             │
+    ├────────────┼────────────┼──────────┼────────────┼─────────────┤
+{chr(10).join(table_rows)}
+    └────────────┴────────────┴──────────┴────────────┴─────────────┘
 
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ RESUMEN DE DESEMPEÑO                                                        │
+│ RESUMEN GENERAL                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-    📊 Módulos Completados:        7 de 8 módulos (87.5%)
-    📈 Promedio General:           90.3%
-    ⚡ Estado Actual:              En Progreso
-    🎯 Siguiente Módulo:           Módulo 8 - Procesos de Recursos Humanos
+    📊 Total de Registros:     {total_registros}
+    ⏸️  Sin Iniciar:            {total_sin_iniciar} ({(total_sin_iniciar/total_registros*100):.1f}%)
+    🔄 En Proceso:             {total_en_proceso} ({(total_en_proceso/total_registros*100):.1f}%)
+    ✅ Completado:             {total_completado} ({(total_completado/total_registros*100):.1f}%)
 
 
 ════════════════════════════════════════════════════════════════════════════════
@@ -515,13 +601,15 @@ class UserReportPanel(ctk.CTkFrame):
 
     def _save_pdf(self):
         """Guardar PDF en PC"""
-        if not self.current_pdf_buffer or not self.current_user_data:
+        if not self.current_pdf_buffer or not self.current_unit_data:
             messagebox.showerror("Error", "No hay reporte generado para guardar")
             return
 
         try:
             # Sugerir nombre de archivo
-            default_filename = f"Reporte_{self.current_user_data[0]}_{datetime.now().strftime('%Y%m%d')}.pdf"
+            unit_name = self.current_unit_data['name'].replace(' ', '_')
+            module_name = self.current_module.replace(' ', '_')
+            default_filename = f"Reporte_{unit_name}_{module_name}_{datetime.now().strftime('%Y%m%d')}.pdf"
 
             # Abrir diálogo de guardar
             file_path = filedialog.asksaveasfilename(
