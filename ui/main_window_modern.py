@@ -27,6 +27,7 @@ from ui.panels.user_report_panel import UserReportPanel
 from ui.panels.unit_report_panel import UnitReportPanel
 from ui.panels.period_report_panel import PeriodReportPanel
 from ui.panels.global_report_panel import GlobalReportPanel
+from ui.panels.management_levels_panel import ManagementLevelsPanel
 from ui.dialogs.user_management_dialog import UserManagementDialog
 
 
@@ -885,6 +886,12 @@ class MainWindow:
                 'title': 'Reporte por Periodo',
                 'desc': 'Reportes filtrados por rango de fechas',
                 'command': self.generate_period_report
+            },
+            {
+                'icon': '👔',
+                'title': 'Reporte por Niveles de Mando',
+                'desc': 'Estadísticas por mandos gerenciales, medios y operativos',
+                'command': self.generate_management_levels_report
             }
         ]
 
@@ -1044,6 +1051,20 @@ class MainWindow:
             theme_manager=self.theme_manager
         )
         self.period_report_panel.pack(fill='both', expand=True)
+
+    def generate_management_levels_report(self):
+        """Generar reporte por niveles de mando - Abre panel de generación PDF por niveles gerenciales"""
+        self.clear_content_area()
+        self.current_panel = 'management_levels_report'
+
+        # Crear panel de generación de reportes por niveles de mando con vista previa
+        self.management_levels_panel = ManagementLevelsPanel(
+            self.content_area,
+            db=self.conn,
+            cursor=self.cursor,
+            theme_manager=self.theme_manager
+        )
+        self.management_levels_panel.pack(fill='both', expand=True)
 
     def show_configuracion_panel(self):
         """Panel de configuración con diseño moderno y navegación interna"""
