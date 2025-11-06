@@ -250,12 +250,13 @@ class UnitReportPanel(ctk.CTkFrame):
         )
         self.save_button.grid(row=0, column=1, sticky='e', padx=(15, 0))
 
-        # Área de vista previa (scrollable text)
+        # Área de vista previa - Más grande y profesional
         self.preview_text = ctk.CTkTextbox(
             preview_section,
-            font=('Courier New', 11),
-            wrap='word',
-            corner_radius=10
+            font=('Courier New', 13),
+            wrap='none',
+            corner_radius=10,
+            height=600
         )
         self.preview_text.pack(fill='both', expand=True, padx=30, pady=(0, 30))
 
