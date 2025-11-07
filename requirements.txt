@@ -18,8 +18,8 @@ tkinterdnd2-universal>=1.7.3       # Drag & drop
 pillow>=10.0.0                     # Imágenes
 
 # Gráficos y visualización
-plotly>=5.17.0                     # Gráficos interactivos
-kaleido>=0.2.1                     # Exportar gráficos Plotly a imágenes estáticas
+pywebview>=4.3.3                   # Embeber HTML/JS/D3.js en ventanas nativas (PRINCIPAL)
+plotly>=5.17.0                     # Gráficos interactivos (legacy, opcional)
 matplotlib>=3.7.0                  # Gráficos estáticos (compatibilidad)
 seaborn>=0.12.0                    # Gráficos estadísticos avanzados
 
@@ -36,6 +36,7 @@ pyinstaller>=6.0.0
 # NOTAS DE INSTALACIÓN:
 # =====================
 # 1. Ejecutar: pip install -r requirements.txt
-# 2. Si kaleido falla en Windows, usar: pip install kaleido==0.1.0.post1
+# 2. pywebview requiere navegador del sistema (Edge/Chrome en Windows)
 # 3. Para desarrollo: pip install --upgrade --force-reinstall customtkinter
 # 4. PIL viene incluido con pillow, no instalar por separado
+# 5. D3.js se carga desde CDN (sin instalación local necesaria)

@@ -28,6 +28,7 @@ from interfaz.paneles.reportes.panel_reporte_unidad import UnitReportPanel
 from interfaz.paneles.reportes.panel_reporte_periodo import PeriodReportPanel
 from interfaz.paneles.reportes.panel_reporte_global import GlobalReportPanel
 from interfaz.paneles.reportes.panel_niveles_mando import ManagementLevelsPanel
+from interfaz.paneles.graficos.panel_demo_d3 import PanelDemoD3
 from interfaz.dialogos.dialogo_gestion_usuarios import UserManagementDialog
 
 
@@ -138,6 +139,7 @@ class MainWindow:
             'consultas': self.show_consultas_panel,
             'actualizar': self.show_actualizar_panel,
             'reportes': self.show_reportes_panel,
+            'graficos_d3': self.show_graficos_d3_panel,
             'configuracion': self.show_configuracion_panel,
         }
 
@@ -1065,6 +1067,15 @@ class MainWindow:
             theme_manager=self.theme_manager
         )
         self.management_levels_panel.pack(fill='both', expand=True)
+
+    def show_graficos_d3_panel(self):
+        """Panel de demostración de gráficos D3.js interactivos"""
+        self.clear_content_area()
+        self.current_panel = 'graficos_d3'
+
+        # Crear panel de demos D3.js
+        self.graficos_d3_panel = PanelDemoD3(self.content_area)
+        self.graficos_d3_panel.pack(fill='both', expand=True)
 
     def show_configuracion_panel(self):
         """Panel de configuración con diseño moderno y navegación interna"""
