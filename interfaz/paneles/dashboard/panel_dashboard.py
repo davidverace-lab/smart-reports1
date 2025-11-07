@@ -1,11 +1,11 @@
 """
 Panel ModernDashboard - Dashboard optimizado con lazy loading y pestañas
-ACTUALIZADO: Gráficos D3.js embebidos directamente dentro de la aplicación
+ACTUALIZADO: Gráficos D3.js embebidos profesionalmente con múltiples fallbacks
 """
 import customtkinter as ctk
 from tkinter import messagebox
 from interfaz.componentes.visualizacion.tarjeta_metrica import MetricCard
-from interfaz.componentes.visualizacion.tarjeta_d3_embebido import EmbeddedD3ChartCard
+from interfaz.componentes.visualizacion.tarjeta_d3_profesional import ProfessionalD3ChartCard
 from nucleo.configuracion.ajustes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from nucleo.configuracion.gestor_temas import get_theme_manager
 
@@ -311,14 +311,14 @@ class ModernDashboard(ctk.CTkFrame):
         charts_frame.grid_rowconfigure(0, weight=1)
 
         # Chart 1: Usuarios por Unidad (Barras D3.js)
-        self.chart1 = EmbeddedD3ChartCard(
+        self.chart1 = ProfessionalD3ChartCard(
             charts_frame,
             title='📊 Usuarios por Unidad de Negocio'
         )
         self.chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
         # Chart 2: Progreso General por UN (Donut D3.js)
-        self.chart2 = EmbeddedD3ChartCard(
+        self.chart2 = ProfessionalD3ChartCard(
             charts_frame,
             title='📈 Progreso General por Unidad (TNG 100% - 8 Módulos)'
         )
@@ -496,14 +496,14 @@ class ModernDashboard(ctk.CTkFrame):
         # ===== ROW 0: Top 5 UN con Mayor Incumplimiento + Top 3 UN más Lentas =====
 
         # Chart 1: Top 5 UN con Mayor Incumplimiento (D3.js)
-        chart_incumplimiento = EmbeddedD3ChartCard(
+        chart_incumplimiento = ProfessionalD3ChartCard(
             scrollable_frame,
             title='⚠️ UN con Mayor Incumplimiento (Módulo 8)'
         )
         chart_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
         # Chart 2: UN más Lentas (D3.js)
-        chart_lentas = EmbeddedD3ChartCard(
+        chart_lentas = ProfessionalD3ChartCard(
             scrollable_frame,
             title='⏱️ UN más Lentas (Tiempo a 80%)'
         )
@@ -512,7 +512,7 @@ class ModernDashboard(ctk.CTkFrame):
         # ===== ROW 1: Top 10 Usuarios Más Atrasados + Cuadro de Honor =====
 
         # Chart 3: Top 10 Usuarios Más Atrasados (D3.js)
-        chart_atrasados = EmbeddedD3ChartCard(
+        chart_atrasados = ProfessionalD3ChartCard(
             scrollable_frame,
             title='🐌 Usuarios Más Atrasados (Gen 1-4)'
         )
@@ -521,7 +521,7 @@ class ModernDashboard(ctk.CTkFrame):
         # ===== ROW 2: Usuarios con Mejor Calificación =====
 
         # Chart 4: Usuarios con Mejor Calificación (D3.js)
-        chart_calificacion = EmbeddedD3ChartCard(
+        chart_calificacion = ProfessionalD3ChartCard(
             scrollable_frame,
             title='⭐ Usuarios con Mejor Calificación Promedio'
         )

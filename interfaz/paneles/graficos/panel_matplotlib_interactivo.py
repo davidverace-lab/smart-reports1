@@ -1,9 +1,9 @@
 """
 Panel de gráficos interactivos D3.js embebidos
-ACTUALIZADO: Gráficos D3.js embebidos DENTRO de la aplicación de escritorio
+ACTUALIZADO: Gráficos D3.js profesionales con múltiples fallbacks
 """
 import customtkinter as ctk
-from interfaz.componentes.visualizacion.tarjeta_d3_embebido import EmbeddedD3ChartCard
+from interfaz.componentes.visualizacion.tarjeta_d3_profesional import ProfessionalD3ChartCard
 from nucleo.configuracion.ajustes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from nucleo.configuracion.gestor_temas import get_theme_manager
 
@@ -74,28 +74,28 @@ class MatplotlibInteractivePanel(ctk.CTkFrame):
         self.scroll_frame.grid_columnconfigure((0, 1), weight=1)
 
         # === Card 1: Gráfico de Líneas ===
-        chart1 = EmbeddedD3ChartCard(
+        chart1 = ProfessionalD3ChartCard(
             self.scroll_frame,
             title='📈 Tendencias de Progreso por Módulo'
         )
         chart1.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
         # === Card 2: Barras ===
-        chart2 = EmbeddedD3ChartCard(
+        chart2 = ProfessionalD3ChartCard(
             self.scroll_frame,
             title='📊 Distribución por Estado y Módulo'
         )
         chart2.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
         # === Card 3: Análisis ===
-        chart3 = EmbeddedD3ChartCard(
+        chart3 = ProfessionalD3ChartCard(
             self.scroll_frame,
             title='🎯 Análisis de Correlación - Progreso vs Tiempo'
         )
         chart3.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
 
         # === Card 4: Donut ===
-        chart4 = EmbeddedD3ChartCard(
+        chart4 = ProfessionalD3ChartCard(
             self.scroll_frame,
             title='🍩 Comparativa de Unidades de Negocio'
         )
