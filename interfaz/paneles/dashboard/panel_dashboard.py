@@ -1,13 +1,11 @@
 """
 Panel ModernDashboard - Dashboard optimizado con lazy loading y pestañas
-ACTUALIZADO: Usa gráficos D3.js interactivos en lugar de matplotlib
+ACTUALIZADO: Gráficos D3.js embebidos directamente dentro de la aplicación
 """
 import customtkinter as ctk
 from tkinter import messagebox
 from interfaz.componentes.visualizacion.tarjeta_metrica import MetricCard
-from interfaz.componentes.visualizacion.grafico_d3_widget import GraficoD3Widget
-from nucleo.servicios.motor_templates_d3 import MotorTemplatesD3
-from nucleo.servicios.graficos_d3_avanzados import GraficosD3Avanzados
+from interfaz.componentes.visualizacion.tarjeta_d3_embebido import EmbeddedD3ChartCard
 from nucleo.configuracion.ajustes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from nucleo.configuracion.gestor_temas import get_theme_manager
 
@@ -106,9 +104,6 @@ class ModernDashboard(ctk.CTkFrame):
 
         # Cargar pestaña General al inicio (después de crear widgets)
         self.after(50, self.load_general_charts)
-
-        # Widget para gráficos D3.js
-        self.grafico_d3_widget = GraficoD3Widget(width=1200, height=800)
 
     def _create_tabbed_content(self):
         """Crear contenedor con pestañas usando CTkSegmentedButton"""
@@ -309,92 +304,31 @@ class ModernDashboard(ctk.CTkFrame):
         )
         metric3.grid(row=0, column=2, sticky='ew', padx=10, pady=8)
 
-        # Row 2: Botones de Gráficos Interactivos D3.js (2 cards)
+        # Row 2: Gráficos D3.js embebidos (2 cards)
         charts_frame = ctk.CTkFrame(parent, fg_color='transparent')
         charts_frame.grid(row=1, column=0, sticky='nsew', padx=15, pady=(0, 15))
         charts_frame.grid_columnconfigure((0, 1), weight=1)
         charts_frame.grid_rowconfigure(0, weight=1)
 
-        theme = self.theme_manager.get_current_theme()
-
-        # Chart Card 1: Usuarios por Unidad (Barras Horizontales)
-        chart1_card = ctk.CTkFrame(
+        # Chart 1: Usuarios por Unidad (Barras D3.js)
+        self.chart1 = EmbeddedD3ChartCard(
             charts_frame,
-            fg_color=theme['surface'],
-            corner_radius=15,
-            border_width=1,
-            border_color=theme['border']
+            title='📊 Usuarios por Unidad de Negocio'
         )
-        chart1_card.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
+        self.chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
-        chart1_title = ctk.CTkLabel(
-            chart1_card,
-            text='📊 Usuarios por Unidad de Negocio',
-            font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
-        )
-        chart1_title.pack(pady=(20, 10))
-
-        chart1_desc = ctk.CTkLabel(
-            chart1_card,
-            text='Gráfico interactivo de barras horizontales',
-            font=('Montserrat', 11),
-            text_color=theme['text_secondary']
-        )
-        chart1_desc.pack(pady=(0, 20))
-
-        chart1_btn = ctk.CTkButton(
-            chart1_card,
-            text='Ver Gráfico Interactivo',
-            font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
-            height=45,
-            corner_radius=10,
-            command=self._show_chart_usuarios_por_unidad
-        )
-        chart1_btn.pack(pady=(0, 20), padx=40, fill='x')
-
-        # Chart Card 2: Progreso General por UN (Donut)
-        chart2_card = ctk.CTkFrame(
+        # Chart 2: Progreso General por UN (Donut D3.js)
+        self.chart2 = EmbeddedD3ChartCard(
             charts_frame,
-            fg_color=theme['surface'],
-            corner_radius=15,
-            border_width=1,
-            border_color=theme['border']
+            title='📈 Progreso General por Unidad (TNG 100% - 8 Módulos)'
         )
-        chart2_card.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
+        self.chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
 
-        chart2_title = ctk.CTkLabel(
-            chart2_card,
-            text='📈 Progreso General por Unidad',
-            font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
-        )
-        chart2_title.pack(pady=(20, 10))
+        # Crear gráficos D3.js
+        self._create_general_charts_d3()
 
-        chart2_desc = ctk.CTkLabel(
-            chart2_card,
-            text='Gráfico donut interactivo (TNG 100% - 8 Módulos)',
-            font=('Montserrat', 11),
-            text_color=theme['text_secondary']
-        )
-        chart2_desc.pack(pady=(0, 20))
-
-        chart2_btn = ctk.CTkButton(
-            chart2_card,
-            text='Ver Gráfico Interactivo',
-            font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
-            height=45,
-            corner_radius=10,
-            command=self._show_chart_progreso_general
-        )
-        chart2_btn.pack(pady=(0, 20), padx=40, fill='x')
-
-    def _show_chart_usuarios_por_unidad(self):
-        """Mostrar gráfico de usuarios por unidad con D3.js"""
+    def _create_general_charts_d3(self):
+        """Crear gráficos D3.js embebidos para pestaña General"""
         # Obtener datos
         units_data = self._get_users_by_unit()
 
@@ -402,103 +336,71 @@ class ModernDashboard(ctk.CTkFrame):
             units = [row[0] for row in units_data]
             counts = [row[1] for row in units_data]
 
-            # Crear gráfico D3.js de barras
-            self.grafico_d3_widget.crear_grafico_barras(
-                titulo="Usuarios por Unidad de Negocio - Instituto Hutchison Ports",
+            # Gráfico 1: Barras D3.js
+            self.chart1.set_d3_chart(
+                chart_type='bar',
                 datos={
                     'labels': units,
                     'values': counts
                 },
-                subtitulo="Distribución de usuarios por unidad de negocio • Datos en tiempo real"
+                subtitulo='Distribución de usuarios por unidad de negocio • Interactivo'
             )
 
-    def _show_chart_progreso_general(self):
-        """Mostrar gráfico de progreso general por UN con D3.js"""
-        # Datos estáticos (alineados con la realidad del negocio)
+        # Gráfico 2: Donut D3.js de Progreso General
         unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
         porcentajes_completado = [100, 82, 75, 68, 62]
 
-        # Crear gráfico D3.js donut
-        self.grafico_d3_widget.crear_grafico_donut(
-            titulo="Progreso General por Unidad de Negocio",
+        self.chart2.set_d3_chart(
+            chart_type='donut',
             datos={
                 'labels': [f"{un} - {pct}%" for un, pct in zip(unidades_negocio, porcentajes_completado)],
                 'values': porcentajes_completado
             },
-            subtitulo="TNG 100% completado (8 módulos) • Otras unidades en progreso"
+            subtitulo='TNG 100% completado (8 módulos) • Otras unidades en progreso'
         )
 
-    def _show_chart_incumplimiento(self):
-        """Mostrar gráfico de unidades con mayor incumplimiento con D3.js"""
-        unidades = ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística']
-        usuarios_pendientes = [65, 58, 52, 43, 38]
+    def _create_gerencial_charts_d3(self, chart_incump, chart_lentas, chart_atrasados, chart_calif):
+        """Crear gráficos D3.js embebidos para pestaña Gerencial"""
 
-        self.grafico_d3_widget.crear_grafico_barras(
-            titulo="Unidades con Mayor Incumplimiento - Módulo 8",
+        # Chart 1: UN con Mayor Incumplimiento
+        chart_incump.set_d3_chart(
+            chart_type='bar',
             datos={
-                'labels': unidades,
-                'values': usuarios_pendientes
+                'labels': ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística'],
+                'values': [65, 58, 52, 43, 38]
             },
-            subtitulo="Top 5 unidades con más usuarios pendientes (sin TNG al 100%)"
+            subtitulo='Top 5 unidades con más usuarios pendientes • Sin TNG (100%)'
         )
 
-    def _show_chart_atrasados(self):
-        """Mostrar gráfico de usuarios más atrasados con D3.js"""
-        usuarios = [
-            'Juan Pérez (ICAVE)',
-            'María García (HPMX)',
-            'Carlos López (ECV)',
-            'Ana Martínez (Container Care)',
-            'Pedro Sánchez (ICAVE)',
-            'Laura Rodríguez (HPMX)',
-            'José Hernández (ECV)',
-            'Carmen González (Logística)',
-            'Francisco Torres (ICAVE)',
-            'Isabel Ramírez (HPMX)'
-        ]
-        dias_retraso = [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
-
-        self.grafico_d3_widget.crear_grafico_barras(
-            titulo="Usuarios Más Atrasados - Generación 1-4",
+        # Chart 2: UN más Lentas
+        chart_lentas.set_d3_chart(
+            chart_type='bar',
             datos={
-                'labels': usuarios,
-                'values': dias_retraso
+                'labels': ['Logística', 'ECV', 'ICAVE'],
+                'values': [112, 108, 95]
             },
-            subtitulo="Top 10 usuarios con mayor retraso en días"
+            subtitulo='Días promedio para alcanzar 80% • Top 3 unidades'
         )
 
-    def _show_chart_lentas(self):
-        """Mostrar gráfico de unidades más lentas con D3.js"""
-        unidades = ['Logística', 'ICAVE', 'ECV']
-        dias_promedio = [112, 95, 108]
-
-        self.grafico_d3_widget.crear_grafico_barras(
-            titulo="Unidades más Lentas - Tiempo a 80%",
+        # Chart 3: Usuarios Más Atrasados
+        chart_atrasados.set_d3_chart(
+            chart_type='bar',
             datos={
-                'labels': unidades,
-                'values': dias_promedio
+                'labels': ['J. Pérez', 'M. García', 'C. López', 'A. Martínez', 'P. Sánchez',
+                          'L. Rodríguez', 'J. Hernández', 'C. González', 'F. Torres', 'I. Ramírez'],
+                'values': [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
             },
-            subtitulo="Top 3 unidades con mayor tiempo promedio para alcanzar 80% (sin TNG)"
+            subtitulo='Top 10 usuarios con mayor retraso en días • Generación 1-4'
         )
 
-    def _show_chart_calificacion(self):
-        """Mostrar gráfico de usuarios con mejor calificación con D3.js"""
-        usuarios = [
-            'Cristina Ruiz (ICAVE)',
-            'Roberto Mendoza (HPMX)',
-            'Patricia Morales (ECV)',
-            'Fernando Silva (Container Care)',
-            'Andrea López (Logística)'
-        ]
-        calificaciones = [98.5, 97.8, 97.2, 96.9, 95.5]
-
-        self.grafico_d3_widget.crear_grafico_barras(
-            titulo="Usuarios con Mejor Calificación Promedio",
+        # Chart 4: Usuarios con Mejor Calificación
+        chart_calif.set_d3_chart(
+            chart_type='bar',
             datos={
-                'labels': usuarios,
-                'values': calificaciones
+                'labels': ['C. Ruiz', 'R. Mendoza', 'P. Morales', 'F. Silva', 'A. López'],
+                'values': [98.5, 97.8, 97.2, 96.9, 95.5]
             },
-            subtitulo="Top 5 usuarios con las mejores calificaciones"
+            subtitulo='Top 5 usuarios con mejor calificación promedio'
         )
 
     # ==================== MÉTODOS DE DATOS ====================
@@ -593,161 +495,45 @@ class ModernDashboard(ctk.CTkFrame):
 
         # ===== ROW 0: Top 5 UN con Mayor Incumplimiento + Top 3 UN más Lentas =====
 
-        # Card 1: Top 5 UN con Mayor Incumplimiento (sin TNG)
-        card_incumplimiento = ctk.CTkFrame(
+        # Chart 1: Top 5 UN con Mayor Incumplimiento (D3.js)
+        chart_incumplimiento = EmbeddedD3ChartCard(
             scrollable_frame,
-            fg_color=theme['surface'],
-            corner_radius=15,
-            border_width=1,
-            border_color=theme['border']
+            title='⚠️ UN con Mayor Incumplimiento (Módulo 8)'
         )
-        card_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+        chart_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
-        title_incump = ctk.CTkLabel(
-            card_incumplimiento,
-            text='⚠️ UN con Mayor Incumplimiento',
-            font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+        # Chart 2: UN más Lentas (D3.js)
+        chart_lentas = EmbeddedD3ChartCard(
+            scrollable_frame,
+            title='⏱️ UN más Lentas (Tiempo a 80%)'
         )
-        title_incump.pack(pady=(20, 10))
-
-        desc_incump = ctk.CTkLabel(
-            card_incumplimiento,
-            text='Top 5 unidades con más usuarios pendientes (Módulo 8)',
-            font=('Montserrat', 11),
-            text_color=theme['text_secondary']
-        )
-        desc_incump.pack(pady=(0, 20))
-
-        btn_incump = ctk.CTkButton(
-            card_incumplimiento,
-            text='Ver Gráfico Interactivo',
-            font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['warning'],
-            hover_color='#ff8c42',
-            height=45,
-            corner_radius=10,
-            command=self._show_chart_incumplimiento
-        )
-        btn_incump.pack(pady=(0, 20), padx=40, fill='x')
+        chart_lentas.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
         # ===== ROW 1: Top 10 Usuarios Más Atrasados + Cuadro de Honor =====
 
-        # Card 2: Top 10 Usuarios Más Atrasados
-        card_atrasados = ctk.CTkFrame(
+        # Chart 3: Top 10 Usuarios Más Atrasados (D3.js)
+        chart_atrasados = EmbeddedD3ChartCard(
             scrollable_frame,
-            fg_color=theme['surface'],
-            corner_radius=15,
-            border_width=1,
-            border_color=theme['border']
+            title='🐌 Usuarios Más Atrasados (Gen 1-4)'
         )
-        card_atrasados.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
-
-        title_atrasados = ctk.CTkLabel(
-            card_atrasados,
-            text='🐌 Usuarios Más Atrasados',
-            font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
-        )
-        title_atrasados.pack(pady=(20, 10))
-
-        desc_atrasados = ctk.CTkLabel(
-            card_atrasados,
-            text='Top 10 usuarios con mayor retraso (Gen 1-4)',
-            font=('Montserrat', 11),
-            text_color=theme['text_secondary']
-        )
-        desc_atrasados.pack(pady=(0, 20))
-
-        btn_atrasados = ctk.CTkButton(
-            card_atrasados,
-            text='Ver Gráfico Interactivo',
-            font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['danger'],
-            hover_color='#cc5555',
-            height=45,
-            corner_radius=10,
-            command=self._show_chart_atrasados
-        )
-        btn_atrasados.pack(pady=(0, 20), padx=40, fill='x')
-
-        # Card 3: UN más Lentas (Tiempo a 80%)
-        card_lentas = ctk.CTkFrame(
-            scrollable_frame,
-            fg_color=theme['surface'],
-            corner_radius=15,
-            border_width=1,
-            border_color=theme['border']
-        )
-        card_lentas.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
-
-        title_lentas = ctk.CTkLabel(
-            card_lentas,
-            text='⏱️ UN más Lentas',
-            font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
-        )
-        title_lentas.pack(pady=(20, 10))
-
-        desc_lentas = ctk.CTkLabel(
-            card_lentas,
-            text='Top 3 unidades con mayor tiempo promedio (80%)',
-            font=('Montserrat', 11),
-            text_color=theme['text_secondary']
-        )
-        desc_lentas.pack(pady=(0, 20))
-
-        btn_lentas = ctk.CTkButton(
-            card_lentas,
-            text='Ver Gráfico Interactivo',
-            font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_horizon_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
-            height=45,
-            corner_radius=10,
-            command=self._show_chart_lentas
-        )
-        btn_lentas.pack(pady=(0, 20), padx=40, fill='x')
+        chart_atrasados.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
 
         # ===== ROW 2: Usuarios con Mejor Calificación =====
 
-        # Card 4: Usuarios con Mejor Calificación
-        card_calificacion = ctk.CTkFrame(
+        # Chart 4: Usuarios con Mejor Calificación (D3.js)
+        chart_calificacion = EmbeddedD3ChartCard(
             scrollable_frame,
-            fg_color=theme['surface'],
-            corner_radius=15,
-            border_width=1,
-            border_color=theme['border']
+            title='⭐ Usuarios con Mejor Calificación Promedio'
         )
-        card_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
+        chart_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
 
-        title_calif = ctk.CTkLabel(
-            card_calificacion,
-            text='⭐ Usuarios con Mejor Calificación',
-            font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+        # Crear los gráficos D3.js
+        self._create_gerencial_charts_d3(
+            chart_incumplimiento,
+            chart_lentas,
+            chart_atrasados,
+            chart_calificacion
         )
-        title_calif.pack(pady=(20, 10))
-
-        desc_calif = ctk.CTkLabel(
-            card_calificacion,
-            text='Top 5 usuarios con mejor calificación promedio',
-            font=('Montserrat', 11),
-            text_color=theme['text_secondary']
-        )
-        desc_calif.pack(pady=(0, 20))
-
-        btn_calif = ctk.CTkButton(
-            card_calificacion,
-            text='Ver Gráfico Interactivo',
-            font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['success'],
-            hover_color='#41a755',
-            height=45,
-            corner_radius=10,
-            command=self._show_chart_calificacion
-        )
-        btn_calif.pack(pady=(0, 20), padx=40, fill='x')
 
         # Cuadro de Honor (usuarios de otras unidades)
         cuadro_frame = ctk.CTkFrame(
