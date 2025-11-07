@@ -104,7 +104,6 @@ class ModernSidebar(ctk.CTkFrame):
             ('🔍', 'Consulta de Empleados', 'consultas'),
             ('📤', 'Cruce de Datos (Cornerstone)', 'actualizar'),
             ('📄', 'Generar Reportes', 'reportes'),
-            ('🎨', 'Gráficos Interactivos D3', 'graficos_d3'),
             ('⚙️', 'Configuración', 'configuracion'),
         ]
 
