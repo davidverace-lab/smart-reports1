@@ -14,8 +14,8 @@ if __name__ == "__main__":
         sys.path.insert(0, current_dir)
 
 import customtkinter as ctk
-from ui.login_window import LoginWindow
-from ui.main_window_modern import MainWindow
+from interfaz.ventanas.ventana_login import LoginWindow
+from interfaz.ventanas.ventana_principal import MainWindow
 
 
 def main():
