@@ -1,17 +1,15 @@
 """
 Panel ModernDashboard - Dashboard optimizado con lazy loading y pestañas
+ACTUALIZADO: Usa gráficos D3.js interactivos en lugar de matplotlib
 """
 import customtkinter as ctk
 from tkinter import messagebox
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-import numpy as np
-from interfaz.componentes.visualizacion.tarjeta_grafico_matplotlib import MatplotlibChartCard
 from interfaz.componentes.visualizacion.tarjeta_metrica import MetricCard
-from interfaz.paneles.graficos.panel_matplotlib_interactivo import MatplotlibInteractivePanel
+from interfaz.componentes.visualizacion.grafico_d3_widget import GraficoD3Widget
+from nucleo.servicios.motor_templates_d3 import MotorTemplatesD3
+from nucleo.servicios.graficos_d3_avanzados import GraficosD3Avanzados
 from nucleo.configuracion.ajustes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from nucleo.configuracion.gestor_temas import get_theme_manager
-from nucleo.servicios.exportador_graficos import get_chart_exporter
 
 
 # Datos de ejemplo basados en las imágenes proporcionadas
@@ -109,28 +107,8 @@ class ModernDashboard(ctk.CTkFrame):
         # Cargar pestaña General al inicio (después de crear widgets)
         self.after(50, self.load_general_charts)
 
-        # Obtener instancia del exportador
-        self.chart_exporter = get_chart_exporter()
-
-    def export_chart_to_plotly(self, fig, title):
-        """
-        Exportar gráfico Matplotlib a Plotly interactivo
-
-        Args:
-            fig: Figura de Matplotlib
-            title: Título del gráfico
-        """
-        try:
-            self.chart_exporter.export_to_plotly(fig, title)
-            messagebox.showinfo(
-                "Exportación Exitosa",
-                f"El gráfico '{title}' ha sido exportado y abierto en su navegador."
-            )
-        except Exception as e:
-            messagebox.showerror(
-                "Error de Exportación",
-                f"No se pudo exportar el gráfico:\n{str(e)}"
-            )
+        # Widget para gráficos D3.js
+        self.grafico_d3_widget = GraficoD3Widget(width=1200, height=800)
 
     def _create_tabbed_content(self):
         """Crear contenedor con pestañas usando CTkSegmentedButton"""
@@ -331,33 +309,92 @@ class ModernDashboard(ctk.CTkFrame):
         )
         metric3.grid(row=0, column=2, sticky='ew', padx=10, pady=8)
 
-        # Row 2: Gráficos (2 cards)
+        # Row 2: Botones de Gráficos Interactivos D3.js (2 cards)
         charts_frame = ctk.CTkFrame(parent, fg_color='transparent')
         charts_frame.grid(row=1, column=0, sticky='nsew', padx=15, pady=(0, 15))
         charts_frame.grid_columnconfigure((0, 1), weight=1)
         charts_frame.grid_rowconfigure(0, weight=1)
 
-        # Chart 1: Usuarios por Unidad (Barras Horizontales)
-        chart1 = MatplotlibChartCard(
+        theme = self.theme_manager.get_current_theme()
+
+        # Chart Card 1: Usuarios por Unidad (Barras Horizontales)
+        chart1_card = ctk.CTkFrame(
             charts_frame,
-            title='Usuarios por Unidad de Negocio',
-            export_callback=self.export_chart_to_plotly
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
         )
-        chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
+        chart1_card.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
-        # Chart 2: Progreso General por UN (Donut) - MOVIDO desde Reportes Gerenciales
-        chart2 = MatplotlibChartCard(
+        chart1_title = ctk.CTkLabel(
+            chart1_card,
+            text='📊 Usuarios por Unidad de Negocio',
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['text']
+        )
+        chart1_title.pack(pady=(20, 10))
+
+        chart1_desc = ctk.CTkLabel(
+            chart1_card,
+            text='Gráfico interactivo de barras horizontales',
+            font=('Montserrat', 11),
+            text_color=theme['text_secondary']
+        )
+        chart1_desc.pack(pady=(0, 20))
+
+        chart1_btn = ctk.CTkButton(
+            chart1_card,
+            text='Ver Gráfico Interactivo',
+            font=('Montserrat', 13, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
+            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            height=45,
+            corner_radius=10,
+            command=self._show_chart_usuarios_por_unidad
+        )
+        chart1_btn.pack(pady=(0, 20), padx=40, fill='x')
+
+        # Chart Card 2: Progreso General por UN (Donut)
+        chart2_card = ctk.CTkFrame(
             charts_frame,
-            title='Progreso General por Unidad de Negocio (TNG 100% - 8 Módulos)',
-            export_callback=self.export_chart_to_plotly
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
         )
-        chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
+        chart2_card.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
 
-        # Crear gráficos
-        self._create_general_charts(chart1, chart2)
+        chart2_title = ctk.CTkLabel(
+            chart2_card,
+            text='📈 Progreso General por Unidad',
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['text']
+        )
+        chart2_title.pack(pady=(20, 10))
 
-    def _create_general_charts(self, chart1, chart2):
-        """Crear gráficos para pestaña General"""
+        chart2_desc = ctk.CTkLabel(
+            chart2_card,
+            text='Gráfico donut interactivo (TNG 100% - 8 Módulos)',
+            font=('Montserrat', 11),
+            text_color=theme['text_secondary']
+        )
+        chart2_desc.pack(pady=(0, 20))
+
+        chart2_btn = ctk.CTkButton(
+            chart2_card,
+            text='Ver Gráfico Interactivo',
+            font=('Montserrat', 13, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
+            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            height=45,
+            corner_radius=10,
+            command=self._show_chart_progreso_general
+        )
+        chart2_btn.pack(pady=(0, 20), padx=40, fill='x')
+
+    def _show_chart_usuarios_por_unidad(self):
+        """Mostrar gráfico de usuarios por unidad con D3.js"""
         # Obtener datos
         units_data = self._get_users_by_unit()
 
@@ -365,81 +402,104 @@ class ModernDashboard(ctk.CTkFrame):
             units = [row[0] for row in units_data]
             counts = [row[1] for row in units_data]
 
-            # Usar paleta GERENCIAL_PALETTE (azules y verdes armoniosos)
-            colors = [GERENCIAL_PALETTE[i % len(GERENCIAL_PALETTE)] for i in range(len(units))]
+            # Crear gráfico D3.js de barras
+            self.grafico_d3_widget.crear_grafico_barras(
+                titulo="Usuarios por Unidad de Negocio - Instituto Hutchison Ports",
+                datos={
+                    'labels': units,
+                    'values': counts
+                },
+                subtitulo="Distribución de usuarios por unidad de negocio • Datos en tiempo real"
+            )
 
-            # Gráfico 1: Barras horizontales
-            fig1 = Figure(figsize=(8, 5))
-            ax1 = fig1.add_subplot(111)
-
-            bars = ax1.barh(units, counts, color=colors, edgecolor='none')
-            ax1.set_xlabel('Número de Usuarios', fontsize=11, fontfamily='Montserrat')
-            ax1.set_ylabel('', fontsize=11)
-            ax1.tick_params(labelsize=10)
-            ax1.spines['top'].set_visible(False)
-            ax1.spines['right'].set_visible(False)
-            ax1.grid(axis='x', alpha=0.3)
-
-            # Añadir valores en las barras
-            for bar in bars:
-                width = bar.get_width()
-                ax1.text(width + 5, bar.get_y() + bar.get_height()/2,
-                        f'{int(width)}',
-                        ha='left', va='center', fontsize=9,
-                        fontweight='bold')
-
-            fig1.tight_layout()
-            chart1.set_figure(fig1)
-
-        # Gráfico 2: Donut de Progreso General por UN
-        theme = self.theme_manager.get_current_theme()
-
-        # Datos estáticos para el gráfico de donut (alineados con la realidad del negocio)
-        # TNG al 100% completado (8 módulos), otras unidades en progreso
-        unidades_negocio = ['TNG\n100%', 'ICAVE\n82%', 'ECV\n75%', 'Container Care\n68%', 'HPMX\n62%']
+    def _show_chart_progreso_general(self):
+        """Mostrar gráfico de progreso general por UN con D3.js"""
+        # Datos estáticos (alineados con la realidad del negocio)
+        unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
         porcentajes_completado = [100, 82, 75, 68, 62]
 
-        # Colores distintivos: TNG en verde (#28A745) por estar completo, otros en tonos azules
-        colors_donut = ['#28A745', '#009BDE', '#0077B6', '#005A8D', '#003D5C']
-
-        fig2 = Figure(figsize=(7, 6))
-        ax2 = fig2.add_subplot(111)
-
-        wedges, texts, autotexts = ax2.pie(
-            porcentajes_completado,
-            labels=unidades_negocio,
-            colors=colors_donut,
-            autopct='',  # No mostrar % dentro (ya está en labels)
-            startangle=90,
-            wedgeprops=dict(width=0.5, edgecolor=theme['surface'], linewidth=3)
+        # Crear gráfico D3.js donut
+        self.grafico_d3_widget.crear_grafico_donut(
+            titulo="Progreso General por Unidad de Negocio",
+            datos={
+                'labels': [f"{un} - {pct}%" for un, pct in zip(unidades_negocio, porcentajes_completado)],
+                'values': porcentajes_completado
+            },
+            subtitulo="TNG 100% completado (8 módulos) • Otras unidades en progreso"
         )
 
-        # Estilo de textos - más grandes y legibles
-        for text in texts:
-            text.set_fontsize(12)
-            text.set_fontfamily('Montserrat')
-            text.set_weight('bold')
+    def _show_chart_incumplimiento(self):
+        """Mostrar gráfico de unidades con mayor incumplimiento con D3.js"""
+        unidades = ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística']
+        usuarios_pendientes = [65, 58, 52, 43, 38]
 
-        # Leyenda mejorada con información completa
-        legend_labels = [
-            'TNG - 100% (8/8 módulos)',
-            'ICAVE - 82% (6.5/8 módulos)',
-            'ECV - 75% (6/8 módulos)',
-            'Container Care - 68% (5.5/8 módulos)',
-            'HPMX - 62% (5/8 módulos)'
+        self.grafico_d3_widget.crear_grafico_barras(
+            titulo="Unidades con Mayor Incumplimiento - Módulo 8",
+            datos={
+                'labels': unidades,
+                'values': usuarios_pendientes
+            },
+            subtitulo="Top 5 unidades con más usuarios pendientes (sin TNG al 100%)"
+        )
+
+    def _show_chart_atrasados(self):
+        """Mostrar gráfico de usuarios más atrasados con D3.js"""
+        usuarios = [
+            'Juan Pérez (ICAVE)',
+            'María García (HPMX)',
+            'Carlos López (ECV)',
+            'Ana Martínez (Container Care)',
+            'Pedro Sánchez (ICAVE)',
+            'Laura Rodríguez (HPMX)',
+            'José Hernández (ECV)',
+            'Carmen González (Logística)',
+            'Francisco Torres (ICAVE)',
+            'Isabel Ramírez (HPMX)'
         ]
+        dias_retraso = [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
 
-        ax2.legend(
-            wedges, legend_labels,
-            title="Progreso por Unidad",
-            loc='center left',
-            bbox_to_anchor=(1, 0, 0.5, 1),
-            fontsize=10,
-            title_fontsize=11
+        self.grafico_d3_widget.crear_grafico_barras(
+            titulo="Usuarios Más Atrasados - Generación 1-4",
+            datos={
+                'labels': usuarios,
+                'values': dias_retraso
+            },
+            subtitulo="Top 10 usuarios con mayor retraso en días"
         )
 
-        fig2.tight_layout()
-        chart2.set_figure(fig2)
+    def _show_chart_lentas(self):
+        """Mostrar gráfico de unidades más lentas con D3.js"""
+        unidades = ['Logística', 'ICAVE', 'ECV']
+        dias_promedio = [112, 95, 108]
+
+        self.grafico_d3_widget.crear_grafico_barras(
+            titulo="Unidades más Lentas - Tiempo a 80%",
+            datos={
+                'labels': unidades,
+                'values': dias_promedio
+            },
+            subtitulo="Top 3 unidades con mayor tiempo promedio para alcanzar 80% (sin TNG)"
+        )
+
+    def _show_chart_calificacion(self):
+        """Mostrar gráfico de usuarios con mejor calificación con D3.js"""
+        usuarios = [
+            'Cristina Ruiz (ICAVE)',
+            'Roberto Mendoza (HPMX)',
+            'Patricia Morales (ECV)',
+            'Fernando Silva (Container Care)',
+            'Andrea López (Logística)'
+        ]
+        calificaciones = [98.5, 97.8, 97.2, 96.9, 95.5]
+
+        self.grafico_d3_widget.crear_grafico_barras(
+            titulo="Usuarios con Mejor Calificación Promedio",
+            datos={
+                'labels': usuarios,
+                'values': calificaciones
+            },
+            subtitulo="Top 5 usuarios con las mejores calificaciones"
+        )
 
     # ==================== MÉTODOS DE DATOS ====================
 
@@ -533,171 +593,161 @@ class ModernDashboard(ctk.CTkFrame):
 
         # ===== ROW 0: Top 5 UN con Mayor Incumplimiento + Top 3 UN más Lentas =====
 
-        # Gráfico: Top 5 UN con Mayor Incumplimiento (sin TNG)
-        chart_incumplimiento = MatplotlibChartCard(
+        # Card 1: Top 5 UN con Mayor Incumplimiento (sin TNG)
+        card_incumplimiento = ctk.CTkFrame(
             scrollable_frame,
-            title='UN con Mayor Incumplimiento (Módulo 8)',
-            export_callback=self.export_chart_to_plotly
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
         )
-        chart_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+        card_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos corregidos (sin TNG ya que están al 100%)
-        unidades_incumplimiento = ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística']
-        usuarios_pendientes = [65, 58, 52, 43, 38]
-
-        fig_incump = Figure(figsize=(8, 6))
-        ax_incump = fig_incump.add_subplot(111)
-        bars_incump = ax_incump.bar(
-            unidades_incumplimiento,
-            usuarios_pendientes,
-            color=[GERENCIAL_PALETTE[i] for i in [1, 2, 3, 4, 5]],
-            edgecolor='none'
+        title_incump = ctk.CTkLabel(
+            card_incumplimiento,
+            text='⚠️ UN con Mayor Incumplimiento',
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['text']
         )
-        ax_incump.set_ylabel('Usuarios Pendientes', fontsize=11, fontfamily='Montserrat')
-        ax_incump.tick_params(labelsize=10)
-        ax_incump.spines['top'].set_visible(False)
-        ax_incump.spines['right'].set_visible(False)
-        ax_incump.grid(axis='y', alpha=0.3)
+        title_incump.pack(pady=(20, 10))
 
-        for bar in bars_incump:
-            height = bar.get_height()
-            ax_incump.text(bar.get_x() + bar.get_width()/2, height,
-                    f'{int(height)}',
-                    ha='center', va='bottom', fontsize=9,
-                    fontweight='bold')
+        desc_incump = ctk.CTkLabel(
+            card_incumplimiento,
+            text='Top 5 unidades con más usuarios pendientes (Módulo 8)',
+            font=('Montserrat', 11),
+            text_color=theme['text_secondary']
+        )
+        desc_incump.pack(pady=(0, 20))
 
-        fig_incump.tight_layout()
-        chart_incumplimiento.set_figure(fig_incump)
+        btn_incump = ctk.CTkButton(
+            card_incumplimiento,
+            text='Ver Gráfico Interactivo',
+            font=('Montserrat', 13, 'bold'),
+            fg_color=HUTCHISON_COLORS['warning'],
+            hover_color='#ff8c42',
+            height=45,
+            corner_radius=10,
+            command=self._show_chart_incumplimiento
+        )
+        btn_incump.pack(pady=(0, 20), padx=40, fill='x')
 
         # ===== ROW 1: Top 10 Usuarios Más Atrasados + Cuadro de Honor =====
 
-        # Gráfico: Top 10 Usuarios Más Atrasados (sin usuarios de TNG)
-        chart_atrasados = MatplotlibChartCard(
+        # Card 2: Top 10 Usuarios Más Atrasados
+        card_atrasados = ctk.CTkFrame(
             scrollable_frame,
-            title='Usuarios Más Atrasados (Gen 1-4)',
-            export_callback=self.export_chart_to_plotly
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
         )
-        chart_atrasados.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+        card_atrasados.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos corregidos (usuarios de ICAVE, HPMX, ECV, etc.)
-        usuarios_atrasados = [
-            'Juan Pérez (ICAVE)',
-            'María García (HPMX)',
-            'Carlos López (ECV)',
-            'Ana Martínez (Container Care)',
-            'Pedro Sánchez (ICAVE)',
-            'Laura Rodríguez (HPMX)',
-            'José Hernández (ECV)',
-            'Carmen González (Logística)',
-            'Francisco Torres (ICAVE)',
-            'Isabel Ramírez (HPMX)'
-        ]
-        dias_retraso = [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
-
-        fig_atrasados = Figure(figsize=(9, 6))
-        ax_atrasados = fig_atrasados.add_subplot(111)
-        bars_atrasados = ax_atrasados.barh(
-            usuarios_atrasados,
-            dias_retraso,
-            color=GERENCIAL_PALETTE[2],
-            edgecolor='none'
+        title_atrasados = ctk.CTkLabel(
+            card_atrasados,
+            text='🐌 Usuarios Más Atrasados',
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['text']
         )
-        ax_atrasados.set_xlabel('Días de Retraso', fontsize=11, fontfamily='Montserrat')
-        ax_atrasados.tick_params(labelsize=9)
-        ax_atrasados.spines['top'].set_visible(False)
-        ax_atrasados.spines['right'].set_visible(False)
-        ax_atrasados.grid(axis='x', alpha=0.3)
+        title_atrasados.pack(pady=(20, 10))
 
-        for bar in bars_atrasados:
-            width = bar.get_width()
-            ax_atrasados.text(width + 1, bar.get_y() + bar.get_height()/2,
-                    f'{int(width)}',
-                    ha='left', va='center', fontsize=9,
-                    fontweight='bold')
+        desc_atrasados = ctk.CTkLabel(
+            card_atrasados,
+            text='Top 10 usuarios con mayor retraso (Gen 1-4)',
+            font=('Montserrat', 11),
+            text_color=theme['text_secondary']
+        )
+        desc_atrasados.pack(pady=(0, 20))
 
-        fig_atrasados.tight_layout()
-        chart_atrasados.set_figure(fig_atrasados)
+        btn_atrasados = ctk.CTkButton(
+            card_atrasados,
+            text='Ver Gráfico Interactivo',
+            font=('Montserrat', 13, 'bold'),
+            fg_color=HUTCHISON_COLORS['danger'],
+            hover_color='#cc5555',
+            height=45,
+            corner_radius=10,
+            command=self._show_chart_atrasados
+        )
+        btn_atrasados.pack(pady=(0, 20), padx=40, fill='x')
 
-        # Gráfico: UN más Lentas (Tiempo a 80%)
-        chart_lentas = MatplotlibChartCard(
+        # Card 3: UN más Lentas (Tiempo a 80%)
+        card_lentas = ctk.CTkFrame(
             scrollable_frame,
-            title='UN más Lentas (Tiempo a 80%)',
-            export_callback=self.export_chart_to_plotly
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
         )
-        chart_lentas.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
+        card_lentas.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos (sin TNG)
-        unidades_lentas = ['Logística', 'ICAVE', 'ECV']
-        dias_promedio = [112, 95, 108]
-
-        fig_lentas = Figure(figsize=(8, 5))
-        ax_lentas = fig_lentas.add_subplot(111)
-        bars_lentas = ax_lentas.barh(
-            unidades_lentas,
-            dias_promedio,
-            color=[GERENCIAL_PALETTE[i] for i in [0, 1, 3]],
-            edgecolor='none'
+        title_lentas = ctk.CTkLabel(
+            card_lentas,
+            text='⏱️ UN más Lentas',
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['text']
         )
-        ax_lentas.set_xlabel('Días Promedio para 80%', fontsize=11, fontfamily='Montserrat')
-        ax_lentas.tick_params(labelsize=10)
-        ax_lentas.spines['top'].set_visible(False)
-        ax_lentas.spines['right'].set_visible(False)
-        ax_lentas.grid(axis='x', alpha=0.3)
+        title_lentas.pack(pady=(20, 10))
 
-        for bar in bars_lentas:
-            width = bar.get_width()
-            ax_lentas.text(width + 2, bar.get_y() + bar.get_height()/2,
-                    f'{int(width)}',
-                    ha='left', va='center', fontsize=9,
-                    fontweight='bold')
+        desc_lentas = ctk.CTkLabel(
+            card_lentas,
+            text='Top 3 unidades con mayor tiempo promedio (80%)',
+            font=('Montserrat', 11),
+            text_color=theme['text_secondary']
+        )
+        desc_lentas.pack(pady=(0, 20))
 
-        fig_lentas.tight_layout()
-        chart_lentas.set_figure(fig_lentas)
+        btn_lentas = ctk.CTkButton(
+            card_lentas,
+            text='Ver Gráfico Interactivo',
+            font=('Montserrat', 13, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_horizon_blue'],
+            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            height=45,
+            corner_radius=10,
+            command=self._show_chart_lentas
+        )
+        btn_lentas.pack(pady=(0, 20), padx=40, fill='x')
 
         # ===== ROW 2: Usuarios con Mejor Calificación =====
 
-        # Gráfico: Usuarios con Mejor Calificación (usuarios de otras unidades)
-        chart_calificacion = MatplotlibChartCard(
+        # Card 4: Usuarios con Mejor Calificación
+        card_calificacion = ctk.CTkFrame(
             scrollable_frame,
-            title='Usuarios con Mejor Calificación Promedio',
-            export_callback=self.export_chart_to_plotly
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
         )
-        chart_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
+        card_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Datos estáticos (usuarios de otras unidades con mejores calificaciones)
-        top_usuarios = [
-            'Cristina Ruiz (ICAVE)',
-            'Roberto Mendoza (HPMX)',
-            'Patricia Morales (ECV)',
-            'Fernando Silva (Container Care)',
-            'Andrea López (Logística)'
-        ]
-        calificaciones = [98.5, 97.8, 97.2, 96.9, 95.5]
-
-        fig_calif = Figure(figsize=(9, 5))
-        ax_calif = fig_calif.add_subplot(111)
-        bars_calif = ax_calif.barh(
-            top_usuarios,
-            calificaciones,
-            color=GERENCIAL_PALETTE[0],
-            edgecolor='none'
+        title_calif = ctk.CTkLabel(
+            card_calificacion,
+            text='⭐ Usuarios con Mejor Calificación',
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['text']
         )
-        ax_calif.set_xlabel('Calificación Promedio', fontsize=11, fontfamily='Montserrat')
-        ax_calif.set_xlim(90, 100)
-        ax_calif.tick_params(labelsize=10)
-        ax_calif.spines['top'].set_visible(False)
-        ax_calif.spines['right'].set_visible(False)
-        ax_calif.grid(axis='x', alpha=0.3)
+        title_calif.pack(pady=(20, 10))
 
-        for bar in bars_calif:
-            width = bar.get_width()
-            ax_calif.text(width + 0.2, bar.get_y() + bar.get_height()/2,
-                    f'{width:.1f}',
-                    ha='left', va='center', fontsize=9,
-                    fontweight='bold')
+        desc_calif = ctk.CTkLabel(
+            card_calificacion,
+            text='Top 5 usuarios con mejor calificación promedio',
+            font=('Montserrat', 11),
+            text_color=theme['text_secondary']
+        )
+        desc_calif.pack(pady=(0, 20))
 
-        fig_calif.tight_layout()
-        chart_calificacion.set_figure(fig_calif)
+        btn_calif = ctk.CTkButton(
+            card_calificacion,
+            text='Ver Gráfico Interactivo',
+            font=('Montserrat', 13, 'bold'),
+            fg_color=HUTCHISON_COLORS['success'],
+            hover_color='#41a755',
+            height=45,
+            corner_radius=10,
+            command=self._show_chart_calificacion
+        )
+        btn_calif.pack(pady=(0, 20), padx=40, fill='x')
 
         # Cuadro de Honor (usuarios de otras unidades)
         cuadro_frame = ctk.CTkFrame(
