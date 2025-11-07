@@ -1,13 +1,11 @@
 """
 Panel ModernDashboard - Dashboard optimizado con lazy loading y pestañas
-ACTUALIZADO: Matplotlib embebido optimizado + exportación D3.js opcional
+ACTUALIZADO: Gráficos D3.js embebidos directamente dentro de la aplicación
 """
 import customtkinter as ctk
 from tkinter import messagebox
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
 from interfaz.componentes.visualizacion.tarjeta_metrica import MetricCard
-from interfaz.componentes.visualizacion.tarjeta_grafico_optimizado import OptimizedChartCard
+from interfaz.componentes.visualizacion.tarjeta_d3_embebido import EmbeddedD3ChartCard
 from nucleo.configuracion.ajustes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from nucleo.configuracion.gestor_temas import get_theme_manager
 
@@ -306,31 +304,31 @@ class ModernDashboard(ctk.CTkFrame):
         )
         metric3.grid(row=0, column=2, sticky='ew', padx=10, pady=8)
 
-        # Row 2: Gráficos embebidos (2 cards)
+        # Row 2: Gráficos D3.js embebidos (2 cards)
         charts_frame = ctk.CTkFrame(parent, fg_color='transparent')
         charts_frame.grid(row=1, column=0, sticky='nsew', padx=15, pady=(0, 15))
         charts_frame.grid_columnconfigure((0, 1), weight=1)
         charts_frame.grid_rowconfigure(0, weight=1)
 
-        # Chart 1: Usuarios por Unidad (Barras Horizontales)
-        self.chart1 = OptimizedChartCard(
+        # Chart 1: Usuarios por Unidad (Barras D3.js)
+        self.chart1 = EmbeddedD3ChartCard(
             charts_frame,
-            title='Usuarios por Unidad de Negocio'
+            title='📊 Usuarios por Unidad de Negocio'
         )
         self.chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
-        # Chart 2: Progreso General por UN (Donut)
-        self.chart2 = OptimizedChartCard(
+        # Chart 2: Progreso General por UN (Donut D3.js)
+        self.chart2 = EmbeddedD3ChartCard(
             charts_frame,
-            title='Progreso General por Unidad de Negocio (TNG 100% - 8 Módulos)'
+            title='📈 Progreso General por Unidad (TNG 100% - 8 Módulos)'
         )
         self.chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
 
-        # Crear gráficos
-        self._create_general_charts()
+        # Crear gráficos D3.js
+        self._create_general_charts_d3()
 
-    def _create_general_charts(self):
-        """Crear gráficos matplotlib embebidos para pestaña General"""
+    def _create_general_charts_d3(self):
+        """Crear gráficos D3.js embebidos para pestaña General"""
         # Obtener datos
         units_data = self._get_users_by_unit()
 
@@ -338,227 +336,72 @@ class ModernDashboard(ctk.CTkFrame):
             units = [row[0] for row in units_data]
             counts = [row[1] for row in units_data]
 
-            # Gráfico 1: Barras horizontales
-            fig1 = Figure(figsize=(7, 5), dpi=90)
-            ax1 = fig1.add_subplot(111)
+            # Gráfico 1: Barras D3.js
+            self.chart1.set_d3_chart(
+                chart_type='bar',
+                datos={
+                    'labels': units,
+                    'values': counts
+                },
+                subtitulo='Distribución de usuarios por unidad de negocio • Interactivo'
+            )
 
-            colors = [GERENCIAL_PALETTE[i % len(GERENCIAL_PALETTE)] for i in range(len(units))]
-            bars = ax1.barh(units, counts, color=colors, edgecolor='none')
-            ax1.set_xlabel('Número de Usuarios', fontsize=11, fontfamily='Montserrat')
-            ax1.tick_params(labelsize=10)
-            ax1.spines['top'].set_visible(False)
-            ax1.spines['right'].set_visible(False)
-            ax1.grid(axis='x', alpha=0.3)
-
-            # Añadir valores
-            for bar in bars:
-                width = bar.get_width()
-                ax1.text(width + 5, bar.get_y() + bar.get_height()/2,
-                        f'{int(width)}',
-                        ha='left', va='center', fontsize=9,
-                        fontweight='bold')
-
-            fig1.tight_layout()
-
-            # Datos para D3.js
-            d3_data1 = {
-                'type': 'bar',
-                'labels': units,
-                'values': counts,
-                'subtitulo': 'Distribución de usuarios por unidad de negocio • Clic en 🚀 D3.js para versión interactiva'
-            }
-            self.chart1.set_figure(fig1, d3_data=d3_data1)
-
-        # Gráfico 2: Donut de Progreso General por UN
-        theme = self.theme_manager.get_current_theme()
-        unidades_negocio = ['TNG\n100%', 'ICAVE\n82%', 'ECV\n75%', 'Container Care\n68%', 'HPMX\n62%']
+        # Gráfico 2: Donut D3.js de Progreso General
+        unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
         porcentajes_completado = [100, 82, 75, 68, 62]
-        colors_donut = ['#28A745', '#009BDE', '#0077B6', '#005A8D', '#003D5C']
 
-        fig2 = Figure(figsize=(7, 5), dpi=90)
-        ax2 = fig2.add_subplot(111)
-
-        wedges, texts, autotexts = ax2.pie(
-            porcentajes_completado,
-            labels=unidades_negocio,
-            colors=colors_donut,
-            autopct='',
-            startangle=90,
-            wedgeprops=dict(width=0.5, edgecolor=theme['surface'], linewidth=3)
+        self.chart2.set_d3_chart(
+            chart_type='donut',
+            datos={
+                'labels': [f"{un} - {pct}%" for un, pct in zip(unidades_negocio, porcentajes_completado)],
+                'values': porcentajes_completado
+            },
+            subtitulo='TNG 100% completado (8 módulos) • Otras unidades en progreso'
         )
 
-        for text in texts:
-            text.set_fontsize(11)
-            text.set_fontfamily('Montserrat')
-            text.set_weight('bold')
-
-        fig2.tight_layout()
-
-        # Datos para D3.js
-        d3_data2 = {
-            'type': 'donut',
-            'labels': ['TNG - 100%', 'ICAVE - 82%', 'ECV - 75%', 'Container Care - 68%', 'HPMX - 62%'],
-            'values': porcentajes_completado,
-            'subtitulo': 'TNG 100% completado (8 módulos) • Clic en 🚀 D3.js para versión interactiva'
-        }
-        self.chart2.set_figure(fig2, d3_data=d3_data2)
-
-    def _create_gerencial_charts(self, chart_incump, chart_lentas, chart_atrasados, chart_calif):
-        """Crear gráficos matplotlib embebidos para pestaña Gerencial"""
+    def _create_gerencial_charts_d3(self, chart_incump, chart_lentas, chart_atrasados, chart_calif):
+        """Crear gráficos D3.js embebidos para pestaña Gerencial"""
 
         # Chart 1: UN con Mayor Incumplimiento
-        unidades = ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística']
-        usuarios_pendientes = [65, 58, 52, 43, 38]
-
-        fig_incump = Figure(figsize=(7, 5), dpi=90)
-        ax_incump = fig_incump.add_subplot(111)
-        bars_incump = ax_incump.bar(
-            unidades,
-            usuarios_pendientes,
-            color=[GERENCIAL_PALETTE[i] for i in [1, 2, 3, 4, 5]],
-            edgecolor='none'
+        chart_incump.set_d3_chart(
+            chart_type='bar',
+            datos={
+                'labels': ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística'],
+                'values': [65, 58, 52, 43, 38]
+            },
+            subtitulo='Top 5 unidades con más usuarios pendientes • Sin TNG (100%)'
         )
-        ax_incump.set_ylabel('Usuarios Pendientes', fontsize=11, fontfamily='Montserrat')
-        ax_incump.tick_params(labelsize=10)
-        ax_incump.spines['top'].set_visible(False)
-        ax_incump.spines['right'].set_visible(False)
-        ax_incump.grid(axis='y', alpha=0.3)
-
-        for bar in bars_incump:
-            height = bar.get_height()
-            ax_incump.text(bar.get_x() + bar.get_width()/2, height,
-                    f'{int(height)}',
-                    ha='center', va='bottom', fontsize=9,
-                    fontweight='bold')
-
-        fig_incump.tight_layout()
-        d3_data_incump = {
-            'type': 'bar',
-            'labels': unidades,
-            'values': usuarios_pendientes,
-            'subtitulo': 'Top 5 unidades • Clic en 🚀 para D3.js'
-        }
-        chart_incump.set_figure(fig_incump, d3_data=d3_data_incump)
 
         # Chart 2: UN más Lentas
-        unidades_lentas = ['Logística', 'ECV', 'ICAVE']
-        dias_promedio = [112, 108, 95]
-
-        fig_lentas = Figure(figsize=(6, 5), dpi=90)
-        ax_lentas = fig_lentas.add_subplot(111)
-        bars_lentas = ax_lentas.barh(
-            unidades_lentas,
-            dias_promedio,
-            color=[GERENCIAL_PALETTE[i] for i in [0, 3, 1]],
-            edgecolor='none'
+        chart_lentas.set_d3_chart(
+            chart_type='bar',
+            datos={
+                'labels': ['Logística', 'ECV', 'ICAVE'],
+                'values': [112, 108, 95]
+            },
+            subtitulo='Días promedio para alcanzar 80% • Top 3 unidades'
         )
-        ax_lentas.set_xlabel('Días Promedio', fontsize=11, fontfamily='Montserrat')
-        ax_lentas.tick_params(labelsize=10)
-        ax_lentas.spines['top'].set_visible(False)
-        ax_lentas.spines['right'].set_visible(False)
-        ax_lentas.grid(axis='x', alpha=0.3)
-
-        for bar in bars_lentas:
-            width = bar.get_width()
-            ax_lentas.text(width + 2, bar.get_y() + bar.get_height()/2,
-                    f'{int(width)}',
-                    ha='left', va='center', fontsize=9,
-                    fontweight='bold')
-
-        fig_lentas.tight_layout()
-        d3_data_lentas = {
-            'type': 'bar',
-            'labels': unidades_lentas,
-            'values': dias_promedio,
-            'subtitulo': 'Top 3 unidades • Clic en 🚀 para D3.js'
-        }
-        chart_lentas.set_figure(fig_lentas, d3_data=d3_data_lentas)
 
         # Chart 3: Usuarios Más Atrasados
-        usuarios_atrasados = [
-            'J. Pérez',
-            'M. García',
-            'C. López',
-            'A. Martínez',
-            'P. Sánchez',
-            'L. Rodríguez',
-            'J. Hernández',
-            'C. González',
-            'F. Torres',
-            'I. Ramírez'
-        ]
-        dias_retraso = [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
-
-        fig_atrasados = Figure(figsize=(8, 6), dpi=90)
-        ax_atrasados = fig_atrasados.add_subplot(111)
-        bars_atrasados = ax_atrasados.barh(
-            usuarios_atrasados,
-            dias_retraso,
-            color=GERENCIAL_PALETTE[2],
-            edgecolor='none'
+        chart_atrasados.set_d3_chart(
+            chart_type='bar',
+            datos={
+                'labels': ['J. Pérez', 'M. García', 'C. López', 'A. Martínez', 'P. Sánchez',
+                          'L. Rodríguez', 'J. Hernández', 'C. González', 'F. Torres', 'I. Ramírez'],
+                'values': [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
+            },
+            subtitulo='Top 10 usuarios con mayor retraso en días • Generación 1-4'
         )
-        ax_atrasados.set_xlabel('Días de Retraso', fontsize=11, fontfamily='Montserrat')
-        ax_atrasados.tick_params(labelsize=9)
-        ax_atrasados.spines['top'].set_visible(False)
-        ax_atrasados.spines['right'].set_visible(False)
-        ax_atrasados.grid(axis='x', alpha=0.3)
-
-        for bar in bars_atrasados:
-            width = bar.get_width()
-            ax_atrasados.text(width + 1, bar.get_y() + bar.get_height()/2,
-                    f'{int(width)}',
-                    ha='left', va='center', fontsize=8,
-                    fontweight='bold')
-
-        fig_atrasados.tight_layout()
-        d3_data_atrasados = {
-            'type': 'bar',
-            'labels': usuarios_atrasados,
-            'values': dias_retraso,
-            'subtitulo': 'Top 10 usuarios • Clic en 🚀 para D3.js'
-        }
-        chart_atrasados.set_figure(fig_atrasados, d3_data=d3_data_atrasados)
 
         # Chart 4: Usuarios con Mejor Calificación
-        top_usuarios = [
-            'C. Ruiz',
-            'R. Mendoza',
-            'P. Morales',
-            'F. Silva',
-            'A. López'
-        ]
-        calificaciones = [98.5, 97.8, 97.2, 96.9, 95.5]
-
-        fig_calif = Figure(figsize=(7, 5), dpi=90)
-        ax_calif = fig_calif.add_subplot(111)
-        bars_calif = ax_calif.barh(
-            top_usuarios,
-            calificaciones,
-            color=GERENCIAL_PALETTE[0],
-            edgecolor='none'
+        chart_calif.set_d3_chart(
+            chart_type='bar',
+            datos={
+                'labels': ['C. Ruiz', 'R. Mendoza', 'P. Morales', 'F. Silva', 'A. López'],
+                'values': [98.5, 97.8, 97.2, 96.9, 95.5]
+            },
+            subtitulo='Top 5 usuarios con mejor calificación promedio'
         )
-        ax_calif.set_xlabel('Calificación Promedio', fontsize=11, fontfamily='Montserrat')
-        ax_calif.set_xlim(90, 100)
-        ax_calif.tick_params(labelsize=10)
-        ax_calif.spines['top'].set_visible(False)
-        ax_calif.spines['right'].set_visible(False)
-        ax_calif.grid(axis='x', alpha=0.3)
-
-        for bar in bars_calif:
-            width = bar.get_width()
-            ax_calif.text(width + 0.2, bar.get_y() + bar.get_height()/2,
-                    f'{width:.1f}',
-                    ha='left', va='center', fontsize=9,
-                    fontweight='bold')
-
-        fig_calif.tight_layout()
-        d3_data_calif = {
-            'type': 'bar',
-            'labels': top_usuarios,
-            'values': calificaciones,
-            'subtitulo': 'Top 5 usuarios • Clic en 🚀 para D3.js'
-        }
-        chart_calif.set_figure(fig_calif, d3_data=d3_data_calif)
 
     # ==================== MÉTODOS DE DATOS ====================
 
@@ -652,40 +495,40 @@ class ModernDashboard(ctk.CTkFrame):
 
         # ===== ROW 0: Top 5 UN con Mayor Incumplimiento + Top 3 UN más Lentas =====
 
-        # Chart 1: Top 5 UN con Mayor Incumplimiento
-        chart_incumplimiento = OptimizedChartCard(
+        # Chart 1: Top 5 UN con Mayor Incumplimiento (D3.js)
+        chart_incumplimiento = EmbeddedD3ChartCard(
             scrollable_frame,
-            title='UN con Mayor Incumplimiento (Módulo 8)'
+            title='⚠️ UN con Mayor Incumplimiento (Módulo 8)'
         )
         chart_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Chart 2: UN más Lentas
-        chart_lentas = OptimizedChartCard(
+        # Chart 2: UN más Lentas (D3.js)
+        chart_lentas = EmbeddedD3ChartCard(
             scrollable_frame,
-            title='UN más Lentas (Tiempo a 80%)'
+            title='⏱️ UN más Lentas (Tiempo a 80%)'
         )
         chart_lentas.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
 
         # ===== ROW 1: Top 10 Usuarios Más Atrasados + Cuadro de Honor =====
 
-        # Chart 3: Top 10 Usuarios Más Atrasados
-        chart_atrasados = OptimizedChartCard(
+        # Chart 3: Top 10 Usuarios Más Atrasados (D3.js)
+        chart_atrasados = EmbeddedD3ChartCard(
             scrollable_frame,
-            title='Usuarios Más Atrasados (Gen 1-4)'
+            title='🐌 Usuarios Más Atrasados (Gen 1-4)'
         )
         chart_atrasados.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
 
         # ===== ROW 2: Usuarios con Mejor Calificación =====
 
-        # Chart 4: Usuarios con Mejor Calificación
-        chart_calificacion = OptimizedChartCard(
+        # Chart 4: Usuarios con Mejor Calificación (D3.js)
+        chart_calificacion = EmbeddedD3ChartCard(
             scrollable_frame,
-            title='Usuarios con Mejor Calificación Promedio'
+            title='⭐ Usuarios con Mejor Calificación Promedio'
         )
         chart_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Crear los gráficos matplotlib
-        self._create_gerencial_charts(
+        # Crear los gráficos D3.js
+        self._create_gerencial_charts_d3(
             chart_incumplimiento,
             chart_lentas,
             chart_atrasados,

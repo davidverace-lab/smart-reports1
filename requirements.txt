@@ -16,10 +16,11 @@ openpyxl>=3.1.0                    # Excel
 customtkinter>=5.2.0               # UI moderna
 tkinterdnd2-universal>=1.7.3       # Drag & drop
 pillow>=10.0.0                     # Imágenes
+tkinterweb>=3.23.0                 # Widget HTML embebido (para D3.js dentro de la app)
 
 # Gráficos y visualización
-matplotlib>=3.7.0                  # Gráficos embebidos optimizados (PRINCIPAL)
-pywebview>=4.3.3                   # Exportar gráficos a D3.js interactivo (OPCIONAL)
+# matplotlib>=3.7.0                # Opcional: Solo si prefieres gráficos estáticos
+# Los gráficos usan D3.js embebido con tkinterweb (instalado arriba)
 
 # Reportes PDF
 reportlab>=4.0.0                   # Generación de PDFs
