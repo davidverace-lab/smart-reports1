@@ -50,7 +50,7 @@ class PlotlyChartCard(ctk.CTkFrame):
             title_label = ctk.CTkLabel(
                 header,
                 text=title,
-                font=('Segoe UI', 16, 'bold'),
+                font=('Montserrat', 16, 'bold'),
                 text_color='#ffffff',
                 anchor='w'
             )
@@ -60,7 +60,7 @@ class PlotlyChartCard(ctk.CTkFrame):
             open_btn = ctk.CTkButton(
                 header,
                 text='🌐',
-                font=('Segoe UI', 14),
+                font=('Montserrat', 14),
                 width=35,
                 height=28,
                 fg_color='#3a3d5c',
@@ -96,7 +96,7 @@ class PlotlyChartCard(ctk.CTkFrame):
             template='plotly_dark',
             paper_bgcolor='#1a1d2e',
             plot_bgcolor='#1a1d2e',
-            font=dict(color='#a0a0b0', size=11, family='Segoe UI'),
+            font=dict(color='#a0a0b0', size=11, family='Montserrat'),
             margin=dict(l=50, r=30, t=30, b=50),
             showlegend=True,
             legend=dict(
@@ -120,7 +120,7 @@ class PlotlyChartCard(ctk.CTkFrame):
             hoverlabel=dict(
                 bgcolor='#1a1d2e',
                 font_size=11,
-                font_family='Segoe UI',
+                font_family='Montserrat',
                 bordercolor='#6c63ff'
             )
         )
@@ -206,7 +206,7 @@ class PlotlyChartCard(ctk.CTkFrame):
             info_label = ctk.CTkLabel(
                 self.chart_container,
                 text='💡 Haz clic en 🌐 para vista interactiva',
-                font=('Segoe UI', 9),
+                font=('Montserrat', 9),
                 text_color='#6c6c80'
             )
             info_label.pack(pady=(5, 0))
@@ -251,7 +251,7 @@ class PlotlyChartCard(ctk.CTkFrame):
             self.chart_container,
             text=f"📊 {self._title or 'Gráfico'} generado\n\n"
                  f"Haz clic en 🌐 para abrir en navegador",
-            font=('Segoe UI', 12),
+            font=('Montserrat', 12),
             text_color='#a0a0b0',
             justify='center'
         )
@@ -265,7 +265,7 @@ class PlotlyChartCard(ctk.CTkFrame):
         error_label = ctk.CTkLabel(
             error_frame,
             text="⚠️ Vista previa no disponible",
-            font=('Segoe UI', 14, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             text_color='#ff8c42'
         )
         error_label.pack(pady=(0, 10))
@@ -273,7 +273,7 @@ class PlotlyChartCard(ctk.CTkFrame):
         info_label = ctk.CTkLabel(
             error_frame,
             text="Para habilitar vistas previas, instala:\npip install kaleido",
-            font=('Segoe UI', 11),
+            font=('Montserrat', 11),
             text_color='#a0a0b0',
             justify='center'
         )
@@ -282,7 +282,7 @@ class PlotlyChartCard(ctk.CTkFrame):
         browser_label = ctk.CTkLabel(
             error_frame,
             text="Haz clic en 🌐 para ver en navegador",
-            font=('Segoe UI', 10),
+            font=('Montserrat', 10),
             text_color='#6c63ff'
         )
         browser_label.pack()
@@ -303,7 +303,7 @@ class PlotlyChartCard(ctk.CTkFrame):
         error_label = ctk.CTkLabel(
             self.chart_container,
             text=f"❌ {message}",
-            font=('Segoe UI', 14),
+            font=('Montserrat', 14),
             text_color='#ff6b6b'
         )
         error_label.pack(fill='both', expand=True)

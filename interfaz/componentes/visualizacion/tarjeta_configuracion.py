@@ -85,7 +85,7 @@ class ConfigCard(ctk.CTkFrame):
         self.icon_label = ctk.CTkLabel(
             main_container,
             text=self.icon,
-            font=('Segoe UI', 56),
+            font=('Montserrat', 56),
             text_color=icon_color,
             anchor='center'
         )
@@ -95,7 +95,7 @@ class ConfigCard(ctk.CTkFrame):
         self.title_label = ctk.CTkLabel(
             main_container,
             text=self.title,
-            font=('Segoe UI', 22, 'bold'),
+            font=('Montserrat', 22, 'bold'),
             text_color=theme['text'],
             anchor='center'
         )
@@ -106,7 +106,7 @@ class ConfigCard(ctk.CTkFrame):
             self.desc_label = ctk.CTkLabel(
                 main_container,
                 text=self.description,
-                font=('Segoe UI', 13),
+                font=('Montserrat', 13),
                 text_color=theme['text_secondary'],
                 anchor='center',
                 wraplength=280,

@@ -50,7 +50,7 @@ class ChartCard(ctk.CTkFrame):
         title_label = ctk.CTkLabel(
             header,
             text=title,
-            font=('Segoe UI', 18, 'bold'),
+            font=('Montserrat', 18, 'bold'),
             text_color='#ffffff',
             anchor='w'
         )
@@ -60,7 +60,7 @@ class ChartCard(ctk.CTkFrame):
         export_btn = ctk.CTkButton(
             header,
             text='💾',
-            font=('Segoe UI', 16),
+            font=('Montserrat', 16),
             width=40,
             height=30,
             fg_color='#3a3d5c',
@@ -226,7 +226,7 @@ class ChartCard(ctk.CTkFrame):
             hoverlabel=dict(
                 bgcolor='#1a1d2e',
                 font_size=12,
-                font_family='Segoe UI'
+                font_family='Montserrat'
             )
         )
 
@@ -273,7 +273,7 @@ class ChartCard(ctk.CTkFrame):
             text=f"📊 Gráfico {self.chart_type.upper()} generado\n\n"
                  f"⚠️ Vista previa no disponible en esta versión\n"
                  f"Haz clic en 💾 para exportar a imagen",
-            font=('Segoe UI', 12),
+            font=('Montserrat', 12),
             text_color='#a0a0b0',
             justify='center'
         )
@@ -283,7 +283,7 @@ class ChartCard(ctk.CTkFrame):
         open_btn = ctk.CTkButton(
             self.chart_container,
             text='🌐 Abrir en Navegador',
-            font=('Segoe UI', 12),
+            font=('Montserrat', 12),
             fg_color='#6c63ff',
             hover_color='#5a52d5',
             command=lambda: os.startfile(self.chart_html_path)
@@ -321,7 +321,7 @@ class ChartCard(ctk.CTkFrame):
         error_label = ctk.CTkLabel(
             self.chart_container,
             text=f"❌ {message}",
-            font=('Segoe UI', 14),
+            font=('Montserrat', 14),
             text_color='#ff6b6b'
         )
         error_label.pack(fill='both', expand=True)

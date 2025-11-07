@@ -401,13 +401,13 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 foreground=theme['text'],
                 fieldbackground=theme['background'],
                 borderwidth=0,
-                font=('Segoe UI', 10)
+                font=('Montserrat', 10)
             )
             style.configure('UserMgmt.Treeview.Heading',
                 background=theme['surface'],
                 foreground=theme['text'],
                 borderwidth=1,
-                font=('Segoe UI', 11, 'bold')
+                font=('Montserrat', 11, 'bold')
             )
             style.map('UserMgmt.Treeview',
                 background=[('selected', '#6c63ff')],
@@ -419,13 +419,13 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 foreground=theme['text'],
                 fieldbackground='#ffffff',
                 borderwidth=0,
-                font=('Segoe UI', 10)
+                font=('Montserrat', 10)
             )
             style.configure('UserMgmt.Treeview.Heading',
                 background='#e8e8e8',
                 foreground=theme['text'],
                 borderwidth=1,
-                font=('Segoe UI', 11, 'bold')
+                font=('Montserrat', 11, 'bold')
             )
 
         # Scrollbars
@@ -1276,13 +1276,13 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 foreground=theme['text'],
                 fieldbackground=theme['background'],
                 borderwidth=0,
-                font=('Segoe UI', 11)
+                font=('Montserrat', 11)
             )
             style.configure('History.Treeview.Heading',
                 background=theme['surface'],
                 foreground=theme['text'],
                 borderwidth=1,
-                font=('Segoe UI', 12, 'bold')
+                font=('Montserrat', 12, 'bold')
             )
             style.map('History.Treeview',
                 background=[('selected', '#1E90FF')],
@@ -1294,13 +1294,13 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 foreground=theme['text'],
                 fieldbackground='#ffffff',
                 borderwidth=0,
-                font=('Segoe UI', 11)
+                font=('Montserrat', 11)
             )
             style.configure('History.Treeview.Heading',
                 background='#e8e8e8',
                 foreground=theme['text'],
                 borderwidth=1,
-                font=('Segoe UI', 12, 'bold')
+                font=('Montserrat', 12, 'bold')
             )
 
         # Scrollbars

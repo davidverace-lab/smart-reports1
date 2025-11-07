@@ -53,7 +53,7 @@ class MatplotlibChartCard(ctk.CTkFrame):
             self.title_label = ctk.CTkLabel(
                 header,
                 text=title,
-                font=('Segoe UI', 16, 'bold'),
+                font=('Montserrat', 16, 'bold'),
                 text_color=theme['text'],
                 anchor='w'
             )

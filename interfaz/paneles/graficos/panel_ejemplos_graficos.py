@@ -56,7 +56,7 @@ class ChartExamplesPanel(ctk.CTkFrame):
         title = ctk.CTkLabel(
             header,
             text='📊 Ejemplos de Gráficos Interactivos',
-            font=('Segoe UI', 32, 'bold'),
+            font=('Montserrat', 32, 'bold'),
             text_color='#ffffff',
             anchor='w'
         )
@@ -66,7 +66,7 @@ class ChartExamplesPanel(ctk.CTkFrame):
         desc = ctk.CTkLabel(
             header,
             text='Explora los diferentes tipos de gráficos con datos de ejemplo',
-            font=('Segoe UI', 14),
+            font=('Montserrat', 14),
             text_color='#a0a0b0',
             anchor='w'
         )
@@ -141,7 +141,7 @@ class ChartExamplesPanel(ctk.CTkFrame):
         info_title = ctk.CTkLabel(
             info_frame,
             text='💡 Características de los Gráficos',
-            font=('Segoe UI', 20, 'bold'),
+            font=('Montserrat', 20, 'bold'),
             text_color='#ffffff'
         )
         info_title.pack(padx=20, pady=(15, 10), anchor='w')
@@ -159,7 +159,7 @@ class ChartExamplesPanel(ctk.CTkFrame):
             feature_label = ctk.CTkLabel(
                 info_frame,
                 text=feature,
-                font=('Segoe UI', 13),
+                font=('Montserrat', 13),
                 text_color='#a0a0b0',
                 anchor='w'
             )

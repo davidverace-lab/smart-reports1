@@ -188,7 +188,7 @@ class MainWindow:
             error_label = ctk.CTkLabel(
                 error_frame,
                 text='⚠️ No hay conexión a la base de datos\n\nPor favor verifica la configuración de conexión.',
-                font=('Segoe UI', 18),
+                font=('Montserrat', 18),
                 text_color='#ff6b6b'
             )
             error_label.pack(expand=True)
@@ -255,14 +255,14 @@ class MainWindow:
         drop_icon = ctk.CTkLabel(
             drop_zone,
             text='📁',
-            font=('Segoe UI', 48)
+            font=('Montserrat', 48)
         )
         drop_icon.pack(pady=(20, 5))
 
         drop_text1 = ctk.CTkLabel(
             drop_zone,
             text='Arrastra archivo Excel aquí',
-            font=('Segoe UI', 16, 'bold'),
+            font=('Montserrat', 16, 'bold'),
             text_color='#002E6D'  # Azul navy
         )
         drop_text1.pack()
@@ -270,7 +270,7 @@ class MainWindow:
         drop_text2 = ctk.CTkLabel(
             drop_zone,
             text='o haz clic en el botón de abajo',
-            font=('Segoe UI', 12),
+            font=('Montserrat', 12),
             text_color='#FFFFFF'  # Blanco
         )
         drop_text2.pack(pady=(5, 10))
@@ -299,7 +299,7 @@ class MainWindow:
         file_label_title = ctk.CTkLabel(
             file_frame,
             text='Archivo:',
-            font=('Segoe UI', 14),
+            font=('Montserrat', 14),
             text_color=theme['text_secondary']
         )
         file_label_title.pack(side='left', padx=15, pady=15)
@@ -307,7 +307,7 @@ class MainWindow:
         self.file_label = ctk.CTkLabel(
             file_frame,
             text='Ningún archivo seleccionado',
-            font=('Segoe UI', 14),
+            font=('Montserrat', 14),
             text_color=theme['text_light']
         )
         self.file_label.pack(side='left', padx=5, pady=15)
@@ -409,7 +409,7 @@ class MainWindow:
             error_label = ctk.CTkLabel(
                 error_frame,
                 text='⚠️ No hay conexión a la base de datos\n\nPor favor verifica la configuración de conexión.',
-                font=('Segoe UI', 18),
+                font=('Montserrat', 18),
                 text_color='#ff6b6b'
             )
             error_label.pack(expand=True)
@@ -555,7 +555,7 @@ class MainWindow:
         ctk.CTkLabel(
             filters_row1,
             text='📊 Estado:',
-            font=('Segoe UI', 13),
+            font=('Montserrat', 13),
             text_color=theme['text']
         ).pack(side='left', padx=(0, 10))
 
@@ -581,7 +581,7 @@ class MainWindow:
         ctk.CTkLabel(
             filters_row1,
             text='📚 Módulo:',
-            font=('Segoe UI', 13),
+            font=('Montserrat', 13),
             text_color=theme['text']
         ).pack(side='left', padx=(0, 10))
 
@@ -610,21 +610,21 @@ class MainWindow:
         ctk.CTkLabel(
             filters_row2,
             text='📅 Rango de Fechas:',
-            font=('Segoe UI', 13),
+            font=('Montserrat', 13),
             text_color=theme['text']
         ).pack(side='left', padx=(0, 10))
 
         ctk.CTkLabel(
             filters_row2,
             text='Desde:',
-            font=('Segoe UI', 11),
+            font=('Montserrat', 11),
             text_color=theme['text_secondary']
         ).pack(side='left', padx=(0, 5))
 
         self.filter_fecha_desde = ctk.CTkEntry(
             filters_row2,
             placeholder_text='YYYY-MM-DD',
-            font=('Segoe UI', 12),
+            font=('Montserrat', 12),
             width=140,
             height=35,
             corner_radius=8
@@ -634,14 +634,14 @@ class MainWindow:
         ctk.CTkLabel(
             filters_row2,
             text='Hasta:',
-            font=('Segoe UI', 11),
+            font=('Montserrat', 11),
             text_color=theme['text_secondary']
         ).pack(side='left', padx=(15, 5))
 
         self.filter_fecha_hasta = ctk.CTkEntry(
             filters_row2,
             placeholder_text='YYYY-MM-DD',
-            font=('Segoe UI', 12),
+            font=('Montserrat', 12),
             width=140,
             height=35,
             corner_radius=8
@@ -680,7 +680,7 @@ class MainWindow:
         self.results_counter_label = ctk.CTkLabel(
             filters_row3,
             text='Mostrando 0 resultados',
-            font=('Segoe UI', 12),
+            font=('Montserrat', 12),
             text_color=theme['text_secondary']
         )
         self.results_counter_label.pack(side='right', padx=20)
@@ -754,13 +754,13 @@ class MainWindow:
                 foreground=theme['text'],
                 fieldbackground=theme['background'],
                 borderwidth=0,
-                font=('Segoe UI', 10)
+                font=('Montserrat', 10)
             )
             style.configure('Themed.Treeview.Heading',
                 background=theme['surface'],
                 foreground=theme['text'],
                 borderwidth=1,
-                font=('Segoe UI', 11, 'bold')
+                font=('Montserrat', 11, 'bold')
             )
             style.map('Themed.Treeview',
                 background=[('selected', '#6c63ff')],
@@ -773,13 +773,13 @@ class MainWindow:
                 foreground=theme['text'],
                 fieldbackground='#ffffff',
                 borderwidth=0,
-                font=('Segoe UI', 10)
+                font=('Montserrat', 10)
             )
             style.configure('Themed.Treeview.Heading',
                 background='#e8e8e8',
                 foreground=theme['text'],
                 borderwidth=1,
-                font=('Segoe UI', 11, 'bold')
+                font=('Montserrat', 11, 'bold')
             )
             style.map('Themed.Treeview',
                 background=[('selected', HUTCHISON_COLORS['ports_sky_blue'])],
@@ -930,7 +930,7 @@ class MainWindow:
         icon_label = ctk.CTkLabel(
             left_section,
             text=report['icon'],
-            font=('Segoe UI', 42),
+            font=('Montserrat', 42),
             text_color=icon_color
         )
         icon_label.pack(side='left', padx=(0, 20))
@@ -1094,7 +1094,7 @@ class MainWindow:
         icon_label = ctk.CTkLabel(
             inner_container,
             text=icon,
-            font=('Segoe UI', 64),
+            font=('Montserrat', 64),
             text_color=icon_color
         )
         icon_label.pack(pady=(0, 20))

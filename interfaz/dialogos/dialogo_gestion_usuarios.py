@@ -60,7 +60,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         title = ctk.CTkLabel(
             header,
             text='👥 Gestión de Usuarios',
-            font=('Segoe UI', 28, 'bold'),
+            font=('Montserrat', 28, 'bold'),
             text_color='#ffffff'
         )
         title.pack(side='left')
@@ -75,14 +75,14 @@ class UserManagementDialog(ctk.CTkToplevel):
         ctk.CTkLabel(
             search_container,
             text='🔍  Buscar Usuario por ID:',
-            font=('Segoe UI', 14, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             text_color='#ffffff'
         ).pack(side='left', padx=(0, 10))
 
         self.search_id_entry = ctk.CTkEntry(
             search_container,
             placeholder_text='Ingrese User ID para buscar...',
-            font=('Segoe UI', 13),
+            font=('Montserrat', 13),
             width=300,
             height=40,
             corner_radius=10
@@ -92,7 +92,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         search_btn = ctk.CTkButton(
             search_container,
             text='Buscar',
-            font=('Segoe UI', 14, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             fg_color='#6c63ff',
             hover_color='#5a52d5',
             corner_radius=10,
@@ -105,7 +105,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         self.search_result_label = ctk.CTkLabel(
             search_container,
             text='',
-            font=('Segoe UI', 11),
+            font=('Montserrat', 11),
             text_color='#a0a0b0'
         )
         self.search_result_label.pack(side='left', padx=10)
@@ -151,7 +151,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         label_unit = ctk.CTkLabel(
             form_container,
             text='Unidad de Negocio:',
-            font=('Segoe UI', 14, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             text_color='#ffffff'
         )
         label_unit.grid(row=3, column=0, sticky='w', pady=(15, 5))
@@ -160,7 +160,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         self.business_unit_combo = ctk.CTkComboBox(
             form_container,
             variable=self.business_unit_var,
-            font=('Segoe UI', 13),
+            font=('Montserrat', 13),
             width=400,
             height=40,
             corner_radius=10,
@@ -190,7 +190,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         info_label = ctk.CTkLabel(
             form_container,
             text='ℹ️ Los campos marcados son obligatorios',
-            font=('Segoe UI', 12),
+            font=('Montserrat', 12),
             text_color='#a0a0b0'
         )
         info_label.grid(row=7, column=0, columnspan=2, sticky='w', pady=(0, 10))
@@ -203,7 +203,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         cancel_btn = ctk.CTkButton(
             button_frame,
             text='✖  Cancelar',
-            font=('Segoe UI', 14, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             fg_color='#ff6b6b',
             hover_color='#ff5252',
             corner_radius=10,
@@ -217,7 +217,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         save_btn = ctk.CTkButton(
             button_frame,
             text='✓  Guardar Usuario',
-            font=('Segoe UI', 14, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             fg_color='#51cf66',
             hover_color='#40c057',
             corner_radius=10,
@@ -231,7 +231,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         clear_btn = ctk.CTkButton(
             button_frame,
             text='🗑  Limpiar',
-            font=('Segoe UI', 14),
+            font=('Montserrat', 14),
             fg_color='#6c6c80',
             hover_color='#5c5c70',
             corner_radius=10,
@@ -245,7 +245,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         self.delete_btn = ctk.CTkButton(
             button_frame,
             text='🗑️  Eliminar Usuario',
-            font=('Segoe UI', 14, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             fg_color='#ff6b6b',
             hover_color='#ff5252',
             corner_radius=10,
@@ -264,7 +264,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         label = ctk.CTkLabel(
             parent,
             text=label_text,
-            font=('Segoe UI', 14, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             text_color='#ffffff'
         )
         label.grid(row=row, column=0, sticky='w', pady=(15, 5))
@@ -272,7 +272,7 @@ class UserManagementDialog(ctk.CTkToplevel):
         entry = ctk.CTkEntry(
             parent,
             placeholder_text=placeholder,
-            font=('Segoe UI', 13),
+            font=('Montserrat', 13),
             width=400,
             height=40,
             corner_radius=10

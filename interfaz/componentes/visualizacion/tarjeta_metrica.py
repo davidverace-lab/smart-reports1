@@ -45,7 +45,7 @@ class MetricCard(ctk.CTkFrame):
             icon_label = ctk.CTkLabel(
                 self,
                 text=icon,
-                font=('Segoe UI', 24),  # Reducido de 32 a 24
+                font=('Montserrat', 24),  # Reducido de 32 a 24
                 text_color=color
             )
             icon_label.grid(row=row, column=0, padx=20, pady=(15, 5), sticky='w')
