@@ -7,9 +7,12 @@ from tkinter import Frame, Text, Scrollbar
 import tempfile
 import os
 import webbrowser
+import time
+from pathlib import Path
 from nucleo.configuracion.gestor_temas import get_theme_manager
 from nucleo.configuracion.ajustes import HUTCHISON_COLORS
 from nucleo.servicios.motor_templates_d3 import MotorTemplatesD3
+from nucleo.servicios.motor_graficos_svg import MotorGraficosSVG
 
 # Intentar importar tkhtmlview (más estable que tkinterweb)
 try:
@@ -55,6 +58,7 @@ class ProfessionalD3ChartCard(ctk.CTkFrame):
         self._width = width
         self._height = height
         self.motor_d3 = MotorTemplatesD3()
+        self.motor_svg = MotorGraficosSVG()
         self.html_widget = None
         self.current_html = None
 
@@ -109,7 +113,7 @@ class ProfessionalD3ChartCard(ctk.CTkFrame):
 
     def set_d3_chart(self, chart_type, datos, subtitulo=''):
         """
-        Establecer gráfico D3.js embebido
+        Establecer gráfico embebido (D3.js interactivo o SVG estático)
 
         Args:
             chart_type: Tipo de gráfico ('bar', 'donut', 'line')
@@ -122,43 +126,57 @@ class ProfessionalD3ChartCard(ctk.CTkFrame):
 
         tema = 'dark' if self.theme_manager.is_dark_mode() else 'light'
 
-        # Generar HTML según tipo
+        # ESTRATEGIA DE RENDERIZADO:
+        # 1. tkinterweb disponible -> D3.js interactivo (requiere JavaScript)
+        # 2. tkhtmlview disponible -> SVG estático (no requiere JavaScript)
+        # 3. Ninguno disponible -> Preview mode + botón navegador
+
+        if HTML_RENDERER == 'tkinterweb':
+            # Usar D3.js interactivo
+            html = self._generar_html_d3(chart_type, datos, subtitulo, tema)
+            self.current_html = html
+            self._render_with_tkinterweb(html)
+
+        elif HTML_RENDERER == 'tkhtmlview':
+            # Usar SVG estático (funciona sin JavaScript)
+            html = self._generar_html_svg(chart_type, datos, tema)
+            self.current_html = html
+            self._render_with_tkhtmlview(html)
+
+        else:
+            # Generar D3.js para navegador
+            html = self._generar_html_d3(chart_type, datos, subtitulo, tema)
+            self.current_html = html
+            self._show_preview_mode(chart_type, datos)
+
+    def _generar_html_d3(self, chart_type, datos, subtitulo, tema):
+        """Generar HTML con D3.js (interactivo)"""
         if chart_type == 'bar':
-            html = self.motor_d3.generar_grafico_barras(
-                titulo='',
-                datos=datos,
-                subtitulo=subtitulo,
-                tema=tema,
-                interactivo=True
+            return self.motor_d3.generar_grafico_barras(
+                titulo='', datos=datos, subtitulo=subtitulo,
+                tema=tema, interactivo=True
             )
         elif chart_type == 'donut':
-            html = self.motor_d3.generar_grafico_donut(
-                titulo='',
-                datos=datos,
-                subtitulo=subtitulo,
-                tema=tema
+            return self.motor_d3.generar_grafico_donut(
+                titulo='', datos=datos, subtitulo=subtitulo, tema=tema
             )
         elif chart_type == 'line':
-            html = self.motor_d3.generar_grafico_lineas(
-                titulo='',
-                datos=datos,
-                subtitulo=subtitulo,
-                tema=tema
+            return self.motor_d3.generar_grafico_lineas(
+                titulo='', datos=datos, subtitulo=subtitulo, tema=tema
             )
         else:
-            self._show_error("Tipo de gráfico no soportado")
-            return
+            return "<p>Tipo de gráfico no soportado</p>"
 
-        self.current_html = html
-
-        # Intentar renderizar con el mejor método disponible
-        if HTML_RENDERER == 'tkhtmlview':
-            self._render_with_tkhtmlview(html)
-        elif HTML_RENDERER == 'tkinterweb':
-            self._render_with_tkinterweb(html)
+    def _generar_html_svg(self, chart_type, datos, tema):
+        """Generar HTML con SVG estático (no requiere JavaScript)"""
+        if chart_type == 'bar':
+            return self.motor_svg.generar_grafico_barras(datos, tema)
+        elif chart_type == 'donut':
+            return self.motor_svg.generar_grafico_donut(datos, tema)
+        elif chart_type == 'line':
+            return self.motor_svg.generar_grafico_lineas(datos, tema)
         else:
-            # Fallback: Mostrar preview con opción de abrir en navegador
-            self._show_preview_mode(chart_type, datos)
+            return "<p>Tipo de gráfico no soportado</p>"
 
     def _render_with_tkhtmlview(self, html):
         """Renderizar con tkhtmlview (más estable)"""
@@ -177,21 +195,27 @@ class ProfessionalD3ChartCard(ctk.CTkFrame):
             self._show_preview_mode('bar', {})
 
     def _render_with_tkinterweb(self, html):
-        """Renderizar con tkinterweb"""
+        """Renderizar con tkinterweb (soporta JavaScript y D3.js)"""
         try:
             html_container = Frame(self.chart_container, bg=self.chart_container._fg_color)
             html_container.pack(fill='both', expand=True, padx=5, pady=5)
 
             self.html_widget = HtmlFrame(
                 html_container,
-                messages_enabled=False,
-                vertical_scrollbar=False,
+                messages_enabled=False,  # Deshabilitar mensajes de consola
+                vertical_scrollbar=True,  # Habilitar scrollbar si es necesario
                 horizontal_scrollbar=False
             )
             self.html_widget.load_html(html)
             self.html_widget.pack(fill='both', expand=True)
+
+            print("✅ Gráfico D3.js renderizado correctamente con tkinterweb")
         except Exception as e:
-            print(f"Error con tkinterweb: {e}")
+            print(f"❌ Error renderizando con tkinterweb: {e}")
+            print("📌 Abriendo en navegador como alternativa...")
+            # Si falla, abrir automáticamente en navegador
+            self._open_in_browser()
+            # Y mostrar preview
             self._show_preview_mode('bar', {})
 
     def _show_preview_mode(self, chart_type, datos):
@@ -251,9 +275,16 @@ class ProfessionalD3ChartCard(ctk.CTkFrame):
         open_btn_big.pack(pady=20, padx=40, fill='x')
 
         # Nota
+        if HTML_RENDERER is None:
+            note_text = '💡 Instala "pip install tkinterweb" para ver gráficos embebidos'
+        elif HTML_RENDERER == 'tkhtmlview':
+            note_text = '⚠️ D3.js requiere JavaScript. Usa el navegador para gráficos interactivos'
+        else:
+            note_text = '📊 Los gráficos D3.js son completamente interactivos en el navegador'
+
         note = ctk.CTkLabel(
             preview_frame,
-            text='💡 Instala "pip install tkhtmlview" para ver gráficos embebidos',
+            text=note_text,
             font=('Montserrat', 9, 'italic'),
             text_color=theme['text_secondary']
         )
