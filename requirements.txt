@@ -16,7 +16,8 @@ openpyxl>=3.1.0                    # Excel
 customtkinter>=5.2.0               # UI moderna
 tkinterdnd2-universal>=1.7.3       # Drag & drop
 pillow>=10.0.0                     # Imágenes
-tkinterweb>=3.23.0                 # Widget HTML embebido (para D3.js dentro de la app)
+tkhtmlview>=0.1.1                  # Renderizar HTML/D3.js en tkinter (RECOMENDADO)
+tkinterweb>=3.23.0                 # Alternativa HTML widget (fallback)
 
 # Gráficos y visualización
 # matplotlib>=3.7.0                # Opcional: Solo si prefieres gráficos estáticos
