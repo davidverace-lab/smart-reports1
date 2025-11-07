@@ -772,7 +772,7 @@ class MotorTemplatesD3:
                 .attr("x", 30)
                 .attr("y", 15)
                 .attr("font-size", "13px")
-                .attr("fill", "{HUTCHISON_COLORS['text'] if tema == 'dark' else '#2b2d42'}")
+                .attr("fill", "{'#ffffff' if tema == 'dark' else '#2b2d42'}")
                 .text(serie.name);
         }});
     </script>
