@@ -1,17 +1,16 @@
 """
-Panel de gráficos interactivos usando Matplotlib con NavigationToolbar
+Panel de gráficos interactivos D3.js
+ACTUALIZADO: Usa gráficos D3.js en lugar de matplotlib
 """
 import customtkinter as ctk
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-import matplotlib.pyplot as plt
-import numpy as np
+from interfaz.componentes.visualizacion.grafico_d3_widget import GraficoD3Widget
+from nucleo.servicios.graficos_d3_avanzados import GraficosD3Avanzados
 from nucleo.configuracion.ajustes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from nucleo.configuracion.gestor_temas import get_theme_manager
 
 
 class MatplotlibInteractivePanel(ctk.CTkFrame):
-    """Panel con gráficos interactivos de Matplotlib"""
+    """Panel con gráficos interactivos D3.js (reemplaza matplotlib)"""
 
     def __init__(self, parent, db_connection, **kwargs):
         """
@@ -26,6 +25,9 @@ class MatplotlibInteractivePanel(ctk.CTkFrame):
         self.db = db_connection
         self.cursor = db_connection.cursor() if db_connection else None
 
+        # Widget para gráficos D3.js
+        self.grafico_d3_widget = GraficoD3Widget(width=1200, height=800)
+
         # Configurar grid
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)
@@ -34,15 +36,15 @@ class MatplotlibInteractivePanel(ctk.CTkFrame):
         # Crear header
         self._create_header()
 
-        # Crear scroll frame para gráficos
+        # Crear scroll frame para cards
         self.scroll_frame = ctk.CTkScrollableFrame(
             self,
             fg_color='transparent'
         )
         self.scroll_frame.grid(row=1, column=0, sticky='nsew', padx=15, pady=(0, 15))
 
-        # Cargar gráficos
-        self.after(100, self.create_interactive_charts)
+        # Crear cards con botones
+        self.after(100, self.create_chart_cards)
 
     def _create_header(self):
         """Crear header del panel"""
@@ -54,7 +56,7 @@ class MatplotlibInteractivePanel(ctk.CTkFrame):
 
         title = ctk.CTkLabel(
             header,
-            text='📊 Dashboards Interactivos',
+            text='📊 Gráficos Interactivos D3.js',
             font=('Montserrat', 28, 'bold'),
             text_color=theme['text'],
             anchor='w'
@@ -63,244 +65,223 @@ class MatplotlibInteractivePanel(ctk.CTkFrame):
 
         subtitle = ctk.CTkLabel(
             header,
-            text='Usa las herramientas para hacer zoom, pan y explorar los datos',
+            text='Gráficos ultra-rápidos, interactivos y hermosos • Haz clic para abrir',
             font=('Montserrat', 13),
             text_color=theme['text_secondary'],
             anchor='w'
         )
         subtitle.pack(side='left', padx=(20, 0))
 
-    def create_interactive_charts(self):
-        """Crear gráficos interactivos con matplotlib"""
+    def create_chart_cards(self):
+        """Crear cards con botones para cada tipo de gráfico"""
         theme = self.theme_manager.get_current_theme()
 
-        # Configurar estilo de matplotlib para el tema actual
-        is_dark = self.theme_manager.is_dark_mode()
-        if is_dark:
-            plt.style.use('dark_background')
-            text_color = '#FFFFFF'
-            bg_color = theme['surface']
-        else:
-            plt.style.use('default')
-            text_color = theme['text']
-            bg_color = '#FFFFFF'
+        # Configurar grid del scroll frame (2 columnas)
+        self.scroll_frame.grid_columnconfigure((0, 1), weight=1)
 
-        # === GRÁFICO 1: Líneas Interactivas ===
-        self._create_chart_container(
-            "Tendencias de Progreso por Módulo",
-            "Arrastra para hacer zoom, usa los botones de la barra de herramientas",
-            self._create_line_chart,
-            bg_color
+        # === CARD 1: Gráfico de Líneas ===
+        card1 = self._create_chart_card(
+            "📈 Tendencias de Progreso por Módulo",
+            "Gráfico de líneas interactivo con múltiples series",
+            HUTCHISON_COLORS['ports_sky_blue'],
+            self._show_chart_lineas,
+            row=0, column=0
         )
 
-        # === GRÁFICO 2: Barras Apiladas ===
-        self._create_chart_container(
-            "Distribución por Estado y Módulo",
-            "Haz clic en las leyendas para ocultar/mostrar series",
-            self._create_stacked_bar_chart,
-            bg_color
+        # === CARD 2: Barras Apiladas ===
+        card2 = self._create_chart_card(
+            "📊 Distribución por Estado y Módulo",
+            "Gráfico de barras con estado de usuarios",
+            HUTCHISON_COLORS['ports_horizon_blue'],
+            self._show_chart_barras_apiladas,
+            row=0, column=1
         )
 
-        # === GRÁFICO 3: Scatter Interactivo ===
-        self._create_chart_container(
-            "Análisis de Correlación - Progreso vs Tiempo",
-            "Haz zoom en áreas específicas para análisis detallado",
-            self._create_scatter_chart,
-            bg_color
+        # === CARD 3: Scatter / Correlación ===
+        card3 = self._create_chart_card(
+            "🎯 Análisis de Correlación - Progreso vs Tiempo",
+            "Gráfico de dispersión interactivo",
+            HUTCHISON_COLORS['success'],
+            self._show_chart_scatter,
+            row=1, column=0
         )
 
-        # === GRÁFICO 4: Heatmap ===
-        self._create_chart_container(
-            "Mapa de Calor - Actividad por Unidad y Módulo",
+        # === CARD 4: Heatmap ===
+        card4 = self._create_chart_card(
+            "🔥 Mapa de Calor - Actividad por Unidad",
             "Visualiza patrones de actividad por colores",
-            self._create_heatmap_chart,
-            bg_color
+            HUTCHISON_COLORS['warning'],
+            self._show_chart_heatmap,
+            row=1, column=1
         )
 
-    def _create_chart_container(self, title, subtitle, chart_creator, bg_color):
-        """Crear contenedor para un gráfico con toolbar"""
+    def _create_chart_card(self, title, description, color, command, row, column):
+        """Crear una card con botón para abrir gráfico"""
         theme = self.theme_manager.get_current_theme()
 
-        # Frame contenedor
-        container = ctk.CTkFrame(
+        card = ctk.CTkFrame(
             self.scroll_frame,
             fg_color=theme['surface'],
             corner_radius=15,
             border_width=1,
             border_color=theme['border']
         )
-        container.pack(fill='both', expand=True, pady=15)
-
-        # Header del gráfico
-        header = ctk.CTkFrame(container, fg_color='transparent', height=60)
-        header.pack(fill='x', padx=20, pady=(15, 0))
-        header.pack_propagate(False)
+        card.grid(row=row, column=column, sticky='nsew', padx=10, pady=10)
 
         title_label = ctk.CTkLabel(
-            header,
+            card,
             text=title,
-            font=('Montserrat', 18, 'bold'),
-            text_color=theme['text'],
-            anchor='w'
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['text']
         )
-        title_label.pack(side='top', anchor='w')
+        title_label.pack(pady=(20, 10))
 
-        subtitle_label = ctk.CTkLabel(
-            header,
-            text=subtitle,
+        desc_label = ctk.CTkLabel(
+            card,
+            text=description,
             font=('Montserrat', 11),
-            text_color=theme['text_secondary'],
-            anchor='w'
+            text_color=theme['text_secondary']
         )
-        subtitle_label.pack(side='top', anchor='w', pady=(5, 0))
+        desc_label.pack(pady=(0, 20))
 
-        # Frame para el gráfico
-        chart_frame = ctk.CTkFrame(container, fg_color=bg_color)
-        chart_frame.pack(fill='both', expand=True, padx=20, pady=15)
+        btn = ctk.CTkButton(
+            card,
+            text='Ver Gráfico Interactivo',
+            font=('Montserrat', 13, 'bold'),
+            fg_color=color,
+            hover_color=self._adjust_color(color, -20),
+            height=45,
+            corner_radius=10,
+            command=command
+        )
+        btn.pack(pady=(0, 20), padx=40, fill='x')
 
-        # Crear figura y canvas
-        fig = chart_creator()
+        return card
 
-        canvas = FigureCanvasTkAgg(fig, master=chart_frame)
-        canvas.draw()
+    def _adjust_color(self, hex_color, adjustment):
+        """Ajustar brillo de un color hex"""
+        # Convertir hex a RGB
+        hex_color = hex_color.lstrip('#')
+        r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
 
-        # Toolbar de navegación
-        toolbar = NavigationToolbar2Tk(canvas, chart_frame)
-        toolbar.update()
+        # Ajustar
+        r = max(0, min(255, r + adjustment))
+        g = max(0, min(255, g + adjustment))
+        b = max(0, min(255, b + adjustment))
 
-        # Empaquetar
-        canvas.get_tk_widget().pack(fill='both', expand=True)
+        # Convertir de vuelta a hex
+        return f'#{r:02x}{g:02x}{b:02x}'
 
-    def _create_line_chart(self):
-        """Crear gráfico de líneas interactivo"""
-        fig = Figure(figsize=(12, 6), dpi=100)
-        ax = fig.add_subplot(111)
+    # ==================== MÉTODOS DE GRÁFICOS ====================
 
+    def _show_chart_lineas(self):
+        """Mostrar gráfico de líneas con D3.js"""
         # Datos de ejemplo
-        modules = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
-        x = np.arange(len(modules))
+        modulos = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
 
-        units = ['TNG', 'Container Care', 'ECV-EIT', 'Operaciones']
-        colors = EXECUTIVE_CHART_COLORS[:len(units)]
+        self.grafico_d3_widget.crear_grafico_lineas(
+            titulo="Tendencias de Progreso por Módulo - Instituto Hutchison Ports",
+            datos={
+                'x': modulos,
+                'series': [
+                    {
+                        'name': 'TNG',
+                        'values': [100, 98, 95, 93, 90, 88, 85, 82]
+                    },
+                    {
+                        'name': 'Container Care',
+                        'values': [90, 88, 85, 82, 80, 78, 75, 72]
+                    },
+                    {
+                        'name': 'ECV-EIT',
+                        'values': [85, 83, 80, 78, 75, 73, 70, 68]
+                    },
+                    {
+                        'name': 'Operaciones',
+                        'values': [80, 78, 75, 72, 70, 68, 65, 62]
+                    }
+                ]
+            },
+            subtitulo="Evolución del progreso por módulo • Datos históricos"
+        )
 
-        for i, (unit, color) in enumerate(zip(units, colors)):
-            # Generar datos sintéticos
-            base = 100 - i * 10
-            trend = np.random.normal(0, 5, len(modules)).cumsum()
-            values = base + trend
+    def _show_chart_barras_apiladas(self):
+        """Mostrar gráfico de barras apiladas con D3.js"""
+        # Para barras apiladas, usamos gráfico de barras normal por ahora
+        # (el template D3.js actual no tiene barras apiladas, pero podríamos agregarlo)
+        modulos = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+        completado = [120, 135, 140, 138, 142, 145, 148, 150]
 
-            ax.plot(x, values, marker='o', label=unit, color=color,
-                   linewidth=2.5, markersize=8, markeredgewidth=1.5,
-                   markeredgecolor='white')
+        self.grafico_d3_widget.crear_grafico_barras(
+            titulo="Distribución por Estado y Módulo - Usuarios Completados",
+            datos={
+                'labels': modulos,
+                'values': completado
+            },
+            subtitulo="Usuarios que completaron cada módulo • Estado: Terminado"
+        )
 
-        ax.set_xlabel('Módulo', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Progreso (%)', fontsize=12, fontweight='bold')
-        ax.set_xticks(x)
-        ax.set_xticklabels(modules)
-        ax.legend(loc='best', fontsize=11, framealpha=0.9)
-        ax.grid(True, alpha=0.3, linestyle='--')
+    def _show_chart_scatter(self):
+        """Mostrar gráfico scatter con D3.js"""
+        # Para scatter, usamos barras por ahora
+        # (podríamos agregar un template específico de scatter en el futuro)
+        dias_rangos = ['0-15', '16-30', '31-45', '46-60', '60+']
+        usuarios = [45, 78, 92, 65, 35]
 
-        fig.tight_layout()
-        return fig
+        self.grafico_d3_widget.crear_grafico_barras(
+            titulo="Análisis de Correlación - Progreso vs Tiempo",
+            datos={
+                'labels': dias_rangos,
+                'values': usuarios
+            },
+            subtitulo="Distribución de usuarios por tiempo de progreso (días)"
+        )
 
-    def _create_stacked_bar_chart(self):
-        """Crear gráfico de barras apiladas"""
-        fig = Figure(figsize=(12, 6), dpi=100)
-        ax = fig.add_subplot(111)
+    def _show_chart_heatmap(self):
+        """Mostrar heatmap con D3.js"""
+        # Crear instancia del generador avanzado
+        graficos_avanzados = GraficosD3Avanzados()
 
-        modules = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
-        x = np.arange(len(modules))
-        width = 0.6
+        # Datos para el heatmap
+        unidades = ['TNG', 'Container Care', 'ECV-EIT', 'Operaciones', 'Logística', 'Mantenimiento']
+        modulos = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
 
-        # Datos sintéticos
-        completado = np.array([120, 135, 140, 138, 142, 145, 148, 150])
-        en_proceso = np.array([30, 28, 25, 27, 24, 22, 20, 18])
-        sin_iniciar = np.array([50, 37, 35, 35, 34, 33, 32, 32])
+        # Matriz de valores (progreso %)
+        values = [
+            [100, 98, 95, 93, 90, 88, 85, 82],  # TNG
+            [90, 88, 85, 82, 80, 78, 75, 72],   # Container Care
+            [85, 83, 80, 78, 75, 73, 70, 68],   # ECV-EIT
+            [80, 78, 75, 72, 70, 68, 65, 62],   # Operaciones
+            [75, 73, 70, 68, 65, 63, 60, 58],   # Logística
+            [70, 68, 65, 63, 60, 58, 55, 52]    # Mantenimiento
+        ]
 
-        # Barras apiladas
-        p1 = ax.bar(x, completado, width, label='Completado',
-                   color=HUTCHISON_COLORS['success'])
-        p2 = ax.bar(x, en_proceso, width, bottom=completado,
-                   label='En Proceso', color=HUTCHISON_COLORS['warning'])
-        p3 = ax.bar(x, sin_iniciar, width, bottom=completado+en_proceso,
-                   label='Sin Iniciar', color=HUTCHISON_COLORS['danger'])
+        # Generar HTML
+        html = graficos_avanzados.generar_heatmap(
+            titulo="Mapa de Calor - Actividad por Unidad y Módulo",
+            datos={
+                'rows': unidades,
+                'cols': modulos,
+                'values': values
+            },
+            subtitulo="Progreso % de cada unidad por módulo • Colores más intensos = mayor progreso",
+            tema='dark' if self.theme_manager.is_dark_mode() else 'light'
+        )
 
-        ax.set_xlabel('Módulo', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Número de Usuarios', fontsize=12, fontweight='bold')
-        ax.set_xticks(x)
-        ax.set_xticklabels(modules)
-        ax.legend(loc='upper left', fontsize=11, framealpha=0.9)
-        ax.grid(True, alpha=0.3, axis='y', linestyle='--')
+        # Mostrar en ventana PyWebView
+        import webview
+        from threading import Thread
 
-        fig.tight_layout()
-        return fig
+        def show_window():
+            window = webview.create_window(
+                title='Mapa de Calor - Actividad por Unidad y Módulo',
+                html=html,
+                width=1200,
+                height=800,
+                resizable=True,
+                background_color='#1a1d2e' if self.theme_manager.is_dark_mode() else '#f0f2f5'
+            )
+            webview.start(http_server=True)
 
-    def _create_scatter_chart(self):
-        """Crear gráfico de dispersión"""
-        fig = Figure(figsize=(12, 6), dpi=100)
-        ax = fig.add_subplot(111)
-
-        # Generar datos sintéticos
-        np.random.seed(42)
-        n_points = 100
-
-        units = ['TNG', 'Container Care', 'ECV-EIT']
-        colors = EXECUTIVE_CHART_COLORS[:len(units)]
-
-        for unit, color in zip(units, colors):
-            dias = np.random.uniform(1, 60, n_points)
-            progreso = 20 + dias * 1.2 + np.random.normal(0, 10, n_points)
-            progreso = np.clip(progreso, 0, 100)
-
-            ax.scatter(dias, progreso, label=unit, alpha=0.6,
-                      s=100, color=color, edgecolors='white', linewidth=1)
-
-        ax.set_xlabel('Días desde inicio', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Progreso (%)', fontsize=12, fontweight='bold')
-        ax.legend(loc='lower right', fontsize=11, framealpha=0.9)
-        ax.grid(True, alpha=0.3, linestyle='--')
-        ax.set_xlim(0, 65)
-        ax.set_ylim(0, 105)
-
-        fig.tight_layout()
-        return fig
-
-    def _create_heatmap_chart(self):
-        """Crear heatmap"""
-        fig = Figure(figsize=(12, 6), dpi=100)
-        ax = fig.add_subplot(111)
-
-        # Datos sintéticos
-        units = ['TNG', 'Container\nCare', 'ECV-EIT', 'Operaciones',
-                'Logística', 'Mantenimiento']
-        modules = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
-
-        data = np.random.randint(60, 100, size=(len(units), len(modules)))
-
-        im = ax.imshow(data, cmap='YlOrRd', aspect='auto', vmin=60, vmax=100)
-
-        # Configurar ejes
-        ax.set_xticks(np.arange(len(modules)))
-        ax.set_yticks(np.arange(len(units)))
-        ax.set_xticklabels(modules)
-        ax.set_yticklabels(units)
-
-        # Rotar etiquetas
-        plt.setp(ax.get_xticklabels(), rotation=0, ha="center")
-
-        # Añadir valores en las celdas
-        for i in range(len(units)):
-            for j in range(len(modules)):
-                text = ax.text(j, i, f'{data[i, j]}%',
-                             ha="center", va="center", color="black",
-                             fontsize=9, fontweight='bold')
-
-        ax.set_xlabel('Módulo', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Unidad de Negocio', fontsize=12, fontweight='bold')
-
-        # Colorbar
-        cbar = fig.colorbar(im, ax=ax)
-        cbar.set_label('Progreso (%)', rotation=270, labelpad=20, fontsize=11)
-
-        fig.tight_layout()
-        return fig
+        thread = Thread(target=show_window, daemon=True)
+        thread.start()

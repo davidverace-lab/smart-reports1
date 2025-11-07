@@ -18,10 +18,11 @@ tkinterdnd2-universal>=1.7.3       # Drag & drop
 pillow>=10.0.0                     # Imágenes
 
 # Gráficos y visualización
-pywebview>=4.3.3                   # Embeber HTML/JS/D3.js en ventanas nativas (PRINCIPAL)
-plotly>=5.17.0                     # Gráficos interactivos (legacy, opcional)
-matplotlib>=3.7.0                  # Gráficos estáticos (compatibilidad)
-seaborn>=0.12.0                    # Gráficos estadísticos avanzados
+pywebview>=4.3.3                   # Embeber HTML/JS/D3.js en ventanas nativas (PRINCIPAL - Usado activamente)
+# Librerías legacy (ya no se usan activamente, reemplazadas por D3.js):
+# plotly>=5.17.0                   # Legacy: Reemplazado por D3.js
+# matplotlib>=3.7.0                # Legacy: Reemplazado por D3.js
+# seaborn>=0.12.0                  # Legacy: Reemplazado por D3.js
 
 # Reportes PDF
 reportlab>=4.0.0                   # Generación de PDFs
