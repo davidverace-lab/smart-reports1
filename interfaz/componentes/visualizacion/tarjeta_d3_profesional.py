@@ -43,23 +43,21 @@ class SimpleHTTPServer:
         if self.httpd is not None:
             return  # Ya está corriendo
 
-        original_dir = os.getcwd()
-        os.chdir(self.directory)
-
-        Handler = http.server.SimpleHTTPRequestHandler
+        # Handler que sirve desde el directorio especificado
+        import functools
+        Handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=self.directory)
 
         try:
             self.httpd = socketserver.TCPServer(("", self.port), Handler)
             self.thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
             self.thread.start()
             print(f"✅ Servidor HTTP D3.js iniciado en http://localhost:{self.port}")
+            print(f"   Sirviendo desde: {self.directory}")
         except OSError as e:
             if "Address already in use" in str(e):
                 print(f"⚠️ Puerto {self.port} ya en uso (servidor ya corriendo)")
             else:
                 raise
-        finally:
-            os.chdir(original_dir)
 
     def stop(self):
         """Detiene el servidor"""
