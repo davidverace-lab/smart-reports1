@@ -67,24 +67,25 @@ class ModernSidebar(ctk.CTkFrame):
         logo_frame.pack(fill='x', padx=20, pady=(20, 10))
         logo_frame.pack_propagate(False)
 
-        # Título principal (más grande)
+        # Título principal (centrado y con mejor espaciado)
         self.logo_label = ctk.CTkLabel(
             logo_frame,
             text='SMART\nREPORTS',
-            font=('Montserrat', 26, 'bold'),  # Aumentado de 22 a 26
+            font=('Montserrat', 26, 'bold'),
             text_color=text_color,
-            justify='left'
+            justify='center'  # Centrado para mejor alineación
         )
-        self.logo_label.pack(anchor='w', pady=(10, 0))
+        self.logo_label.pack(anchor='center', pady=(10, 0))
 
-        # Subtítulo (más grande)
+        # Subtítulo (centrado y con mejor espaciado)
         self.subtitle = ctk.CTkLabel(
             logo_frame,
             text='INSTITUTO\nHUTCHISON PORTS',
-            font=('Montserrat', 11),  # Aumentado de 10 a 11
-            text_color=text_secondary_color
+            font=('Montserrat', 11),
+            text_color=text_secondary_color,
+            justify='center'  # Centrado para mejor alineación
         )
-        self.subtitle.pack(anchor='w', pady=(5, 0))
+        self.subtitle.pack(anchor='center', pady=(5, 0))
 
         # Línea separadora
         self.header_separator = ctk.CTkFrame(self, height=1, fg_color=border_color)
