@@ -24,6 +24,7 @@ except ImportError:
     print("ReportLab no está instalado. Instala con: pip install reportlab")
 
 from nucleo.configuracion.gestor_temas import get_theme_manager
+from interfaz.componentes.visualizacion.previsualizador_reporte import PrevisualizadorReporte
 
 
 class UserReportPanel(ctk.CTkFrame):
@@ -64,8 +65,7 @@ class UserReportPanel(ctk.CTkFrame):
             if hasattr(self, 'userid_entry') and self.userid_entry.winfo_exists():
                 current_userid = self.userid_entry.get()
 
-            if hasattr(self, 'preview_text') and self.preview_text.winfo_exists():
-                preview_content = self.preview_text.get('1.0', 'end-1c')
+            # Preview widget ya no necesita guardar contenido (se regenera)
 
             if hasattr(self, 'save_button') and self.save_button.winfo_exists():
                 save_button_state = str(self.save_button.cget('state'))
@@ -78,11 +78,7 @@ class UserReportPanel(ctk.CTkFrame):
                 self.userid_entry.delete(0, 'end')
                 self.userid_entry.insert(0, current_userid)
 
-            if preview_content and preview_content.strip() and hasattr(self, 'preview_text'):
-                self.preview_text.configure(state='normal')
-                self.preview_text.delete('1.0', 'end')
-                self.preview_text.insert('1.0', preview_content)
-                self.preview_text.configure(state='disabled')
+            # Preview widget se regenera automáticamente si es necesario
 
             if save_button_state == 'normal' and hasattr(self, 'save_button'):
                 self.save_button.configure(state='normal')
@@ -220,19 +216,9 @@ class UserReportPanel(ctk.CTkFrame):
         )
         self.save_button.grid(row=0, column=1, sticky='e', padx=(15, 0))
 
-        # Área de vista previa - Más grande y profesional
-        self.preview_text = ctk.CTkTextbox(
-            preview_section,
-            font=('Courier New', 13),
-            wrap='none',
-            corner_radius=10,
-            height=600
-        )
-        self.preview_text.pack(fill='both', expand=True, padx=30, pady=(0, 30))
-
-        # Mensaje inicial
-        self.preview_text.insert('1.0', 'Ingrese un User ID y haga clic en "Generar Vista Previa" para ver el reporte.')
-        self.preview_text.configure(state='disabled')
+        # Área de vista previa - HTML profesional estilo Word
+        self.preview_widget = PrevisualizadorReporte(preview_section)
+        self.preview_widget.pack(fill='both', expand=True, padx=30, pady=(0, 30))
 
     def _generate_preview(self):
         """Generar vista previa del reporte"""
@@ -448,71 +434,28 @@ class UserReportPanel(ctk.CTkFrame):
         self.current_user_data = user
 
     def _show_preview_text(self, user):
-        """Mostrar vista previa en formato profesional"""
-        self.preview_text.configure(state='normal')
-        self.preview_text.delete('1.0', 'end')
+        """Mostrar vista previa en HTML profesional"""
+        # Preparar datos del usuario
+        datos_usuario = {
+            'user_id': user[0],
+            'nombre': user[1],
+            'email': user[2] if user[2] else 'N/A'
+        }
 
-        theme = self.theme_manager.get_current_theme()
-        is_dark = self.theme_manager.is_dark_mode()
+        # Obtener progreso de módulos (datos de ejemplo - ajustar según BD real)
+        progreso_modulos = [
+            {'modulo': 'Módulo 1 - Introducción', 'completado': True, 'fecha': '15/01/2024', 'calificacion': 95},
+            {'modulo': 'Módulo 2 - Seguridad', 'completado': True, 'fecha': '22/01/2024', 'calificacion': 88},
+            {'modulo': 'Módulo 3 - Operaciones', 'completado': True, 'fecha': '05/02/2024', 'calificacion': 92},
+            {'modulo': 'Módulo 4 - Logística', 'completado': True, 'fecha': '18/02/2024', 'calificacion': 90},
+            {'modulo': 'Módulo 5 - Calidad', 'completado': True, 'fecha': '10/03/2024', 'calificacion': 87},
+            {'modulo': 'Módulo 6 - Medio Ambiente', 'completado': True, 'fecha': '25/03/2024', 'calificacion': 91},
+            {'modulo': 'Módulo 7 - Administración', 'completado': True, 'fecha': '08/04/2024', 'calificacion': 89},
+            {'modulo': 'Módulo 8 - RR.HH.', 'completado': False, 'fecha': 'Pendiente', 'calificacion': 0},
+        ]
 
-        # Colores para el preview
-        title_color = '#009BDE' if is_dark else '#002E6D'
-        header_bg = '#1E1E1E' if is_dark else '#F0F4F8'
-        text_color = '#FFFFFF' if is_dark else '#1A1A1A'
-
-        # Crear preview con mejor formato
-        preview = f"""
-════════════════════════════════════════════════════════════════════════════════
-                    REPORTE DE PROGRESO DEL USUARIO
-                     Instituto Hutchison Ports
-════════════════════════════════════════════════════════════════════════════════
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ INFORMACIÓN DEL USUARIO                                                     │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-    User ID:              {user[0]}
-    Nombre Completo:      {user[1]}
-    Correo Electrónico:   {user[2] if user[2] else 'N/A'}
-    Fecha de Reporte:     {datetime.now().strftime('%d de %B de %Y - %H:%M hrs')}
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ PROGRESO POR MÓDULO                                                         │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-    ┌────────────────────────────────┬────────────┬─────────────────┬──────────────┐
-    │ Módulo                         │ Completado │ Fecha Final.    │ Calificación │
-    ├────────────────────────────────┼────────────┼─────────────────┼──────────────┤
-    │ Módulo 1 - Introducción        │     ✓ Sí   │   15/01/2024    │     95%      │
-    │ Módulo 2 - Seguridad           │     ✓ Sí   │   22/01/2024    │     88%      │
-    │ Módulo 3 - Operaciones         │     ✓ Sí   │   05/02/2024    │     92%      │
-    │ Módulo 4 - Logística           │     ✓ Sí   │   18/02/2024    │     90%      │
-    │ Módulo 5 - Calidad             │     ✓ Sí   │   10/03/2024    │     87%      │
-    │ Módulo 6 - Medio Ambiente      │     ✓ Sí   │   25/03/2024    │     91%      │
-    │ Módulo 7 - Administración      │     ✓ Sí   │   08/04/2024    │     89%      │
-    │ Módulo 8 - RR.HH.              │     ✗ No   │   Pendiente     │     N/A      │
-    └────────────────────────────────┴────────────┴─────────────────┴──────────────┘
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ RESUMEN DE DESEMPEÑO                                                        │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-    📊 Módulos Completados:        7 de 8 módulos (87.5%)
-    📈 Promedio General:           90.3%
-    ⚡ Estado Actual:              En Progreso
-    🎯 Siguiente Módulo:           Módulo 8 - Procesos de Recursos Humanos
-
-
-════════════════════════════════════════════════════════════════════════════════
-         Generado automáticamente por Smart Reports v2.0
-         {datetime.now().strftime('%d/%m/%Y a las %H:%M hrs')}
-════════════════════════════════════════════════════════════════════════════════
-"""
-
-        self.preview_text.insert('1.0', preview)
-        self.preview_text.configure(state='disabled')
+        # Mostrar en widget HTML
+        self.preview_widget.mostrar_reporte_usuario(datos_usuario, progreso_modulos)
 
     def _save_pdf(self):
         """Guardar PDF en PC"""
