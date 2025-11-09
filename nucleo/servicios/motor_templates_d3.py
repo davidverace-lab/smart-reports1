@@ -253,8 +253,12 @@ class MotorTemplatesD3:
             interactivo: Si es True, agrega hover y animaciones
         """
 
-        labels_json = json.dumps(datos['labels'])
-        values_json = json.dumps(datos['values'])
+        # Aceptar tanto 'labels'/'values' como 'categorias'/'valores'
+        labels = datos.get('labels') or datos.get('categorias', [])
+        values = datos.get('values') or datos.get('valores', [])
+
+        labels_json = json.dumps(labels)
+        values_json = json.dumps(values)
         colores_json = json.dumps(MotorTemplatesD3.PALETA_COLORES)
 
         html = MotorTemplatesD3._generar_head(titulo, tema)
@@ -471,8 +475,12 @@ class MotorTemplatesD3:
     ) -> str:
         """Generar gráfico de donut con D3.js"""
 
-        labels_json = json.dumps(datos['labels'])
-        values_json = json.dumps(datos['values'])
+        # Aceptar tanto 'labels'/'values' como 'categorias'/'valores'
+        labels = datos.get('labels') or datos.get('categorias', [])
+        values = datos.get('values') or datos.get('valores', [])
+
+        labels_json = json.dumps(labels)
+        values_json = json.dumps(values)
         colores_json = json.dumps(MotorTemplatesD3.PALETA_COLORES)
 
         html = MotorTemplatesD3._generar_head(titulo, tema)
@@ -634,9 +642,13 @@ class MotorTemplatesD3:
     ) -> str:
         """Generar gráfico de líneas con D3.js (múltiples series)"""
 
+        # Aceptar tanto 'labels'/'values' como 'categorias'/'valores'
+        labels = datos.get('labels') or datos.get('categorias', [])
+        values = datos.get('values') or datos.get('valores', [])
+
         # datos = {'labels': [...], 'series': [{'name': '...', 'values': [...]}, ...]}
-        labels_json = json.dumps(datos['labels'])
-        series_json = json.dumps(datos.get('series', [{'name': 'Serie 1', 'values': datos.get('values', [])}]))
+        labels_json = json.dumps(labels)
+        series_json = json.dumps(datos.get('series', [{'name': 'Serie 1', 'values': values}]))
         colores_json = json.dumps(MotorTemplatesD3.PALETA_COLORES)
 
         html = MotorTemplatesD3._generar_head(titulo, tema)
