@@ -11,18 +11,18 @@ from nucleo.configuracion.ajustes import HUTCHISON_COLORS
 class MotorTemplatesD3:
     """Motor para generar templates HTML con D3.js embebido"""
 
-    # Colores Hutchison Ports para gráficos
+    # Escala de azules desde navy (solicitado por usuario)
     PALETA_COLORES = [
-        HUTCHISON_COLORS['ports_sky_blue'],     # #009BDE
-        HUTCHISON_COLORS['ports_horizon_blue'], # #00B5E2
-        HUTCHISON_COLORS['success'],            # #51cf66
-        HUTCHISON_COLORS['warning'],            # #ffd93d
-        HUTCHISON_COLORS['danger'],             # #ff6b6b
-        '#8B4CFA',  # Púrpura
-        '#FF8C42',  # Naranja
-        '#4ECDC4',  # Turquesa
-        '#A78BFA',  # Lavanda
-        '#FB923C',  # Naranja claro
+        '#002E6D',  # Navy (Hutchison Ports - más oscuro)
+        '#003D82',  # Navy blue
+        '#004C97',  # Royal blue oscuro
+        '#0066CC',  # Royal blue
+        '#0080FF',  # Azure blue
+        '#009BDE',  # Sky blue (Hutchison Ports)
+        '#00B5E2',  # Horizon blue (Hutchison Ports)
+        '#33C7F0',  # Light blue
+        '#66D4F5',  # Lighter blue
+        '#99E1FA',  # Very light blue
     ]
 
     @staticmethod

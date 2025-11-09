@@ -223,28 +223,22 @@ class ProfessionalD3ChartCard(ctk.CTkFrame):
         # Generar HTML D3.js (siempre lo generamos para botón de navegador)
         self.current_html_d3 = self._generar_html_d3(chart_type, datos, subtitulo, tema)
 
-        # Decidir qué tecnología usar
-        if TKINTERWEB_AVAILABLE:
-            # OPCIÓN 1: D3.js interactivo con servidor HTTP (PREFERIDO)
-            try:
-                self._render_d3_with_http_server(chart_type, datos, subtitulo, tema)
-                print(f"✅ Gráfico D3.js {chart_type} renderizado (interactivo)")
-                self.using_d3 = True
-                return
-            except Exception as e:
-                print(f"⚠️ Error con D3.js, usando matplotlib: {e}")
-                self.using_d3 = False
+        # SOLO D3.js - Si no funciona, mostrar error claro (sin fallback)
+        if not TKINTERWEB_AVAILABLE:
+            self._show_error("❌ tkinterweb NO instalado\n\nInstala con:\npip install tkinterweb")
+            print("❌ ERROR: tkinterweb no disponible. Instala con: pip install tkinterweb")
+            return
 
-        # OPCIÓN 2: Matplotlib fallback (siempre funciona)
+        # Renderizar con D3.js (sin fallback a matplotlib)
         try:
-            self._render_matplotlib(chart_type, datos, tema)
-            print(f"✅ Gráfico {chart_type} renderizado con matplotlib")
-            self.using_d3 = False
+            self._render_d3_with_http_server(chart_type, datos, subtitulo, tema)
+            print(f"✅ Gráfico D3.js {chart_type} renderizado (interactivo)")
+            self.using_d3 = True
         except Exception as e:
-            print(f"❌ Error renderizando matplotlib: {e}")
+            print(f"❌ ERROR renderizando D3.js: {e}")
             import traceback
             traceback.print_exc()
-            self._show_error(f"Error al generar gráfico: {e}")
+            self._show_error(f"❌ Error D3.js:\n{str(e)}\n\nRevisa la consola")
 
     def _generar_html_d3(self, chart_type, datos, subtitulo, tema):
         """Generar HTML con D3.js para navegador"""
