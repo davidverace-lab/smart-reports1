@@ -3,6 +3,7 @@ CustomTabButton - Botones de pestañas personalizados más grandes y elegantes
 """
 import customtkinter as ctk
 from config.themes import HUTCHISON_COLORS
+from config.gestor_temas import get_theme_manager
 
 
 class CustomTabButton(ctk.CTkButton):
@@ -19,20 +20,21 @@ class CustomTabButton(ctk.CTkButton):
         self.is_active = False
         self.tab_text = text
         self.tab_icon = icon
+        self.theme_manager = get_theme_manager()
 
         display_text = f"{icon}  {text}" if icon else text
 
         super().__init__(
             parent,
             text=display_text,
-            font=('Montserrat', 14, 'bold'),
+            font=('Segoe UI', 13, 'bold'),
             fg_color='transparent',
-            text_color='#888888',
-            hover_color='#3a3d5c',
-            corner_radius=12,
-            height=55,
-            width=250,
-            anchor='w',
+            text_color='#ffffff',
+            hover_color='#555555',
+            corner_radius=8,
+            height=45,
+            width=220,
+            anchor='center',
             command=command,
             border_width=0,
             **kwargs
@@ -46,18 +48,22 @@ class CustomTabButton(ctk.CTkButton):
             active: True si está activo, False si no
         """
         self.is_active = active
+        theme = self.theme_manager.get_current_theme()
 
         if active:
+            # Tab activo: azul navy con letras blancas
             self.configure(
-                fg_color=HUTCHISON_COLORS['ports_sky_blue'],
+                fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Navy blue
                 text_color='#ffffff',
                 hover_color=HUTCHISON_COLORS['ports_sea_blue']
             )
         else:
+            # Tab inactivo: gris con letras blancas
+            inactive_gray = '#666666' if self.theme_manager.is_dark_mode() else '#999999'
             self.configure(
-                fg_color='transparent',
-                text_color='#888888',
-                hover_color='#3a3d5c'
+                fg_color=inactive_gray,
+                text_color='#ffffff',
+                hover_color='#555555'
             )
 
 
