@@ -250,21 +250,97 @@ class PanelImportacionDatos(ctk.CTkFrame):
         )
         section_title.pack(anchor='w', pady=(0, 12))
 
-        # Tabs para preview
-        self.preview_tabs = ctk.CTkTabview(parent, height=300)
-        self.preview_tabs.pack(fill='both', expand=True, pady=(0, 10))
+        # Botones de navegación de preview (reemplazan tabs)
+        buttons_frame = ctk.CTkFrame(parent, fg_color='transparent')
+        buttons_frame.pack(fill='x', pady=(0, 15))
 
-        # Tab 1: Training Report
-        self.tab_preview_training = self.preview_tabs.add("📊 Training Report")
+        # Grid para 3 botones
+        buttons_frame.columnconfigure((0, 1, 2), weight=1)
+
+        # Botón Training Report
+        self.btn_preview_training = ctk.CTkButton(
+            buttons_frame,
+            text="📊 Training Report",
+            font=('Segoe UI', 12, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            hover_color='#001a3d',
+            text_color='white',
+            height=42,
+            corner_radius=8,
+            command=lambda: self._show_preview_content('training')
+        )
+        self.btn_preview_training.grid(row=0, column=0, padx=4, sticky='ew')
+
+        # Botón Org Planning
+        self.btn_preview_org = ctk.CTkButton(
+            buttons_frame,
+            text="👥 Org Planning",
+            font=('Segoe UI', 12, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            hover_color='#001a3d',
+            text_color='white',
+            height=42,
+            corner_radius=8,
+            command=lambda: self._show_preview_content('org')
+        )
+        self.btn_preview_org.grid(row=0, column=1, padx=4, sticky='ew')
+
+        # Botón Validación
+        self.btn_preview_validation = ctk.CTkButton(
+            buttons_frame,
+            text="✅ Validación",
+            font=('Segoe UI', 12, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            hover_color='#001a3d',
+            text_color='white',
+            height=42,
+            corner_radius=8,
+            command=lambda: self._show_preview_content('validation')
+        )
+        self.btn_preview_validation.grid(row=0, column=2, padx=4, sticky='ew')
+
+        # Contenedor para el contenido dinámico
+        self.preview_content_container = ctk.CTkFrame(
+            parent,
+            fg_color=theme['surface'],
+            corner_radius=10,
+            border_width=1,
+            border_color=theme['border'],
+            height=300
+        )
+        self.preview_content_container.pack(fill='both', expand=True, pady=(0, 10))
+        self.preview_content_container.pack_propagate(False)
+
+        # Crear los 3 frames de contenido (ocultos inicialmente)
+        self.tab_preview_training = ctk.CTkFrame(self.preview_content_container, fg_color='transparent')
+        self.tab_preview_org = ctk.CTkFrame(self.preview_content_container, fg_color='transparent')
+        self.tab_validation = ctk.CTkFrame(self.preview_content_container, fg_color='transparent')
+
+        # Crear contenido de cada frame
         self._create_preview_content(self.tab_preview_training, "training")
-
-        # Tab 2: Org Planning
-        self.tab_preview_org = self.preview_tabs.add("👥 Org Planning")
         self._create_preview_content(self.tab_preview_org, "org")
-
-        # Tab 3: Validación
-        self.tab_validation = self.preview_tabs.add("✅ Validación")
         self._create_validation_content(self.tab_validation)
+
+        # Mostrar training por defecto
+        self.current_preview = 'training'
+        self.tab_preview_training.pack(fill='both', expand=True)
+
+    def _show_preview_content(self, tipo):
+        """Mostrar contenido de preview según el tipo seleccionado"""
+        # Ocultar todos los frames
+        self.tab_preview_training.pack_forget()
+        self.tab_preview_org.pack_forget()
+        self.tab_validation.pack_forget()
+
+        # Mostrar el frame seleccionado
+        if tipo == 'training':
+            self.tab_preview_training.pack(fill='both', expand=True)
+        elif tipo == 'org':
+            self.tab_preview_org.pack(fill='both', expand=True)
+        elif tipo == 'validation':
+            self.tab_validation.pack(fill='both', expand=True)
+
+        self.current_preview = tipo
 
     def _create_preview_content(self, parent, tipo):
         """Crear contenido de preview"""
@@ -317,8 +393,8 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="🔍 Validar Datos",
             font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_horizon_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            hover_color='#001a3d',
             text_color='white',
             height=45,
             corner_radius=10,
@@ -331,8 +407,8 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="🚀 Importar Todo",
             font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['success'],
-            hover_color='#51cf66',
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            hover_color='#001a3d',
             text_color='white',
             height=45,
             corner_radius=10,
@@ -345,8 +421,8 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="📊 Solo Training",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            hover_color='#001a3d',
             text_color='white',
             height=45,
             corner_radius=10,
@@ -359,7 +435,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="👥 Solo Org",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
             height=45,
@@ -382,11 +458,10 @@ class PanelImportacionDatos(ctk.CTkFrame):
             tools_grid,
             text="⚙ Configurar Columnas",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=theme['surface'],
-            hover_color=theme['surface_light'],
-            text_color=theme['text'],
-            border_width=2,
-            border_color=HUTCHISON_COLORS['ports_horizon_blue'],
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            hover_color='#001a3d',
+            text_color='white',
+            border_width=0,
             height=38,
             corner_radius=8,
             command=self._configurar_columnas
@@ -398,11 +473,10 @@ class PanelImportacionDatos(ctk.CTkFrame):
             tools_grid,
             text="💾 Exportar Log",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=theme['surface'],
-            hover_color=theme['surface_light'],
-            text_color=theme['text'],
-            border_width=2,
-            border_color=HUTCHISON_COLORS['ports_sky_blue'],
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            hover_color='#001a3d',
+            text_color='white',
+            border_width=0,
             height=38,
             corner_radius=8,
             command=self._exportar_log
@@ -414,11 +488,10 @@ class PanelImportacionDatos(ctk.CTkFrame):
             tools_grid,
             text="🔄 Ver Backups",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=theme['surface'],
-            hover_color=theme['surface_light'],
-            text_color=theme['text'],
-            border_width=2,
-            border_color=HUTCHISON_COLORS['warning'],
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            hover_color='#001a3d',
+            text_color='white',
+            border_width=0,
             height=38,
             corner_radius=8,
             command=self._ver_backups
@@ -670,8 +743,8 @@ class PanelImportacionDatos(ctk.CTkFrame):
         self.validation_text.insert('end', "="*60 + "\n✅ Validación completada\n")
         self.validation_text.configure(state='disabled')
 
-        # Cambiar a tab de validación
-        self.preview_tabs.set("✅ Validación")
+        # Cambiar a panel de validación
+        self._show_preview_content('validation')
 
     def _validar_training_report(self, file_path):
         """Validar estructura del Training Report"""

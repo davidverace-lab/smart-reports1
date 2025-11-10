@@ -85,7 +85,7 @@ class CustomTabView(ctk.CTkFrame):
 
         # Frame para botones de pestañas
         self.tabs_frame = ctk.CTkFrame(self, fg_color='transparent', height=70)
-        self.tabs_frame.pack(side='top', fill='x', pady=(0, 15))
+        self.tabs_frame.pack(side='top', fill='x', pady=(15, 25))  # Más espacio arriba y abajo
         self.tabs_frame.pack_propagate(False)
 
         # Frame interno para centrar los botones
