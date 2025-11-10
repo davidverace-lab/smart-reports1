@@ -1,34 +1,6 @@
 """
-Configuración global del sistema Smart Reports
+Configuración de temas y colores - Smart Reports
 """
-
-# ============================================
-# CONFIGURACIÓN DE BASE DE DATOS
-# ============================================
-
-# Tipo de base de datos: 'sqlserver' o 'mysql'
-DB_TYPE = 'mysql'  # Cambiar a 'sqlserver' para usar base de datos del trabajo
-
-# Configuración SQL Server (Trabajo)
-SQLSERVER_CONFIG = {
-    'server': '10.133.18.111',
-    'database': 'TNGCORE',
-    'username': 'tngdatauser',
-    'password': 'Password1',
-    'driver': 'ODBC Driver 17 for SQL Server'
-}
-
-# Configuración MySQL (Casa)
-MYSQL_CONFIG = {
-    'host': 'localhost',
-    'port': 3306,
-    'database': 'tngcore',
-    'user': 'root',
-    'password': 'Xbox360xd'
-}
-
-# Configuración activa (se establece según DB_TYPE)
-DATABASE_CONFIG = SQLSERVER_CONFIG if DB_TYPE == 'sqlserver' else MYSQL_CONFIG
 
 # ============================================
 # PALETAS DE COLORES - HUTCHISON PORTS BRANDING
@@ -50,6 +22,7 @@ HUTCHISON_COLORS = {
     'success': '#00B5AD',             # Verde agua (éxito)
     'warning': '#FFD700',             # Amarillo (advertencia)
     'danger': '#FF6B35',              # Naranja (peligro)
+    'error': '#FF6B35',               # Alias para danger
 }
 
 # Paleta Oscura (Tema por defecto) - Adaptada a Hutchison Ports
