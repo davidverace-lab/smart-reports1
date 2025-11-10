@@ -17,19 +17,17 @@ except ImportError:
 from config.themes import APP_CONFIG, HUTCHISON_COLORS
 from config.gestor_temas import get_theme_manager
 from src.infrastructure.persistence.mysql.connection import DatabaseConnection
-from nucleo.servicios.procesador_datos import TranscriptProcessor
-from nucleo.servicios.sincronizador_datos import DataSyncManager
+from src.application.services.importador_capacitacion import ImportadorCapacitacion
 from src.interfaces.ui.views.components.navigation.barra_lateral import ModernSidebar
 from src.interfaces.ui.views.components.navigation.barra_superior import TopBar
-from src.interfaces.ui.views.panels.dashboard.panel_dashboard import ModernDashboard
 from src.interfaces.ui.views.panels.dashboard.panel_dashboards_gerenciales import DashboardsGerencialesPanel
 from src.interfaces.ui.views.panels.configuracion.panel_configuracion import ConfiguracionPanel
+from src.interfaces.ui.views.panels.configuracion.panel_importacion_datos import PanelImportacionDatos
 from src.interfaces.ui.views.panels.reportes.panel_reporte_usuario import UserReportPanel
 from src.interfaces.ui.views.panels.reportes.panel_reporte_unidad import UnitReportPanel
 from src.interfaces.ui.views.panels.reportes.panel_reporte_periodo import PeriodReportPanel
 from src.interfaces.ui.views.panels.reportes.panel_reporte_global import GlobalReportPanel
 from src.interfaces.ui.views.panels.reportes.panel_niveles_mando import ManagementLevelsPanel
-from interfaz.dialogos.dialogo_gestion_usuarios import UserManagementDialog
 
 
 class MainWindow:
@@ -1207,164 +1205,25 @@ class MainWindow:
             f"Archivo cargado: {filename}\n\nAhora haz clic en 'Actualizar Base de Datos'")
 
     def update_database_from_file(self):
-        """Actualizar base de datos desde archivo cargado usando DataSyncManager"""
+        """Redirigir al panel de importación de datos"""
         if self.conn is None:
             messagebox.showerror("Error de Conexión",
                 "No hay conexión a la base de datos.\nNo se puede actualizar.")
             return
 
-        if not self.current_file:
-            messagebox.showwarning("Sin Archivo",
-                "Primero debes seleccionar un archivo Excel de Cornerstone")
-            return
+        # Redirigir al panel de importación de datos
+        messagebox.showinfo(
+            "Panel de Importación",
+            "Para importar datos desde Excel, ve a:\n\n"
+            "Configuración → Importación de Datos\n\n"
+            "Ahí podrás importar:\n"
+            "• Enterprise Training Report\n"
+            "• CSOD Org Planning\n\n"
+            "Con log en tiempo real y reportes detallados."
+        )
 
-        try:
-            self.log_movement("="*50)
-            self.log_movement("🔄 INICIANDO CRUCE DE DATOS (DATA SYNC)")
-            self.log_movement("="*50)
-            self.log_movement(f"Archivo: {self.current_file}")
-            self.log_movement("")
-
-            # Preguntar al usuario qué tipo de archivo es
-            from tkinter import Toplevel
-            dialog = Toplevel(self.root)
-            dialog.title("Tipo de Archivo")
-            dialog.geometry("400x250")
-            dialog.transient(self.root)
-            dialog.grab_set()
-
-            theme = self.theme_manager.get_current_theme()
-
-            ctk.CTkLabel(
-                dialog,
-                text="Seleccione el tipo de archivo Excel:",
-                font=('Montserrat', 14, 'bold')
-            ).pack(pady=20)
-
-            file_type_var = tk.StringVar(value='transcripts')
-
-            ctk.CTkRadioButton(
-                dialog,
-                text="Transcripciones (Título, Estado, Fechas)",
-                variable=file_type_var,
-                value='transcripts',
-                font=('Montserrat', 12)
-            ).pack(pady=5)
-
-            ctk.CTkRadioButton(
-                dialog,
-                text="Puntuaciones y Fallos",
-                variable=file_type_var,
-                value='scores',
-                font=('Montserrat', 12)
-            ).pack(pady=5)
-
-            ctk.CTkRadioButton(
-                dialog,
-                text="Datos de Usuario (Email, Departamento, etc.)",
-                variable=file_type_var,
-                value='users',
-                font=('Montserrat', 12)
-            ).pack(pady=5)
-
-            selected_type = {'value': None}
-
-            def on_confirm():
-                selected_type['value'] = file_type_var.get()
-                dialog.destroy()
-
-            def on_cancel():
-                selected_type['value'] = None
-                dialog.destroy()
-
-            btn_frame = ctk.CTkFrame(dialog, fg_color='transparent')
-            btn_frame.pack(pady=20)
-
-            button_color = self.get_button_color()
-
-            ctk.CTkButton(
-                btn_frame,
-                text='Confirmar',
-                font=('Montserrat', 12, 'bold'),
-                fg_color=button_color,
-                hover_color=self.get_button_hover_color(button_color),
-                width=120,
-                command=on_confirm
-            ).pack(side='left', padx=5)
-
-            ctk.CTkButton(
-                btn_frame,
-                text='Cancelar',
-                font=('Montserrat', 12, 'bold'),
-                fg_color='#666666',
-                hover_color='#555555',
-                width=120,
-                command=on_cancel
-            ).pack(side='left', padx=5)
-
-            # Esperar a que el usuario seleccione
-            self.root.wait_window(dialog)
-
-            if not selected_type['value']:
-                self.log_movement("✗ Operación cancelada por el usuario")
-                return
-
-            file_type = selected_type['value']
-            self.log_movement(f"Tipo de archivo seleccionado: {file_type}")
-            self.log_movement("")
-
-            # Crear DataSyncManager
-            sync_manager = DataSyncManager(self.conn)
-
-            # Procesar archivo según el tipo
-            if file_type == 'transcripts':
-                self.log_movement("📄 Procesando transcripciones...")
-                stats = sync_manager.sync_transcript_data(self.current_file)
-            elif file_type == 'scores':
-                self.log_movement("📊 Procesando puntuaciones...")
-                stats = sync_manager.sync_scores_data(self.current_file)
-            elif file_type == 'users':
-                self.log_movement("👤 Procesando datos de usuario...")
-                stats = sync_manager.sync_user_data(self.current_file)
-
-            # Mostrar estadísticas
-            self.log_movement("")
-            self.log_movement("📊 ESTADÍSTICAS DEL PROCESO:")
-            self.log_movement(f"  • Usuarios creados: {stats['usuarios_creados']}")
-            self.log_movement(f"  • Usuarios actualizados: {stats['usuarios_actualizados']}")
-            self.log_movement(f"  • Módulos creados: {stats['modulos_creados']}")
-            self.log_movement(f"  • Inscripciones creadas: {stats['inscripciones_creadas']}")
-            self.log_movement(f"  • Inscripciones actualizadas: {stats['inscripciones_actualizadas']}")
-            self.log_movement(f"  • Evaluaciones creadas: {stats['evaluaciones_creadas']}")
-            self.log_movement(f"  • Departamentos creados: {stats['departamentos_creados']}")
-            self.log_movement(f"  • Errores encontrados: {len(stats['errores'])}")
-
-            if stats['errores']:
-                self.log_movement("")
-                self.log_movement("⚠️ ERRORES (primeros 10):")
-                for error in stats['errores'][:10]:
-                    self.log_movement(f"  • {error}")
-
-            # Mensaje de éxito
-            messagebox.showinfo("Cruce de Datos Exitoso",
-                f"✓ Sincronización completada correctamente\n\n" +
-                f"Usuarios creados: {stats['usuarios_creados']}\n" +
-                f"Usuarios actualizados: {stats['usuarios_actualizados']}\n" +
-                f"Módulos creados: {stats['modulos_creados']}\n" +
-                f"Inscripciones creadas: {stats['inscripciones_creadas']}\n" +
-                f"Inscripciones actualizadas: {stats['inscripciones_actualizadas']}\n\n" +
-                f"Errores: {len(stats['errores'])}")
-
-            self.log_movement("")
-            self.log_movement("✓ Cruce de datos completado exitosamente")
-            self.log_movement("="*50 + "\n")
-
-        except Exception as e:
-            error_msg = f"Error en cruce de datos: {str(e)}"
-            messagebox.showerror("Error", error_msg)
-            self.log_movement(f"✗ ERROR: {str(e)}")
-            import traceback
-            self.log_movement(traceback.format_exc())
+        # Cambiar al panel de configuración automáticamente
+        self.show_configuracion_panel()
 
     def log_movement(self, message):
         """Registrar movimiento en el panel"""
@@ -1618,20 +1477,28 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
         )
 
     def show_user_management(self):
-        """Mostrar ventana de gestión de usuarios"""
+        """Redirigir al panel de configuración para gestión de usuarios"""
         if self.conn is None:
             messagebox.showerror("Error de Conexión",
                 "No hay conexión a la base de datos.\n" +
                 "No se puede gestionar usuarios sin conexión.")
             return
 
-        # Abrir diálogo de gestión de usuarios
-        dialog = UserManagementDialog(self.root, self.conn)
-        self.root.wait_window(dialog)
+        # Redirigir al panel de configuración que tiene gestión de usuarios completa
+        messagebox.showinfo(
+            "Gestión de Usuarios",
+            "La gestión de usuarios se encuentra en:\n\n"
+            "Configuración → Gestión de Usuarios\n\n"
+            "Ahí podrás:\n"
+            "• Crear usuarios\n"
+            "• Editar usuarios\n"
+            "• Eliminar usuarios\n"
+            "• Buscar usuarios\n"
+            "• Ver historial"
+        )
 
-        # Si se creó o actualizó un usuario, refrescar dashboard si está visible
-        if dialog.result in ['created', 'updated'] and self.current_panel == 'dashboard':
-            self.show_dashboard_panel()
+        # Cambiar al panel de configuración
+        self.show_configuracion_panel()
 
     def backup_database(self):
         """Crear respaldo de la base de datos"""
