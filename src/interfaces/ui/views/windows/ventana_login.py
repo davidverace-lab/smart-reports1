@@ -217,16 +217,18 @@ class LoginWindow:
 
         # Credenciales demo (sin base de datos)
         # TODO: Reemplazar con consulta a BD
+        # Usuarios válidos con sus contraseñas y roles
         VALID_USERS = {
-            'admin': '1234',
-            'usuario': 'pass',
-            'demo': 'demo'
+            'admin': {'password': '1234', 'role': 'Administrador'},
+            'usuario': {'password': 'pass', 'role': 'Usuario'},
+            'demo': {'password': 'demo', 'role': 'Demo'}
         }
 
         # Verificar credenciales
-        if username in VALID_USERS and VALID_USERS[username] == password:
-            # Login exitoso
-            self.on_login_success(username)
+        if username in VALID_USERS and VALID_USERS[username]['password'] == password:
+            # Login exitoso - obtener el rol del usuario
+            user_role = VALID_USERS[username]['role']
+            self.on_login_success(username, user_role)
         else:
             # Login fallido
             messagebox.showerror(
@@ -236,18 +238,19 @@ class LoginWindow:
             self.password_entry.delete(0, 'end')
             self.password_entry.focus()
 
-    def on_login_success(self, username):
+    def on_login_success(self, username, role):
         """
         Se ejecuta cuando el login es exitoso
 
         Args:
             username: Nombre de usuario autenticado
+            role: Rol del usuario (Administrador, Usuario, Demo)
         """
         # Destruir frame de login
         self.main_frame.destroy()
 
-        # Llamar al callback con el usuario autenticado
-        self.on_success_callback(username)
+        # Llamar al callback con el usuario autenticado y su rol
+        self.on_success_callback(username, role)
 
     def destroy(self):
         """Destruye la ventana de login"""
