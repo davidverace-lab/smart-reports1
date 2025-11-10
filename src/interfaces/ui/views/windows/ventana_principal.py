@@ -194,7 +194,15 @@ class MainWindow:
             return
 
         # Crear Dashboards Gerenciales con múltiples gráficos D3.js
-        dashboard = DashboardsGerencialesPanel(self.content_area, self.conn)
+        usuario_info = {
+            "nombre": self.username,
+            "rol": self.user_role
+        }
+        dashboard = DashboardsGerencialesPanel(
+            self.content_area,
+            db_connection=self.conn,
+            usuario_actual=usuario_info
+        )
         dashboard.pack(fill='both', expand=True)
 
     def show_actualizar_panel(self):

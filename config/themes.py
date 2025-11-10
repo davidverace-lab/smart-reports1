@@ -66,6 +66,7 @@ DARK_THEME = {
     'danger': '#FF6B35',              # Sunset Orange
     'text': '#ffffff',
     'text_secondary': '#a0a0a0',
+    'text_tertiary': '#808080',       # Texto terciario (más tenue)
     'text_light': '#808080',          # Texto más claro
     'border': '#444654',
     'border_light': '#555570',        # Bordes claros
@@ -88,6 +89,7 @@ LIGHT_THEME = {
     'danger': '#FF6B35',              # Sunset Orange
     'text': '#002E6D',                # Texto principal - Ports Sea Blue
     'text_secondary': '#555555',      # Texto secundario
+    'text_tertiary': '#777777',       # Texto terciario (más tenue)
     'text_light': '#777777',          # Texto más claro
     'border': '#d0d0d0',              # Bordes
     'border_light': '#e8e8e8',        # Bordes claros
