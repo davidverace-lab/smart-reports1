@@ -81,35 +81,37 @@ class PrevisualizadorReporte(ctk.CTkFrame):
         self.html_widget.load_file(temp_file.name)
 
     def _generar_html_usuario(self, datos, progreso):
-        """Generar HTML estilo Word para reporte de usuario"""
-
-        fecha_actual = datetime.now().strftime('%d de %B de %Y')
+        """
+        Generar HTML que replica EXACTAMENTE el formato del PDF de ReportLab
+        Sin gradientes, sin cards elaborados - igual al PDF
+        """
+        fecha_actual = datetime.now().strftime('%d/%m/%Y %H:%M')
 
         # Calcular estadísticas
         total_modulos = len(progreso)
         completados = sum(1 for m in progreso if m.get('completado', False))
-        porcentaje_global = (completados / total_modulos * 100) if total_modulos > 0 else 0
+        suma_calif = sum(m.get('calificacion', 0) for m in progreso if m.get('completado', False))
+        promedio = (suma_calif / completados) if completados > 0 else 0
 
-        # Generar filas de tabla
+        # Generar filas de tabla - igual al PDF
         filas_modulos = ""
-        for modulo in progreso:
-            estado = "✓ Completado" if modulo.get('completado', False) else "○ Pendiente"
-            estado_color = "#51cf66" if modulo.get('completado', False) else "#ffa94d"
+        for idx, modulo in enumerate(progreso):
+            completado_si_no = "Sí" if modulo.get('completado', False) else "No"
             fecha = modulo.get('fecha', 'Pendiente')
             calificacion = f"{modulo.get('calificacion', 0)}%" if modulo.get('completado', False) else "N/A"
+            bg_color = "#FFFFFF" if idx % 2 == 0 else "#F5F5F5"  # Filas alternadas como el PDF
 
             filas_modulos += f"""
-            <tr>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">{modulo.get('modulo', 'N/A')}</td>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; color: {estado_color}; font-weight: 600;">
-                    {estado}
-                </td>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: center;">{fecha}</td>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: center; font-weight: 600;">
-                    {calificacion}
-                </td>
+            <tr style="background-color: {bg_color};">
+                <td style="padding: 10px 8px;">{modulo.get('modulo', 'N/A')}</td>
+                <td style="padding: 10px 8px; text-align: center;">{completado_si_no}</td>
+                <td style="padding: 10px 8px; text-align: center;">{fecha}</td>
+                <td style="padding: 10px 8px; text-align: center;">{calificacion}</td>
             </tr>
             """
+
+        # Estado general
+        estado_general = "En Progreso" if completados < total_modulos else "Completado"
 
         html = f"""
         <!DOCTYPE html>
@@ -117,210 +119,151 @@ class PrevisualizadorReporte(ctk.CTkFrame):
         <head>
             <meta charset="UTF-8">
             <style>
-                @page {{
-                    size: A4;
-                    margin: 2cm;
-                }}
-
                 body {{
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    line-height: 1.6;
-                    color: #333;
-                    max-width: 21cm;
+                    font-family: Helvetica, Arial, sans-serif;
+                    color: #000000;
+                    max-width: 8.5in;
                     margin: 0 auto;
-                    padding: 40px;
+                    padding: 0.5in;
                     background: white;
+                    line-height: 1.4;
                 }}
 
-                .header {{
+                h1 {{
+                    color: #002E6D;
+                    font-size: 20px;
                     text-align: center;
-                    border-bottom: 4px solid #002E6D;
-                    padding-bottom: 20px;
+                    margin: 0 0 10px 0;
+                    font-weight: bold;
+                }}
+
+                .subtitle {{
+                    text-align: center;
+                    font-size: 12px;
+                    color: #666666;
                     margin-bottom: 30px;
                 }}
 
-                .header h1 {{
-                    color: #002E6D;
-                    font-size: 28px;
-                    margin: 0 0 10px 0;
-                    font-weight: 700;
-                }}
-
-                .header .subtitle {{
-                    color: #009BDE;
-                    font-size: 16px;
-                    font-weight: 600;
-                }}
-
-                .section {{
-                    margin: 30px 0;
-                }}
-
                 .section-title {{
-                    background: linear-gradient(135deg, #002E6D 0%, #004C97 100%);
-                    color: white;
-                    padding: 12px 20px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    border-radius: 6px;
-                    margin-bottom: 15px;
-                }}
-
-                .info-grid {{
-                    display: grid;
-                    grid-template-columns: 180px 1fr;
-                    gap: 12px;
-                    background: #f8f9fa;
-                    padding: 20px;
-                    border-radius: 6px;
-                    border-left: 4px solid #009BDE;
-                }}
-
-                .info-label {{
-                    font-weight: 600;
                     color: #002E6D;
-                }}
-
-                .info-value {{
-                    color: #333;
+                    font-size: 14px;
+                    font-weight: bold;
+                    margin: 20px 0 10px 0;
                 }}
 
                 table {{
                     width: 100%;
                     border-collapse: collapse;
-                    margin: 15px 0;
-                    background: white;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    border-radius: 6px;
-                    overflow: hidden;
+                    margin: 10px 0;
+                    font-size: 11px;
                 }}
 
-                thead {{
-                    background: linear-gradient(135deg, #002E6D 0%, #004C97 100%);
+                .info-table td {{
+                    padding: 8px 10px;
+                    border: none;
+                }}
+
+                .info-table td:first-child {{
+                    font-weight: bold;
+                    color: #002E6D;
+                    width: 150px;
+                }}
+
+                .data-table {{
+                    border: 0.5px solid #808080;
+                }}
+
+                .data-table thead {{
+                    background-color: #002E6D;
                     color: white;
                 }}
 
-                th {{
-                    padding: 15px 12px;
-                    text-align: left;
-                    font-weight: 600;
-                    font-size: 14px;
-                }}
-
-                td {{
-                    padding: 12px;
-                    border-bottom: 1px solid #e0e0e0;
-                }}
-
-                tr:last-child td {{
-                    border-bottom: none;
-                }}
-
-                tr:hover {{
-                    background: #f8f9fa;
-                }}
-
-                .stats-box {{
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 15px;
-                    margin: 20px 0;
-                }}
-
-                .stat-card {{
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    padding: 20px;
-                    border-radius: 8px;
+                .data-table th {{
+                    padding: 10px 8px;
                     text-align: center;
-                    border: 2px solid #dee2e6;
+                    font-weight: bold;
+                    font-size: 11px;
+                    border-bottom: 2px solid #002E6D;
                 }}
 
-                .stat-value {{
-                    font-size: 32px;
-                    font-weight: 700;
-                    color: #002E6D;
-                    margin: 5px 0;
+                .data-table td {{
+                    padding: 10px 8px;
+                    border: 0.5px solid #808080;
+                    font-size: 10px;
                 }}
 
-                .stat-label {{
-                    font-size: 13px;
-                    color: #666;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
+                .data-table tbody tr:nth-child(even) {{
+                    background-color: #F5F5F5;
+                }}
+
+                .data-table tbody tr:nth-child(odd) {{
+                    background-color: #FFFFFF;
                 }}
 
                 .footer {{
-                    margin-top: 40px;
-                    padding-top: 20px;
-                    border-top: 2px solid #e0e0e0;
+                    margin-top: 50px;
                     text-align: center;
-                    color: #666;
-                    font-size: 12px;
+                    font-size: 9px;
+                    color: #808080;
                 }}
             </style>
         </head>
         <body>
-            <div class="header">
-                <h1>REPORTE DE PROGRESO DEL USUARIO</h1>
-                <div class="subtitle">Instituto Hutchison Ports</div>
-                <div style="color: #666; margin-top: 10px; font-size: 14px;">{fecha_actual}</div>
-            </div>
+            <h1>Reporte de Progreso - Instituto Hutchison Ports</h1>
 
-            <div class="section">
-                <div class="section-title">Información del Usuario</div>
-                <div class="info-grid">
-                    <div class="info-label">User ID:</div>
-                    <div class="info-value">{datos.get('user_id', 'N/A')}</div>
+            <div class="section-title">Información del Usuario</div>
+            <table class="info-table">
+                <tr>
+                    <td>User ID:</td>
+                    <td>{datos.get('user_id', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td>Nombre:</td>
+                    <td>{datos.get('nombre', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td>Email:</td>
+                    <td>{datos.get('email', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td>Fecha de Reporte:</td>
+                    <td>{fecha_actual}</td>
+                </tr>
+            </table>
 
-                    <div class="info-label">Nombre Completo:</div>
-                    <div class="info-value">{datos.get('nombre', 'N/A')}</div>
+            <div class="section-title">Progreso por Módulo</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Módulo</th>
+                        <th>Completado</th>
+                        <th>Fecha Finalización</th>
+                        <th>Calificación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filas_modulos}
+                </tbody>
+            </table>
 
-                    <div class="info-label">Correo Electrónico:</div>
-                    <div class="info-value">{datos.get('email', 'N/A')}</div>
-
-                    <div class="info-label">Fecha de Reporte:</div>
-                    <div class="info-value">{datetime.now().strftime('%d/%m/%Y %H:%M hrs')}</div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">Resumen de Desempeño</div>
-                <div class="stats-box">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Módulos</div>
-                        <div class="stat-value">{total_modulos}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Completados</div>
-                        <div class="stat-value" style="color: #51cf66;">{completados}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Progreso General</div>
-                        <div class="stat-value" style="color: #009BDE;">{porcentaje_global:.1f}%</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">Progreso por Módulo</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Módulo</th>
-                            <th>Estado</th>
-                            <th style="text-align: center;">Fecha Finalización</th>
-                            <th style="text-align: center;">Calificación</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filas_modulos}
-                    </tbody>
-                </table>
-            </div>
+            <div class="section-title">Resumen de Desempeño</div>
+            <table class="info-table">
+                <tr>
+                    <td>Módulos Completados:</td>
+                    <td>{completados} / {total_modulos}</td>
+                </tr>
+                <tr>
+                    <td>Promedio General:</td>
+                    <td>{promedio:.1f}%</td>
+                </tr>
+                <tr>
+                    <td>Estado:</td>
+                    <td>{estado_general}</td>
+                </tr>
+            </table>
 
             <div class="footer">
-                <div>© {datetime.now().year} Instituto Hutchison Ports - Todos los derechos reservados</div>
-                <div style="margin-top: 5px;">Sistema Smart Reports v2.0</div>
+                Generado automáticamente por Smart Reports v2.0 - {fecha_actual}
             </div>
         </body>
         </html>
@@ -719,146 +662,96 @@ class PrevisualizadorReporte(ctk.CTkFrame):
         return html
 
     def _get_common_styles(self):
-        """Estilos CSS comunes para todos los reportes"""
+        """
+        Estilos CSS que replican el formato de PDFs de ReportLab
+        Sin gradientes, sin bordes redondeados - estilo documento profesional
+        """
         return """
-                @page {
-                    size: A4;
-                    margin: 2cm;
-                }
-
                 body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    line-height: 1.6;
-                    color: #333;
-                    max-width: 21cm;
+                    font-family: Helvetica, Arial, sans-serif;
+                    color: #000000;
+                    max-width: 8.5in;
                     margin: 0 auto;
-                    padding: 40px;
+                    padding: 0.5in;
                     background: white;
+                    line-height: 1.4;
                 }
 
-                .header {
+                h1 {
+                    color: #002E6D;
+                    font-size: 20px;
                     text-align: center;
-                    border-bottom: 4px solid #002E6D;
-                    padding-bottom: 20px;
+                    margin: 0 0 10px 0;
+                    font-weight: bold;
+                }
+
+                .subtitle {
+                    text-align: center;
+                    font-size: 12px;
+                    color: #666666;
                     margin-bottom: 30px;
                 }
 
-                .header h1 {
-                    color: #002E6D;
-                    font-size: 28px;
-                    margin: 0 0 10px 0;
-                    font-weight: 700;
-                }
-
-                .header .subtitle {
-                    color: #009BDE;
-                    font-size: 16px;
-                    font-weight: 600;
-                }
-
-                .section {
-                    margin: 30px 0;
-                }
-
                 .section-title {
-                    background: linear-gradient(135deg, #002E6D 0%, #004C97 100%);
-                    color: white;
-                    padding: 12px 20px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    border-radius: 6px;
-                    margin-bottom: 15px;
-                }
-
-                .info-grid {
-                    display: grid;
-                    grid-template-columns: 180px 1fr;
-                    gap: 12px;
-                    background: #f8f9fa;
-                    padding: 20px;
-                    border-radius: 6px;
-                    border-left: 4px solid #009BDE;
-                }
-
-                .info-label {
-                    font-weight: 600;
                     color: #002E6D;
-                }
-
-                .info-value {
-                    color: #333;
+                    font-size: 14px;
+                    font-weight: bold;
+                    margin: 20px 0 10px 0;
                 }
 
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    margin: 15px 0;
-                    background: white;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    border-radius: 6px;
-                    overflow: hidden;
+                    margin: 10px 0;
+                    font-size: 11px;
                 }
 
-                thead {
-                    background: linear-gradient(135deg, #002E6D 0%, #004C97 100%);
+                .info-table td {
+                    padding: 8px 10px;
+                    border: none;
+                }
+
+                .info-table td:first-child {
+                    font-weight: bold;
+                    color: #002E6D;
+                    width: 200px;
+                }
+
+                .data-table {
+                    border: 0.5px solid #808080;
+                }
+
+                .data-table thead {
+                    background-color: #002E6D;
                     color: white;
                 }
 
-                th {
-                    padding: 15px 12px;
-                    text-align: left;
-                    font-weight: 600;
-                    font-size: 14px;
-                }
-
-                td {
-                    padding: 12px;
-                    border-bottom: 1px solid #e0e0e0;
-                }
-
-                tr:last-child td {
-                    border-bottom: none;
-                }
-
-                tr:hover {
-                    background: #f8f9fa;
-                }
-
-                .stats-box {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 15px;
-                    margin: 20px 0;
-                }
-
-                .stat-card {
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                    padding: 20px;
-                    border-radius: 8px;
+                .data-table th {
+                    padding: 10px 8px;
                     text-align: center;
-                    border: 2px solid #dee2e6;
+                    font-weight: bold;
+                    font-size: 11px;
+                    border-bottom: 2px solid #002E6D;
                 }
 
-                .stat-value {
-                    font-size: 32px;
-                    font-weight: 700;
-                    color: #002E6D;
-                    margin: 5px 0;
+                .data-table td {
+                    padding: 10px 8px;
+                    border: 0.5px solid #808080;
+                    font-size: 10px;
                 }
 
-                .stat-label {
-                    font-size: 13px;
-                    color: #666;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
+                .data-table tbody tr:nth-child(even) {
+                    background-color: #F5F5F5;
+                }
+
+                .data-table tbody tr:nth-child(odd) {
+                    background-color: #FFFFFF;
                 }
 
                 .footer {
-                    margin-top: 40px;
-                    padding-top: 20px;
-                    border-top: 2px solid #e0e0e0;
+                    margin-top: 50px;
                     text-align: center;
-                    color: #666;
-                    font-size: 12px;
+                    font-size: 9px;
+                    color: #808080;
                 }
         """
