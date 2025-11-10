@@ -121,22 +121,27 @@ class CustomTabView(ctk.CTkFrame):
 
     def select_tab(self, tab_name):
         """
-        Seleccionar una pestaña
+        Seleccionar una pestaña con transición fluida
 
         Args:
             tab_name: Nombre de la pestaña a seleccionar
         """
-        if tab_name not in self.tabs:
+        if tab_name not in self.tabs or tab_name == self.active_tab:
             return
 
-        # Ocultar todas las pestañas y desactivar botones
-        for name, tab_frame in self.tabs.items():
-            tab_frame.pack_forget()
+        # Desactivar todos los botones
+        for name in self.tab_buttons:
             self.tab_buttons[name].set_active(False)
 
-        # Mostrar pestaña seleccionada y activar botón
-        self.tabs[tab_name].pack(fill='both', expand=True)
+        # Activar botón seleccionado inmediatamente
         self.tab_buttons[tab_name].set_active(True)
+
+        # Ocultar pestaña anterior
+        if self.active_tab:
+            self.tabs[self.active_tab].pack_forget()
+
+        # Mostrar nueva pestaña con transición suave
+        self.tabs[tab_name].pack(fill='both', expand=True)
         self.active_tab = tab_name
 
         # Llamar callback si existe
