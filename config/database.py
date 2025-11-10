@@ -14,13 +14,13 @@ DB_TYPE = os.getenv('DB_TYPE', 'mysql')  # 👈 CAMBIA AQUÍ: 'sqlserver' o 'mys
 # 📊 CONFIGURACIÓN SQL SERVER (TRABAJO)
 # ============================================================
 SQLSERVER_CONFIG = {
-    'server': os.getenv('DB_HOST', 'localhost'),  # Servidor SQL Server
-    'port': int(os.getenv('DB_PORT', 1433)),      # Puerto SQL Server (default 1433)
-    'database': os.getenv('DB_NAME', 'tngcore'),
-    'username': os.getenv('DB_USER', 'tngdatauser'),
-    'password': os.getenv('DB_PASSWORD', 'Password1'),
-    'driver': '{ODBC Driver 17 for SQL Server}',  # Driver ODBC
-    'trusted_connection': os.getenv('DB_TRUSTED', 'no'),  # 'yes' para Windows Auth
+    'server': '10.133.18.111',
+    'port': 1433,
+    'database': 'TNGCORE',
+    'username': 'tngdatauser',
+    'password': 'Password1',
+    'driver': 'ODBC Driver 17 for SQL Server',
+    'trusted_connection': 'no',
     'encrypt': 'yes',
     'trust_server_certificate': 'yes'
 }
@@ -29,11 +29,11 @@ SQLSERVER_CONFIG = {
 # 🏠 CONFIGURACIÓN MYSQL (CASA)
 # ============================================================
 MYSQL_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'port': int(os.getenv('DB_PORT', 3306)),
-    'user': os.getenv('DB_USER', 'root'),
-    'password': os.getenv('DB_PASSWORD', 'Xbox360xd'),
-    'database': os.getenv('DB_NAME', 'tngcore'),
+    'host': 'localhost',
+    'port': 3306,
+    'database': 'tngcore',
+    'user': 'root',
+    'password': 'Xbox360xd',
     'charset': 'utf8mb4',
     'autocommit': False
 }
