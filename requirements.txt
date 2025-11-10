@@ -4,47 +4,30 @@
 # ============================================
 
 # Base de datos
-pyodbc>=5.0.0                      # SQL Server
-mysql-connector-python>=8.0.33     # MySQL
+pyodbc>=5.0.0
+mysql-connector-python>=8.0.33
 
 # Procesamiento de datos
 pandas>=2.0.0
 numpy>=1.24.0
-openpyxl>=3.1.0                    # Excel
+openpyxl>=3.1.0
 
-# Interfaz gráfica
-customtkinter>=5.2.0               # UI moderna
-tkinterdnd2-universal>=1.7.3       # Drag & drop
-pillow>=10.0.0                     # Imágenes
-tkhtmlview>=0.1.1                  # Renderizar HTML/D3.js en tkinter (RECOMENDADO)
-tkinterweb>=3.23.0                 # Alternativa HTML widget (fallback)
+# Interfaz grafica
+customtkinter>=5.2.0
+tkinterdnd2-universal>=1.7.3
+pillow>=10.0.0
+tkhtmlview>=0.1.1
+tkinterweb>=3.23.0
 
-# Gráficos y visualización
-matplotlib>=3.7.0                  # Generación de gráficos SVG estáticos (fallback para D3.js)
-# Los gráficos usan D3.js interactivo con tkinterweb (cuando disponible)
-# o SVG estático con matplotlib (cuando solo tkhtmlview disponible)
+# Graficos y visualizacion
+matplotlib>=3.7.0
 
 # Reportes PDF
-reportlab>=4.0.0                   # Generación de PDFs
+reportlab>=4.0.0
 
 # Utilidades
-python-dateutil>=2.8.2             # Manejo de fechas
-colorama>=0.4.6                    # Colores en terminal (debugging)
+python-dateutil>=2.8.2
+colorama>=0.4.6
 
 # Empaquetado
 pyinstaller>=6.0.0
-
-# NOTAS DE INSTALACIÓN:
-# =====================
-# 1. Ejecutar: pip install -r requirements.txt
-# 2. Para gráficos D3.js interactivos embebidos: tkinterweb (ya incluido)
-# 3. Para gráficos SVG estáticos embebidos: tkhtmlview + matplotlib (ya incluidos)
-# 4. Para desarrollo: pip install --upgrade --force-reinstall customtkinter
-# 5. PIL viene incluido con pillow, no instalar por separado
-# 6. D3.js se carga desde CDN (sin instalación local necesaria)
-
-# RENDERIZADO DE GRÁFICOS:
-# ========================
-# - tkinterweb disponible -> D3.js interactivo (navegador embebido con JavaScript)
-# - solo tkhtmlview disponible -> SVG estático con matplotlib (sin JavaScript)
-# - ninguno disponible -> botón para abrir en navegador externo
