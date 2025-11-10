@@ -1,60 +1,69 @@
-# Smart Reports - Instituto Hutchison Ports
+# 🚀 Smart Reports - Instituto Hutchison Ports
 
-Sistema de reportes y dashboards para capacitación.
+Sistema de reportes y dashboards para capacitación con **arquitectura DDD + Hexagonal escalable**.
 
-## 🚀 Ejecutar la Aplicación
+---
+
+## ⚡ Inicio Rápido
 
 ```bash
-python ejecutar_app.py
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar aplicación
+python main.py
 ```
 
 **Credenciales por defecto:**
-- Usuario: `admin` / Contraseña: `1234`
-- Usuario: `demo` / Contraseña: `demo`
+- `admin` / `1234` (Administrador)
+- `demo` / `demo` (Demo)
 
-## 📦 Dependencias
+---
 
-```bash
-pip install customtkinter tkinterweb mysql-connector-python pandas openpyxl reportlab
-```
-
-## 📂 Estructura
+## 📂 Nueva Arquitectura
 
 ```
 smart-reports1/
-├── ejecutar_app.py          # ⭐ EJECUTAR AQUÍ
-├── database/                 # Scripts SQL e importación
-├── interfaz/                 # UI de la aplicación
-├── nucleo/                   # Lógica de negocio
-└── data/                     # Excel para importar (crear carpeta)
+├── main.py                  # 🚀 Punto de entrada único
+├── config/                  # ⚙️ Configuración centralizada
+├── src/                     # 📦 Código fuente
+│   ├── domain/              # 🧠 Lógica de negocio
+│   ├── application/         # 💼 Casos de uso
+│   ├── infrastructure/      # 🔧 Implementaciones
+│   └── interfaces/ui/       # 🎨 Desktop UI
+├── tests/                   # 🧪 Tests
+└── data/                    # 📊 Excel para importar
 ```
 
-## 📥 Importar Datos de Excel
+---
 
-1. Coloca tus 3 archivos Excel en `data/`
-2. Ejecuta:
+## 🎨 Pestañas del Sistema
+
+- **📊 Dashboards**: Métricas y gráficos D3.js interactivos
+- **👥 Consulta Usuarios**: Búsqueda y filtros avanzados
+- **🔄 Cruce de Datos**: Sincronización Cornerstone
+- **📄 Reportes**: PDF profesionales (usuario, unidad, global, período)
+- **⚙️ Configuración**: Gestión de usuarios y ajustes
+
+---
+
+## 📥 Importar Excel
+
 ```bash
-python database/importar_excel_simple.py
+# 1. Coloca 3 archivos en data/
+# 2. Configura MySQL en config/database.py
+# 3. Ejecuta:
+python src/infrastructure/persistence/excel/excel_importer.py
 ```
 
-## ⚙️ Configuración MySQL
+---
 
-Edita `database/importar_excel_simple.py`:
-```python
-config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'TU_PASSWORD',  # ⚠️ Cambiar
-    'database': 'tngcore'
-}
-```
+## ✅ Características
 
-## 🎨 Características
-
-- ✅ Dashboards D3.js interactivos
-- ✅ Reportes PDF profesionales
-- ✅ Gestión de usuarios
-- ✅ Importación masiva desde Excel
+- ✅ D3.js interactivo (azules navy)
+- ✅ Reportes HTML estilo Word
+- ✅ Transiciones fluidas
+- ✅ Arquitectura escalable
 - ✅ Temas claro/oscuro
 
 ---
