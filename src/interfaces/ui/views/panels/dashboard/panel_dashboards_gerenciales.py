@@ -1,16 +1,21 @@
 """
-Panel de Dashboards - RESTAURADO a versión simple con matplotlib
-Dos pestañas: General y Gerencial (estratégicas)
+Panel de Dashboards Gerenciales - VERSIÓN DEFINITIVA CON D3.JS
+Dos pestañas: General y Gerencial con gráficos D3.js interactivos
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
-from src.interfaces.ui.views.components.charts.tarjeta_matplotlib_simple import SimpleMatplotlibCard
+from src.interfaces.ui.views.components.charts.tarjeta_d3_final import D3ChartCard
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 
 
 class DashboardsGerencialesPanel(ctk.CTkFrame):
-    """Panel simple con 2 pestañas: General y Gerencial"""
+    """
+    Panel de Dashboards con gráficos D3.js interactivos
+
+    - Pestaña General: Métricas + 2 gráficos generales
+    - Pestaña Gerencial: 4 gráficos estratégicos para toma de decisiones
+    """
 
     def __init__(self, parent, db_connection=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
@@ -21,7 +26,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         # Header
         self._create_header()
 
-        # Tabs: General y Gerencial
+        # Tabs
         self.tab_view = CustomTabView(self)
         self.tab_view.pack(fill='both', expand=True, padx=20, pady=(0, 20))
 
@@ -29,11 +34,11 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.tab_general = self.tab_view.add("📊 General", "📊")
         self.tab_gerencial = self.tab_view.add("📈 Dashboards Gerenciales", "📈")
 
-        # Crear contenido de cada pestaña
+        # Crear contenido
         self._create_general_tab()
         self._create_gerencial_tab()
 
-        # Cargar datos después de crear la interfaz
+        # Cargar datos
         self.after(500, self._load_data)
 
     def _create_header(self):
@@ -44,19 +49,21 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         header.pack(fill='x', padx=20, pady=(20, 15))
         header.pack_propagate(False)
 
+        # Título
         title = ctk.CTkLabel(
             header,
-            text="📊 Dashboards",
+            text="📊 Dashboards Interactivos",
             font=('Montserrat', 24, 'bold'),
             text_color=theme['text']
         )
         title.pack(side='left', anchor='w')
 
+        # Badge D3.js
         badge = ctk.CTkLabel(
             header,
-            text="📊 Matplotlib",
+            text="D3.js Visualizations ⚡",
             font=('Montserrat', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
+            fg_color=HUTCHISON_COLORS['success'],
             text_color='white',
             corner_radius=8,
             padx=15,
@@ -65,10 +72,10 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         badge.pack(side='right', anchor='e', padx=10)
 
     def _create_general_tab(self):
-        """Crear pestaña General con métricas y 2 dashboards"""
+        """Crear pestaña General con métricas y 2 gráficos"""
         theme = self.theme_manager.get_current_theme()
 
-        # Container principal con scroll
+        # Container con scroll
         container = ctk.CTkScrollableFrame(
             self.tab_general,
             fg_color='transparent'
@@ -87,7 +94,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             metrics_frame,
             title="Total de Usuarios",
             value="0",
-            subtitle="Usuarios activos",
+            subtitle="Usuarios activos en el sistema",
             icon="👥",
             color=HUTCHISON_COLORS['ports_sky_blue']
         )
@@ -98,7 +105,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             metrics_frame,
             title="Módulo Actual",
             value="Dashboards",
-            subtitle="Vista actual",
+            subtitle="Vista activa",
             icon="📊",
             color=HUTCHISON_COLORS['ports_horizon_blue']
         )
@@ -107,46 +114,45 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         # Métrica 3: Porcentaje de Avance
         self.metric_avance = self._create_metric_card(
             metrics_frame,
-            title="Avance del Sistema",
+            title="Progreso del Sistema",
             value="0%",
-            subtitle="Implementación",
+            subtitle="Implementación completa",
             icon="📈",
             color=HUTCHISON_COLORS['success']
         )
         self.metric_avance.grid(row=0, column=2, padx=10, pady=10, sticky='ew')
 
-        # === SECCIÓN DE DASHBOARDS GENERALES ===
-        dashboards_frame = ctk.CTkFrame(container, fg_color='transparent')
-        dashboards_frame.pack(fill='both', expand=True, pady=(10, 0))
+        # === SECCIÓN DE GRÁFICOS GENERALES ===
+        charts_frame = ctk.CTkFrame(container, fg_color='transparent')
+        charts_frame.pack(fill='both', expand=True, pady=(10, 0))
 
-        # Grid para 2 dashboards
-        dashboards_frame.columnconfigure((0, 1), weight=1)
+        # Grid para 2 gráficos
+        charts_frame.columnconfigure((0, 1), weight=1)
+        charts_frame.rowconfigure(0, weight=1)
 
-        # Dashboard 1: Usuarios por Módulo
-        self.chart_usuarios_modulo = SimpleMatplotlibCard(
-            dashboards_frame,
+        # Gráfico 1: Usuarios por Módulo (D3.js Barras)
+        self.chart_usuarios_modulo = D3ChartCard(
+            charts_frame,
             title="Usuarios por Módulo",
             width=500,
             height=400
         )
         self.chart_usuarios_modulo.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 2: Reportes Generados
-        self.chart_reportes = SimpleMatplotlibCard(
-            dashboards_frame,
-            title="Reportes Generados",
+        # Gráfico 2: Reportes Generados (D3.js Líneas)
+        self.chart_reportes = D3ChartCard(
+            charts_frame,
+            title="Reportes Generados - Últimos 6 Meses",
             width=500,
             height=400
         )
         self.chart_reportes.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
-        dashboards_frame.rowconfigure(0, weight=1)
-
     def _create_gerencial_tab(self):
         """Crear pestaña Gerencial con dashboards estratégicos"""
         theme = self.theme_manager.get_current_theme()
 
-        # Container principal con scroll
+        # Container con scroll
         container = ctk.CTkScrollableFrame(
             self.tab_gerencial,
             fg_color='transparent'
@@ -156,7 +162,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         # Título de sección
         section_title = ctk.CTkLabel(
             container,
-            text="Dashboards Estratégicos para Toma de Decisiones",
+            text="Dashboards Estratégicos para Toma de Decisiones Gerenciales",
             font=('Montserrat', 18, 'bold'),
             text_color=theme['text']
         )
@@ -166,51 +172,49 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         row1 = ctk.CTkFrame(container, fg_color='transparent')
         row1.pack(fill='x', pady=(0, 20))
         row1.columnconfigure((0, 1), weight=1)
+        row1.rowconfigure(0, weight=1)
 
-        # Dashboard 1: Usuarios por Unidad de Negocio
-        self.chart_unidades_negocio = SimpleMatplotlibCard(
+        # Dashboard 1: Usuarios por Unidad de Negocio (D3.js Barras)
+        self.chart_unidades = D3ChartCard(
             row1,
             title="Usuarios por Unidad de Negocio",
             width=500,
             height=400
         )
-        self.chart_unidades_negocio.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
+        self.chart_unidades.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 2: Distribución por Áreas
-        self.chart_distribucion_areas = SimpleMatplotlibCard(
+        # Dashboard 2: Distribución por Áreas (D3.js Donut)
+        self.chart_areas = D3ChartCard(
             row1,
-            title="Distribución por Áreas",
+            title="Distribución por Áreas Operativas",
             width=500,
             height=400
         )
-        self.chart_distribucion_areas.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
-
-        row1.rowconfigure(0, weight=1)
+        self.chart_areas.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
         # === FILA 2: Tendencias y Actividad ===
         row2 = ctk.CTkFrame(container, fg_color='transparent')
         row2.pack(fill='x', pady=(0, 20))
         row2.columnconfigure((0, 1), weight=1)
+        row2.rowconfigure(0, weight=1)
 
-        # Dashboard 3: Tendencia Mensual
-        self.chart_tendencia_mensual = SimpleMatplotlibCard(
+        # Dashboard 3: Tendencia Mensual (D3.js Líneas)
+        self.chart_tendencia = D3ChartCard(
             row2,
             title="Tendencia de Uso Mensual",
             width=500,
             height=400
         )
-        self.chart_tendencia_mensual.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
+        self.chart_tendencia.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 4: Actividad por Tipo de Reporte
-        self.chart_tipo_reporte = SimpleMatplotlibCard(
+        # Dashboard 4: Reportes por Tipo (D3.js Barras)
+        self.chart_tipos = D3ChartCard(
             row2,
             title="Actividad por Tipo de Reporte",
             width=500,
             height=400
         )
-        self.chart_tipo_reporte.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
-
-        row2.rowconfigure(0, weight=1)
+        self.chart_tipos.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
     def _create_metric_card(self, parent, title, value, subtitle, icon, color):
         """Crear tarjeta de métrica"""
@@ -264,66 +268,68 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         )
         subtitle_label.pack(anchor='w')
 
-        # Guardar referencia al value_label para actualizar después
+        # Guardar referencia al value_label
         card.value_label = value_label
 
         return card
 
     def _load_data(self):
-        """Cargar datos en los dashboards"""
-        print("📊 Cargando datos en dashboards...")
+        """Cargar datos en todos los dashboards"""
+        print("📊 Cargando dashboards D3.js interactivos...")
 
         try:
             # === CARGAR MÉTRICAS ===
             total_usuarios = self._get_total_usuarios()
             self.metric_usuarios.value_label.configure(text=str(total_usuarios))
 
-            # Calcular porcentaje de avance (ejemplo: basado en usuarios)
-            porcentaje = min(100, int((total_usuarios / 1000) * 100))  # Objetivo: 1000 usuarios
+            # Calcular porcentaje
+            porcentaje = min(100, int((total_usuarios / 1000) * 100))
             self.metric_avance.value_label.configure(text=f"{porcentaje}%")
 
-            # === CARGAR DASHBOARDS GENERALES ===
-            # Dashboard 1: Usuarios por Módulo
+            # === CARGAR GRÁFICOS GENERALES ===
+
+            # Gráfico 1: Usuarios por Módulo (Barras D3.js)
             datos_modulos = {
                 'labels': ['Reportes', 'Dashboards', 'Configuración', 'Usuarios', 'Soporte'],
                 'values': [245, 198, 87, 156, 92]
             }
             self.chart_usuarios_modulo.set_chart('bar', datos_modulos)
 
-            # Dashboard 2: Reportes Generados
+            # Gráfico 2: Reportes Generados (Líneas D3.js)
             datos_reportes = {
-                'labels': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                'labels': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
                 'values': [450, 520, 480, 650, 720, 680]
             }
             self.chart_reportes.set_chart('line', datos_reportes)
 
             # === CARGAR DASHBOARDS GERENCIALES ===
-            # Dashboard 1: Unidades de Negocio
-            datos_unidades = self._get_datos_unidades_negocio()
-            self.chart_unidades_negocio.set_chart('bar', datos_unidades)
 
-            # Dashboard 2: Distribución por Áreas
+            # Dashboard 1: Unidades de Negocio (Barras D3.js)
+            datos_unidades = self._get_datos_unidades_negocio()
+            self.chart_unidades.set_chart('bar', datos_unidades)
+
+            # Dashboard 2: Distribución por Áreas (Donut D3.js)
             datos_areas = {
                 'labels': ['Operaciones', 'Logística', 'Comercial', 'Administración', 'TI'],
                 'values': [320, 280, 250, 180, 150]
             }
-            self.chart_distribucion_areas.set_chart('donut', datos_areas)
+            self.chart_areas.set_chart('donut', datos_areas)
 
-            # Dashboard 3: Tendencia Mensual
+            # Dashboard 3: Tendencia Mensual (Líneas D3.js)
             datos_tendencia = {
                 'labels': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                 'values': [850, 920, 880, 1050, 1120, 1080, 1200, 1350, 1280, 1400, 1450, 1520]
             }
-            self.chart_tendencia_mensual.set_chart('line', datos_tendencia)
+            self.chart_tendencia.set_chart('line', datos_tendencia)
 
-            # Dashboard 4: Tipo de Reporte
+            # Dashboard 4: Tipos de Reporte (Barras D3.js)
             datos_tipos = {
                 'labels': ['Financiero', 'Operativo', 'Estratégico', 'Táctico', 'Ejecutivo'],
                 'values': [420, 380, 290, 250, 180]
             }
-            self.chart_tipo_reporte.set_chart('bar', datos_tipos)
+            self.chart_tipos.set_chart('bar', datos_tipos)
 
-            print("✅ Dashboards cargados exitosamente")
+            print("✅ Todos los dashboards D3.js cargados exitosamente")
 
         except Exception as e:
             print(f"❌ Error cargando dashboards: {e}")
@@ -331,18 +337,16 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             traceback.print_exc()
 
     def _get_total_usuarios(self):
-        """Obtener total de usuarios desde la base de datos"""
+        """Obtener total de usuarios desde BD"""
         try:
             if self.db_connection:
                 cursor = self.db_connection.cursor()
-                # Intentar contar usuarios
                 try:
                     cursor.execute("SELECT COUNT(*) FROM Instituto_Usuario WHERE Activo = 1")
                     result = cursor.fetchone()
                     if result:
                         return result[0]
                 except:
-                    # Si falla, usar dato de ejemplo
                     pass
         except:
             pass
@@ -352,19 +356,18 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
     def _get_datos_unidades_negocio(self):
         """Obtener datos de Unidades de Negocio"""
-        # Datos de ejemplo de Unidades de Negocio Hutchison Ports
         return {
             'labels': [
-                'TNG - Terminal\nContenedores',
-                'Container\nCare',
-                'ECV/EIT\nEquipos',
-                'ICAVE\nLogística',
-                'HPMX\nHutchison',
-                'HIT\nTerminal',
-                'TIMSA\nInfraestructura',
-                'SITT\nServicios',
-                'Hutchison\nLogistics',
-                'Servicios\nCompartidos'
+                'TNG - Terminal Contenedores',
+                'Container Care',
+                'ECV/EIT - Equipos',
+                'ICAVE - Logística',
+                'HPMX - Hutchison Ports',
+                'HIT - Terminal',
+                'TIMSA - Infraestructura',
+                'SITT - Servicios',
+                'Hutchison Logistics',
+                'Servicios Compartidos'
             ],
             'values': [523, 412, 387, 295, 268, 234, 198, 167, 145, 123]
         }
