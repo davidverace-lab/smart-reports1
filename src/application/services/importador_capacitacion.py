@@ -131,6 +131,49 @@ class ImportadorCapacitacion:
     # UTILIDADES
     # ============================================================================
 
+    def _leer_excel_con_deteccion_headers(self, archivo_excel: str) -> pd.DataFrame:
+        """
+        Lee Excel detectando automáticamente en qué fila están los headers reales.
+        Los reportes CSOD a veces tienen filas de título/logo antes de los headers.
+
+        Args:
+            archivo_excel: Ruta al archivo Excel
+
+        Returns:
+            DataFrame con headers correctos
+        """
+        # Intentar leer las primeras 10 filas para detectar headers
+        df_preview = pd.read_excel(archivo_excel, nrows=10)
+
+        # Si las columnas son "Unnamed: X", los headers están en otra fila
+        if any('Unnamed' in str(col) for col in df_preview.columns):
+            print("⚠️  Headers no detectados en fila 0, buscando headers reales...")
+
+            # Probar leyendo desde diferentes filas
+            for skip_rows in range(1, 6):
+                try:
+                    df_test = pd.read_excel(archivo_excel, skiprows=skip_rows, nrows=5)
+
+                    # Verificar si esta fila tiene headers válidos
+                    # Buscar columnas conocidas de CSOD
+                    columnas_test = [str(col).lower() for col in df_test.columns]
+                    palabras_clave = ['training', 'user', 'title', 'status', 'título', 'usuario',
+                                     'capacitación', 'department', 'departamento']
+
+                    if any(keyword in ' '.join(columnas_test) for keyword in palabras_clave):
+                        print(f"  ✓ Headers encontrados en fila {skip_rows + 1}")
+                        # Leer el Excel completo saltando las filas superiores
+                        return pd.read_excel(archivo_excel, skiprows=skip_rows)
+                except:
+                    continue
+
+            # Si no encontramos headers, usar lectura por defecto
+            print("  ⚠️ No se pudieron detectar headers automáticamente. Usando lectura por defecto.")
+            return pd.read_excel(archivo_excel)
+        else:
+            # Headers están en la primera fila, leer normalmente
+            return pd.read_excel(archivo_excel)
+
     def _detectar_columnas(self, df: pd.DataFrame):
         """
         Detecta qué nombres de columnas están presentes en el DataFrame
@@ -276,8 +319,8 @@ class ImportadorCapacitacion:
         print(f"Archivo: {os.path.basename(archivo_excel)}\n")
 
         try:
-            # Leer Excel
-            df = pd.read_excel(archivo_excel)
+            # Leer Excel con detección automática de fila de headers
+            df = self._leer_excel_con_deteccion_headers(archivo_excel)
             print(f"✅ Excel leído: {len(df)} registros")
 
             # Detectar columnas (auto-mapeo bilingüe)
@@ -456,8 +499,8 @@ class ImportadorCapacitacion:
         print(f"Archivo: {os.path.basename(archivo_excel)}\n")
 
         try:
-            # Leer Excel
-            df = pd.read_excel(archivo_excel)
+            # Leer Excel con detección automática de fila de headers
+            df = self._leer_excel_con_deteccion_headers(archivo_excel)
             print(f"✅ Excel leído: {len(df)} registros")
 
             # Detectar columnas (auto-mapeo bilingüe)
