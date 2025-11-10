@@ -189,7 +189,7 @@ class D3ChartCard(ctk.CTkFrame):
             text='🌐',
             font=('Montserrat', 12, 'bold'),
             fg_color=HUTCHISON_COLORS['ports_sea_blue'],
-            hover_color=HUTCHISON_COLORS['ports_dark_blue'],
+            hover_color='#001a3d',  # Versión más oscura de ports_sea_blue
             text_color='white',
             corner_radius=6,
             width=35,
