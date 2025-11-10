@@ -1,12 +1,11 @@
 """
-Panel ModernDashboard - Dashboard optimizado con lazy loading y pestañas
-ACTUALIZADO: Gráficos D3.js embebidos profesionalmente con múltiples fallbacks
+Panel ModernDashboard - Dashboard SIMPLE que SIEMPRE funciona
 """
 import customtkinter as ctk
 from tkinter import messagebox
 from src.interfaces.ui.views.components.charts.tarjeta_metrica import MetricCard
-from src.interfaces.ui.views.components.charts.tarjeta_d3_profesional import ProfessionalD3ChartCard
-from config.themes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
+from src.interfaces.ui.views.components.charts.tarjeta_matplotlib_simple import SimpleMatplotlibCard
+from config.themes import HUTCHISON_COLORS
 from config.gestor_temas import get_theme_manager
 
 
@@ -310,25 +309,25 @@ class ModernDashboard(ctk.CTkFrame):
         charts_frame.grid_columnconfigure((0, 1), weight=1)
         charts_frame.grid_rowconfigure(0, weight=1)
 
-        # Chart 1: Usuarios por Unidad (Barras D3.js)
-        self.chart1 = ProfessionalD3ChartCard(
+        # Chart 1: Usuarios por Unidad (Barras matplotlib)
+        self.chart1 = SimpleMatplotlibCard(
             charts_frame,
             title='📊 Usuarios por Unidad de Negocio'
         )
         self.chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
 
-        # Chart 2: Progreso General por UN (Donut D3.js)
-        self.chart2 = ProfessionalD3ChartCard(
+        # Chart 2: Progreso General por UN (Donut matplotlib)
+        self.chart2 = SimpleMatplotlibCard(
             charts_frame,
             title='📈 Progreso General por Unidad (TNG 100% - 8 Módulos)'
         )
         self.chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
 
-        # Crear gráficos D3.js
-        self._create_general_charts_d3()
+        # Crear gráficos matplotlib
+        self._create_general_charts_matplotlib()
 
-    def _create_general_charts_d3(self):
-        """Crear gráficos D3.js embebidos para pestaña General"""
+    def _create_general_charts_matplotlib(self):
+        """Crear gráficos matplotlib embebidos para pestaña General"""
         # Obtener datos
         units_data = self._get_users_by_unit()
 
@@ -336,71 +335,65 @@ class ModernDashboard(ctk.CTkFrame):
             units = [row[0] for row in units_data]
             counts = [row[1] for row in units_data]
 
-            # Gráfico 1: Barras D3.js
-            self.chart1.set_d3_chart(
+            # Gráfico 1: Barras matplotlib
+            self.chart1.set_chart(
                 chart_type='bar',
                 datos={
                     'labels': units,
                     'values': counts
-                },
-                subtitulo='Distribución de usuarios por unidad de negocio • Interactivo'
+                }
             )
 
-        # Gráfico 2: Donut D3.js de Progreso General
+        # Gráfico 2: Donut matplotlib de Progreso General
         unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
         porcentajes_completado = [100, 82, 75, 68, 62]
 
-        self.chart2.set_d3_chart(
+        self.chart2.set_chart(
             chart_type='donut',
             datos={
-                'labels': [f"{un} - {pct}%" for un, pct in zip(unidades_negocio, porcentajes_completado)],
+                'labels': [f"{un} {pct}%" for un, pct in zip(unidades_negocio, porcentajes_completado)],
                 'values': porcentajes_completado
-            },
-            subtitulo='TNG 100% completado (8 módulos) • Otras unidades en progreso'
+            }
         )
 
-    def _create_gerencial_charts_d3(self, chart_incump, chart_lentas, chart_atrasados, chart_calif):
-        """Crear gráficos D3.js embebidos para pestaña Gerencial"""
+    def _create_gerencial_charts_matplotlib(self, chart_incump, chart_lentas, chart_atrasados, chart_calif):
+        """Crear gráficos matplotlib embebidos para pestaña Gerencial"""
 
         # Chart 1: UN con Mayor Incumplimiento
-        chart_incump.set_d3_chart(
+        chart_incump.set_chart(
             chart_type='bar',
             datos={
-                'labels': ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística'],
+                'labels': ['ICAVE', 'HPMX', 'ECV', 'Container\nCare', 'Logística'],
                 'values': [65, 58, 52, 43, 38]
-            },
-            subtitulo='Top 5 unidades con más usuarios pendientes • Sin TNG (100%)'
+            }
         )
 
         # Chart 2: UN más Lentas
-        chart_lentas.set_d3_chart(
+        chart_lentas.set_chart(
             chart_type='bar',
             datos={
                 'labels': ['Logística', 'ECV', 'ICAVE'],
                 'values': [112, 108, 95]
-            },
-            subtitulo='Días promedio para alcanzar 80% • Top 3 unidades'
+            }
         )
 
         # Chart 3: Usuarios Más Atrasados
-        chart_atrasados.set_d3_chart(
+        chart_atrasados.set_chart(
             chart_type='bar',
             datos={
-                'labels': ['J. Pérez', 'M. García', 'C. López', 'A. Martínez', 'P. Sánchez',
-                          'L. Rodríguez', 'J. Hernández', 'C. González', 'F. Torres', 'I. Ramírez'],
+                'labels': ['J.Pérez', 'M.García', 'C.López', 'A.Mtz', 'P.Sánz',
+                          'L.Rodz', 'J.Hndz', 'C.Gnzz', 'F.Torres', 'I.Rmz'],
                 'values': [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
-            },
-            subtitulo='Top 10 usuarios con mayor retraso en días • Generación 1-4'
+            }
         )
 
         # Chart 4: Usuarios con Mejor Calificación
-        chart_calif.set_d3_chart(
+        chart_calif.set_chart(
             chart_type='bar',
             datos={
                 'labels': ['C. Ruiz', 'R. Mendoza', 'P. Morales', 'F. Silva', 'A. López'],
                 'values': [98.5, 97.8, 97.2, 96.9, 95.5]
-            },
-            subtitulo='Top 5 usuarios con mejor calificación promedio'
+            }
         )
 
     # ==================== MÉTODOS DE DATOS ====================
@@ -506,15 +499,15 @@ class ModernDashboard(ctk.CTkFrame):
 
         # ===== ROW 0: Top 5 UN con Mayor Incumplimiento + Top 3 UN más Lentas =====
 
-        # Chart 1: Top 5 UN con Mayor Incumplimiento (D3.js)
-        chart_incumplimiento = ProfessionalD3ChartCard(
+        # Chart 1: Top 5 UN con Mayor Incumplimiento (matplotlib)
+        chart_incumplimiento = SimpleMatplotlibCard(
             scrollable_frame,
             title='⚠️ UN con Mayor Incumplimiento (Módulo 8)'
         )
         chart_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Chart 2: UN más Lentas (D3.js)
-        chart_lentas = ProfessionalD3ChartCard(
+        # Chart 2: UN más Lentas (matplotlib)
+        chart_lentas = SimpleMatplotlibCard(
             scrollable_frame,
             title='⏱️ UN más Lentas (Tiempo a 80%)'
         )
@@ -522,8 +515,8 @@ class ModernDashboard(ctk.CTkFrame):
 
         # ===== ROW 1: Top 10 Usuarios Más Atrasados + Cuadro de Honor =====
 
-        # Chart 3: Top 10 Usuarios Más Atrasados (D3.js)
-        chart_atrasados = ProfessionalD3ChartCard(
+        # Chart 3: Top 10 Usuarios Más Atrasados (matplotlib)
+        chart_atrasados = SimpleMatplotlibCard(
             scrollable_frame,
             title='🐌 Usuarios Más Atrasados (Gen 1-4)'
         )
@@ -531,15 +524,15 @@ class ModernDashboard(ctk.CTkFrame):
 
         # ===== ROW 2: Usuarios con Mejor Calificación =====
 
-        # Chart 4: Usuarios con Mejor Calificación (D3.js)
-        chart_calificacion = ProfessionalD3ChartCard(
+        # Chart 4: Usuarios con Mejor Calificación (matplotlib)
+        chart_calificacion = SimpleMatplotlibCard(
             scrollable_frame,
             title='⭐ Usuarios con Mejor Calificación Promedio'
         )
         chart_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
 
-        # Crear los gráficos D3.js
-        self._create_gerencial_charts_d3(
+        # Crear los gráficos matplotlib
+        self._create_gerencial_charts_matplotlib(
             chart_incumplimiento,
             chart_lentas,
             chart_atrasados,
