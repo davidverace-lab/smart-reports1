@@ -2,15 +2,26 @@
 Gestión de conexión a Base de Datos (SQL Server y MySQL)
 """
 from typing import Optional
-import pyodbc
+
+# SQL Server support
+try:
+    import pyodbc
+    SQLSERVER_AVAILABLE = True
+except ImportError:
+    pyodbc = None
+    SQLSERVER_AVAILABLE = False
+
+# MySQL support
 try:
     import mysql.connector
     from mysql.connector import Error as MySQLError
+    MYSQL_AVAILABLE = True
 except ImportError:
     mysql = None
     MySQLError = Exception
+    MYSQL_AVAILABLE = False
 
-from config.themes import DB_TYPE, DATABASE_CONFIG, SQLSERVER_CONFIG, MYSQL_CONFIG
+from config.database import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
 
 
 class DatabaseConnection:
@@ -47,27 +58,47 @@ class DatabaseConnection:
 
     def _connect_sqlserver(self):
         """Conexión a SQL Server usando pyodbc"""
+        if not SQLSERVER_AVAILABLE:
+            raise ImportError(
+                "pyodbc no está instalado. Para SQL Server ejecuta:\n"
+                "pip install pyodbc\n"
+                "También necesitas ODBC Driver 17 for SQL Server instalado."
+            )
+
+        # Construir connection string
+        server = SQLSERVER_CONFIG['server']
+        port = SQLSERVER_CONFIG.get('port', 1433)
+
+        # Si el puerto no es el default, agregarlo al servidor
+        if port != 1433:
+            server = f"{server},{port}"
+
         connection_string = (
-            f"DRIVER={{{SQLSERVER_CONFIG['driver']}}};"
-            f"SERVER={SQLSERVER_CONFIG['server']};"
+            f"DRIVER={SQLSERVER_CONFIG['driver']};"
+            f"SERVER={server};"
             f"DATABASE={SQLSERVER_CONFIG['database']};"
             f"UID={SQLSERVER_CONFIG['username']};"
             f"PWD={SQLSERVER_CONFIG['password']};"
             f"TrustServerCertificate=yes;"
         )
+
         return pyodbc.connect(connection_string)
 
     def _connect_mysql(self):
         """Conexión a MySQL usando mysql-connector-python"""
-        if mysql is None:
-            raise ImportError("mysql-connector-python no está instalado. Ejecuta: pip install mysql-connector-python")
+        if not MYSQL_AVAILABLE:
+            raise ImportError(
+                "mysql-connector-python no está instalado. Para MySQL ejecuta:\n"
+                "pip install mysql-connector-python"
+            )
 
         return mysql.connector.connect(
             host=MYSQL_CONFIG['host'],
             port=MYSQL_CONFIG['port'],
             database=MYSQL_CONFIG['database'],
             user=MYSQL_CONFIG['user'],
-            password=MYSQL_CONFIG['password']
+            password=MYSQL_CONFIG['password'],
+            charset=MYSQL_CONFIG.get('charset', 'utf8mb4')
         )
 
     def get_cursor(self):
