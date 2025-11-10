@@ -1,6 +1,6 @@
 """
 Panel de Importación y Cruce de Datos - Sistema de Capacitación
-Sistema mejorado con validación, preview y matching manual
+Sistema mejorado con validación, preview, matching, rollback y export
 """
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
@@ -9,6 +9,13 @@ import pandas as pd
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 from src.application.services.importador_capacitacion import ImportadorCapacitacion
+from src.interfaces.ui.views.components.import import (
+    DialogoMatching,
+    BarraProgresoImportacion,
+    ExportadorLogs,
+    SistemaRollback,
+    ConfiguradorColumnas
+)
 
 
 class PanelImportacionDatos(ctk.CTkFrame):
@@ -26,6 +33,15 @@ class PanelImportacionDatos(ctk.CTkFrame):
         self.df_training_preview = None
         self.df_org_preview = None
         self.importando = False
+
+        # Componentes avanzados
+        self.sistema_rollback = None
+        self.barra_progreso = None
+        self.mapeo_columnas = None
+
+        # Inicializar sistema de rollback
+        if db_connection:
+            self.sistema_rollback = SistemaRollback(db_connection)
 
         # Crear interfaz mejorada
         self._create_header()
@@ -291,7 +307,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
     def _create_actions_section(self, parent, theme):
         """Sección de botones de acción"""
 
-        # Grid para botones
+        # Grid para botones principales
         actions_grid = ctk.CTkFrame(parent, fg_color='transparent')
         actions_grid.pack(fill='x', pady=5)
         actions_grid.columnconfigure((0, 1, 2, 3), weight=1)
@@ -352,6 +368,63 @@ class PanelImportacionDatos(ctk.CTkFrame):
         )
         self.btn_importar_org.grid(row=0, column=3, padx=4, sticky='ew')
 
+        # Separador pequeño
+        sep_small = ctk.CTkFrame(parent, fg_color='transparent', height=10)
+        sep_small.pack(fill='x')
+
+        # Grid para herramientas avanzadas
+        tools_grid = ctk.CTkFrame(parent, fg_color='transparent')
+        tools_grid.pack(fill='x', pady=5)
+        tools_grid.columnconfigure((0, 1, 2), weight=1)
+
+        # Botón Configurar Columnas
+        self.btn_configurar_columnas = ctk.CTkButton(
+            tools_grid,
+            text="⚙ Configurar Columnas",
+            font=('Segoe UI', 11, 'bold'),
+            fg_color=theme['surface'],
+            hover_color=theme['surface_light'],
+            text_color=theme['text'],
+            border_width=2,
+            border_color=HUTCHISON_COLORS['ports_horizon_blue'],
+            height=38,
+            corner_radius=8,
+            command=self._configurar_columnas
+        )
+        self.btn_configurar_columnas.grid(row=0, column=0, padx=4, sticky='ew')
+
+        # Botón Exportar Log
+        self.btn_exportar_log = ctk.CTkButton(
+            tools_grid,
+            text="💾 Exportar Log",
+            font=('Segoe UI', 11, 'bold'),
+            fg_color=theme['surface'],
+            hover_color=theme['surface_light'],
+            text_color=theme['text'],
+            border_width=2,
+            border_color=HUTCHISON_COLORS['ports_sky_blue'],
+            height=38,
+            corner_radius=8,
+            command=self._exportar_log
+        )
+        self.btn_exportar_log.grid(row=0, column=1, padx=4, sticky='ew')
+
+        # Botón Ver Backups
+        self.btn_ver_backups = ctk.CTkButton(
+            tools_grid,
+            text="🔄 Ver Backups",
+            font=('Segoe UI', 11, 'bold'),
+            fg_color=theme['surface'],
+            hover_color=theme['surface_light'],
+            text_color=theme['text'],
+            border_width=2,
+            border_color=HUTCHISON_COLORS['warning'],
+            height=38,
+            corner_radius=8,
+            command=self._ver_backups
+        )
+        self.btn_ver_backups.grid(row=0, column=2, padx=4, sticky='ew')
+
     def _create_log_section(self, parent, theme):
         """Sección de log"""
 
@@ -364,6 +437,16 @@ class PanelImportacionDatos(ctk.CTkFrame):
             anchor='w'
         )
         log_title.pack(anchor='w', pady=(0, 8))
+
+        # Barra de progreso (oculta por defecto)
+        self.progress_frame = ctk.CTkFrame(
+            parent,
+            fg_color=theme['surface'],
+            corner_radius=10,
+            border_width=1,
+            border_color=theme['border']
+        )
+        # No pack inicialmente, se mostrará durante importación
 
         # Textbox para log
         log_frame = ctk.CTkFrame(
@@ -716,6 +799,25 @@ class PanelImportacionDatos(ctk.CTkFrame):
         self.log("🚀 INICIANDO IMPORTACIÓN...")
         self.log("="*70)
 
+        # Crear backup antes de importar
+        if self.sistema_rollback:
+            self.log("📦 Creando backup de seguridad...")
+            tipo = []
+            if importar_training:
+                tipo.append("Training")
+            if importar_org:
+                tipo.append("Org")
+            descripcion = f"Backup antes de importar {' y '.join(tipo)}"
+
+            backup_id = self.sistema_rollback.crear_backup(descripcion)
+            if backup_id:
+                self.log(f"✅ Backup creado: {backup_id}")
+            else:
+                self.log("⚠ No se pudo crear backup, pero continuando...")
+
+        # Mostrar barra de progreso
+        self._mostrar_barra_progreso()
+
         # Ejecutar en thread
         thread = threading.Thread(
             target=self._proceso_importacion,
@@ -724,21 +826,80 @@ class PanelImportacionDatos(ctk.CTkFrame):
         )
         thread.start()
 
+    def _mostrar_barra_progreso(self):
+        """Mostrar barra de progreso"""
+        if self.barra_progreso:
+            self.barra_progreso.destroy()
+
+        self.barra_progreso = BarraProgresoImportacion(self.progress_frame)
+        self.barra_progreso.pack(fill='x', padx=15, pady=12)
+
+        # Mostrar frame de progreso
+        self.progress_frame.pack(fill='x', pady=(0, 10))
+
+    def _ocultar_barra_progreso(self):
+        """Ocultar barra de progreso"""
+        self.progress_frame.pack_forget()
+        if self.barra_progreso:
+            self.barra_progreso.destroy()
+            self.barra_progreso = None
+
     def _proceso_importacion(self, importar_training, importar_org):
         """Proceso de importación (thread separado)"""
         try:
             # Crear importador
             importador = ImportadorCapacitacion(self.db_connection)
 
+            # Contar registros totales para la barra de progreso
+            total_registros = 0
+            if importar_training and self.archivo_training:
+                df_train = pd.read_excel(self.archivo_training)
+                total_registros += len(df_train)
+            if importar_org and self.archivo_org_planning:
+                df_org = pd.read_excel(self.archivo_org_planning)
+                total_registros += len(df_org)
+
+            # Iniciar barra de progreso
+            if self.barra_progreso:
+                tipo = []
+                if importar_training:
+                    tipo.append("Training")
+                if importar_org:
+                    tipo.append("Org")
+                titulo = f"Importando {' y '.join(tipo)}"
+                self.after(0, lambda: self.barra_progreso.iniciar(total_registros, titulo))
+
+            procesados = 0
+
             # Importar Training Report
             if importar_training:
                 self.log_thread("\n📊 Importando Training Report...")
+                if self.barra_progreso:
+                    self.after(0, lambda: self.barra_progreso.actualizar(estado="Procesando Training Report..."))
+
                 stats_training = importador.importar_training_report(self.archivo_training)
+
+                df_train = pd.read_excel(self.archivo_training)
+                procesados += len(df_train)
+                if self.barra_progreso:
+                    self.after(0, lambda p=procesados: self.barra_progreso.actualizar(procesados=p))
 
             # Importar Org Planning
             if importar_org:
                 self.log_thread("\n👥 Importando Org Planning...")
+                if self.barra_progreso:
+                    self.after(0, lambda: self.barra_progreso.actualizar(estado="Procesando Org Planning..."))
+
                 stats_org = importador.importar_org_planning(self.archivo_org_planning)
+
+                df_org = pd.read_excel(self.archivo_org_planning)
+                procesados += len(df_org)
+                if self.barra_progreso:
+                    self.after(0, lambda p=procesados: self.barra_progreso.actualizar(procesados=p))
+
+            # Finalizar progreso
+            if self.barra_progreso:
+                self.after(0, lambda: self.barra_progreso.finalizar(exito=True, mensaje="Todos los datos importados correctamente"))
 
             # Reporte final
             reporte = importador.generar_reporte()
@@ -756,6 +917,9 @@ class PanelImportacionDatos(ctk.CTkFrame):
             import traceback
             self.log_thread(traceback.format_exc())
 
+            if self.barra_progreso:
+                self.after(0, lambda e=e: self.barra_progreso.finalizar(exito=False, mensaje=f"Error: {str(e)}"))
+
             self.after(0, lambda: messagebox.showerror(
                 "Error de Importación",
                 f"Error durante la importación:\n\n{str(e)}"
@@ -764,6 +928,8 @@ class PanelImportacionDatos(ctk.CTkFrame):
         finally:
             self.importando = False
             self.after(0, self._habilitar_botones)
+            # Ocultar progreso después de 3 segundos
+            self.after(3000, self._ocultar_barra_progreso)
 
     # ========== UTILIDADES ==========
 
@@ -782,6 +948,9 @@ class PanelImportacionDatos(ctk.CTkFrame):
         self.btn_importar_todo.configure(state='disabled')
         self.btn_importar_training.configure(state='disabled')
         self.btn_importar_org.configure(state='disabled')
+        self.btn_configurar_columnas.configure(state='disabled')
+        self.btn_exportar_log.configure(state='disabled')
+        self.btn_ver_backups.configure(state='disabled')
 
     def _habilitar_botones(self):
         """Habilitar botones después de importación"""
@@ -789,3 +958,272 @@ class PanelImportacionDatos(ctk.CTkFrame):
         self.btn_importar_todo.configure(state='normal')
         self.btn_importar_training.configure(state='normal')
         self.btn_importar_org.configure(state='normal')
+        self.btn_configurar_columnas.configure(state='normal')
+        self.btn_exportar_log.configure(state='normal')
+        self.btn_ver_backups.configure(state='normal')
+
+    # ========== MÉTODOS DE COMPONENTES AVANZADOS ==========
+
+    def _configurar_columnas(self):
+        """Abrir configurador de mapeo de columnas"""
+        if not self.archivo_training and not self.archivo_org_planning:
+            messagebox.showinfo(
+                "Selecciona archivos",
+                "Primero selecciona al menos un archivo Excel para configurar el mapeo de columnas."
+            )
+            return
+
+        try:
+            # Obtener columnas del archivo seleccionado
+            columnas_excel = []
+            if self.archivo_training:
+                df = pd.read_excel(self.archivo_training, nrows=0)
+                columnas_excel = list(df.columns)
+            elif self.archivo_org_planning:
+                df = pd.read_excel(self.archivo_org_planning, nrows=0)
+                columnas_excel = list(df.columns)
+
+            # Campos de BD disponibles (ajustar según tu modelo)
+            campos_bd = {
+                'UserId': 'ID de Usuario',
+                'UserEmail': 'Email de Usuario',
+                'NombreCompleto': 'Nombre Completo',
+                'NombreModulo': 'Nombre del Módulo',
+                'EstatusModulo': 'Estatus del Módulo',
+                'Calificacion': 'Calificación',
+                'FechaFinalizacion': 'Fecha de Finalización',
+                'FechaVencimiento': 'Fecha de Vencimiento',
+                'Position': 'Cargo/Posición',
+                'Division': 'División',
+                'Ubicacion': 'Ubicación'
+            }
+
+            # Crear diálogo
+            dialogo = ConfiguradorColumnas(self, columnas_excel, campos_bd)
+            dialogo.wait_window()
+
+            # Obtener mapeos
+            if dialogo.mapeo_guardado:
+                mapeos = dialogo.get_mapeos()
+                self.mapeo_columnas = mapeos
+                self.log(f"✅ Mapeo configurado: {len(mapeos)} columnas mapeadas")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al configurar columnas:\n{str(e)}")
+
+    def _exportar_log(self):
+        """Exportar log actual a archivo"""
+        contenido_log = self.log_text.get('1.0', 'end-1c')
+
+        if not contenido_log.strip():
+            messagebox.showinfo("Log vacío", "No hay contenido en el log para exportar.")
+            return
+
+        # Preguntar formato
+        from tkinter import simpledialog
+        formato = messagebox.askyesno(
+            "Formato de Exportación",
+            "¿Exportar como HTML?\n\n"
+            "Sí = HTML con colores\n"
+            "No = Texto plano (.txt)"
+        )
+
+        if formato:
+            # Exportar HTML
+            archivo = ExportadorLogs.exportar_log_html(contenido_log, "importacion_datos")
+        else:
+            # Exportar TXT
+            archivo = ExportadorLogs.exportar_log(contenido_log, "importacion_datos")
+
+        if archivo:
+            self.log(f"💾 Log exportado a: {archivo}")
+
+    def _ver_backups(self):
+        """Ver y gestionar backups disponibles"""
+        if not self.sistema_rollback:
+            messagebox.showwarning(
+                "Sin conexión",
+                "El sistema de rollback requiere conexión a la base de datos."
+            )
+            return
+
+        backups = self.sistema_rollback.listar_backups()
+
+        if not backups:
+            messagebox.showinfo(
+                "Sin backups",
+                "No hay backups disponibles.\n\n"
+                "Los backups se crean automáticamente antes de cada importación."
+            )
+            return
+
+        # Crear ventana de backups
+        self._mostrar_ventana_backups(backups)
+
+    def _mostrar_ventana_backups(self, backups):
+        """Mostrar ventana con lista de backups"""
+        theme = self.theme_manager.get_current_theme()
+
+        ventana = ctk.CTkToplevel(self)
+        ventana.title("🔄 Gestión de Backups")
+        ventana.geometry("700x500")
+
+        # Centrar
+        ventana.update_idletasks()
+        x = (ventana.winfo_screenwidth() // 2) - (700 // 2)
+        y = (ventana.winfo_screenheight() // 2) - (500 // 2)
+        ventana.geometry(f"700x500+{x}+{y}")
+
+        # Header
+        header = ctk.CTkFrame(ventana, fg_color=HUTCHISON_COLORS['ports_sea_blue'], height=60)
+        header.pack(fill='x')
+        header.pack_propagate(False)
+
+        title = ctk.CTkLabel(
+            header,
+            text="🔄 Backups Disponibles",
+            font=('Segoe UI', 18, 'bold'),
+            text_color='white'
+        )
+        title.pack(side='left', padx=20, pady=15)
+
+        # Info
+        info = ctk.CTkLabel(
+            ventana,
+            text=f"Total de backups: {len(backups)}",
+            font=('Segoe UI', 11),
+            text_color=theme['text_secondary']
+        )
+        info.pack(padx=20, pady=(15, 10))
+
+        # Lista de backups
+        scroll_frame = ctk.CTkScrollableFrame(ventana, fg_color='transparent')
+        scroll_frame.pack(fill='both', expand=True, padx=20, pady=(0, 15))
+
+        for backup in backups:
+            self._crear_card_backup(scroll_frame, backup, ventana)
+
+        # Botón cerrar
+        btn_cerrar = ctk.CTkButton(
+            ventana,
+            text="✖ Cerrar",
+            font=('Segoe UI', 11, 'bold'),
+            fg_color=theme['border'],
+            hover_color=theme['surface_light'],
+            text_color=theme['text'],
+            width=120,
+            command=ventana.destroy
+        )
+        btn_cerrar.pack(pady=(0, 15))
+
+    def _crear_card_backup(self, parent, backup, ventana_padre):
+        """Crear card de backup"""
+        theme = self.theme_manager.get_current_theme()
+
+        card = ctk.CTkFrame(
+            parent,
+            fg_color=theme['surface'],
+            corner_radius=8,
+            border_width=1,
+            border_color=theme['border']
+        )
+        card.pack(fill='x', pady=5)
+
+        # Info
+        info_frame = ctk.CTkFrame(card, fg_color='transparent')
+        info_frame.pack(side='left', fill='both', expand=True, padx=15, pady=12)
+
+        # ID y fecha
+        fecha_str = backup['fecha'][:19].replace('T', ' ')
+        id_label = ctk.CTkLabel(
+            info_frame,
+            text=f"📦 {backup['id']}",
+            font=('Segoe UI', 12, 'bold'),
+            text_color=theme['text'],
+            anchor='w'
+        )
+        id_label.pack(anchor='w')
+
+        fecha_label = ctk.CTkLabel(
+            info_frame,
+            text=f"📅 {fecha_str}",
+            font=('Segoe UI', 10),
+            text_color=theme['text_secondary'],
+            anchor='w'
+        )
+        fecha_label.pack(anchor='w')
+
+        desc_label = ctk.CTkLabel(
+            info_frame,
+            text=f"📋 {backup['descripcion']}",
+            font=('Segoe UI', 9),
+            text_color=theme['text_tertiary'],
+            anchor='w'
+        )
+        desc_label.pack(anchor='w')
+
+        # Botones
+        btn_frame = ctk.CTkFrame(card, fg_color='transparent')
+        btn_frame.pack(side='right', padx=10)
+
+        btn_restaurar = ctk.CTkButton(
+            btn_frame,
+            text="🔄 Restaurar",
+            font=('Segoe UI', 10, 'bold'),
+            fg_color=HUTCHISON_COLORS['warning'],
+            width=100,
+            height=28,
+            command=lambda: self._restaurar_backup(backup['id'], ventana_padre)
+        )
+        btn_restaurar.pack(side='left', padx=3)
+
+        btn_eliminar = ctk.CTkButton(
+            btn_frame,
+            text="🗑 Eliminar",
+            font=('Segoe UI', 10, 'bold'),
+            fg_color=HUTCHISON_COLORS['error'],
+            width=100,
+            height=28,
+            command=lambda: self._eliminar_backup(backup['id'], ventana_padre)
+        )
+        btn_eliminar.pack(side='left', padx=3)
+
+    def _restaurar_backup(self, backup_id, ventana):
+        """Restaurar un backup"""
+        respuesta = messagebox.askyesno(
+            "⚠ Confirmar Rollback",
+            f"¿Restaurar el backup {backup_id}?\n\n"
+            "ADVERTENCIA: Esta operación restaurará los datos\n"
+            "a su estado anterior. Los cambios actuales pueden\n"
+            "perderse si no están respaldados.\n\n"
+            "¿Continuar?"
+        )
+
+        if respuesta:
+            self.log(f"\n🔄 Restaurando backup: {backup_id}...")
+
+            if self.sistema_rollback.restaurar_backup(backup_id):
+                self.log("✅ Backup restaurado exitosamente")
+                messagebox.showinfo("✅ Rollback Completado", "Los datos han sido restaurados.")
+                ventana.destroy()
+            else:
+                self.log("❌ Error al restaurar backup")
+                messagebox.showerror("Error", "No se pudo restaurar el backup.")
+
+    def _eliminar_backup(self, backup_id, ventana):
+        """Eliminar un backup"""
+        respuesta = messagebox.askyesno(
+            "Confirmar Eliminación",
+            f"¿Eliminar el backup {backup_id}?\n\n"
+            "Esta operación no se puede deshacer."
+        )
+
+        if respuesta:
+            if self.sistema_rollback.eliminar_backup(backup_id):
+                self.log(f"🗑 Backup {backup_id} eliminado")
+                messagebox.showinfo("Eliminado", "Backup eliminado correctamente.")
+                ventana.destroy()
+                # Reabrir ventana actualizada
+                backups = self.sistema_rollback.listar_backups()
+                if backups:
+                    self._mostrar_ventana_backups(backups)
