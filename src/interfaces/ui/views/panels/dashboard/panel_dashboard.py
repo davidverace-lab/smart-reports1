@@ -449,12 +449,18 @@ class ModernDashboard(ctk.CTkFrame):
     def _get_users_by_unit(self):
         """Obtener usuarios por unidad de negocio"""
         if not self.cursor:
+            # Datos de ejemplo basados en unidades de negocio reales
             return [
-                ('Operaciones Portuarias', 487),
-                ('Logística y Almacenamiento', 364),
-                ('Mantenimiento', 342),
-                ('Administración', 231),
-                ('Seguridad', 101)
+                ('TNG - Terminal de Contenedores', 523),
+                ('Container Care', 412),
+                ('ECV/EIT - Equipos', 387),
+                ('ICAVE - Logística', 295),
+                ('HPMX - Hutchison Ports México', 268),
+                ('Operaciones Portuarias', 234),
+                ('Administración General', 189),
+                ('Mantenimiento', 156),
+                ('Seguridad Portuaria', 112),
+                ('Recursos Humanos', 89)
             ]
         try:
             self.cursor.execute("""
@@ -468,11 +474,16 @@ class ModernDashboard(ctk.CTkFrame):
         except Exception as e:
             print(f"Error obteniendo usuarios por unidad: {e}")
             return [
-                ('Operaciones Portuarias', 487),
-                ('Logística y Almacenamiento', 364),
-                ('Mantenimiento', 342),
-                ('Administración', 231),
-                ('Seguridad', 101)
+                ('TNG - Terminal de Contenedores', 523),
+                ('Container Care', 412),
+                ('ECV/EIT - Equipos', 387),
+                ('ICAVE - Logística', 295),
+                ('HPMX - Hutchison Ports México', 268),
+                ('Operaciones Portuarias', 234),
+                ('Administración General', 189),
+                ('Mantenimiento', 156),
+                ('Seguridad Portuaria', 112),
+                ('Recursos Humanos', 89)
             ]
 
     # ==================== PESTAÑA REPORTES GERENCIALES ====================
