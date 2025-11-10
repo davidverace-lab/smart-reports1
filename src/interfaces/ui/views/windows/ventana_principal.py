@@ -22,6 +22,7 @@ from nucleo.servicios.sincronizador_datos import DataSyncManager
 from src.interfaces.ui.views.components.navigation.barra_lateral import ModernSidebar
 from src.interfaces.ui.views.components.navigation.barra_superior import TopBar
 from src.interfaces.ui.views.panels.dashboard.panel_dashboard import ModernDashboard
+from src.interfaces.ui.views.panels.dashboard.panel_dashboards_gerenciales import DashboardsGerencialesPanel
 from src.interfaces.ui.views.panels.configuracion.panel_configuracion import ConfiguracionPanel
 from src.interfaces.ui.views.panels.reportes.panel_reporte_usuario import UserReportPanel
 from src.interfaces.ui.views.panels.reportes.panel_reporte_unidad import UnitReportPanel
@@ -176,7 +177,7 @@ class MainWindow:
     # ==================== SECCIONES PRINCIPALES ====================
 
     def show_dashboard_panel(self):
-        """Mostrar panel de dashboard moderno"""
+        """Mostrar panel de dashboards gerenciales con múltiples visualizaciones D3.js"""
         self.clear_content_area()
         self.current_panel = 'dashboard'
 
@@ -194,8 +195,8 @@ class MainWindow:
             error_label.pack(expand=True)
             return
 
-        # Crear Modern Dashboard
-        dashboard = ModernDashboard(self.content_area, self.conn)
+        # Crear Dashboards Gerenciales con múltiples gráficos D3.js
+        dashboard = DashboardsGerencialesPanel(self.content_area, self.conn)
         dashboard.pack(fill='both', expand=True)
 
     def show_actualizar_panel(self):

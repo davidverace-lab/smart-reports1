@@ -101,7 +101,7 @@ class ModernSidebar(ctk.CTkFrame):
         hover_color = '#4a5a8a' if not is_dark else theme['surface_light']
 
         nav_items = [
-            ('📊', 'Dashboard', 'dashboard'),
+            ('📊', 'Dashboards Gerenciales', 'dashboard'),
             ('🔍', 'Consulta de Empleados', 'consultas'),
             ('📤', 'Cruce de Datos (Cornerstone)', 'actualizar'),
             ('📄', 'Generar Reportes', 'reportes'),
