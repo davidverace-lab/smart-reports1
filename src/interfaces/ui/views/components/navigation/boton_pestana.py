@@ -88,6 +88,10 @@ class CustomTabView(ctk.CTkFrame):
         self.tabs_frame.pack(side='top', fill='x', pady=(0, 15))
         self.tabs_frame.pack_propagate(False)
 
+        # Frame interno para centrar los botones
+        self.buttons_container = ctk.CTkFrame(self.tabs_frame, fg_color='transparent')
+        self.buttons_container.pack(expand=True)  # expand=True centra el frame
+
         # Frame para contenido de pestañas
         self.content_frame = ctk.CTkFrame(self, fg_color='transparent')
         self.content_frame.pack(side='top', fill='both', expand=True)
@@ -105,12 +109,12 @@ class CustomTabView(ctk.CTkFrame):
         """
         # Crear botón de pestaña
         button = CustomTabButton(
-            self.tabs_frame,
+            self.buttons_container,  # Usar buttons_container en lugar de tabs_frame
             text=tab_name,
             icon=icon,
             command=lambda: self.select_tab(tab_name)
         )
-        button.pack(side='left', padx=8)
+        button.pack(side='left', padx=8)  # side='left' dentro del container centrado
 
         # Crear frame de contenido
         tab_frame = ctk.CTkFrame(self.content_frame, fg_color='transparent')

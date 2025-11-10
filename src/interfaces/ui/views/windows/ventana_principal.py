@@ -206,9 +206,32 @@ class MainWindow:
         dashboard.pack(fill='both', expand=True)
 
     def show_actualizar_panel(self):
-        """Panel de actualización de datos - MODERNIZADO"""
+        """Panel de Cruce de Datos - Sistema avanzado de importación"""
         self.clear_content_area()
         self.current_panel = 'actualizar'
+
+        if self.conn is None:
+            # Mostrar mensaje de error si no hay conexión
+            error_frame = ctk.CTkFrame(self.content_area, fg_color='transparent')
+            error_frame.pack(fill='both', expand=True)
+
+            theme = self.theme_manager.get_current_theme()
+            error_label = ctk.CTkLabel(
+                error_frame,
+                text='⚠️ No hay conexión a la base de datos\n\nPor favor verifica la configuración de conexión.',
+                font=('Montserrat', 18),
+                text_color='#ff6b6b'
+            )
+            error_label.pack(expand=True)
+            return
+
+        # Crear panel de importación avanzado
+        importacion_panel = PanelImportacionDatos(
+            self.content_area,
+            db_connection=self.conn
+        )
+        importacion_panel.pack(fill='both', expand=True)
+        return  # Terminar aquí, no ejecutar el código antiguo
 
         # Scroll frame para contenido
         scroll_frame = ctk.CTkScrollableFrame(
