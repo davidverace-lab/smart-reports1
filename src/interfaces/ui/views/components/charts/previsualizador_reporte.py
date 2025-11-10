@@ -288,20 +288,19 @@ class PrevisualizadorReporte(ctk.CTkFrame):
         self.html_widget.load_file(temp_file.name)
 
     def _generar_html_periodo(self, datos, registros):
-        """Generar HTML estilo Word para reporte de periodo"""
-        fecha_actual = datetime.now().strftime('%d de %B de %Y')
+        """Generar HTML que replica EXACTAMENTE el formato del PDF de ReportLab"""
+        fecha_actual = datetime.now().strftime('%d/%m/%Y %H:%M')
 
-        # Generar filas de tabla
+        # Generar filas de tabla - igual al PDF
         filas_registros = ""
-        for reg in registros:
+        for idx, reg in enumerate(registros):
+            bg_color = "#FFFFFF" if idx % 2 == 0 else "#F5F5F5"
             filas_registros += f"""
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">{reg.get('usuario', 'N/A')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">{reg.get('modulo', 'N/A')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: center;">{reg.get('fecha', 'N/A')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: center; font-weight: 600;">
-                    {reg.get('estado', 'N/A')}
-                </td>
+            <tr style="background-color: {bg_color};">
+                <td style="padding: 10px 8px;">{reg.get('usuario', 'N/A')}</td>
+                <td style="padding: 10px 8px;">{reg.get('modulo', 'N/A')}</td>
+                <td style="padding: 10px 8px; text-align: center;">{reg.get('fecha', 'N/A')}</td>
+                <td style="padding: 10px 8px; text-align: center;">{reg.get('estado', 'N/A')}</td>
             </tr>
             """
 
@@ -315,49 +314,45 @@ class PrevisualizadorReporte(ctk.CTkFrame):
             </style>
         </head>
         <body>
-            <div class="header">
-                <h1>REPORTE POR PERIODO</h1>
-                <div class="subtitle">Instituto Hutchison Ports</div>
-                <div style="color: #666; margin-top: 10px; font-size: 14px;">{fecha_actual}</div>
-            </div>
+            <h1>Reporte por Periodo - Instituto Hutchison Ports</h1>
 
-            <div class="section">
-                <div class="section-title">Parámetros del Reporte</div>
-                <div class="info-grid">
-                    <div class="info-label">Módulo:</div>
-                    <div class="info-value">{datos.get('modulo', 'Todos')}</div>
+            <div class="section-title">Parámetros del Reporte</div>
+            <table class="info-table">
+                <tr>
+                    <td>Módulo:</td>
+                    <td>{datos.get('modulo', 'Todos')}</td>
+                </tr>
+                <tr>
+                    <td>Fecha Inicio:</td>
+                    <td>{datos.get('fecha_inicio', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td>Fecha Fin:</td>
+                    <td>{datos.get('fecha_fin', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td>Total Registros:</td>
+                    <td>{len(registros)}</td>
+                </tr>
+            </table>
 
-                    <div class="info-label">Fecha Inicio:</div>
-                    <div class="info-value">{datos.get('fecha_inicio', 'N/A')}</div>
-
-                    <div class="info-label">Fecha Fin:</div>
-                    <div class="info-value">{datos.get('fecha_fin', 'N/A')}</div>
-
-                    <div class="info-label">Total Registros:</div>
-                    <div class="info-value">{len(registros)}</div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">Registros del Periodo</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Módulo</th>
-                            <th style="text-align: center;">Fecha</th>
-                            <th style="text-align: center;">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filas_registros if filas_registros else '<tr><td colspan="4" style="text-align:center; padding:20px;">No hay registros para mostrar</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
+            <div class="section-title">Registros del Periodo</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Módulo</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filas_registros if filas_registros else '<tr><td colspan="4" style="text-align:center; padding:20px;">No hay registros para mostrar</td></tr>'}
+                </tbody>
+            </table>
 
             <div class="footer">
-                <div>© {datetime.now().year} Instituto Hutchison Ports - Todos los derechos reservados</div>
-                <div style="margin-top: 5px;">Sistema Smart Reports v2.0</div>
+                Generado automáticamente por Smart Reports v2.0 - {fecha_actual}
             </div>
         </body>
         </html>
@@ -365,23 +360,19 @@ class PrevisualizadorReporte(ctk.CTkFrame):
         return html
 
     def _generar_html_unidad(self, datos, estadisticas):
-        """Generar HTML estilo Word para reporte de unidad de negocio"""
-        fecha_actual = datetime.now().strftime('%d de %B de %Y')
+        """Generar HTML que replica EXACTAMENTE el formato del PDF de ReportLab"""
+        fecha_actual = datetime.now().strftime('%d/%m/%Y %H:%M')
 
-        # Generar filas de tabla de usuarios
+        # Generar filas de tabla de usuarios - igual al PDF
         filas_usuarios = ""
-        for usuario in estadisticas.get('usuarios', []):
-            progreso_color = "#51cf66" if usuario.get('progreso', 0) >= 70 else "#ffa94d"
+        for idx, usuario in enumerate(estadisticas.get('usuarios', [])):
+            bg_color = "#FFFFFF" if idx % 2 == 0 else "#F5F5F5"
             filas_usuarios += f"""
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">{usuario.get('nombre', 'N/A')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">{usuario.get('cargo', 'N/A')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: center; font-weight: 600; color: {progreso_color};">
-                    {usuario.get('progreso', 0)}%
-                </td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: center;">
-                    {usuario.get('completados', 0)}/{usuario.get('total', 8)}
-                </td>
+            <tr style="background-color: {bg_color};">
+                <td style="padding: 10px 8px;">{usuario.get('nombre', 'N/A')}</td>
+                <td style="padding: 10px 8px;">{usuario.get('cargo', 'N/A')}</td>
+                <td style="padding: 10px 8px; text-align: center;">{usuario.get('progreso', 0)}%</td>
+                <td style="padding: 10px 8px; text-align: center;">{usuario.get('completados', 0)}/{usuario.get('total', 8)}</td>
             </tr>
             """
 
@@ -395,67 +386,61 @@ class PrevisualizadorReporte(ctk.CTkFrame):
             </style>
         </head>
         <body>
-            <div class="header">
-                <h1>REPORTE POR UNIDAD DE NEGOCIO</h1>
-                <div class="subtitle">Instituto Hutchison Ports</div>
-                <div style="color: #666; margin-top: 10px; font-size: 14px;">{fecha_actual}</div>
-            </div>
+            <h1>Reporte por Unidad de Negocio - Instituto Hutchison Ports</h1>
 
-            <div class="section">
-                <div class="section-title">Información de la Unidad</div>
-                <div class="info-grid">
-                    <div class="info-label">Unidad de Negocio:</div>
-                    <div class="info-value">{datos.get('unidad', 'N/A')}</div>
+            <div class="section-title">Información de la Unidad</div>
+            <table class="info-table">
+                <tr>
+                    <td>Unidad de Negocio:</td>
+                    <td>{datos.get('unidad', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td>Código:</td>
+                    <td>{datos.get('codigo', 'N/A')}</td>
+                </tr>
+                <tr>
+                    <td>Total Usuarios:</td>
+                    <td>{estadisticas.get('total_usuarios', 0)}</td>
+                </tr>
+                <tr>
+                    <td>Módulo Consultado:</td>
+                    <td>{datos.get('modulo', 'Todos')}</td>
+                </tr>
+            </table>
 
-                    <div class="info-label">Código:</div>
-                    <div class="info-value">{datos.get('codigo', 'N/A')}</div>
+            <div class="section-title">Estadísticas de la Unidad</div>
+            <table class="info-table">
+                <tr>
+                    <td>Progreso Promedio:</td>
+                    <td>{estadisticas.get('progreso_promedio', 0):.1f}%</td>
+                </tr>
+                <tr>
+                    <td>Usuarios Activos:</td>
+                    <td>{estadisticas.get('usuarios_activos', 0)}</td>
+                </tr>
+                <tr>
+                    <td>Módulos Completados:</td>
+                    <td>{estadisticas.get('modulos_completados', 0)}</td>
+                </tr>
+            </table>
 
-                    <div class="info-label">Total Usuarios:</div>
-                    <div class="info-value">{estadisticas.get('total_usuarios', 0)}</div>
-
-                    <div class="info-label">Módulo Consultado:</div>
-                    <div class="info-value">{datos.get('modulo', 'Todos')}</div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">Estadísticas de la Unidad</div>
-                <div class="stats-box">
-                    <div class="stat-card">
-                        <div class="stat-label">Progreso Promedio</div>
-                        <div class="stat-value" style="color: #009BDE;">{estadisticas.get('progreso_promedio', 0):.1f}%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Usuarios Activos</div>
-                        <div class="stat-value" style="color: #51cf66;">{estadisticas.get('usuarios_activos', 0)}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Módulos Completados</div>
-                        <div class="stat-value" style="color: #002E6D;">{estadisticas.get('modulos_completados', 0)}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">Progreso por Usuario</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nombre Usuario</th>
-                            <th>Cargo</th>
-                            <th style="text-align: center;">Progreso</th>
-                            <th style="text-align: center;">Módulos</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filas_usuarios if filas_usuarios else '<tr><td colspan="4" style="text-align:center; padding:20px;">No hay datos disponibles</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
+            <div class="section-title">Progreso por Usuario</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nombre Usuario</th>
+                        <th>Cargo</th>
+                        <th>Progreso</th>
+                        <th>Módulos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filas_usuarios if filas_usuarios else '<tr><td colspan="4" style="text-align:center; padding:20px;">No hay datos disponibles</td></tr>'}
+                </tbody>
+            </table>
 
             <div class="footer">
-                <div>© {datetime.now().year} Instituto Hutchison Ports - Todos los derechos reservados</div>
-                <div style="margin-top: 5px;">Sistema Smart Reports v2.0</div>
+                Generado automáticamente por Smart Reports v2.0 - {fecha_actual}
             </div>
         </body>
         </html>
@@ -463,22 +448,19 @@ class PrevisualizadorReporte(ctk.CTkFrame):
         return html
 
     def _generar_html_global(self, estadisticas):
-        """Generar HTML estilo Word para reporte global"""
-        fecha_actual = datetime.now().strftime('%d de %B de %Y')
+        """Generar HTML que replica EXACTAMENTE el formato del PDF de ReportLab"""
+        fecha_actual = datetime.now().strftime('%d/%m/%Y %H:%M')
 
-        # Generar filas para módulos
+        # Generar filas para módulos - igual al PDF
         filas_modulos = ""
-        for modulo in estadisticas.get('por_modulo', []):
+        for idx, modulo in enumerate(estadisticas.get('por_modulo', [])):
+            bg_color = "#FFFFFF" if idx % 2 == 0 else "#F5F5F5"
             filas_modulos += f"""
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">{modulo.get('nombre', 'N/A')}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: center;">{modulo.get('inscritos', 0)}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: center; font-weight: 600; color: #51cf66;">
-                    {modulo.get('completados', 0)}
-                </td>
-                <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: center; color: #009BDE; font-weight: 600;">
-                    {modulo.get('porcentaje', 0):.1f}%
-                </td>
+            <tr style="background-color: {bg_color};">
+                <td style="padding: 10px 8px;">{modulo.get('nombre', 'N/A')}</td>
+                <td style="padding: 10px 8px; text-align: center;">{modulo.get('inscritos', 0)}</td>
+                <td style="padding: 10px 8px; text-align: center;">{modulo.get('completados', 0)}</td>
+                <td style="padding: 10px 8px; text-align: center;">{modulo.get('porcentaje', 0):.1f}%</td>
             </tr>
             """
 
@@ -492,67 +474,61 @@ class PrevisualizadorReporte(ctk.CTkFrame):
             </style>
         </head>
         <body>
-            <div class="header">
-                <h1>REPORTE GLOBAL DEL INSTITUTO</h1>
-                <div class="subtitle">Instituto Hutchison Ports</div>
-                <div style="color: #666; margin-top: 10px; font-size: 14px;">{fecha_actual}</div>
-            </div>
+            <h1>Reporte Global del Instituto - Instituto Hutchison Ports</h1>
 
-            <div class="section">
-                <div class="section-title">Estadísticas Generales</div>
-                <div class="stats-box">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Usuarios</div>
-                        <div class="stat-value">{estadisticas.get('total_usuarios', 0)}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Usuarios Activos</div>
-                        <div class="stat-value" style="color: #51cf66;">{estadisticas.get('usuarios_activos', 0)}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Progreso Global</div>
-                        <div class="stat-value" style="color: #009BDE;">{estadisticas.get('progreso_global', 0):.1f}%</div>
-                    </div>
-                </div>
-            </div>
+            <div class="section-title">Estadísticas Generales</div>
+            <table class="info-table">
+                <tr>
+                    <td>Total Usuarios:</td>
+                    <td>{estadisticas.get('total_usuarios', 0)}</td>
+                </tr>
+                <tr>
+                    <td>Usuarios Activos:</td>
+                    <td>{estadisticas.get('usuarios_activos', 0)}</td>
+                </tr>
+                <tr>
+                    <td>Progreso Global:</td>
+                    <td>{estadisticas.get('progreso_global', 0):.1f}%</td>
+                </tr>
+            </table>
 
-            <div class="section">
-                <div class="section-title">Resumen por Módulo</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Módulo</th>
-                            <th style="text-align: center;">Inscritos</th>
-                            <th style="text-align: center;">Completados</th>
-                            <th style="text-align: center;">% Completado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filas_modulos if filas_modulos else '<tr><td colspan="4" style="text-align:center; padding:20px;">No hay datos disponibles</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
+            <div class="section-title">Resumen por Módulo</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Módulo</th>
+                        <th>Inscritos</th>
+                        <th>Completados</th>
+                        <th>% Completado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filas_modulos if filas_modulos else '<tr><td colspan="4" style="text-align:center; padding:20px;">No hay datos disponibles</td></tr>'}
+                </tbody>
+            </table>
 
-            <div class="section">
-                <div class="section-title">Métricas Adicionales</div>
-                <div class="info-grid">
-                    <div class="info-label">Total Evaluaciones:</div>
-                    <div class="info-value">{estadisticas.get('total_evaluaciones', 0)}</div>
-
-                    <div class="info-label">Evaluaciones Aprobadas:</div>
-                    <div class="info-value">{estadisticas.get('evaluaciones_aprobadas', 0)}</div>
-
-                    <div class="info-label">Promedio General:</div>
-                    <div class="info-value">{estadisticas.get('promedio_general', 0):.1f}%</div>
-
-                    <div class="info-label">Tasa de Aprobación:</div>
-                    <div class="info-value">{estadisticas.get('tasa_aprobacion', 0):.1f}%</div>
-                </div>
-            </div>
+            <div class="section-title">Métricas Adicionales</div>
+            <table class="info-table">
+                <tr>
+                    <td>Total Evaluaciones:</td>
+                    <td>{estadisticas.get('total_evaluaciones', 0)}</td>
+                </tr>
+                <tr>
+                    <td>Evaluaciones Aprobadas:</td>
+                    <td>{estadisticas.get('evaluaciones_aprobadas', 0)}</td>
+                </tr>
+                <tr>
+                    <td>Promedio General:</td>
+                    <td>{estadisticas.get('promedio_general', 0):.1f}%</td>
+                </tr>
+                <tr>
+                    <td>Tasa de Aprobación:</td>
+                    <td>{estadisticas.get('tasa_aprobacion', 0):.1f}%</td>
+                </tr>
+            </table>
 
             <div class="footer">
-                <div>© {datetime.now().year} Instituto Hutchison Ports - Todos los derechos reservados</div>
-                <div style="margin-top: 5px;">Sistema Smart Reports v2.0</div>
+                Generado automáticamente por Smart Reports v2.0 - {fecha_actual}
             </div>
         </body>
         </html>
@@ -560,26 +536,20 @@ class PrevisualizadorReporte(ctk.CTkFrame):
         return html
 
     def _generar_html_niveles_mando(self, datos, estadisticas):
-        """Generar HTML estilo Word para reporte por niveles de mando"""
-        fecha_actual = datetime.now().strftime('%d de %B de %Y')
+        """Generar HTML que replica EXACTAMENTE el formato del PDF de ReportLab"""
+        fecha_actual = datetime.now().strftime('%d/%m/%Y %H:%M')
 
-        # Generar filas para niveles
+        # Generar filas para niveles - igual al PDF
         filas_niveles = ""
-        for nivel in estadisticas.get('por_nivel', []):
-            progreso_color = "#51cf66" if nivel.get('progreso_promedio', 0) >= 70 else "#ffa94d"
+        for idx, nivel in enumerate(estadisticas.get('por_nivel', [])):
+            bg_color = "#FFFFFF" if idx % 2 == 0 else "#F5F5F5"
             filas_niveles += f"""
-            <tr>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: 600;">{nivel.get('nivel', 'N/A')}</td>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: center;">{nivel.get('total_usuarios', 0)}</td>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: center; font-weight: 600; color: {progreso_color};">
-                    {nivel.get('progreso_promedio', 0):.1f}%
-                </td>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: center; color: #51cf66;">
-                    {nivel.get('completados', 0)}
-                </td>
-                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: center; color: #ffa94d;">
-                    {nivel.get('en_progreso', 0)}
-                </td>
+            <tr style="background-color: {bg_color};">
+                <td style="padding: 10px 8px;">{nivel.get('nivel', 'N/A')}</td>
+                <td style="padding: 10px 8px; text-align: center;">{nivel.get('total_usuarios', 0)}</td>
+                <td style="padding: 10px 8px; text-align: center;">{nivel.get('progreso_promedio', 0):.1f}%</td>
+                <td style="padding: 10px 8px; text-align: center;">{nivel.get('completados', 0)}</td>
+                <td style="padding: 10px 8px; text-align: center;">{nivel.get('en_progreso', 0)}</td>
             </tr>
             """
 
@@ -593,68 +563,62 @@ class PrevisualizadorReporte(ctk.CTkFrame):
             </style>
         </head>
         <body>
-            <div class="header">
-                <h1>REPORTE POR NIVELES DE MANDO</h1>
-                <div class="subtitle">Instituto Hutchison Ports</div>
-                <div style="color: #666; margin-top: 10px; font-size: 14px;">{fecha_actual}</div>
-            </div>
+            <h1>Reporte por Niveles de Mando - Instituto Hutchison Ports</h1>
 
-            <div class="section">
-                <div class="section-title">Parámetros del Reporte</div>
-                <div class="info-grid">
-                    <div class="info-label">Módulo Consultado:</div>
-                    <div class="info-value">{datos.get('modulo', 'Todos los módulos')}</div>
+            <div class="section-title">Parámetros del Reporte</div>
+            <table class="info-table">
+                <tr>
+                    <td>Módulo Consultado:</td>
+                    <td>{datos.get('modulo', 'Todos los módulos')}</td>
+                </tr>
+                <tr>
+                    <td>Total Niveles:</td>
+                    <td>{len(estadisticas.get('por_nivel', []))}</td>
+                </tr>
+                <tr>
+                    <td>Total Usuarios:</td>
+                    <td>{estadisticas.get('total_usuarios', 0)}</td>
+                </tr>
+                <tr>
+                    <td>Fecha de Generación:</td>
+                    <td>{fecha_actual}</td>
+                </tr>
+            </table>
 
-                    <div class="info-label">Total Niveles:</div>
-                    <div class="info-value">{len(estadisticas.get('por_nivel', []))}</div>
+            <div class="section-title">Estadísticas Consolidadas</div>
+            <table class="info-table">
+                <tr>
+                    <td>Progreso Promedio:</td>
+                    <td>{estadisticas.get('progreso_total', 0):.1f}%</td>
+                </tr>
+                <tr>
+                    <td>Completados:</td>
+                    <td>{estadisticas.get('total_completados', 0)}</td>
+                </tr>
+                <tr>
+                    <td>En Progreso:</td>
+                    <td>{estadisticas.get('total_en_progreso', 0)}</td>
+                </tr>
+            </table>
 
-                    <div class="info-label">Total Usuarios:</div>
-                    <div class="info-value">{estadisticas.get('total_usuarios', 0)}</div>
-
-                    <div class="info-label">Fecha de Generación:</div>
-                    <div class="info-value">{datetime.now().strftime('%d/%m/%Y %H:%M hrs')}</div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">Estadísticas Consolidadas</div>
-                <div class="stats-box">
-                    <div class="stat-card">
-                        <div class="stat-label">Progreso Promedio</div>
-                        <div class="stat-value" style="color: #009BDE;">{estadisticas.get('progreso_total', 0):.1f}%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Completados</div>
-                        <div class="stat-value" style="color: #51cf66;">{estadisticas.get('total_completados', 0)}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">En Progreso</div>
-                        <div class="stat-value" style="color: #ffa94d;">{estadisticas.get('total_en_progreso', 0)}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">Progreso por Nivel de Mando</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nivel de Mando</th>
-                            <th style="text-align: center;">Usuarios</th>
-                            <th style="text-align: center;">Progreso</th>
-                            <th style="text-align: center;">Completados</th>
-                            <th style="text-align: center;">En Progreso</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filas_niveles if filas_niveles else '<tr><td colspan="5" style="text-align:center; padding:20px;">No hay datos disponibles</td></tr>'}
-                    </tbody>
-                </table>
-            </div>
+            <div class="section-title">Progreso por Nivel de Mando</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nivel de Mando</th>
+                        <th>Usuarios</th>
+                        <th>Progreso</th>
+                        <th>Completados</th>
+                        <th>En Progreso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filas_niveles if filas_niveles else '<tr><td colspan="5" style="text-align:center; padding:20px;">No hay datos disponibles</td></tr>'}
+                </tbody>
+            </table>
 
             <div class="footer">
-                <div>© {datetime.now().year} Instituto Hutchison Ports - Todos los derechos reservados</div>
-                <div style="margin-top: 5px;">Sistema Smart Reports v2.0</div>
+                Generado automáticamente por Smart Reports v2.0 - {fecha_actual}
             </div>
         </body>
         </html>
