@@ -32,11 +32,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.usuario_actual = usuario_actual or {"nombre": "Admin"}
 
         try:
-            # Header con saludo personalizado
-            print("  → Creando header...")
-            self._create_header()
-
-            # Tabs de navegación
+            # Tabs de navegación (sin header, ya existe en upper bar)
             print("  → Creando tabs...")
             self.tab_view = CustomTabView(self)
             self.tab_view.pack(fill='both', expand=True, padx=20, pady=(0, 20))
@@ -62,52 +58,6 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             import traceback
             traceback.print_exc()
 
-    def _create_header(self):
-        """Crear header con saludo y logo Hutchison Ports"""
-        theme = self.theme_manager.get_current_theme()
-
-        header = ctk.CTkFrame(self, fg_color='transparent', height=100)
-        header.pack(fill='x', padx=20, pady=(20, 10))
-        header.pack_propagate(False)
-
-        # Container izquierdo: Saludo + Título
-        left_container = ctk.CTkFrame(header, fg_color='transparent')
-        left_container.pack(side='left', fill='both', expand=True)
-
-        # Saludo personalizado
-        nombre_usuario = self.usuario_actual.get("nombre", "Admin")
-        saludo = ctk.CTkLabel(
-            left_container,
-            text=f"¡Bienvenido, {nombre_usuario}!",
-            font=('Segoe UI', 16, 'normal'),
-            text_color=theme['text_secondary'],
-            anchor='w'
-        )
-        saludo.pack(anchor='w', pady=(5, 2))
-
-        # Título principal
-        titulo = ctk.CTkLabel(
-            left_container,
-            text="Panel de Control",
-            font=('Segoe UI', 28, 'bold'),
-            text_color=theme['text'],
-            anchor='w'
-        )
-        titulo.pack(anchor='w')
-
-        # Container derecho: Logo/Marca Hutchison Ports
-        right_container = ctk.CTkFrame(header, fg_color='transparent')
-        right_container.pack(side='right', padx=20)
-
-        logo_label = ctk.CTkLabel(
-            right_container,
-            text="HUTCHISON PORTS",
-            font=('Segoe UI', 20, 'bold'),
-            text_color=HUTCHISON_COLORS['ports_sea_blue'],
-            anchor='e'
-        )
-        logo_label.pack(side='right', pady=10)
-
     def _create_general_tab(self):
         """Crear pestaña General con diseño del mockup"""
         theme = self.theme_manager.get_current_theme()
@@ -124,37 +74,38 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         metrics_frame = ctk.CTkFrame(container, fg_color='transparent')
         metrics_frame.pack(fill='x', pady=(0, 20))
 
-        # Grid para 3 cards en fila
-        metrics_frame.columnconfigure((0, 1, 2), weight=1, uniform='metrics')
+        # Grid para 3 cards: laterales pequeñas (peso 1), central grande (peso 2)
+        metrics_frame.columnconfigure(0, weight=1)  # Total Usuarios (pequeña)
+        metrics_frame.columnconfigure(1, weight=2)  # Módulo Actual (grande)
+        metrics_frame.columnconfigure(2, weight=1)  # Tasa Completado (pequeña)
 
-        # Card 1: Total de Usuarios
-        self.metric_usuarios = self._create_metric_card(
+        # Card 1: Total de Usuarios (pequeña, izquierda)
+        self.metric_usuarios = self._create_metric_card_small(
             metrics_frame,
             title="Total de Usuarios",
             value="0",
-            subtitle="Usuarios activos en el sistema",
+            subtitle="Usuarios activos",
             icon="👥",
             color=HUTCHISON_COLORS['ports_sky_blue']
         )
         self.metric_usuarios.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Card 2: Módulo Actual
-        self.metric_modulo = self._create_metric_card(
+        # Card 2: Módulo Actual (grande, centro)
+        self.metric_modulo = self._create_metric_card_large(
             metrics_frame,
             title="Módulo Actual",
-            value="Módulo 8",
-            subtitle="Procesos de Recursos Humanos",
+            value="Módulo 8 - Procesos de Recursos Humanos",
             icon="📋",
             color=HUTCHISON_COLORS['ports_horizon_blue']
         )
         self.metric_modulo.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
-        # Card 3: Tasa de Completado
-        self.metric_completado = self._create_metric_card(
+        # Card 3: Tasa de Completado (pequeña, derecha)
+        self.metric_completado = self._create_metric_card_small(
             metrics_frame,
             title="Tasa de Completado",
-            value="0.0%",
-            subtitle="Progreso general del sistema",
+            value="70.0%",
+            subtitle="Progreso general",
             icon="✓",
             color=HUTCHISON_COLORS['success']
         )
@@ -256,9 +207,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         )
         self.chart_evaluaciones.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
-    def _create_metric_card(self, parent, title, value, subtitle, icon, color):
+    def _create_metric_card_small(self, parent, title, value, subtitle, icon, color):
         """
-        Crear tarjeta de métrica estilo Hutchison Ports
+        Crear tarjeta de métrica pequeña (laterales)
 
         Args:
             parent: Widget padre
@@ -270,7 +221,6 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         """
         theme = self.theme_manager.get_current_theme()
 
-        # Card principal con sombra simulada mediante border
         card = ctk.CTkFrame(
             parent,
             fg_color=theme['surface'],
@@ -279,50 +229,107 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             border_color=theme['border']
         )
 
-        # Container interno con padding
         inner = ctk.CTkFrame(card, fg_color='transparent')
-        inner.pack(fill='both', expand=True, padx=24, pady=20)
+        inner.pack(fill='both', expand=True, padx=20, pady=15)
 
-        # Icono grande con color
+        # Icono
         icon_label = ctk.CTkLabel(
             inner,
             text=icon,
-            font=('Segoe UI', 36),
+            font=('Segoe UI', 28),
             text_color=color
         )
-        icon_label.pack(anchor='w', pady=(0, 8))
+        icon_label.pack(anchor='center', pady=(0, 5))
 
-        # Valor principal (grande y bold)
+        # Valor principal
         value_label = ctk.CTkLabel(
             inner,
             text=value,
-            font=('Segoe UI', 32, 'bold'),
+            font=('Segoe UI', 28, 'bold'),
             text_color=theme['text']
         )
-        value_label.pack(anchor='w', pady=(0, 4))
+        value_label.pack(anchor='center', pady=(0, 3))
 
-        # Título (label principal)
+        # Título
+        title_label = ctk.CTkLabel(
+            inner,
+            text=title,
+            font=('Segoe UI', 12, 'bold'),
+            text_color=theme['text_secondary']
+        )
+        title_label.pack(anchor='center', pady=(0, 2))
+
+        # Subtítulo
+        subtitle_label = ctk.CTkLabel(
+            inner,
+            text=subtitle,
+            font=('Segoe UI', 10),
+            text_color=theme['text_tertiary']
+        )
+        subtitle_label.pack(anchor='center')
+
+        # Guardar referencias
+        card.value_label = value_label
+        card.title_label = title_label
+        card.subtitle_label = subtitle_label
+
+        return card
+
+    def _create_metric_card_large(self, parent, title, value, icon, color):
+        """
+        Crear tarjeta de métrica grande (centro - Módulo Actual)
+
+        Args:
+            parent: Widget padre
+            title: "Módulo Actual"
+            value: "Módulo 8 - Procesos de Recursos Humanos"
+            icon: Emoji o símbolo
+            color: Color del icono y acento
+        """
+        theme = self.theme_manager.get_current_theme()
+
+        card = ctk.CTkFrame(
+            parent,
+            fg_color=theme['surface'],
+            corner_radius=8,
+            border_width=1,
+            border_color=theme['border']
+        )
+
+        inner = ctk.CTkFrame(card, fg_color='transparent')
+        inner.pack(fill='both', expand=True, padx=30, pady=20)
+
+        # Icono grande
+        icon_label = ctk.CTkLabel(
+            inner,
+            text=icon,
+            font=('Segoe UI', 40),
+            text_color=color
+        )
+        icon_label.pack(anchor='center', pady=(5, 8))
+
+        # Título: "Módulo Actual"
         title_label = ctk.CTkLabel(
             inner,
             text=title,
             font=('Segoe UI', 14, 'bold'),
             text_color=theme['text_secondary']
         )
-        title_label.pack(anchor='w', pady=(0, 2))
+        title_label.pack(anchor='center', pady=(0, 8))
 
-        # Subtítulo (texto pequeño, terciario)
-        subtitle_label = ctk.CTkLabel(
+        # Valor: "Módulo 8 - Procesos de Recursos Humanos" (tamaño mediano)
+        value_label = ctk.CTkLabel(
             inner,
-            text=subtitle,
-            font=('Segoe UI', 11),
-            text_color=theme['text_tertiary']
+            text=value,
+            font=('Segoe UI', 18, 'bold'),
+            text_color=theme['text'],
+            wraplength=350
         )
-        subtitle_label.pack(anchor='w')
+        value_label.pack(anchor='center', pady=(0, 5))
 
-        # Guardar referencias para actualización
+        # Guardar referencias
         card.value_label = value_label
         card.title_label = title_label
-        card.subtitle_label = subtitle_label
 
         return card
 
@@ -336,15 +343,16 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             # === PASO 1: CARGAR MÉTRICAS ===
             print("\n[1/3] 📈 Cargando métricas principales...")
 
-            # Métrica 1: Total de Usuarios
+            # Métrica 1: Total de Usuarios (desde BD)
             total_usuarios = self._get_total_usuarios()
             self.metric_usuarios.value_label.configure(text=f"{total_usuarios:,}")
             print(f"  ✓ Total usuarios: {total_usuarios:,}")
 
-            # Métrica 3: Tasa de Completado
-            tasa_completado = self._get_tasa_completado()
-            self.metric_completado.value_label.configure(text=f"{tasa_completado:.1f}%")
-            print(f"  ✓ Tasa de completado: {tasa_completado:.1f}%")
+            # Métrica 2: Módulo Actual (ya está fijo, no se actualiza)
+            print(f"  ✓ Módulo actual: Módulo 8 - Procesos de Recursos Humanos")
+
+            # Métrica 3: Tasa de Completado (valor estático 70%)
+            print(f"  ✓ Tasa de completado: 70.0% (valor estático)")
 
             # === PASO 2: CARGAR GRÁFICOS PESTAÑA GENERAL ===
             print("\n[2/3] 📊 Cargando gráficos de pestaña General...")
@@ -437,26 +445,6 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Valor por defecto del mockup
         return 1525
-
-    def _get_tasa_completado(self):
-        """Calcular tasa de completado global del sistema"""
-        try:
-            if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT AVG(PorcentajeAvance) as promedio
-                    FROM instituto_ProgresoModulo
-                    WHERE PorcentajeAvance > 0
-                """
-                cursor.execute(query)
-                result = cursor.fetchone()
-                if result and result[0]:
-                    return float(result[0])
-        except Exception as e:
-            print(f"  ⚠ Error consultando tasa completado: {e}")
-
-        # Valor por defecto del mockup
-        return 70.0
 
     def _get_usuarios_por_unidad(self):
         """
