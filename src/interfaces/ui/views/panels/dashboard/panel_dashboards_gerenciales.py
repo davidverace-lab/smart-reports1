@@ -20,26 +20,41 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
     def __init__(self, parent, db_connection=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
 
+        print("🚀 Inicializando DashboardsGerencialesPanel...")
+
         self.theme_manager = get_theme_manager()
         self.db_connection = db_connection
 
-        # Header
-        self._create_header()
+        try:
+            # Header
+            print("  → Creando header...")
+            self._create_header()
 
-        # Tabs
-        self.tab_view = CustomTabView(self)
-        self.tab_view.pack(fill='both', expand=True, padx=20, pady=(0, 20))
+            # Tabs
+            print("  → Creando tabs...")
+            self.tab_view = CustomTabView(self)
+            self.tab_view.pack(fill='both', expand=True, padx=20, pady=(0, 20))
 
-        # Crear pestañas
-        self.tab_general = self.tab_view.add("📊 General", "📊")
-        self.tab_gerencial = self.tab_view.add("📈 Dashboards Gerenciales", "📈")
+            # Crear pestañas
+            print("  → Agregando pestañas...")
+            self.tab_general = self.tab_view.add("General", "📊")
+            self.tab_gerencial = self.tab_view.add("Dashboards Gerenciales", "📈")
 
-        # Crear contenido
-        self._create_general_tab()
-        self._create_gerencial_tab()
+            # Crear contenido
+            print("  → Creando contenido de tabs...")
+            self._create_general_tab()
+            self._create_gerencial_tab()
 
-        # Cargar datos
-        self.after(500, self._load_data)
+            # Cargar datos
+            print("  → Programando carga de datos...")
+            self.after(500, self._load_data)
+
+            print("✅ DashboardsGerencialesPanel inicializado correctamente")
+
+        except Exception as e:
+            print(f"❌ Error inicializando dashboard: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _create_header(self):
         """Crear header del panel"""
@@ -275,61 +290,82 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
     def _load_data(self):
         """Cargar datos en todos los dashboards"""
-        print("📊 Cargando dashboards D3.js interactivos...")
+        print("\n" + "="*60)
+        print("📊 CARGANDO DASHBOARDS D3.JS INTERACTIVOS")
+        print("="*60)
 
         try:
+            print("\n[1/5] Cargando métricas...")
             # === CARGAR MÉTRICAS ===
             total_usuarios = self._get_total_usuarios()
             self.metric_usuarios.value_label.configure(text=str(total_usuarios))
+            print(f"  ✓ Total usuarios: {total_usuarios}")
 
             # Calcular porcentaje
             porcentaje = min(100, int((total_usuarios / 1000) * 100))
             self.metric_avance.value_label.configure(text=f"{porcentaje}%")
+            print(f"  ✓ Porcentaje: {porcentaje}%")
 
             # === CARGAR GRÁFICOS GENERALES ===
+            print("\n[2/5] Cargando gráficos de pestaña General...")
 
             # Gráfico 1: Usuarios por Módulo (Barras D3.js)
+            print("  → Chart 1: Usuarios por Módulo (bar)")
             datos_modulos = {
                 'labels': ['Reportes', 'Dashboards', 'Configuración', 'Usuarios', 'Soporte'],
                 'values': [245, 198, 87, 156, 92]
             }
             self.chart_usuarios_modulo.set_chart('bar', datos_modulos)
+            print("    ✓ Completado")
 
             # Gráfico 2: Reportes Generados (Líneas D3.js)
+            print("  → Chart 2: Reportes Generados (line)")
             datos_reportes = {
                 'labels': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
                 'values': [450, 520, 480, 650, 720, 680]
             }
             self.chart_reportes.set_chart('line', datos_reportes)
+            print("    ✓ Completado")
 
             # === CARGAR DASHBOARDS GERENCIALES ===
+            print("\n[3/5] Cargando dashboards gerenciales...")
 
             # Dashboard 1: Unidades de Negocio (Barras D3.js)
+            print("  → Dashboard 1: Unidades de Negocio (bar)")
             datos_unidades = self._get_datos_unidades_negocio()
             self.chart_unidades.set_chart('bar', datos_unidades)
+            print("    ✓ Completado")
 
             # Dashboard 2: Distribución por Áreas (Donut D3.js)
+            print("  → Dashboard 2: Distribución por Áreas (donut)")
             datos_areas = {
                 'labels': ['Operaciones', 'Logística', 'Comercial', 'Administración', 'TI'],
                 'values': [320, 280, 250, 180, 150]
             }
             self.chart_areas.set_chart('donut', datos_areas)
+            print("    ✓ Completado")
 
             # Dashboard 3: Tendencia Mensual (Líneas D3.js)
+            print("  → Dashboard 3: Tendencia Mensual (line)")
             datos_tendencia = {
                 'labels': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                 'values': [850, 920, 880, 1050, 1120, 1080, 1200, 1350, 1280, 1400, 1450, 1520]
             }
             self.chart_tendencia.set_chart('line', datos_tendencia)
+            print("    ✓ Completado")
 
             # Dashboard 4: Tipos de Reporte (Barras D3.js)
+            print("  → Dashboard 4: Tipos de Reporte (bar)")
             datos_tipos = {
                 'labels': ['Financiero', 'Operativo', 'Estratégico', 'Táctico', 'Ejecutivo'],
                 'values': [420, 380, 290, 250, 180]
             }
             self.chart_tipos.set_chart('bar', datos_tipos)
+            print("    ✓ Completado")
 
-            print("✅ Todos los dashboards D3.js cargados exitosamente")
+            print("\n" + "="*60)
+            print("✅ TODOS LOS DASHBOARDS D3.JS CARGADOS EXITOSAMENTE")
+            print("="*60 + "\n")
 
         except Exception as e:
             print(f"❌ Error cargando dashboards: {e}")
