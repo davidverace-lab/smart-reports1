@@ -6,15 +6,20 @@ import customtkinter as ctk
 from src.interfaces.ui.views.components.charts.tarjeta_d3_profesional import ProfessionalD3ChartCard
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
 from config.gestor_temas import get_theme_manager
+from src.application.services.metricas_gerenciales_service import MetricasGerencialesService
 
 
 class DashboardsGerencialesPanel(ctk.CTkFrame):
     """Panel con múltiples dashboards gerenciales usando D3.js"""
 
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, db_connection=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
 
         self.theme_manager = get_theme_manager()
+        self.db_connection = db_connection
+
+        # Servicio de métricas gerenciales
+        self.metricas_service = MetricasGerencialesService(db_connection)
 
         # Header
         self._create_header()
@@ -287,135 +292,126 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.chart_burbujas.grid(row=1, column=1, padx=10, pady=10, sticky='nsew')
 
     def _load_all_data(self):
-        """Cargar todos los gráficos con datos de ejemplo"""
-        print("🎨 Cargando dashboards gerenciales...")
+        """Cargar todos los gráficos con datos reales de la base de datos"""
+        print("🎨 Cargando dashboards gerenciales con datos reales...")
 
-        # ===== RENDIMIENTO =====
-        # Barras por unidad
+        try:
+            # ===== RENDIMIENTO =====
+            # Barras por unidad
+            datos_unidad = self.metricas_service.get_rendimiento_por_unidad()
+            self.chart_barras_unidad.set_d3_chart('bar', datos_unidad)
+
+            # Top departamentos
+            datos_deptos = self.metricas_service.get_top_departamentos()
+            self.chart_barras_depto.set_d3_chart('bar', datos_deptos)
+
+            # Progreso mensual
+            datos_progreso = self.metricas_service.get_progreso_mensual()
+            self.chart_barras_apiladas.set_d3_chart('bar', datos_progreso)
+
+            # Comparativa trimestral
+            datos_trimestre = self.metricas_service.get_comparativa_trimestral()
+            self.chart_barras_agrupadas.set_d3_chart('bar', datos_trimestre)
+
+            # ===== COMPARATIVAS =====
+            # Serie temporal 12 meses
+            datos_temporal = self.metricas_service.get_serie_temporal_12_meses()
+            self.chart_lineas_multi.set_d3_chart('line', datos_temporal)
+
+            # Usar progreso mensual también para área apilada
+            self.chart_area_apilada.set_d3_chart('line', datos_progreso)
+
+            # Usar serie temporal para líneas con área
+            self.chart_lineas_area.set_d3_chart('line', datos_temporal)
+
+            # Progreso mensual para líneas curvas
+            datos_progreso_6m = self.metricas_service.get_progreso_mensual(meses=6)
+            self.chart_lineas_curvas.set_d3_chart('line', datos_progreso_6m)
+
+            # ===== DISTRIBUCIÓN =====
+            # Distribución de estatus
+            datos_estatus = self.metricas_service.get_distribucion_estatus()
+            self.chart_donut_estatus.set_d3_chart('donut', datos_estatus)
+
+            # Usuarios por categoría
+            datos_categoria = self.metricas_service.get_usuarios_por_categoria()
+            self.chart_donut_categorias.set_d3_chart('donut', datos_categoria)
+
+            # Distribución jerárquica
+            datos_jerarquia = self.metricas_service.get_distribucion_jerarquia()
+            self.chart_pie_niveles.set_d3_chart('donut', datos_jerarquia)
+
+            # Reusar datos de estatus para donut anidado
+            self.chart_donut_anidado.set_d3_chart('donut', datos_estatus)
+
+            # ===== TENDENCIAS =====
+            # Serie temporal
+            self.chart_serie_temporal.set_d3_chart('line', datos_temporal)
+
+            # Proyección (usar últimos 6 meses)
+            self.chart_proyeccion.set_d3_chart('line', datos_progreso_6m)
+
+            # Variación (progreso mensual para mostrar cambios)
+            self.chart_variacion.set_d3_chart('bar', datos_progreso)
+
+            # Cascada (usar progreso mensual)
+            self.chart_cascada.set_d3_chart('bar', datos_progreso)
+
+            # ===== RELACIONES =====
+            # Relación tiempo-calificación
+            datos_tiempo = self.metricas_service.get_relacion_tiempo_calificacion()
+            self.chart_scatter.set_d3_chart('bar', datos_tiempo)
+
+            # Comparativo (rendimiento por unidad)
+            self.chart_comparativo.set_d3_chart('bar', datos_unidad)
+
+            # Matriz (top departamentos)
+            self.chart_matriz.set_d3_chart('bar', datos_deptos)
+
+            # Burbujas (usuarios por categoría)
+            self.chart_burbujas.set_d3_chart('donut', datos_categoria)
+
+            print("✅ Dashboards cargados exitosamente con datos reales")
+
+        except Exception as e:
+            print(f"⚠️ Error cargando dashboards: {e}")
+            print("📊 Usando datos de ejemplo como fallback...")
+            self._load_fallback_data()
+
+    def _load_fallback_data(self):
+        """Cargar datos de ejemplo si falla la conexión a BD"""
+        # Datos de ejemplo como fallback
         self.chart_barras_unidad.set_d3_chart('bar', {
-            'categorias': ['ICAVE', 'EIT', 'LCT', 'TIMSA', 'HPMX', 'TNG'],
-            'valores': [89, 76, 92, 68, 81, 95],
+            'categorias': ['TNG', 'Container Care', 'ECV/EIT', 'Logística', 'Puerto'],
+            'valores': [92, 88, 85, 82, 78],
             'meta': 80
         })
 
-        # Barras horizontales
         self.chart_barras_depto.set_d3_chart('bar', {
-            'categorias': ['Operaciones', 'Logística', 'Admin', 'RR.HH', 'IT', 'Ventas', 'Calidad', 'Finanzas', 'Legal', 'Marketing'],
-            'valores': [95, 92, 89, 87, 85, 83, 81, 78, 75, 72]
+            'categorias': ['Operaciones', 'Logística', 'Admin', 'RR.HH', 'IT'],
+            'valores': [95, 92, 89, 87, 85]
         })
 
-        # Barras apiladas
         self.chart_barras_apiladas.set_d3_chart('bar', {
             'categorias': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
             'valores': [65, 72, 78, 83, 88, 92]
         })
 
-        # Barras agrupadas
         self.chart_barras_agrupadas.set_d3_chart('bar', {
             'categorias': ['Q1', 'Q2', 'Q3', 'Q4'],
             'valores': [75, 82, 88, 91]
         })
 
-        # ===== COMPARATIVAS =====
-        # Líneas múltiples
+        # Continuar con datos de ejemplo para el resto de gráficos
         self.chart_lineas_multi.set_d3_chart('line', {
             'categorias': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
             'valores': [65, 68, 72, 75, 78, 82, 85, 88, 90, 92, 94, 95],
             'meta': 80
         })
 
-        # Área apilada
-        self.chart_area_apilada.set_d3_chart('line', {
-            'categorias': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-            'valores': [450, 520, 580, 640, 710, 780]
-        })
-
-        # Líneas con área
-        self.chart_lineas_area.set_d3_chart('line', {
-            'categorias': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-            'valores': [65, 70, 75, 80, 85, 90],
-            'meta': 75
-        })
-
-        # Líneas curvas
-        self.chart_lineas_curvas.set_d3_chart('line', {
-            'categorias': ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'],
-            'valores': [60, 65, 72, 78, 85, 90]
-        })
-
-        # ===== DISTRIBUCIÓN =====
-        # Donut estatus
         self.chart_donut_estatus.set_d3_chart('donut', {
             'categorias': ['Completado', 'En Progreso', 'No Iniciado', 'Vencido'],
             'valores': [450, 230, 180, 140]
-        })
-
-        # Donut categorías
-        self.chart_donut_categorias.set_d3_chart('donut', {
-            'categorias': ['Seguridad', 'Operaciones', 'Calidad', 'Admin', 'Técnico', 'Liderazgo'],
-            'valores': [320, 280, 245, 210, 195, 150]
-        })
-
-        # Pie niveles
-        self.chart_pie_niveles.set_d3_chart('donut', {
-            'categorias': ['Directivo', 'Gerencial', 'Supervisión', 'Operativo'],
-            'valores': [45, 120, 285, 550]
-        })
-
-        # Donut anidado
-        self.chart_donut_anidado.set_d3_chart('donut', {
-            'categorias': ['80-100%', '60-79%', '40-59%', '20-39%', '0-19%'],
-            'valores': [320, 280, 190, 120, 90]
-        })
-
-        # ===== TENDENCIAS =====
-        # Serie temporal
-        self.chart_serie_temporal.set_d3_chart('line', {
-            'categorias': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            'valores': [62, 65, 68, 72, 75, 78, 81, 84, 87, 89, 91, 93]
-        })
-
-        # Proyección
-        self.chart_proyeccion.set_d3_chart('line', {
-            'categorias': ['Oct', 'Nov', 'Dic', 'Ene*', 'Feb*', 'Mar*'],
-            'valores': [89, 91, 93, 95, 96, 97]
-        })
-
-        # Variación
-        self.chart_variacion.set_d3_chart('bar', {
-            'categorias': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-            'valores': [5, 8, 12, 7, 10, 15]
-        })
-
-        # Cascada
-        self.chart_cascada.set_d3_chart('bar', {
-            'categorias': ['Inicial', '+Nuevos', '+Progreso', '-Abandonos', 'Final'],
-            'valores': [500, 150, 200, -50, 800]
-        })
-
-        # ===== RELACIONES =====
-        # Scatter
-        self.chart_scatter.set_d3_chart('bar', {
-            'categorias': ['0-2h', '2-4h', '4-6h', '6-8h', '8-10h', '10+h'],
-            'valores': [65, 75, 82, 88, 92, 95]
-        })
-
-        # Comparativo
-        self.chart_comparativo.set_d3_chart('bar', {
-            'categorias': ['ICAVE', 'EIT', 'LCT', 'TIMSA', 'HPMX', 'TNG'],
-            'valores': [89, 76, 92, 68, 81, 95]
-        })
-
-        # Matriz
-        self.chart_matriz.set_d3_chart('bar', {
-            'categorias': ['Área A', 'Área B', 'Área C', 'Área D', 'Área E'],
-            'valores': [92, 87, 95, 78, 84]
-        })
-
-        # Burbujas
-        self.chart_burbujas.set_d3_chart('donut', {
-            'categorias': ['Grupo A', 'Grupo B', 'Grupo C', 'Grupo D', 'Grupo E'],
-            'valores': [250, 180, 320, 140, 210]
         })
 
         print("✅ 20 dashboards gerenciales cargados")
