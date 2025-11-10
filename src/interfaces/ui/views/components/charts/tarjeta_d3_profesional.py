@@ -221,22 +221,29 @@ class ProfessionalD3ChartCard(ctk.CTkFrame):
         # Generar HTML D3.js (siempre lo generamos para botón de navegador)
         self.current_html_d3 = self._generar_html_d3(chart_type, datos, subtitulo, tema)
 
-        # SOLO D3.js - Si no funciona, mostrar error claro (sin fallback)
-        if not TKINTERWEB_AVAILABLE:
-            self._show_error("❌ tkinterweb NO instalado\n\nInstala con:\npip install tkinterweb")
-            print("❌ ERROR: tkinterweb no disponible. Instala con: pip install tkinterweb")
-            return
+        # Intentar renderizar con D3.js, sino usar matplotlib como fallback
+        if TKINTERWEB_AVAILABLE:
+            try:
+                self._render_d3_with_http_server(chart_type, datos, subtitulo, tema)
+                print(f"✅ Gráfico D3.js {chart_type} renderizado (interactivo)")
+                self.using_d3 = True
+                return
+            except Exception as e:
+                print(f"⚠️ Error renderizando D3.js: {e}. Usando matplotlib como fallback...")
+                # Continuar con matplotlib
+        else:
+            print("⚠️ tkinterweb no disponible. Usando matplotlib como fallback...")
 
-        # Renderizar con D3.js (sin fallback a matplotlib)
+        # FALLBACK: Usar matplotlib si D3.js no está disponible o falla
         try:
-            self._render_d3_with_http_server(chart_type, datos, subtitulo, tema)
-            print(f"✅ Gráfico D3.js {chart_type} renderizado (interactivo)")
-            self.using_d3 = True
+            self._render_matplotlib(chart_type, datos, tema)
+            print(f"✅ Gráfico matplotlib {chart_type} renderizado (fallback)")
+            self.using_d3 = False
         except Exception as e:
-            print(f"❌ ERROR renderizando D3.js: {e}")
+            print(f"❌ ERROR renderizando matplotlib: {e}")
             import traceback
             traceback.print_exc()
-            self._show_error(f"❌ Error D3.js:\n{str(e)}\n\nRevisa la consola")
+            self._show_error(f"❌ Error generando gráfico:\n{str(e)}")
 
     def _generar_html_d3(self, chart_type, datos, subtitulo, tema):
         """Generar HTML con D3.js para navegador"""
