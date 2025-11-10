@@ -15,7 +15,7 @@ except ImportError:
     print("Warning: tkinterdnd2 no disponible. Drag & drop deshabilitado.")
 
 from config.themes import APP_CONFIG, HUTCHISON_COLORS
-from config.themes import get_theme_manager
+from config.gestor_temas import get_theme_manager
 from src.infrastructure.persistence.mysql.connection import DatabaseConnection
 from nucleo.servicios.procesador_datos import TranscriptProcessor
 from nucleo.servicios.sincronizador_datos import DataSyncManager
@@ -1635,7 +1635,7 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
 
     def backup_database(self):
         """Crear respaldo de la base de datos"""
-        from config.themes import DB_TYPE
+        from config.database import DB_TYPE
 
         try:
             if DB_TYPE == 'sqlserver':
@@ -1658,7 +1658,7 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
 
     def show_database_config(self):
         """Mostrar configuración de base de datos"""
-        from config.themes import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
+        from config.database import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
 
         current = "SQL Server (Trabajo)" if DB_TYPE == 'sqlserver' else "MySQL (Casa)"
 

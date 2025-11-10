@@ -5,7 +5,7 @@ Smart Reports v2.0
 import customtkinter as ctk
 from tkinter import messagebox
 import tkinter.ttk as ttk
-from config.themes import get_theme_manager
+from config.gestor_temas import get_theme_manager
 from src.interfaces.ui.views.components.charts.tarjeta_configuracion import ConfigCard
 
 

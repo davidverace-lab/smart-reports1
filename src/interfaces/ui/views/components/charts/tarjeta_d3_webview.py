@@ -7,7 +7,7 @@ from tkinter import Frame
 import tempfile
 import os
 import threading
-from config.themes import get_theme_manager
+from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 from src.infrastructure.visualization.d3_generator import MotorTemplatesD3
 

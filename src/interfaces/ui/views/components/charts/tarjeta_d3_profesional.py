@@ -10,7 +10,7 @@ import os
 import threading
 import http.server
 import socketserver
-from config.themes import get_theme_manager
+from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 from src.infrastructure.visualization.d3_generator import MotorTemplatesD3
 from nucleo.servicios.motor_graficos_matplotlib import MotorGraficosMatplotlib

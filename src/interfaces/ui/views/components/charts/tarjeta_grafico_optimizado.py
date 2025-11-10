@@ -10,7 +10,7 @@ from matplotlib import rcParams
 import tempfile
 import webbrowser
 import os
-from config.themes import get_theme_manager
+from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 
 
