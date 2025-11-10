@@ -18,6 +18,38 @@ class ImportadorCapacitacion:
     2. CSOD_Data_Source_for_Org_Planning*.xlsx - Datos de usuarios
     """
 
+    # ============================================================================
+    # MAPEO DE COLUMNAS - SOPORTE BILINGÜE (ESPAÑOL/INGLÉS)
+    # ============================================================================
+    COLUMN_MAPPING = {
+        # Training Report Columns
+        'training_title': ['Título de la capacitación', 'Training Title', 'Course Title', 'Title'],
+        'user_id': ['Identificación de usuario', 'User ID', 'User Identification', 'UserID'],
+        'record_status': ['Estado del expediente', 'Record Status', 'Completion Status', 'Status'],
+        'transcript_date': ['Fecha de registro de la transcripción', 'Transcript Registration Date',
+                           'Registration Date', 'Transcript Date'],
+        'start_date': ['Fecha de inicio de la capacitación', 'Training Start Date', 'Start Date',
+                      'Commencement Date'],
+        'completion_date': ['Fecha de finalización de expediente', 'Record Completion Date',
+                          'Completion Date', 'Finished Date'],
+        'training_type': ['Tipo de capacitación', 'Training Type', 'Type', 'Content Type'],
+        'score': ['Puntuación de la transcripción', 'Transcript Score', 'Score', 'Test Score'],
+        'department': ['Departamento', 'Department', 'Organization'],
+        'position': ['Cargo', 'Position', 'Job Title', 'Title'],
+
+        # Org Planning Columns
+        'org_user_id': ['Usuario - Identificación de usuario', 'User - User ID', 'User ID'],
+        'org_full_name': ['Usuario - Nombre completo del usuario', 'User - Full Name',
+                         'User - Name', 'Full Name'],
+        'org_email': ['Usuario - Correo electrónico del usuario', 'User - Email Address',
+                     'User - Email', 'Email'],
+        'org_position': ['Usuario - Cargo', 'User - Job Title', 'User - Position', 'Job Title'],
+        'org_department': ['Usuario - Departamento', 'User - Department', 'Department'],
+        'org_location': ['Usuario - Ubicación', 'User - Location', 'Location'],
+        'org_city': ['Usuario - Ciudad', 'User - City', 'City'],
+        'org_country': ['Usuario - País del usuario', 'User - Country', 'Country']
+    }
+
     # Mapeo de nombres de módulos para normalización
     MODULOS_MAPPING = {
         1: {
@@ -93,10 +125,60 @@ class ImportadorCapacitacion:
             'calificaciones_registradas': 0,
             'errores': []
         }
+        self.detected_columns = {}  # Almacena columnas detectadas del Excel actual
 
     # ============================================================================
     # UTILIDADES
     # ============================================================================
+
+    def _detectar_columnas(self, df: pd.DataFrame):
+        """
+        Detecta qué nombres de columnas están presentes en el DataFrame
+        y crea un mapeo para acceso consistente (bilingüe).
+
+        Args:
+            df: DataFrame de pandas con el Excel cargado
+        """
+        columnas_excel = df.columns.tolist()
+        print(f"\n🔍 Columnas detectadas en Excel ({len(columnas_excel)}):")
+        print(f"   {', '.join(columnas_excel[:10])}..." if len(columnas_excel) > 10 else f"   {', '.join(columnas_excel)}")
+
+        self.detected_columns = {}
+
+        # Para cada columna que buscamos
+        for key, possible_names in self.COLUMN_MAPPING.items():
+            # Buscar la primera coincidencia
+            for possible_name in possible_names:
+                if possible_name in columnas_excel:
+                    self.detected_columns[key] = possible_name
+                    break
+
+        # Mostrar columnas detectadas
+        print(f"\n✅ Columnas mapeadas:")
+        for key, col_name in self.detected_columns.items():
+            print(f"   • {key}: '{col_name}'")
+
+        # Advertir sobre columnas no encontradas
+        missing = [k for k in self.COLUMN_MAPPING.keys() if k not in self.detected_columns]
+        if missing:
+            print(f"\n⚠️  Columnas no encontradas (pueden no estar en este tipo de reporte):")
+            print(f"   {', '.join(missing)}")
+
+    def _get_column(self, df: pd.DataFrame, key: str, default=None):
+        """
+        Obtiene el valor de una columna usando la detección automática
+
+        Args:
+            df: DataFrame
+            key: Clave del mapeo (ej: 'training_title', 'user_id')
+            default: Valor por defecto si la columna no existe
+
+        Returns:
+            Serie de pandas con los valores de la columna
+        """
+        if key in self.detected_columns:
+            return df[self.detected_columns[key]]
+        return default
 
     def _normalizar_nombre_modulo(self, nombre: str) -> Optional[int]:
         """
@@ -198,6 +280,9 @@ class ImportadorCapacitacion:
             df = pd.read_excel(archivo_excel)
             print(f"✅ Excel leído: {len(df)} registros")
 
+            # Detectar columnas (auto-mapeo bilingüe)
+            self._detectar_columnas(df)
+
             # Procesar estatus de módulos
             self._procesar_estatus_modulos(df)
 
@@ -224,18 +309,24 @@ class ImportadorCapacitacion:
         """Procesa estatus de módulos y actualiza instituto_ProgresoModulo"""
         print("\n📋 Procesando estatus de módulos...")
 
+        # Verificar que tenemos las columnas necesarias
+        if 'training_title' not in self.detected_columns:
+            print("  ⚠️ Columna de título de capacitación no encontrada. Saltando procesamiento de módulos.")
+            return
+
         # Filtrar solo registros de módulos (títulos que contengan "MÓDULO")
-        df_modulos = df[df['Título de la capacitación'].str.contains('MÓDULO', case=False, na=False)]
+        col_titulo = self.detected_columns['training_title']
+        df_modulos = df[df[col_titulo].str.contains('MÓDULO', case=False, na=False)]
 
         for idx, row in df_modulos.iterrows():
             try:
-                # Obtener datos
-                user_id = str(row['Identificación de usuario']).strip()
-                titulo = row['Título de la capacitación']
-                estado_excel = row.get('Estado del expediente', '')
-                fecha_registro = self._parse_fecha(row.get('Fecha de registro de la transcripción'))
-                fecha_inicio = self._parse_fecha(row.get('Fecha de inicio de la capacitación'))
-                fecha_fin = self._parse_fecha(row.get('Fecha de finalización de expediente'))
+                # Obtener datos usando columnas detectadas
+                user_id = str(row[self.detected_columns['user_id']]).strip()
+                titulo = row[col_titulo]
+                estado_excel = row.get(self.detected_columns.get('record_status', ''), '')
+                fecha_registro = self._parse_fecha(row.get(self.detected_columns.get('transcript_date', '')))
+                fecha_inicio = self._parse_fecha(row.get(self.detected_columns.get('start_date', '')))
+                fecha_fin = self._parse_fecha(row.get(self.detected_columns.get('completion_date', '')))
 
                 # Identificar módulo
                 num_modulo = self._normalizar_nombre_modulo(titulo)
@@ -270,14 +361,20 @@ class ImportadorCapacitacion:
         """Procesa calificaciones de pruebas"""
         print("\n📝 Procesando calificaciones...")
 
+        # Verificar columnas necesarias
+        if 'training_type' not in self.detected_columns or 'training_title' not in self.detected_columns:
+            print("  ⚠️ Columnas necesarias no encontradas. Saltando procesamiento de calificaciones.")
+            return
+
         # Filtrar solo pruebas
-        df_pruebas = df[df['Tipo de capacitación'].str.contains('Prueba', case=False, na=False)]
+        col_tipo = self.detected_columns['training_type']
+        df_pruebas = df[df[col_tipo].str.contains('Prueba|Test|Assessment|Exam', case=False, na=False)]
 
         for idx, row in df_pruebas.iterrows():
             try:
-                user_id = str(row['Identificación de usuario']).strip()
-                titulo = row['Título de la capacitación']
-                puntuacion = row.get('Puntuación de la transcripción')
+                user_id = str(row[self.detected_columns['user_id']]).strip()
+                titulo = row[self.detected_columns['training_title']]
+                puntuacion = row.get(self.detected_columns.get('score', ''), None)
 
                 # Identificar módulo
                 num_modulo = self._normalizar_nombre_modulo(titulo)
@@ -317,13 +414,18 @@ class ImportadorCapacitacion:
         """Actualiza Departamento y Cargo de usuarios"""
         print("\n👥 Actualizando info de usuarios...")
 
-        usuarios_unicos = df.drop_duplicates(subset=['Identificación de usuario'])
+        # Verificar columnas necesarias
+        if 'user_id' not in self.detected_columns:
+            print("  ⚠️ Columna de User ID no encontrada. Saltando actualización de usuarios.")
+            return
+
+        usuarios_unicos = df.drop_duplicates(subset=[self.detected_columns['user_id']])
 
         for idx, row in usuarios_unicos.iterrows():
             try:
-                user_id = str(row['Identificación de usuario']).strip()
-                departamento = row.get('Departamento', '')
-                cargo = row.get('Cargo', '')
+                user_id = str(row[self.detected_columns['user_id']]).strip()
+                departamento = row.get(self.detected_columns.get('department', ''), '')
+                cargo = row.get(self.detected_columns.get('position', ''), '')
 
                 if departamento or cargo:
                     self._actualizar_usuario_depto_cargo(user_id, departamento, cargo)
@@ -358,17 +460,25 @@ class ImportadorCapacitacion:
             df = pd.read_excel(archivo_excel)
             print(f"✅ Excel leído: {len(df)} registros")
 
+            # Detectar columnas (auto-mapeo bilingüe)
+            self._detectar_columnas(df)
+
+            # Verificar columnas necesarias
+            if 'org_user_id' not in self.detected_columns:
+                print("  ⚠️ Columna de User ID no encontrada. No se puede continuar.")
+                return self.stats
+
             # Procesar usuarios
             for idx, row in df.iterrows():
                 try:
-                    user_id = str(row['Usuario - Identificación de usuario']).strip()
-                    nombre = row.get('Usuario - Nombre completo del usuario', '')
-                    email = row.get('Usuario - Correo electrónico del usuario', '')
-                    cargo = row.get('Usuario - Cargo', '')
-                    departamento = row.get('Usuario - Departamento', '')
-                    ubicacion = row.get('Usuario - Ubicación', '')
-                    ciudad = row.get('Usuario - Ciudad', '')
-                    pais = row.get('Usuario - País del usuario', '')
+                    user_id = str(row[self.detected_columns['org_user_id']]).strip()
+                    nombre = row.get(self.detected_columns.get('org_full_name', ''), '')
+                    email = row.get(self.detected_columns.get('org_email', ''), '')
+                    cargo = row.get(self.detected_columns.get('org_position', ''), '')
+                    departamento = row.get(self.detected_columns.get('org_department', ''), '')
+                    ubicacion = row.get(self.detected_columns.get('org_location', ''), '')
+                    ciudad = row.get(self.detected_columns.get('org_city', ''), '')
+                    pais = row.get(self.detected_columns.get('org_country', ''), '')
 
                     # Verificar si usuario existe
                     existe = self._usuario_existe(user_id)
