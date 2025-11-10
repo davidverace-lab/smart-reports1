@@ -24,7 +24,7 @@ except ImportError:
     REPORTLAB_AVAILABLE = False
     print("ReportLab no está instalado. Instala con: pip install reportlab")
 
-from config.themes import get_theme_manager
+from config.gestor_temas import get_theme_manager
 
 
 class PeriodReportPanel(ctk.CTkFrame):

@@ -2,7 +2,7 @@
 Componente MetricCard - Card moderna para mostrar métricas
 """
 import customtkinter as ctk
-from config.themes import get_theme_manager
+from config.gestor_temas import get_theme_manager
 
 
 class MetricCard(ctk.CTkFrame):

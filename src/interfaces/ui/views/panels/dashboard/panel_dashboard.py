@@ -7,7 +7,7 @@ from tkinter import messagebox
 from src.interfaces.ui.views.components.charts.tarjeta_metrica import MetricCard
 from src.interfaces.ui.views.components.charts.tarjeta_d3_profesional import ProfessionalD3ChartCard
 from config.themes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
-from config.themes import get_theme_manager
+from config.gestor_temas import get_theme_manager
 
 
 # Datos de ejemplo basados en las imágenes proporcionadas
