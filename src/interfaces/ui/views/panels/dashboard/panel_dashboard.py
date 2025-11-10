@@ -1,0 +1,750 @@
+"""
+Panel ModernDashboard - Dashboard optimizado con lazy loading y pestañas
+ACTUALIZADO: Gráficos D3.js embebidos profesionalmente con múltiples fallbacks
+"""
+import customtkinter as ctk
+from tkinter import messagebox
+from src.interfaces.ui.views.components.charts.tarjeta_metrica import MetricCard
+from src.interfaces.ui.views.components.charts.tarjeta_d3_profesional import ProfessionalD3ChartCard
+from config.themes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
+from config.themes import get_theme_manager
+
+
+# Datos de ejemplo basados en las imágenes proporcionadas
+DATOS_TNG = {
+    'modulos': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8'],
+    'sin_iniciar': [45, 38, 42, 35, 40, 33, 37, 30],
+    'en_proceso': [32, 28, 25, 30, 27, 32, 28, 25],
+    'completado': [123, 134, 133, 135, 133, 135, 135, 145]
+}
+
+DATOS_CONTAINER_CARE = {
+    'modulos': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8'],
+    'sin_iniciar': [28, 25, 30, 22, 27, 20, 24, 18],
+    'en_proceso': [18, 15, 12, 16, 14, 18, 15, 12],
+    'completado': [54, 60, 58, 62, 59, 62, 61, 70]
+}
+
+DATOS_ECV_EIT = {
+    'modulos': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8'],
+    'sin_iniciar': [35, 30, 33, 28, 32, 26, 29, 24],
+    'en_proceso': [22, 20, 18, 24, 21, 25, 22, 19],
+    'completado': [83, 90, 89, 88, 87, 89, 89, 97]
+}
+
+DATOS_JERARQUICO = {
+    'fases': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8'],
+    'puestos': {
+        'DIRECTORES': [12, 12, 12, 11, 11, 10, 10, 10],
+        'GERENTES GENERALES': [25, 24, 23, 23, 22, 22, 21, 20],
+        'GERENTES SENIOR': [45, 44, 43, 42, 42, 41, 40, 39],
+        'GERENTES DE AREA': [68, 67, 65, 64, 63, 62, 61, 60],
+        'SUBGERENTES': [92, 90, 88, 87, 85, 84, 82, 80],
+        'COORDINADORES': [115, 112, 110, 108, 106, 104, 102, 100],
+        'SUPERVISORES': [145, 142, 140, 138, 135, 133, 130, 128],
+        'JEFES DE TURNO': [180, 176, 173, 170, 167, 164, 161, 158]
+    }
+}
+
+# Colores Hutchison Ports para UI
+PRIMARY_COLORS = {
+    'accent_blue': HUTCHISON_COLORS['ports_sky_blue'],
+    'accent_green': HUTCHISON_COLORS['success'],
+    'accent_orange': HUTCHISON_COLORS['warning'],
+    'accent_cyan': HUTCHISON_COLORS['ports_horizon_blue'],
+    'accent_yellow': HUTCHISON_COLORS['sunray_yellow'],
+    'accent_red': HUTCHISON_COLORS['danger'],
+    'accent_purple': HUTCHISON_COLORS['ports_sea_blue']
+}
+
+# Paleta de colores azules para Reportes Gerenciales (varios tonos de azul)
+# Desde azul claro hasta azul oscuro para consistencia y elegancia
+GERENCIAL_PALETTE = [
+    '#1E90FF',  # Azul Dodger (brillante)
+    '#4169E1',  # Azul Royal (medio brillante)
+    '#0066CC',  # Azul Azure (corporativo)
+    '#003D82',  # Azul Marino Medio
+    '#87CEEB',  # Azul Cielo (claro)
+    '#5B9BD5',  # Azul Medio Suave
+    '#002E6D',  # Azul Marino Oscuro
+    '#6495ED'   # Azul Cornflower (suave)
+]
+
+
+class ModernDashboard(ctk.CTkFrame):
+    """Dashboard optimizado con lazy loading y pestañas"""
+
+    def __init__(self, parent, db_connection, **kwargs):
+        """
+        Args:
+            parent: Widget padre
+            db_connection: Conexión a la base de datos
+        """
+        # Obtener tema actual
+        self.theme_manager = get_theme_manager()
+        theme = self.theme_manager.get_current_theme()
+
+        super().__init__(parent, fg_color=theme['background'], **kwargs)
+        self.db = db_connection
+        self.cursor = db_connection.cursor() if db_connection else None
+
+        # Flags para lazy loading (según especificación)
+        self._general_loaded = False
+        self._gerencial_loaded = False
+
+        # Referencias a componentes
+        # (reservado para futuras referencias si son necesarias)
+
+        # Configurar grid principal
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        # Crear contenido con pestañas
+        self._create_tabbed_content()
+
+        # Cargar pestaña General al inicio (después de crear widgets)
+        self.after(50, self.load_general_charts)
+
+    def _create_tabbed_content(self):
+        """Crear contenedor con pestañas usando CTkSegmentedButton"""
+        # Frame principal con padding
+        main_frame = ctk.CTkFrame(self, fg_color='transparent')
+        main_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
+        main_frame.grid_columnconfigure(0, weight=1)
+        main_frame.grid_rowconfigure(2, weight=1)  # content_frame ocupará el espacio
+
+        # Header con título y botón exportar
+        header = ctk.CTkFrame(main_frame, fg_color='transparent', height=60)
+        header.grid(row=0, column=0, sticky='ew', pady=(0, 15))
+        header.grid_propagate(False)
+
+        theme = self.theme_manager.get_current_theme()
+
+        # Color del título: blanco en modo oscuro, azul marino en modo claro
+        is_dark = self.theme_manager.is_dark_mode()
+        title_color = '#FFFFFF' if is_dark else '#002E6D'
+
+        self.title_label = ctk.CTkLabel(
+            header,
+            text='Panel de Control',
+            font=('Montserrat', 28, 'bold'),
+            text_color=title_color,
+            anchor='w'
+        )
+        self.title_label.pack(side='left')
+
+        # Header Frame para los botones (pestañas)
+        header_frame = ctk.CTkFrame(main_frame, fg_color='transparent')
+        header_frame.grid(row=1, column=0, sticky='ew', pady=(0, 15))
+
+        # Frame contenedor para centrar los botones
+        buttons_container = ctk.CTkFrame(header_frame, fg_color='transparent')
+        buttons_container.pack(pady=10)
+
+        # Almacenar referencias a los botones
+        self.tab_buttons = {}
+        self.active_tab = None
+
+        # Definir las pestañas
+        tabs = [
+            ("General", "General"),
+            ("Dashboards Gerenciales", "Dashboards Gerenciales")
+        ]
+
+        # Crear botones (inactivo=gris, seleccionado=azul)
+        for tab_name, tab_key in tabs:
+            btn = ctk.CTkButton(
+                buttons_container,
+                text=tab_name,
+                font=('Montserrat', 14, 'bold'),
+                fg_color='#D3D3D3',  # Gris por defecto (inactivo)
+                hover_color='#E5E7EB',  # Gris más claro para hover
+                text_color='#002E6D',  # Texto azul oscuro (inactivo)
+                corner_radius=10,
+                height=40,
+                width=180,
+                command=lambda k=tab_key: self._on_tab_button_click(k)
+            )
+            btn.pack(side='left', padx=5)
+            self.tab_buttons[tab_key] = btn
+
+        # Content Frame (contenedor de las pestañas)
+        content_frame = ctk.CTkFrame(main_frame, fg_color=theme['surface'], corner_radius=15)
+        content_frame.grid(row=2, column=0, sticky='nsew')
+        content_frame.grid_columnconfigure(0, weight=1)
+        content_frame.grid_rowconfigure(0, weight=1)
+
+        # Crear frames para cada pestaña (todos en la misma celda)
+        self.general_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
+        self.gerencial_frame = ctk.CTkFrame(content_frame, fg_color='transparent')
+
+        # Configurar grids de los frames
+        self.general_frame.grid_columnconfigure(0, weight=1)
+        self.general_frame.grid_rowconfigure(0, weight=0)  # Métricas: tamaño fijo
+        self.general_frame.grid_rowconfigure(1, weight=1)  # Gráficos: expansible
+
+        self.gerencial_frame.grid_columnconfigure((0, 1), weight=1)
+        self.gerencial_frame.grid_rowconfigure((0, 1, 2), weight=1)
+
+        # Colocar todos los frames en la misma posición (solo uno visible a la vez)
+        self.general_frame.grid(row=0, column=0, sticky='nsew')
+        self.gerencial_frame.grid(row=0, column=0, sticky='nsew')
+
+        # Ocultar todos excepto el primero
+        self.gerencial_frame.grid_remove()
+
+        # Almacenar referencias a las pestañas (para compatibilidad)
+        self.tab_general = self.general_frame
+        self.tab_gerencial = self.gerencial_frame
+
+        # Seleccionar pestaña inicial DESPUÉS de crear los frames
+        self._on_tab_button_click("General")
+
+    def _on_tab_button_click(self, tab_key):
+        """Callback cuando se hace clic en un botón de pestaña"""
+        # Actualizar estilos de botones (diseño invertido)
+        for key, btn in self.tab_buttons.items():
+            if key == tab_key:
+                # Botón activo/seleccionado: azul navy con texto blanco
+                btn.configure(
+                    fg_color='#002E6D',  # Azul Navy
+                    hover_color='#003D8F',
+                    text_color='#FFFFFF'
+                )
+            else:
+                # Botones inactivos: gris con texto oscuro
+                btn.configure(
+                    fg_color='#D3D3D3',  # Gris claro
+                    hover_color='#E5E7EB',
+                    text_color='#002E6D'
+                )
+
+        self.active_tab = tab_key
+
+        # Llamar a la función de cambio de pestaña
+        self.on_tab_change(tab_key)
+
+    def on_tab_change(self, value):
+        """Callback cuando cambia la pestaña - Lazy loading y cambio de vista"""
+        # Ocultar todos los frames
+        self.general_frame.grid_remove()
+        self.gerencial_frame.grid_remove()
+
+        # Mostrar el frame correspondiente y cargar datos si es necesario
+        if value == "General":
+            self.general_frame.grid(row=0, column=0, sticky='nsew')
+            if not self._general_loaded:
+                self.load_general_charts()
+                self._general_loaded = True
+        elif value == "Dashboards Gerenciales":
+            self.gerencial_frame.grid(row=0, column=0, sticky='nsew')
+            if not self._gerencial_loaded:
+                self.load_gerencial_charts()
+                self._gerencial_loaded = True
+
+    def load_general_charts(self):
+        """Cargar pestaña General (lazy loading)"""
+        if self._general_loaded:
+            return
+
+        self._create_tab_general(self.tab_general)
+        self._general_loaded = True
+
+    def load_gerencial_charts(self):
+        """Cargar pestaña Dashboards Gerenciales (lazy loading)"""
+        if self._gerencial_loaded:
+            return
+
+        self._create_tab_reportes_gerenciales(self.tab_gerencial)
+        self._gerencial_loaded = True
+
+    # ==================== PESTAÑA GENERAL ====================
+
+    def _create_tab_general(self, parent):
+        """Crear pestaña General con métricas y gráficos"""
+        # Row 0: Métricas (3 cards)
+        metrics_frame = ctk.CTkFrame(parent, fg_color='transparent')
+        metrics_frame.grid(row=0, column=0, sticky='nsew', padx=15, pady=(15, 10))
+        metrics_frame.grid_columnconfigure((0, 1, 2), weight=1)
+        metrics_frame.grid_rowconfigure(0, weight=0)  # Height fijo para las métricas
+
+        # Obtener datos reales
+        total_users = self._get_total_users()
+
+        # Metric Card 1: Total Usuarios
+        metric1 = MetricCard(
+            metrics_frame,
+            title='Total de Usuarios',
+            value=f'{total_users:,}',
+            icon='👥',
+            color=PRIMARY_COLORS['accent_blue'],
+            height=90  # Reducido de tamaño
+        )
+        metric1.grid(row=0, column=0, sticky='ew', padx=10, pady=8)
+
+        # Metric Card 2: Módulo Actual (estático)
+        metric2 = MetricCard(
+            metrics_frame,
+            title='Módulo Actual',
+            value='Módulo 8 - Procesos de Recursos Humanos',
+            icon='📚',
+            color=PRIMARY_COLORS['accent_cyan'],
+            height=90  # Reducido de tamaño
+        )
+        metric2.grid(row=0, column=1, sticky='ew', padx=10, pady=8)
+
+        # Metric Card 3: Tasa de Completado (estático)
+        metric3 = MetricCard(
+            metrics_frame,
+            title='Tasa de Completado',
+            value='70.0%',
+            icon='✓',
+            color=PRIMARY_COLORS['accent_green'],
+            height=90  # Reducido de tamaño
+        )
+        metric3.grid(row=0, column=2, sticky='ew', padx=10, pady=8)
+
+        # Row 2: Gráficos D3.js embebidos (2 cards)
+        charts_frame = ctk.CTkFrame(parent, fg_color='transparent')
+        charts_frame.grid(row=1, column=0, sticky='nsew', padx=15, pady=(0, 15))
+        charts_frame.grid_columnconfigure((0, 1), weight=1)
+        charts_frame.grid_rowconfigure(0, weight=1)
+
+        # Chart 1: Usuarios por Unidad (Barras D3.js)
+        self.chart1 = ProfessionalD3ChartCard(
+            charts_frame,
+            title='📊 Usuarios por Unidad de Negocio'
+        )
+        self.chart1.grid(row=0, column=0, sticky='nsew', padx=(0, 10))
+
+        # Chart 2: Progreso General por UN (Donut D3.js)
+        self.chart2 = ProfessionalD3ChartCard(
+            charts_frame,
+            title='📈 Progreso General por Unidad (TNG 100% - 8 Módulos)'
+        )
+        self.chart2.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
+
+        # Crear gráficos D3.js
+        self._create_general_charts_d3()
+
+    def _create_general_charts_d3(self):
+        """Crear gráficos D3.js embebidos para pestaña General"""
+        # Obtener datos
+        units_data = self._get_users_by_unit()
+
+        if units_data and len(units_data) > 0:
+            units = [row[0] for row in units_data]
+            counts = [row[1] for row in units_data]
+
+            # Gráfico 1: Barras D3.js
+            self.chart1.set_d3_chart(
+                chart_type='bar',
+                datos={
+                    'labels': units,
+                    'values': counts
+                },
+                subtitulo='Distribución de usuarios por unidad de negocio • Interactivo'
+            )
+
+        # Gráfico 2: Donut D3.js de Progreso General
+        unidades_negocio = ['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX']
+        porcentajes_completado = [100, 82, 75, 68, 62]
+
+        self.chart2.set_d3_chart(
+            chart_type='donut',
+            datos={
+                'labels': [f"{un} - {pct}%" for un, pct in zip(unidades_negocio, porcentajes_completado)],
+                'values': porcentajes_completado
+            },
+            subtitulo='TNG 100% completado (8 módulos) • Otras unidades en progreso'
+        )
+
+    def _create_gerencial_charts_d3(self, chart_incump, chart_lentas, chart_atrasados, chart_calif):
+        """Crear gráficos D3.js embebidos para pestaña Gerencial"""
+
+        # Chart 1: UN con Mayor Incumplimiento
+        chart_incump.set_d3_chart(
+            chart_type='bar',
+            datos={
+                'labels': ['ICAVE', 'HPMX', 'ECV', 'Container Care', 'Logística'],
+                'values': [65, 58, 52, 43, 38]
+            },
+            subtitulo='Top 5 unidades con más usuarios pendientes • Sin TNG (100%)'
+        )
+
+        # Chart 2: UN más Lentas
+        chart_lentas.set_d3_chart(
+            chart_type='bar',
+            datos={
+                'labels': ['Logística', 'ECV', 'ICAVE'],
+                'values': [112, 108, 95]
+            },
+            subtitulo='Días promedio para alcanzar 80% • Top 3 unidades'
+        )
+
+        # Chart 3: Usuarios Más Atrasados
+        chart_atrasados.set_d3_chart(
+            chart_type='bar',
+            datos={
+                'labels': ['J. Pérez', 'M. García', 'C. López', 'A. Martínez', 'P. Sánchez',
+                          'L. Rodríguez', 'J. Hernández', 'C. González', 'F. Torres', 'I. Ramírez'],
+                'values': [58, 54, 49, 45, 42, 38, 35, 32, 28, 25]
+            },
+            subtitulo='Top 10 usuarios con mayor retraso en días • Generación 1-4'
+        )
+
+        # Chart 4: Usuarios con Mejor Calificación
+        chart_calif.set_d3_chart(
+            chart_type='bar',
+            datos={
+                'labels': ['C. Ruiz', 'R. Mendoza', 'P. Morales', 'F. Silva', 'A. López'],
+                'values': [98.5, 97.8, 97.2, 96.9, 95.5]
+            },
+            subtitulo='Top 5 usuarios con mejor calificación promedio'
+        )
+
+    # ==================== MÉTODOS DE DATOS ====================
+
+    def _get_total_users(self):
+        """Obtener total de usuarios"""
+        if not self.cursor:
+            return 1525  # Datos de ejemplo
+        try:
+            self.cursor.execute("SELECT COUNT(*) FROM Instituto_Usuario")
+            result = self.cursor.fetchone()
+            return result[0] if result else 0
+        except Exception as e:
+            print(f"Error obteniendo total de usuarios: {e}")
+            return 1525
+
+    def _get_active_modules(self):
+        """Obtener número de módulos activos"""
+        if not self.cursor:
+            return 8  # Datos de ejemplo: 8 módulos activos
+        try:
+            self.cursor.execute("SELECT COUNT(DISTINCT IdModulo) FROM Instituto_ProgresoModulo")
+            result = self.cursor.fetchone()
+            return result[0] if result else 0
+        except Exception as e:
+            print(f"Error obteniendo módulos activos: {e}")
+            return 8
+
+    def _get_completion_rate(self):
+        """Obtener tasa de completado"""
+        if not self.cursor:
+            return 72.5  # Datos de ejemplo: 72.5% de completado
+        try:
+            self.cursor.execute("""
+                SELECT
+                    CAST(SUM(CASE WHEN EstatusModuloUsuario = 'Terminado' THEN 1 ELSE 0 END) AS FLOAT) * 100 /
+                    NULLIF(COUNT(*), 0) as rate
+                FROM Instituto_ProgresoModulo
+            """)
+            result = self.cursor.fetchone()
+            return result[0] if result and result[0] else 0.0
+        except Exception as e:
+            print(f"Error obteniendo tasa de completado: {e}")
+            return 72.5
+
+    def _get_users_by_unit(self):
+        """Obtener usuarios por unidad de negocio"""
+        if not self.cursor:
+            return [
+                ('Operaciones Portuarias', 487),
+                ('Logística y Almacenamiento', 364),
+                ('Mantenimiento', 342),
+                ('Administración', 231),
+                ('Seguridad', 101)
+            ]
+        try:
+            self.cursor.execute("""
+                SELECT un.NombreUnidad, COUNT(u.UserId)
+                FROM Instituto_Usuario u
+                JOIN Instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+                GROUP BY un.IdUnidadDeNegocio, un.NombreUnidad
+                ORDER BY COUNT(u.UserId) DESC
+            """)
+            return self.cursor.fetchall()
+        except Exception as e:
+            print(f"Error obteniendo usuarios por unidad: {e}")
+            return [
+                ('Operaciones Portuarias', 487),
+                ('Logística y Almacenamiento', 364),
+                ('Mantenimiento', 342),
+                ('Administración', 231),
+                ('Seguridad', 101)
+            ]
+
+    # ==================== PESTAÑA REPORTES GERENCIALES ====================
+
+    def _create_tab_reportes_gerenciales(self, parent):
+        """Crear pestaña de Dashboards Gerenciales con scrollbar y 6 gráficos estáticos"""
+
+        # Crear CTkScrollableFrame para permitir scroll vertical
+        theme = self.theme_manager.get_current_theme()
+        scrollable_frame = ctk.CTkScrollableFrame(
+            parent,
+            fg_color='transparent',
+            scrollbar_button_color=PRIMARY_COLORS['accent_blue'],
+            scrollbar_button_hover_color='#007bb5'
+        )
+        scrollable_frame.pack(fill='both', expand=True, padx=10, pady=10)
+
+        # Configurar grid del scrollable frame (2 columnas)
+        scrollable_frame.grid_columnconfigure((0, 1), weight=1)
+
+        # ===== ROW 0: Top 5 UN con Mayor Incumplimiento + Top 3 UN más Lentas =====
+
+        # Chart 1: Top 5 UN con Mayor Incumplimiento (D3.js)
+        chart_incumplimiento = ProfessionalD3ChartCard(
+            scrollable_frame,
+            title='⚠️ UN con Mayor Incumplimiento (Módulo 8)'
+        )
+        chart_incumplimiento.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+
+        # Chart 2: UN más Lentas (D3.js)
+        chart_lentas = ProfessionalD3ChartCard(
+            scrollable_frame,
+            title='⏱️ UN más Lentas (Tiempo a 80%)'
+        )
+        chart_lentas.grid(row=0, column=1, sticky='nsew', padx=10, pady=10)
+
+        # ===== ROW 1: Top 10 Usuarios Más Atrasados + Cuadro de Honor =====
+
+        # Chart 3: Top 10 Usuarios Más Atrasados (D3.js)
+        chart_atrasados = ProfessionalD3ChartCard(
+            scrollable_frame,
+            title='🐌 Usuarios Más Atrasados (Gen 1-4)'
+        )
+        chart_atrasados.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+
+        # ===== ROW 2: Usuarios con Mejor Calificación =====
+
+        # Chart 4: Usuarios con Mejor Calificación (D3.js)
+        chart_calificacion = ProfessionalD3ChartCard(
+            scrollable_frame,
+            title='⭐ Usuarios con Mejor Calificación Promedio'
+        )
+        chart_calificacion.grid(row=2, column=0, sticky='nsew', padx=10, pady=10)
+
+        # Crear los gráficos D3.js
+        self._create_gerencial_charts_d3(
+            chart_incumplimiento,
+            chart_lentas,
+            chart_atrasados,
+            chart_calificacion
+        )
+
+        # Cuadro de Honor (usuarios de otras unidades)
+        cuadro_frame = ctk.CTkFrame(
+            scrollable_frame,
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
+        )
+        cuadro_frame.grid(row=1, column=1, sticky='nsew', padx=10, pady=10)
+
+        # Título del cuadro de honor
+        title_label = ctk.CTkLabel(
+            cuadro_frame,
+            text='🏆 Cuadro de Honor: Los Más Proactivos',
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['text']
+        )
+        title_label.pack(pady=(20, 15), padx=20)
+
+        # Contenedor de leaderboard
+        leaderboard_frame = ctk.CTkFrame(cuadro_frame, fg_color='transparent')
+        leaderboard_frame.pack(fill='both', expand=True, padx=20, pady=(0, 20))
+
+        # Datos del leaderboard (usuarios más proactivos de otras unidades)
+        leaderboard_data = [
+            ('🥇', '1. David Rodriguez (ICAVE)', 'Prom. 15 días antes'),
+            ('🥈', '2. Javier Miranda (HPMX)', 'Prom. 13 días antes'),
+            ('🥉', '3. Sofia Reyes (ECV)', 'Prom. 12 días antes'),
+            ('🎯', '4. Roberto Campos (Container Care)', 'Prom. 11 días antes'),
+            ('⭐', '5. Andrea Vega (Logística)', 'Prom. 10 días antes')
+        ]
+
+        for emoji, nombre, tiempo in leaderboard_data:
+            item_frame = ctk.CTkFrame(leaderboard_frame, fg_color='transparent')
+            item_frame.pack(fill='x', pady=8)
+
+            emoji_label = ctk.CTkLabel(
+                item_frame,
+                text=emoji,
+                font=('Montserrat', 20),
+                width=40
+            )
+            emoji_label.pack(side='left', padx=(0, 10))
+
+            text_frame = ctk.CTkFrame(item_frame, fg_color='transparent')
+            text_frame.pack(side='left', fill='x', expand=True)
+
+            nombre_label = ctk.CTkLabel(
+                text_frame,
+                text=nombre,
+                font=('Montserrat', 13, 'bold'),
+                text_color=theme['text'],
+                anchor='w'
+            )
+            nombre_label.pack(fill='x')
+
+            tiempo_label = ctk.CTkLabel(
+                text_frame,
+                text=tiempo,
+                font=('Montserrat', 11),
+                text_color=theme['text_secondary'],
+                anchor='w'
+            )
+            tiempo_label.pack(fill='x')
+
+    def refresh_all_data(self):
+        """Refrescar todos los datos del dashboard"""
+        # Resetear flags
+        self._general_loaded = False
+        self._progreso_loaded = False
+        self._jerarquico_loaded = False
+        self._gerencial_loaded = False
+
+        # Recargar pestaña actual
+        current_tab = self.active_tab if self.active_tab else "General"
+        self.on_tab_change(current_tab)
+
+    # ==================== EXPORTAR A PDF ====================
+
+    def export_dashboard_pdf(self):
+        """Exportar dashboard actual a PDF"""
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.lib import colors
+        from reportlab.lib.units import inch
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        import tempfile
+        import os
+        from tkinter import messagebox
+
+        try:
+            # Crear carpeta reportes si no existe
+            reports_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'reportes')
+            os.makedirs(reports_folder, exist_ok=True)
+
+            # Nombre del archivo con fecha
+            from datetime import datetime
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            pdf_filename = os.path.join(reports_folder, f'Dashboard_Report_{timestamp}.pdf')
+
+            # Crear documento PDF
+            doc = SimpleDocTemplate(pdf_filename, pagesize=A4)
+            story = []
+
+            # Estilos
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=24,
+                textColor=colors.HexColor(HUTCHISON_COLORS['ports_sky_blue']),
+                spaceAfter=30,
+                alignment=TA_CENTER
+            )
+            heading_style = ParagraphStyle(
+                'CustomHeading',
+                parent=styles['Heading2'],
+                fontSize=16,
+                textColor=colors.HexColor(HUTCHISON_COLORS['ports_sky_blue']),
+                spaceAfter=12,
+                spaceBefore=12
+            )
+
+            # Título
+            story.append(Paragraph("📊 Reporte Smart Reports", title_style))
+            story.append(Paragraph(f"Fecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}", styles['Normal']))
+            story.append(Spacer(1, 0.3 * inch))
+
+            # Obtener datos actuales
+            total_users = self._get_total_users()
+            active_modules = self._get_active_modules()
+            completion_rate = self._get_completion_rate()
+
+            # Métricas
+            story.append(Paragraph("Métricas Generales", heading_style))
+
+            metrics_data = [
+                ['Métrica', 'Valor'],
+                ['Total de Usuarios', f'{total_users:,}'],
+                ['Módulos Activos', f'{active_modules}/14'],
+                ['Tasa de Completado', f'{completion_rate:.1f}%']
+            ]
+
+            metrics_table = Table(metrics_data, colWidths=[3*inch, 2*inch])
+            metrics_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor(HUTCHISON_COLORS['ports_sky_blue'])),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0f0f0')),
+                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ]))
+
+            story.append(metrics_table)
+            story.append(Spacer(1, 0.5 * inch))
+
+            # Guardar gráficos como imágenes temporales
+            story.append(Paragraph("Gráficos de Análisis", heading_style))
+
+            # Intentar guardar gráficos de matplotlib si están cargados
+            temp_images = []
+
+            if hasattr(self, 'progreso_bar_card') and self.progreso_bar_card.current_fig:
+                try:
+                    temp_img = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+                    self.progreso_bar_card.current_fig.savefig(temp_img.name, dpi=150, bbox_inches='tight', facecolor='white')
+                    temp_images.append(temp_img.name)
+
+                    story.append(Paragraph("Progreso por Módulo - Comparativa", styles['Heading3']))
+                    img = Image(temp_img.name, width=5*inch, height=3*inch)
+                    story.append(img)
+                    story.append(Spacer(1, 0.3 * inch))
+                except Exception as e:
+                    print(f"Error guardando gráfico de barras: {e}")
+
+            if hasattr(self, 'progreso_donut_card') and self.progreso_donut_card.current_fig:
+                try:
+                    temp_img2 = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+                    self.progreso_donut_card.current_fig.savefig(temp_img2.name, dpi=150, bbox_inches='tight', facecolor='white')
+                    temp_images.append(temp_img2.name)
+
+                    story.append(Paragraph(f"Estado General {self.current_unit}", styles['Heading3']))
+                    img2 = Image(temp_img2.name, width=4*inch, height=3*inch)
+                    story.append(img2)
+                except Exception as e:
+                    print(f"Error guardando gráfico de dona: {e}")
+
+            # Construir PDF
+            doc.build(story)
+
+            # Limpiar archivos temporales
+            for temp_img in temp_images:
+                try:
+                    os.remove(temp_img)
+                except:
+                    pass
+
+            messagebox.showinfo(
+                "Exportación Exitosa",
+                f"El reporte ha sido exportado exitosamente a:\n\n{pdf_filename}"
+            )
+
+            # Abrir el PDF
+            os.startfile(pdf_filename)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al exportar a PDF:\n{str(e)}")
+            print(f"Error detallado: {e}")
