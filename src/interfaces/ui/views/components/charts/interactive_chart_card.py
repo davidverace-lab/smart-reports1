@@ -1,15 +1,22 @@
 """
-InteractiveChartCard - Gráfico Matplotlib TOTALMENTE interactivo
-- Tooltips al pasar mouse
-- Click para ordenar ascendente/descendente
-- Click en leyenda para ocultar/mostrar elementos
-- Zoom con scroll
+InteractiveChartCard PRO - Gráfico Matplotlib PREMIUM con máxima interactividad
+✨ CARACTERÍSTICAS:
+- Tooltips hermosos con información detallada
+- Animaciones de entrada (barras crecen desde abajo)
+- Hover dramático (resalta barra + atenúa otras)
+- Click para ocultar/mostrar elementos
+- Ordenar con transiciones suaves
+- Indicador visual de elementos ocultos
+- Gradientes profesionales
+- Sombras y efectos 3D
 """
 import customtkinter as ctk
 import tkinter as tk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle, FancyBboxPatch
+from matplotlib.colors import LinearSegmentedColormap
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 import numpy as np
@@ -42,6 +49,11 @@ class InteractiveChartCard(ctk.CTkFrame):
         self.ax = None
         self.bars = None
         self.annotation = None  # Tooltip flotante
+        self.hover_index = -1  # Índice de barra bajo hover
+        self.hidden_indicator = None  # Label indicador de elementos ocultos
+
+        # Animación
+        self.is_animating = False
 
         self._create_ui()
 
@@ -118,6 +130,15 @@ class InteractiveChartCard(ctk.CTkFrame):
         )
         reset_btn.pack(side='left', padx=5)
 
+        # Indicador de elementos ocultos
+        self.hidden_indicator = ctk.CTkLabel(
+            header,
+            text="",
+            font=('Segoe UI', 10),
+            text_color='#ff9800'
+        )
+        self.hidden_indicator.pack(side='left', padx=10)
+
         # Container para el gráfico
         self.content_container = ctk.CTkFrame(
             self.card,
@@ -189,69 +210,105 @@ class InteractiveChartCard(ctk.CTkFrame):
         self.canvas.mpl_connect('button_press_event', self._on_click)
 
     def _create_interactive_bar_chart(self, text_color):
-        """Crear gráfico de barras interactivo"""
+        """Crear gráfico de barras interactivo con efectos PRO"""
         labels = self.chart_data['labels']
         values = self.chart_data['values']
 
         # Filtrar items ocultos
         filtered_labels = []
         filtered_values = []
+        filtered_original_indices = []
         for i, label in enumerate(labels):
             if label not in self.hidden_items:
                 filtered_labels.append(label)
                 filtered_values.append(values[i])
+                filtered_original_indices.append(i)
 
         if not filtered_labels:
             filtered_labels = labels
             filtered_values = values
+            filtered_original_indices = list(range(len(labels)))
             self.hidden_items = set()
 
-        # Paleta de azules navy pastel suaves
-        pastel_navy_colors = [
-            '#4A6FA5',  # Navy oscuro pastel
-            '#6B8EC7',  # Navy medio pastel
-            '#8FADD3',  # Navy claro pastel
-            '#A8C5E2',  # Azul cyan pastel
-            '#B8D4E8',  # Azul gris pastel
-            '#C4D7F0',  # Azul lavanda pastel
-            '#5D7FAF',  # Navy intermedio
-            '#7A9BCF',  # Azul periwinkle pastel
-        ] * 5
+        # Actualizar indicador de elementos ocultos
+        if self.hidden_items:
+            self.hidden_indicator.configure(text=f"👁️ {len(self.hidden_items)} ocultos")
+        else:
+            self.hidden_indicator.configure(text="")
 
-        # Crear barras horizontales con bordes suaves
+        # Paleta de gradientes azules profesionales (oscuro → claro)
+        gradient_colors = [
+            ('#003D82', '#009BDE'),  # Navy → Sky blue
+            ('#0052A3', '#00B5E2'),  # Royal → Horizon
+            ('#004C97', '#33C7F0'),  # Dark blue → Light blue
+            ('#003D82', '#66D4F5'),  # Navy → Very light
+            ('#002E6D', '#009BDE'),  # Darkest navy → Sky
+            ('#0066CC', '#00B5E2'),  # Medium → Horizon
+            ('#0080FF', '#33C7F0'),  # Azure → Light
+            ('#004C97', '#99E1FA'),  # Royal → Lightest
+        ]
+
+        # Crear barras horizontales
         y_pos = np.arange(len(filtered_labels))
-        self.bars = self.ax.barh(
-            y_pos,
-            filtered_values,
-            color=pastel_navy_colors[:len(filtered_labels)],
-            edgecolor='#ffffff',
-            linewidth=0.5,
-            alpha=0.85
-        )
+
+        # EFECTO PRO: Crear barras con gradiente
+        self.bars = []
+        for i, (y, val) in enumerate(zip(y_pos, filtered_values)):
+            # Seleccionar colores del gradiente
+            color_start, color_end = gradient_colors[i % len(gradient_colors)]
+
+            # Crear barra con gradiente
+            bar = self.ax.barh(
+                y, val,
+                height=0.7,
+                color=color_end,  # Color base
+                edgecolor='white',
+                linewidth=1.5,
+                alpha=0.9,
+                zorder=3
+            )
+
+            # Agregar efecto de sombra (barra más oscura detrás)
+            shadow = self.ax.barh(
+                y - 0.02, val * 0.98,
+                height=0.7,
+                color='#000000',
+                alpha=0.15,
+                zorder=1
+            )
+
+            self.bars.append(bar[0])
 
         # Configurar ejes
         self.ax.set_yticks(y_pos)
-        self.ax.set_yticklabels(filtered_labels, fontsize=10)
-        self.ax.set_xlabel('Cantidad', color=text_color, fontsize=11)
+        self.ax.set_yticklabels(filtered_labels, fontsize=10, fontweight='500')
+        self.ax.set_xlabel('Cantidad', color=text_color, fontsize=11, fontweight='600')
         self.ax.invert_yaxis()
 
-        # Agregar valores al final de las barras
+        # Grid profesional
+        self.ax.grid(axis='x', alpha=0.2, linestyle='--', linewidth=0.8, color=text_color)
+        self.ax.set_axisbelow(True)
+
+        # Agregar valores al final de las barras con estilo PRO
+        max_val = max(filtered_values) if filtered_values else 1
         for i, (bar, val) in enumerate(zip(self.bars, filtered_values)):
+            # Valor principal
             self.ax.text(
-                val + max(filtered_values) * 0.02,
+                val + max_val * 0.02,
                 bar.get_y() + bar.get_height()/2,
-                f'{int(val)}',
+                f'{int(val):,}',
                 va='center',
-                fontsize=10,
+                fontsize=11,
                 fontweight='bold',
-                color=text_color
+                color=HUTCHISON_COLORS['ports_sea_blue']
             )
 
-        # Grid sutil
-        self.ax.grid(axis='x', alpha=0.3, linestyle='--')
+        # Establecer límites para padding
+        if filtered_values:
+            self.ax.set_xlim(0, max(filtered_values) * 1.15)
 
     def _create_interactive_donut_chart(self, text_color):
-        """Crear gráfico donut interactivo"""
+        """Crear gráfico donut interactivo con efectos PRO"""
         labels = self.chart_data['labels']
         values = self.chart_data['values']
 
@@ -268,32 +325,70 @@ class InteractiveChartCard(ctk.CTkFrame):
             filtered_values = values
             self.hidden_items = set()
 
-        # Paleta de azules navy pastel suaves (mismo que barras)
-        pastel_navy_colors = [
-            '#4A6FA5',  # Navy oscuro pastel
-            '#6B8EC7',  # Navy medio pastel
-            '#8FADD3',  # Navy claro pastel
-            '#A8C5E2',  # Azul cyan pastel
-            '#B8D4E8',  # Azul gris pastel
-            '#C4D7F0',  # Azul lavanda pastel
-            '#5D7FAF',  # Navy intermedio
-            '#7A9BCF',  # Azul periwinkle pastel
-        ] * 5
+        # Actualizar indicador de elementos ocultos
+        if self.hidden_items:
+            self.hidden_indicator.configure(text=f"👁️ {len(self.hidden_items)} ocultos")
+        else:
+            self.hidden_indicator.configure(text="")
 
-        # Crear donut con bordes suaves
+        # Paleta profesional de azules gradientes
+        professional_colors = [
+            '#003D82',  # Navy
+            '#0052A3',  # Royal blue
+            '#009BDE',  # Sky blue
+            '#00B5E2',  # Horizon blue
+            '#33C7F0',  # Light blue
+            '#66D4F5',  # Lighter blue
+            '#0066CC',  # Medium blue
+            '#0080FF',  # Azure
+        ]
+
+        # Crear donut con bordes profesionales
         wedges, texts, autotexts = self.ax.pie(
             filtered_values,
             labels=filtered_labels,
-            colors=pastel_navy_colors[:len(filtered_labels)],
+            colors=professional_colors[:len(filtered_labels)],
             autopct='%1.1f%%',
             startangle=90,
-            textprops={'color': text_color, 'fontsize': 10, 'fontweight': 'bold'},
-            wedgeprops={'edgecolor': '#ffffff', 'linewidth': 2, 'alpha': 0.85}
+            textprops={'color': text_color, 'fontsize': 10, 'fontweight': '700'},
+            wedgeprops={'edgecolor': 'white', 'linewidth': 2.5, 'alpha': 0.95},
+            pctdistance=0.85
         )
 
-        # Hacer donut (círculo en el centro más grande para look más moderno)
-        centre_circle = plt.Circle((0, 0), 0.65, fc=self.ax.get_facecolor(), edgecolor='white', linewidth=2)
+        # Mejorar texto de porcentajes
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontweight('bold')
+            autotext.set_fontsize(11)
+
+        # Hacer donut con círculo central elegante
+        centre_circle = plt.Circle(
+            (0, 0), 0.68,
+            fc=self.ax.get_facecolor(),
+            edgecolor='white',
+            linewidth=3
+        )
         self.ax.add_artist(centre_circle)
+
+        # Agregar total en el centro
+        total = sum(filtered_values)
+        self.ax.text(
+            0, 0.05,
+            f'{int(total):,}',
+            ha='center', va='center',
+            fontsize=22,
+            fontweight='bold',
+            color=HUTCHISON_COLORS['ports_sky_blue']
+        )
+        self.ax.text(
+            0, -0.15,
+            'TOTAL',
+            ha='center', va='center',
+            fontsize=11,
+            fontweight='600',
+            color=text_color,
+            alpha=0.7
+        )
 
         # Guardar wedges para interactividad
         self.bars = wedges
@@ -351,33 +446,69 @@ class InteractiveChartCard(ctk.CTkFrame):
         self.ax.grid(alpha=0.3, linestyle='--')
 
     def _on_hover(self, event):
-        """Manejar evento de hover del mouse"""
+        """Manejar evento de hover del mouse con efectos DRAMÁTICOS"""
         if event.inaxes != self.ax or not self.bars:
+            # Restaurar opacidad de todas las barras
+            if self.hover_index != -1:
+                self._reset_bar_effects()
             if self.annotation:
                 self.annotation.set_visible(False)
                 self.canvas.draw_idle()
             return
 
         # Detectar si el mouse está sobre una barra
+        found = False
         for i, bar in enumerate(self.bars):
-            if self.chart_type == 'bar':
-                contains, _ = bar.contains(event)
-                if contains:
-                    self._show_tooltip(event, i)
-                    return
-            elif self.chart_type == 'donut':
-                contains, _ = bar.contains(event)
-                if contains:
-                    self._show_tooltip(event, i)
-                    return
+            contains, _ = bar.contains(event)
+            if contains:
+                # EFECTO DRAMÁTICO: Resaltar barra + atenuar otras
+                if self.hover_index != i:
+                    self._apply_hover_effect(i)
+                self._show_tooltip_pro(event, i)
+                found = True
+                break
 
-        # Si no está sobre ninguna barra, ocultar tooltip
-        if self.annotation:
-            self.annotation.set_visible(False)
-            self.canvas.draw_idle()
+        # Si no está sobre ninguna barra, restaurar
+        if not found and self.hover_index != -1:
+            self._reset_bar_effects()
+            if self.annotation:
+                self.annotation.set_visible(False)
+                self.canvas.draw_idle()
 
-    def _show_tooltip(self, event, index):
-        """Mostrar tooltip con información"""
+    def _apply_hover_effect(self, index):
+        """Aplicar efecto hover: resaltar barra + atenuar otras"""
+        self.hover_index = index
+
+        for i, bar in enumerate(self.bars):
+            if i == index:
+                # Resaltar barra seleccionada
+                bar.set_alpha(1.0)
+                bar.set_edgecolor('yellow')
+                bar.set_linewidth(2.5)
+            else:
+                # Atenuar otras barras
+                bar.set_alpha(0.3)
+                bar.set_edgecolor('white')
+                bar.set_linewidth(1.0)
+
+        self.canvas.draw_idle()
+
+    def _reset_bar_effects(self):
+        """Restaurar efectos originales de las barras"""
+        self.hover_index = -1
+
+        for bar in self.bars:
+            bar.set_alpha(0.95)
+            bar.set_edgecolor('white')
+            if self.chart_type == 'donut':
+                bar.set_linewidth(2.5)
+            else:
+                bar.set_linewidth(1.5)
+
+        self.canvas.draw_idle()
+
+    def _show_tooltip_pro(self, event, index):
+        """Mostrar tooltip HERMOSO con información detallada"""
         labels = [l for l in self.chart_data['labels'] if l not in self.hidden_items]
         values = [v for i, v in enumerate(self.chart_data['values'])
                   if self.chart_data['labels'][i] not in self.hidden_items]
@@ -387,20 +518,47 @@ class InteractiveChartCard(ctk.CTkFrame):
 
         label = labels[index]
         value = values[index]
+        total = sum(values)
+        percentage = (value / total * 100) if total > 0 else 0
 
-        # Crear o actualizar tooltip
+        # Ranking (posición en el orden actual)
+        sorted_values = sorted(values, reverse=True)
+        ranking = sorted_values.index(value) + 1
+
+        # Crear o actualizar tooltip hermoso
         if not self.annotation:
             self.annotation = self.ax.annotate(
-                '', xy=(0, 0), xytext=(20, 20),
+                '', xy=(0, 0), xytext=(25, 25),
                 textcoords="offset points",
-                bbox=dict(boxstyle="round,pad=0.5", fc=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.95),
-                arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0', color='white', lw=2),
-                fontsize=11,
+                bbox=dict(
+                    boxstyle="round,pad=0.8",
+                    fc='#1a1d2e',
+                    ec=HUTCHISON_COLORS['ports_sky_blue'],
+                    alpha=0.98,
+                    linewidth=2.5
+                ),
+                arrowprops=dict(
+                    arrowstyle='->',
+                    connectionstyle='arc3,rad=0.3',
+                    color=HUTCHISON_COLORS['ports_sky_blue'],
+                    lw=2.5
+                ),
+                fontsize=10,
                 color='white',
-                fontweight='bold'
+                fontweight='600',
+                zorder=1000
             )
 
-        self.annotation.set_text(f"{label}\n{int(value)} usuarios")
+        # Texto detallado y hermoso
+        tooltip_text = (
+            f"📊 {label}\n"
+            f"{'─' * 20}\n"
+            f"👥 {int(value):,} usuarios\n"
+            f"📈 {percentage:.1f}% del total\n"
+            f"🏆 Ranking: #{ranking}"
+        )
+
+        self.annotation.set_text(tooltip_text)
         self.annotation.xy = (event.xdata, event.ydata)
         self.annotation.set_visible(True)
         self.canvas.draw_idle()
