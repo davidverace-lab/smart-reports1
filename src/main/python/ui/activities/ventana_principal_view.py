@@ -10,22 +10,23 @@ ARQUITECTURA LIMPIA:
 import customtkinter as ctk
 from tkinter import messagebox
 
-from config.themes import APP_CONFIG, HUTCHISON_COLORS
-from config.gestor_temas import get_theme_manager
-from src.infrastructure.persistence.mysql.connection import DatabaseConnection
+# Android Studio structure imports
+from src.main.res.config.themes import APP_CONFIG, HUTCHISON_COLORS
+from src.main.res.config.gestor_temas import get_theme_manager
+from src.main.python.data.repositories.persistence.mysql.connection import DatabaseConnection
 
-# Controllers (LÓGICA separada)
-from src.interfaces.ui.controllers.database_query_controller import DatabaseQueryController
-from src.interfaces.ui.controllers.file_import_controller import FileImportController
-from src.interfaces.ui.controllers.reports_controller import ReportsController
-from src.interfaces.ui.controllers.navigation_controller import NavigationController
+# Controllers (LÓGICA separada - ViewModels en Android)
+from src.main.python.viewmodels.database_query_controller import DatabaseQueryController
+from src.main.python.viewmodels.file_import_controller import FileImportController
+from src.main.python.viewmodels.reports_controller import ReportsController
+from src.main.python.viewmodels.navigation_controller import NavigationController
 
-# Components (UI)
-from src.interfaces.ui.views.components.navigation.barra_lateral import ModernSidebar
-from src.interfaces.ui.views.components.navigation.barra_superior import TopBar
+# Components (UI - Widgets/Custom Views en Android)
+from src.main.python.ui.widgets.navigation.barra_lateral import ModernSidebar
+from src.main.python.ui.widgets.navigation.barra_superior import TopBar
 
-# Menus (UI modular - cada menú en su archivo)
-from src.interfaces.ui.views.menus import (
+# Menus (UI modular - Fragments en Android)
+from src.main.python.ui.fragments import (
     show_dashboard_menu,
     show_reportes_menu,
     show_actualizar_menu,
