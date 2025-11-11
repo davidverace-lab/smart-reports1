@@ -5,25 +5,29 @@ Pantalla de autenticación con diseño corporativo
 
 import customtkinter as ctk
 from tkinter import messagebox
+import os
+from PIL import Image
 from config.themes import HUTCHISON_COLORS, DARK_THEME
 
 
 class LoginWindow:
     """Ventana de login con diseño Hutchison Ports"""
 
-    def __init__(self, root, on_success_callback):
+    def __init__(self, root, on_success_callback, theme_mode='dark'):
         """
         Inicializa la ventana de login
 
         Args:
             root: Ventana raíz de CTk
             on_success_callback: Función a ejecutar cuando el login es exitoso
+            theme_mode: 'dark' o 'light' para el modo de tema
         """
         self.root = root
         self.on_success_callback = on_success_callback
+        self.theme_mode = theme_mode
 
         # Configurar ventana principal
-        self.root.title("HUTCHISON PORTS - Login")
+        self.root.title("Instituto Hutchison Ports - Acceso al Sistema")
 
         # Obtener dimensiones de la pantalla
         screen_width = self.root.winfo_screenwidth()
@@ -55,10 +59,24 @@ class LoginWindow:
     def create_login_ui(self):
         """Crea la interfaz de usuario del login"""
 
-        # Frame principal (fondo degradado simulado con color sólido)
+        # Determinar colores según tema
+        if self.theme_mode == 'light':
+            bg_color = '#F5F7FA'  # Fondo claro
+            card_color = '#FFFFFF'  # Tarjeta blanca
+            text_primary = '#002E6D'  # Texto principal oscuro
+            text_secondary = '#666666'  # Texto secundario gris
+            border_color = HUTCHISON_COLORS['ports_sky_blue']
+        else:  # dark
+            bg_color = DARK_THEME['background']
+            card_color = DARK_THEME['surface']
+            text_primary = '#FFFFFF'
+            text_secondary = DARK_THEME['text_secondary']
+            border_color = HUTCHISON_COLORS['ports_sky_blue']
+
+        # Frame principal
         self.main_frame = ctk.CTkFrame(
             self.root,
-            fg_color=DARK_THEME['background'],
+            fg_color=bg_color,
             corner_radius=0
         )
         self.main_frame.pack(fill='both', expand=True)
@@ -73,10 +91,10 @@ class LoginWindow:
         # Tarjeta de login (card)
         self.login_card = ctk.CTkFrame(
             center_container,
-            fg_color=DARK_THEME['surface'],
+            fg_color=card_color,
             corner_radius=20,
             border_width=2,
-            border_color=HUTCHISON_COLORS['ports_sky_blue']
+            border_color=border_color
         )
         self.login_card.pack(padx=40, pady=40)
 
@@ -87,30 +105,73 @@ class LoginWindow:
         )
         content_frame.pack(padx=60, pady=50)
 
-        # === ICONO/LOGO ===
-        icon_label = ctk.CTkLabel(
+        # === TEXTO SUPERIOR: ACCESO AL SISTEMA ===
+        access_label = ctk.CTkLabel(
             content_frame,
-            text="⚓",  # Icono de ancla para tema portuario
-            font=('Montserrat', 64),
+            text="ACCESO AL SISTEMA",
+            font=('Montserrat', 16, 'bold'),
             text_color=HUTCHISON_COLORS['ports_sky_blue']
         )
-        icon_label.pack(pady=(0, 20))
+        access_label.pack(pady=(0, 20))
+
+        # === ICONO/LOGO ===
+        # Intentar cargar logo desde rutas conocidas
+        logo_paths = [
+            'tests/logo.png',
+            'tests/integration/logo.png',
+            'assets/logo.png',
+            'assets/images/logo.png'
+        ]
+
+        logo_loaded = False
+        for logo_path in logo_paths:
+            if os.path.exists(logo_path):
+                try:
+                    # Cargar y redimensionar imagen
+                    pil_image = Image.open(logo_path)
+                    pil_image = pil_image.resize((120, 120), Image.Resampling.LANCZOS)
+                    logo_image = ctk.CTkImage(
+                        light_image=pil_image,
+                        dark_image=pil_image,
+                        size=(120, 120)
+                    )
+
+                    logo_label = ctk.CTkLabel(
+                        content_frame,
+                        image=logo_image,
+                        text=""
+                    )
+                    logo_label.pack(pady=(0, 20))
+                    logo_loaded = True
+                    break
+                except Exception as e:
+                    print(f"Error cargando logo desde {logo_path}: {e}")
+
+        # Si no se cargó logo, usar icono de texto
+        if not logo_loaded:
+            icon_label = ctk.CTkLabel(
+                content_frame,
+                text="⚓",  # Icono de ancla para tema portuario
+                font=('Montserrat', 64),
+                text_color=HUTCHISON_COLORS['ports_sky_blue']
+            )
+            icon_label.pack(pady=(0, 20))
 
         # === TÍTULO ===
         title_label = ctk.CTkLabel(
             content_frame,
-            text="HUTCHISON PORTS",
-            font=('Montserrat', 32, 'bold'),  # Montserrat Bold
-            text_color='white'
+            text="INSTITUTO HUTCHISON PORTS",
+            font=('Montserrat', 28, 'bold'),
+            text_color=text_primary
         )
         title_label.pack(pady=(0, 5))
 
         # === SUBTÍTULO ===
         subtitle_label = ctk.CTkLabel(
             content_frame,
-            text="Acceso al Sistema",
-            font=('Montserrat', 18),  # Montserrat Regular
-            text_color=DARK_THEME['text_secondary']
+            text="Sistema de Gestión de Capacitación",
+            font=('Montserrat', 14),
+            text_color=text_secondary
         )
         subtitle_label.pack(pady=(0, 40))
 
@@ -119,10 +180,20 @@ class LoginWindow:
             content_frame,
             text="Usuario",
             font=('Montserrat', 14),
-            text_color=DARK_THEME['text_secondary'],
+            text_color=text_secondary,
             anchor='w'
         )
         user_label.pack(fill='x', pady=(0, 5))
+
+        # Colores de entrada según tema
+        if self.theme_mode == 'light':
+            entry_fg = '#F8F9FA'
+            entry_border = '#CCCCCC'
+            entry_text = '#002E6D'
+        else:
+            entry_fg = DARK_THEME['surface_light']
+            entry_border = DARK_THEME['border']
+            entry_text = '#FFFFFF'
 
         self.username_entry = ctk.CTkEntry(
             content_frame,
@@ -132,8 +203,9 @@ class LoginWindow:
             height=45,
             width=350,
             border_width=2,
-            border_color=DARK_THEME['border'],
-            fg_color=DARK_THEME['surface_light'],
+            border_color=entry_border,
+            fg_color=entry_fg,
+            text_color=entry_text,
             corner_radius=10
         )
         self.username_entry.pack(pady=(0, 20))
@@ -144,7 +216,7 @@ class LoginWindow:
             content_frame,
             text="Contraseña",
             font=('Montserrat', 14),
-            text_color=DARK_THEME['text_secondary'],
+            text_color=text_secondary,
             anchor='w'
         )
         password_label.pack(fill='x', pady=(0, 5))
@@ -158,8 +230,9 @@ class LoginWindow:
             height=45,
             width=350,
             border_width=2,
-            border_color=DARK_THEME['border'],
-            fg_color=DARK_THEME['surface_light'],
+            border_color=entry_border,
+            fg_color=entry_fg,
+            text_color=entry_text,
             corner_radius=10
         )
         self.password_entry.pack(pady=(0, 30))
@@ -180,20 +253,22 @@ class LoginWindow:
         self.login_button.pack(pady=(0, 25))
 
         # === TEXTO DEMO ===
+        demo_color = '#888888' if self.theme_mode == 'light' else '#666666'
         demo_label = ctk.CTkLabel(
             content_frame,
             text="Demo: Usuario: admin | Contraseña: 1234",
             font=('Montserrat', 11),
-            text_color='#666666'
+            text_color=demo_color
         )
         demo_label.pack(pady=(10, 0))
 
         # === FOOTER ===
+        footer_color = '#999999' if self.theme_mode == 'light' else '#555555'
         footer_label = ctk.CTkLabel(
             content_frame,
             text="Smart Reports v2.0 | Instituto Hutchison Ports",
             font=('Montserrat', 10),
-            text_color='#555555'
+            text_color=footer_color
         )
         footer_label.pack(pady=(20, 0))
 

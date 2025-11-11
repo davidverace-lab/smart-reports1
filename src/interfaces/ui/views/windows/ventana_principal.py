@@ -1297,10 +1297,10 @@ class MainWindow:
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    u.Nombre,
-                    u.Email,
+                    u.NombreCompleto,
+                    u.UserEmail,
                     un.NombreUnidad,
-                    u.Nivel,
+                    r.NombreRol as Nivel,
                     u.Division,
                     m.NombreModulo,
                     pm.EstatusModuloUsuario,
@@ -1352,8 +1352,8 @@ class MainWindow:
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    u.Nombre,
-                    u.Email,
+                    u.NombreCompleto,
+                    u.UserEmail,
                     un.NombreUnidad,
                     COUNT(DISTINCT pm.IdModulo) as TotalModulos,
                     SUM(CASE WHEN pm.EstatusModuloUsuario = 'Terminado' THEN 1 ELSE 0 END) as Completados
@@ -1369,8 +1369,13 @@ class MainWindow:
             if results:
                 self.display_search_results(results,
                     ['User ID', 'Nombre', 'Email', 'Unidad', 'Total Módulos', 'Completados'])
+                # Actualizar contador
+                if hasattr(self, 'results_counter_label'):
+                    self.results_counter_label.configure(text=f'Mostrando {len(results)} resultados')
             else:
                 messagebox.showinfo("Sin resultados", f"No hay usuarios en {unit_name}")
+                if hasattr(self, 'results_counter_label'):
+                    self.results_counter_label.configure(text='Mostrando 0 resultados')
         except Exception as e:
             messagebox.showerror("Error", f"Error en consulta: {str(e)}")
 
@@ -1380,8 +1385,8 @@ class MainWindow:
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    u.Nombre,
-                    u.Email,
+                    u.NombreCompleto,
+                    u.UserEmail,
                     un.NombreUnidad,
                     COUNT(DISTINCT pm.IdModulo) as TotalModulos,
                     SUM(CASE WHEN pm.EstatusModuloUsuario = 'Completado' THEN 1 ELSE 0 END) as Completados
@@ -1396,8 +1401,13 @@ class MainWindow:
             if results:
                 self.display_search_results(results,
                     ['User ID', 'Nombre', 'Email', 'Unidad', 'Total Módulos', 'Completados'])
+                # Actualizar contador
+                if hasattr(self, 'results_counter_label'):
+                    self.results_counter_label.configure(text=f'Mostrando {len(results)} resultados')
             else:
                 messagebox.showinfo("Sin resultados", "No hay usuarios en el sistema")
+                if hasattr(self, 'results_counter_label'):
+                    self.results_counter_label.configure(text='Mostrando 0 resultados')
         except Exception as e:
             messagebox.showerror("Error", f"Error en consulta: {str(e)}")
 
