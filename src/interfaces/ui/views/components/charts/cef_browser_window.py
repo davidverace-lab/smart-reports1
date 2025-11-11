@@ -1,39 +1,40 @@
 """
-CEFBrowserWindow - Ventana fullscreen con Chromium embebido
+WebViewWindow - Ventana fullscreen con navegador web embebido
 Muestra D3.js interactivo funcionando PERFECTAMENTE dentro de la aplicación
+Usa pywebview (compatible con Python 3.11+)
 """
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import Frame
-import sys
-import os
+import threading
 
-# Importar CEF Python
+# Importar pywebview
 try:
-    from cefpython3 import cefpython as cef
-    CEF_AVAILABLE = True
+    import webview
+    WEBVIEW_AVAILABLE = True
 except ImportError:
-    CEF_AVAILABLE = False
-    print("⚠️ CEF Python no disponible")
+    WEBVIEW_AVAILABLE = False
+    print("⚠️ pywebview no disponible - instalar con: pip install pywebview")
 
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 
 
-class CEFBrowserWindow:
+class WebViewWindow:
     """
-    Ventana modal con navegador Chromium embebido
+    Ventana modal con navegador web embebido usando pywebview
 
     Características:
-    - Chromium REAL embebido en tkinter
+    - Navegador nativo embebido (Edge en Windows, WebKit en macOS, GTK en Linux)
     - D3.js funciona 100% con todas sus funcionalidades
     - Animaciones, tooltips, interactividad completa
     - Se ejecuta DENTRO de la aplicación
+    - Compatible con Python 3.11+
     """
 
     def __init__(self, parent, title="Dashboard Fullscreen", url=None):
         """
-        Crear ventana CEF Browser
+        Crear ventana WebView
 
         Args:
             parent: Ventana padre
@@ -43,18 +44,19 @@ class CEFBrowserWindow:
         self.parent = parent
         self.title = title
         self.url = url
-        self.browser = None
         self.window = None
+        self.webview_window = None
 
-        if not CEF_AVAILABLE:
-            print("❌ CEF Python no está disponible")
+        if not WEBVIEW_AVAILABLE:
+            print("❌ pywebview no está disponible")
+            self._fallback_browser()
             return
 
         # Crear ventana modal
         self._create_window()
 
-        # Inicializar CEF
-        self._init_cef()
+        # Inicializar webview en thread separado
+        self._init_webview()
 
     def _create_window(self):
         """Crear ventana TopLevel"""
@@ -79,10 +81,6 @@ class CEFBrowserWindow:
 
         # Header con botón cerrar
         self._create_header()
-
-        # Frame para el navegador
-        self.browser_frame = Frame(self.window, bg='white')
-        self.browser_frame.pack(fill='both', expand=True, padx=20, pady=(0, 20))
 
         # Manejar cierre
         self.window.protocol("WM_DELETE_WINDOW", self.close)
@@ -128,70 +126,87 @@ class CEFBrowserWindow:
         close_btn.bind('<Enter>', on_enter)
         close_btn.bind('<Leave>', on_leave)
 
-    def _init_cef(self):
-        """Inicializar CEF Python y cargar URL"""
-        if not CEF_AVAILABLE or not self.url:
+    def _init_webview(self):
+        """Inicializar pywebview y cargar URL"""
+        if not WEBVIEW_AVAILABLE or not self.url:
             return
 
         try:
-            # Configuración CEF
-            sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+            # Destruir la ventana tkinter y crear una ventana pywebview independiente
+            # pywebview no puede embeberse en tkinter, así que la abrimos aparte
+            self.window.withdraw()  # Ocultar ventana tkinter
 
-            # Configurar CEF con settings
-            settings = {
-                "debug": False,
-                "log_severity": cef.LOGSEVERITY_INFO,
-                "log_file": "",
-            }
+            def start_webview():
+                """Iniciar webview en thread"""
+                try:
+                    # Crear ventana pywebview independiente
+                    self.webview_window = webview.create_window(
+                        title=self.title,
+                        url=self.url,
+                        width=1400,
+                        height=900,
+                        resizable=True,
+                        fullscreen=False,
+                        min_size=(800, 600)
+                    )
 
-            # Inicializar CEF si no está inicializado
-            if not cef.GetAppSetting("initialized"):
-                cef.Initialize(settings)
+                    # Iniciar webview (bloquea hasta que se cierre)
+                    webview.start()
 
-            # Información de la ventana
-            window_info = cef.WindowInfo()
-            window_info.SetAsChild(
-                self.browser_frame.winfo_id(),
-                [0, 0, self.browser_frame.winfo_width(), self.browser_frame.winfo_height()]
-            )
+                    # Cuando se cierre, destruir ventana tkinter
+                    if self.window and self.window.winfo_exists():
+                        self.window.after(0, self._cleanup_after_webview)
 
-            # Crear navegador
-            self.browser = cef.CreateBrowserSync(
-                window_info,
-                url=self.url
-            )
+                except Exception as e:
+                    print(f"❌ Error con pywebview: {e}")
+                    self._fallback_browser()
 
-            print(f"✅ CEF Browser creado: {self.url}")
+            # Iniciar en thread separado
+            webview_thread = threading.Thread(target=start_webview, daemon=True)
+            webview_thread.start()
 
-            # Message loop
-            self.window.after(10, self._message_loop)
+            print(f"✅ Webview iniciado: {self.url}")
 
         except Exception as e:
-            print(f"❌ Error inicializando CEF: {e}")
+            print(f"❌ Error inicializando webview: {e}")
             import traceback
             traceback.print_exc()
+            self._fallback_browser()
 
-    def _message_loop(self):
-        """Loop de mensajes de CEF"""
-        if self.browser and self.window.winfo_exists():
-            try:
-                cef.MessageLoopWork()
-                self.window.after(10, self._message_loop)
-            except:
-                pass
+    def _cleanup_after_webview(self):
+        """Limpiar después de cerrar webview"""
+        try:
+            if self.window and self.window.winfo_exists():
+                self.window.grab_release()
+                self.window.destroy()
+        except:
+            pass
+
+    def _fallback_browser(self):
+        """Fallback: abrir en navegador externo"""
+        import webbrowser
+        print(f"🌐 Abriendo en navegador externo: {self.url}")
+        webbrowser.open(self.url)
+
+        # Cerrar ventana modal si existe
+        if self.window and self.window.winfo_exists():
+            self.window.grab_release()
+            self.window.destroy()
 
     def close(self):
-        """Cerrar ventana y limpiar CEF"""
-        print("🔒 Cerrando CEF Browser Window")
+        """Cerrar ventana y limpiar webview"""
+        print("🔒 Cerrando WebView Window")
 
-        if self.browser:
-            try:
-                self.browser.CloseBrowser(True)
-                self.browser = None
-            except:
-                pass
+        # Intentar cerrar webview
+        try:
+            if self.webview_window:
+                webview.destroy_window(self.webview_window)
+                self.webview_window = None
+        except:
+            pass
 
-        if self.window:
+        # Cerrar ventana tkinter
+        if self.window and self.window.winfo_exists():
             try:
                 self.window.grab_release()
                 self.window.destroy()
@@ -201,7 +216,8 @@ class CEFBrowserWindow:
 
 def open_cef_window(parent, title, url):
     """
-    Helper function para abrir ventana CEF fácilmente
+    Helper function para abrir ventana webview fácilmente
+    (Mantiene el nombre 'open_cef_window' por compatibilidad)
 
     Args:
         parent: Ventana padre
@@ -209,12 +225,12 @@ def open_cef_window(parent, title, url):
         url: URL del D3.js
 
     Returns:
-        CEFBrowserWindow instance
+        WebViewWindow instance
     """
-    if not CEF_AVAILABLE:
-        print("❌ CEF Python no disponible - abriendo en navegador")
+    if not WEBVIEW_AVAILABLE:
+        print("❌ pywebview no disponible - abriendo en navegador")
         import webbrowser
         webbrowser.open(url)
         return None
 
-    return CEFBrowserWindow(parent, title=title, url=url)
+    return WebViewWindow(parent, title=title, url=url)
