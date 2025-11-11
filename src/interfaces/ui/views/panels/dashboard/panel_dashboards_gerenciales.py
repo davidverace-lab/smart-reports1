@@ -54,7 +54,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             # Crear pestañas
             print("  → Agregando pestañas...")
             self.tab_general = self.tab_view.add("General", "📊")
-            self.tab_gerencial = self.tab_view.add("Dashboards Gerenciales", "📈")
+            self.tab_gerencial = self.tab_view.add("Dashboard", "📈")
 
             # Crear contenido
             print("  → Creando contenido de tabs...")
