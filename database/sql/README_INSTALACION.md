@@ -1,98 +1,123 @@
-# 🚀 Instalación de Base de Datos - Smart Reports
+# 🚀 Instalación de Datos - Smart Reports Hutchison Ports
 
-## 📋 Scripts SQL incluidos
+## 📋 Scripts SQL Adaptados a TU Base de Datos
 
-Este directorio contiene los scripts SQL para configurar completamente la base de datos de Smart Reports:
+Estos scripts están diseñados para trabajar con **TU esquema existente** de base de datos.
+**NO crean tablas**, solo insertan datos.
 
-### 1. **01_unidades_negocio.sql**
-Crea y configura las Unidades de Negocio de Hutchison Ports:
-- ✅ Tabla `instituto_UnidadNegocio`
-- ✅ 8 unidades de negocio (terminales, logística, admin, RRHH, TI, seguridad)
-- ✅ Vinculación con tabla de usuarios
-- ✅ Vista `vw_UsuariosConUnidad`
+---
 
-### 2. **02_sistema_roles.sql**
-Implementa el sistema completo de roles y permisos:
-- ✅ Tabla `instituto_Rol`
-- ✅ Tabla `instituto_Permiso`
-- ✅ Tabla `instituto_RolPermiso`
-- ✅ 4 roles: Admin, RRHH, Gerente, Operador
-- ✅ 16 permisos granulares
-- ✅ 2 usuarios por defecto:
-  - **Admin**: `admin@hutchison.com` / `admin123`
-  - **RRHH**: `rrhh@hutchison.com` / `rrhh123`
-- ✅ Vista `vw_UsuariosConRoles`
-- ✅ Función `fn_UsuarioTienePermiso`
+## 📦 Archivos Incluidos
 
-### 3. **03_usuarios_ejemplo_30.sql**
-Genera 30 usuarios de ejemplo con datos reales:
-- ✅ 30 empleados distribuidos en 8 unidades de negocio
-- ✅ Nombres, cargos y departamentos realistas
-- ✅ 3-8 módulos completados por usuario
-- ✅ Calificaciones entre 80-98 puntos
-- ✅ Fechas de capacitación Enero-Julio 2024
-- ✅ ~180+ registros de módulos finalizados
+### 1. **01_datos_base.sql**
+Inserta datos base en tu esquema existente:
+- ✅ **10 Unidades de Negocio** de Hutchison Ports:
+  - CCI, ECV, EIT, HPML, HPMX, ICAVE, LCTM, LCT TILH, TIMSA, TNG
+- ✅ **4 Roles**:
+  - Administrador (acceso total)
+  - Recursos Humanos (vista RRHH)
+  - Gerente (vista gerencial)
+  - Usuario (vista operativa)
+- ✅ **40 Departamentos** (4 por unidad)
+
+**Usa las tablas existentes:**
+- `UnidadDeNegocio` (IdUnidadDeNegocio, NombreUnidad, Activo)
+- `Rol` (IdRol, NombreRol, Descripcion, Activo)
+- `Departamento` (IdDepartamento, IdUnidadDeNegocio, NombreDepartamento, Activo)
+
+### 2. **02_usuarios_30.sql**
+Inserta 32 usuarios de ejemplo:
+- ✅ **2 usuarios del sistema**:
+  - Admin: `U001` - cmendoza@hutchison.com / admin123
+  - RRHH: `U002` - plopez@hutchison.com / rrhh123
+- ✅ **30 usuarios operativos** (U003-U032)
+  - Distribuidos en las 10 unidades de negocio
+  - 10 gerentes (1 por unidad)
+  - 20 usuarios operativos
+  - Contraseña: port123
+
+**Usa la tabla existente:**
+- `Usuario` (IdUsuario, UserId, IdUnidadDeNegocio, IdRol, NombreCompleto, UserEmail, PasswordHash, Division, Position, UserStatus, etc.)
+
+### 3. **03_modulos_progreso.sql**
+Inserta módulos de capacitación y progreso:
+- ✅ **8 Módulos** de capacitación
+- ✅ **~150+ registros de progreso** (3-8 módulos por usuario)
+- ✅ **Evaluaciones** (1 por módulo)
+- ✅ **Resultados** con calificaciones 80-98 puntos
+
+**Usa las tablas existentes:**
+- `Modulo` (IdModulo, NombreModulo, FechaInicioModulo, FechaCierre, Activo)
+- `ProgresoModulo` (IdInscripcion, UserId, IdModulo, EstatusModulo, FechaAsignacion, FechaFinalizacion)
+- `Evaluacion` (IdEvaluacion, IdModulo, NombreEvaluacion, PuntajeMinimoAprobatorio)
+- `ResultadoEvaluacion` (IdResultado, IdInscripcion, IdEvaluacion, PuntajeObtenido, Aprobado)
 
 ---
 
 ## ⚙️ Orden de Ejecución
 
-**IMPORTANTE**: Ejecutar los scripts en este orden:
+**IMPORTANTE**: Ejecutar en este orden:
 
 ```sql
--- 1. Crear unidades de negocio
-:r 01_unidades_negocio.sql
+-- 1. Datos base (unidades, roles, departamentos)
+USE SmartReports;
+GO
+:r 01_datos_base.sql
 GO
 
--- 2. Crear sistema de roles
-:r 02_sistema_roles.sql
+-- 2. Usuarios
+:r 02_usuarios_30.sql
 GO
 
--- 3. Insertar usuarios de ejemplo
-:r 03_usuarios_ejemplo_30.sql
+-- 3. Módulos y progreso
+:r 03_modulos_progreso.sql
 GO
 ```
 
 ---
 
-## 📝 Instrucciones de Instalación
+## 📝 Instrucciones Paso a Paso
 
 ### Opción A: SQL Server Management Studio (SSMS)
 
-1. Abrir SSMS y conectarse a tu servidor
-2. Abrir cada archivo .sql en el orden indicado
-3. Verificar que estás en la base de datos correcta: `USE SmartReports;`
-4. Ejecutar (F5) cada script
-5. Verificar los mensajes de éxito: `✅ CONFIGURADO`
+1. Abrir SSMS y conectarse al servidor
+2. Abrir script `01_datos_base.sql`
+3. Asegurarse de que esté seleccionada la base de datos **SmartReports**
+4. Ejecutar (F5)
+5. Repetir con `02_usuarios_30.sql` y `03_modulos_progreso.sql`
+6. Verificar mensajes de éxito: `✅ CONFIGURADO`
 
 ### Opción B: Línea de comandos (sqlcmd)
 
 ```bash
-# Ejecutar todos los scripts en orden
-sqlcmd -S localhost -d SmartReports -i 01_unidades_negocio.sql
-sqlcmd -S localhost -d SmartReports -i 02_sistema_roles.sql
-sqlcmd -S localhost -d SmartReports -i 03_usuarios_ejemplo_30.sql
+# Navegar a la carpeta de scripts
+cd database/sql
+
+# Ejecutar cada script en orden
+sqlcmd -S localhost -d SmartReports -i 01_datos_base.sql
+sqlcmd -S localhost -d SmartReports -i 02_usuarios_30.sql
+sqlcmd -S localhost -d SmartReports -i 03_modulos_progreso.sql
 ```
 
-### Opción C: Ejecutar todo de una vez
+### Opción C: Todo de una vez
 
-Crear un archivo `install_all.sql`:
+Crear archivo `install_all.sql`:
 
 ```sql
 USE SmartReports;
 GO
 
-:r 01_unidades_negocio.sql
-:r 02_sistema_roles.sql
-:r 03_usuarios_ejemplo_30.sql
+:r 01_datos_base.sql
+:r 02_usuarios_30.sql
+:r 03_modulos_progreso.sql
 
 PRINT '';
 PRINT '============================================';
-PRINT '✅ INSTALACIÓN COMPLETA FINALIZADA';
+PRINT '✅ INSTALACIÓN COMPLETA';
 PRINT '============================================';
 ```
 
-Luego ejecutar:
+Ejecutar:
 ```bash
 sqlcmd -S localhost -d SmartReports -i install_all.sql
 ```
@@ -105,27 +130,31 @@ Ejecutar estas consultas para verificar:
 
 ```sql
 -- Verificar unidades de negocio
-SELECT COUNT(*) as TotalUnidades FROM instituto_UnidadNegocio;
--- Esperado: 8
+SELECT COUNT(*) as TotalUnidades FROM UnidadDeNegocio;
+-- Esperado: 10
 
 -- Verificar roles
-SELECT COUNT(*) as TotalRoles FROM instituto_Rol;
+SELECT COUNT(*) as TotalRoles FROM Rol;
 -- Esperado: 4
 
--- Verificar permisos
-SELECT COUNT(*) as TotalPermisos FROM instituto_Permiso;
--- Esperado: 16
+-- Verificar departamentos
+SELECT COUNT(*) as TotalDepartamentos FROM Departamento;
+-- Esperado: 40
 
 -- Verificar usuarios
-SELECT COUNT(*) as TotalUsuarios FROM instituto_Usuario WHERE Activo = 1;
--- Esperado: 32 (30 ejemplo + admin + rrhh)
+SELECT COUNT(*) as TotalUsuarios FROM Usuario WHERE UserStatus = 'Active';
+-- Esperado: 32
 
--- Verificar módulos completados
-SELECT COUNT(*) as ModulosCompletados FROM instituto_UsuarioModulo WHERE Progreso = 100;
--- Esperado: 180+
+-- Verificar módulos
+SELECT COUNT(*) as TotalModulos FROM Modulo WHERE Activo = 1;
+-- Esperado: 8
 
--- Ver usuarios con roles
-SELECT * FROM vw_UsuariosConRoles;
+-- Verificar progreso
+SELECT COUNT(*) as ProgresoRegistrado FROM ProgresoModulo WHERE EstatusModulo = 'Completado';
+-- Esperado: 150+
+
+-- Ver usuarios creados
+SELECT UserId, NombreCompleto, UserEmail FROM Usuario ORDER BY IdUsuario;
 ```
 
 ---
@@ -133,111 +162,131 @@ SELECT * FROM vw_UsuariosConRoles;
 ## 👥 Usuarios Creados
 
 ### Usuarios del Sistema
-| Email | Contraseña | Rol | Descripción |
-|-------|------------|-----|-------------|
-| admin@hutchison.com | admin123 | Admin | Acceso total |
-| rrhh@hutchison.com | rrhh123 | RRHH | Vista RRHH especializada |
 
-### Usuarios de Ejemplo (30 total)
-| Email | Contraseña | Departamento | Unidad |
-|-------|------------|--------------|--------|
-| jmendez@hutchison.com | port123 | Operaciones | Terminal 1 |
-| msoto@hutchison.com | port123 | Operaciones | Terminal 1 |
-| psilva@hutchison.com | port123 | Operaciones | Terminal 2 |
-| sherrera@hutchison.com | port123 | Logística | Logística |
-| ... y 26 más | port123 | Varios | Varias |
+| UserId | Email | Contraseña | Rol | Unidad |
+|--------|-------|------------|-----|--------|
+| U001 | cmendoza@hutchison.com | admin123 | Administrador | HPMX |
+| U002 | plopez@hutchison.com | rrhh123 | Recursos Humanos | HPMX |
 
-**Todos los usuarios de ejemplo usan la contraseña: `port123`**
+### Usuarios Operativos (30 usuarios)
+
+| Unidad | Usuarios | Gerente | Email Ejemplo |
+|--------|----------|---------|---------------|
+| CCI | 3 | Juan Carlos Méndez | jmendez@hutchison.com |
+| ECV | 3 | Ana Patricia Rojas | arojas@hutchison.com |
+| EIT | 3 | Carlos Enrique Díaz | cdiaz@hutchison.com |
+| HPML | 3 | Pedro Antonio Silva | psilva@hutchison.com |
+| HPMX | 3 | Sandra Patricia Herrera | sherrera@hutchison.com |
+| ICAVE | 3 | Andrés Felipe Torres | atorres@hutchison.com |
+| LCTM | 3 | Diana Carolina Pérez | dperez@hutchison.com |
+| LCT TILH | 3 | Hernán Paredes | hparedes@hutchison.com |
+| TIMSA | 3 | Isabel Reyes | ireyes@hutchison.com |
+| TNG | 3 | Oscar Mauricio León | oleon@hutchison.com |
+
+**Contraseña para todos los usuarios:** `port123`
 
 ---
 
-## 🎯 Roles y Permisos
+## 🎯 Unidades de Negocio Insertadas
 
-### 1. Admin (Nivel 1)
+1. **CCI** - Contecon Cartagena
+2. **ECV** - Ensenada Containers Terminal
+3. **EIT** - Ensenada International Terminal
+4. **HPML** - Hutchison Ports Manzanillo (Lazaro Cardenas)
+5. **HPMX** - Hutchison Ports Mexico
+6. **ICAVE** - Icave Veracruz
+7. **LCTM** - Lázaro Cárdenas Container Terminal
+8. **LCT TILH** - LCT Tuxpan
+9. **TIMSA** - Terminal Internacional Multiservicios
+10. **TNG** - Terminal Norte de Grupo Hutchison
+
+---
+
+## 📊 Roles y Permisos
+
+### 1. Administrador
 - ✅ Acceso TOTAL al sistema
-- ✅ Gestión de usuarios (crear, editar, eliminar)
+- ✅ Gestión de usuarios completa
 - ✅ Configuración del sistema
 - ✅ Todos los reportes y dashboards
-- ✅ Gestión de roles y permisos
 
-### 2. RRHH (Nivel 2)
-- ✅ Ver, crear y editar usuarios
-- ✅ Importar usuarios desde Excel
-- ✅ Ver reportes de TODOS los departamentos
-- ✅ Dashboards especializados de RRHH
-- ❌ No puede eliminar usuarios
-- ❌ No puede modificar configuración
+### 2. Recursos Humanos
+- ✅ Vista especializada RRHH
+- ✅ Dashboards de personal y capacitación
+- ✅ Gestión limitada de usuarios
+- ✅ Reportes de todos los departamentos
 
-### 3. Gerente (Nivel 2)
-- ✅ Ver usuarios
-- ✅ Ver y generar reportes de su departamento
-- ✅ Dashboards gerenciales
-- ❌ No puede crear/editar usuarios
-- ❌ No puede ver otros departamentos
+### 3. Gerente
+- ✅ Vista gerencial
+- ✅ Dashboards estratégicos
+- ✅ Reportes de su departamento
+- ❌ No puede gestionar usuarios
 
-### 4. Operador (Nivel 3)
-- ✅ Ver y exportar reportes propios
-- ✅ Dashboards operativos básicos
-- ❌ No puede ver usuarios
-- ❌ No puede generar reportes de otros
+### 4. Usuario
+- ✅ Vista operativa básica
+- ✅ Consulta de progreso propio
+- ✅ Reportes personales
+- ❌ No puede ver otros usuarios
 
 ---
 
-## 📊 Datos Generados
+## 📚 Módulos de Capacitación
 
-### Unidades de Negocio (8)
-1. Terminal Portuaria 1
-2. Terminal Portuaria 2
-3. Logística y Almacenamiento
-4. Operaciones Terrestres
-5. Administración Central
-6. Recursos Humanos
-7. Tecnología e Innovación
-8. Seguridad y Medio Ambiente
-
-### Distribución de Usuarios
-- Terminal 1: 6 usuarios
-- Terminal 2: 5 usuarios
-- Logística: 5 usuarios
-- Operaciones Terrestres: 4 usuarios
-- Administración: 3 usuarios
-- RRHH: 3 usuarios
-- TI: 2 usuarios
-- Seguridad: 2 usuarios
-
-### Módulos de Capacitación
-- Total módulos: 8
-- Módulos completados por usuario: 3-8 (variable)
-- Calificaciones: 80-98 puntos
-- Período: Enero 2024 - Julio 2024
+1. Seguridad Industrial Básica
+2. Operación de Equipos Portuarios
+3. Manejo de Cargas Peligrosas
+4. Gestión Logística Portuaria
+5. Sistemas de Información Portuaria
+6. Atención al Cliente
+7. Liderazgo y Trabajo en Equipo
+8. Normativa Aduanera y Comercio Exterior
 
 ---
 
 ## 🔧 Solución de Problemas
 
-### Error: "Tabla ya existe"
-Los scripts están diseñados para ser idempotentes. Si una tabla ya existe, solo se mostrarán advertencias pero no errores.
+### Error: "Violation of PRIMARY KEY constraint"
+Las tablas ya tienen datos. Puedes:
+- Comentar las líneas `DELETE FROM` en los scripts si quieres mantener datos existentes
+- O limpiar las tablas manualmente antes de ejecutar
+
+### Error: "Cannot insert NULL into column"
+Verifica que tu esquema de base de datos coincida con el esperado (campos obligatorios).
 
 ### Error: "Foreign key constraint"
-Asegúrate de ejecutar los scripts en el orden correcto (01 → 02 → 03).
+Ejecuta los scripts en el orden correcto: 01 → 02 → 03
 
 ### Usuarios no aparecen
-Verifica que ejecutaste el script 03 completo y que no hubo errores.
-
-### Contraseñas no funcionan
-Las contraseñas en los scripts son en texto plano para desarrollo. En producción, deberías hashearlas.
+- Verifica que el script 02 se ejecutó sin errores
+- Consulta: `SELECT * FROM Usuario`
 
 ---
 
-## 📞 Soporte
+## 🎨 Integración con la Aplicación
 
-Si encuentras problemas con la instalación:
-1. Verifica que tienes permisos de admin en SQL Server
-2. Confirma que la base de datos SmartReports existe
-3. Revisa los mensajes de error en SSMS
-4. Ejecuta las consultas de verificación
+Los scripts están diseñados para funcionar con:
+- ✅ Panel de Dashboards Gerenciales
+- ✅ Panel de Dashboards RRHH
+- ✅ Sistema de reportes
+- ✅ Queries en `queries_hutchison.py`
+
+Todas las consultas SQL en Python están adaptadas al esquema REAL.
+
+---
+
+## 📞 Notas Importantes
+
+1. **Contraseñas en texto plano**: Los scripts usan contraseñas sin hash para desarrollo. En producción, usar `HASHBYTES('SHA2_256', 'password')`.
+
+2. **UserId formato**: Se usa formato `U001`, `U002`, etc. (VARCHAR(50))
+
+3. **UserStatus**: Los usuarios activos tienen `UserStatus = 'Active'`
+
+4. **EstatusModulo**: Los módulos completados tienen `EstatusModulo = 'Completado'`
+
+5. **Fechas**: Todas las fechas están en formato `YYYY-MM-DD` o `DATETIME`
 
 ---
 
 **Última actualización**: 2024-11-11
-**Versión**: 2.0
+**Versión**: 2.0 - Adaptado al esquema REAL de Hutchison Ports

@@ -19,6 +19,9 @@ class InteractiveChartCard(ctk.CTkFrame):
     """Tarjeta con gráfico Matplotlib TOTALMENTE interactivo"""
 
     def __init__(self, parent, title='', width=500, height=400, **kwargs):
+        # Extract custom parameters that CTkFrame doesn't support
+        on_fullscreen = kwargs.pop('on_fullscreen', None)
+
         super().__init__(parent, fg_color='transparent', **kwargs)
 
         self.theme_manager = get_theme_manager()
