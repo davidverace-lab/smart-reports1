@@ -4,8 +4,8 @@ ACTUALIZADO: Gráficos D3.js profesionales con múltiples fallbacks
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.charts.tarjeta_d3_profesional import ProfessionalD3ChartCard
-from config.themes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
-from config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
+from src.main.res.config.gestor_temas import get_theme_manager
 
 
 class MatplotlibInteractivePanel(ctk.CTkFrame):

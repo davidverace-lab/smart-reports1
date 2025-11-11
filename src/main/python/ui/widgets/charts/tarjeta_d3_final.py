@@ -10,9 +10,9 @@ import os
 import threading
 import http.server
 import socketserver
-from config.gestor_temas import get_theme_manager
-from config.themes import HUTCHISON_COLORS
-from src.infrastructure.visualization.d3_generator import MotorTemplatesD3
+from src.main.res.config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
+from src.main.python.utils.visualization.d3_generator import MotorTemplatesD3
 
 # Intentar importar tkinterweb
 try:

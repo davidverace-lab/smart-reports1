@@ -3,8 +3,8 @@ MenuConsultas - Módulo de interfaz para Consultas
 Separado de ventana principal para mejor organización
 """
 import customtkinter as ctk
-from config.themes import HUTCHISON_COLORS
-from config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
+from src.main.res.config.gestor_temas import get_theme_manager
 
 
 def show_consultas_menu(parent, db_connection):

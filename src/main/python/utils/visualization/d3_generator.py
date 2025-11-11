@@ -5,7 +5,7 @@ Sistema escalable y profesional para generación de visualizaciones
 
 import json
 from typing import Dict, List, Any, Optional
-from config.themes import HUTCHISON_COLORS
+from src.main.res.config.themes import HUTCHISON_COLORS
 
 
 class MotorTemplatesD3:

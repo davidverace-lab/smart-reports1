@@ -9,8 +9,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import numpy as np
 
-from config.gestor_temas import get_theme_manager
-from config.themes import HUTCHISON_COLORS
+from src.main.res.config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
 
 
 class MatplotlibChartCard(ctk.CTkFrame):

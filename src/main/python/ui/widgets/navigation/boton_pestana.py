@@ -2,8 +2,8 @@
 CustomTabButton - Botones de pestañas personalizados más grandes y elegantes
 """
 import customtkinter as ctk
-from config.themes import HUTCHISON_COLORS
-from config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
+from src.main.res.config.gestor_temas import get_theme_manager
 
 
 class CustomTabButton(ctk.CTkButton):

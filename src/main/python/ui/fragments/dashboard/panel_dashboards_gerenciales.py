@@ -13,8 +13,8 @@
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
 from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
-from config.gestor_temas import get_theme_manager
-from config.themes import HUTCHISON_COLORS
+from src.main.res.config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -574,7 +574,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
 if __name__ == "__main__":
     import customtkinter as ctk
-    from config.gestor_temas import initialize_theme_manager
+    from src.main.res.config.gestor_temas import initialize_theme_manager
 
     ctk.set_appearance_mode("dark")
     root = ctk.CTk()

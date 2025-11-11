@@ -6,8 +6,8 @@ import customtkinter as ctk
 from tkinter import messagebox
 import json
 import os
-from config.gestor_temas import get_theme_manager
-from config.themes import HUTCHISON_COLORS
+from src.main.res.config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
 
 
 class ConfiguradorColumnas(ctk.CTkToplevel):

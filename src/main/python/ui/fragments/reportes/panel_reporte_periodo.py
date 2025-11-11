@@ -24,7 +24,7 @@ except ImportError:
     REPORTLAB_AVAILABLE = False
     print("ReportLab no está instalado. Instala con: pip install reportlab")
 
-from config.gestor_temas import get_theme_manager
+from src.main.res.config.gestor_temas import get_theme_manager
 from src.interfaces.ui.views.components.charts.previsualizador_reporte import PrevisualizadorReporte
 
 

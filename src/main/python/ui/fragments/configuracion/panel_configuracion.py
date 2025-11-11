@@ -5,7 +5,7 @@ Smart Reports v2.0
 import customtkinter as ctk
 from tkinter import messagebox
 import tkinter.ttk as ttk
-from config.gestor_temas import get_theme_manager
+from src.main.res.config.gestor_temas import get_theme_manager
 from src.interfaces.ui.views.components.charts.tarjeta_configuracion import ConfigCard
 
 
@@ -748,7 +748,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         try:
             # Detectar tipo de base de datos
-            from config.database import DB_TYPE
+            from src.main.res.config.database import DB_TYPE
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
@@ -815,7 +815,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         try:
             # Detectar tipo de base de datos
-            from config.database import DB_TYPE
+            from src.main.res.config.database import DB_TYPE
             is_mysql = DB_TYPE == 'mysql'
 
             self.cursor.execute("""
@@ -904,7 +904,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         try:
             # Detectar tipo de base de datos
-            from config.database import DB_TYPE
+            from src.main.res.config.database import DB_TYPE
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
@@ -953,7 +953,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         try:
             # Detectar tipo de base de datos
-            from config.database import DB_TYPE
+            from src.main.res.config.database import DB_TYPE
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
@@ -1004,7 +1004,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         try:
             # Detectar tipo de base de datos
-            from config.database import DB_TYPE
+            from src.main.res.config.database import DB_TYPE
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
@@ -1059,7 +1059,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 self.support_history_tree.delete(item)
 
             # Detectar tipo de base de datos
-            from config.database import DB_TYPE
+            from src.main.res.config.database import DB_TYPE
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
@@ -1144,7 +1144,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         try:
             # Detectar tipo de base de datos
-            from config.database import DB_TYPE
+            from src.main.res.config.database import DB_TYPE
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 

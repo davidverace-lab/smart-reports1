@@ -3,7 +3,7 @@ FileImportController - LÓGICA de importación de archivos
 Separa la lógica de archivos de la interfaz (patrón Android: Controller = Java)
 """
 import os
-from src.application.services.importador_capacitacion import ImportadorCapacitacion
+from src.main.python.domain.services.importador_capacitacion import ImportadorCapacitacion
 
 
 class FileImportController:

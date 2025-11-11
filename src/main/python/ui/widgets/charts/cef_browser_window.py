@@ -16,8 +16,8 @@ except ImportError:
     WEBVIEW_AVAILABLE = False
     print("⚠️ pywebview no disponible - instalar con: pip install pywebview")
 
-from config.gestor_temas import get_theme_manager
-from config.themes import HUTCHISON_COLORS
+from src.main.res.config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
 
 
 class WebViewWindow:

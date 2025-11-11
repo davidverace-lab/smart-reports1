@@ -21,7 +21,7 @@ except ImportError:
     MySQLError = Exception
     MYSQL_AVAILABLE = False
 
-from config.database import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
+from src.main.res.config.database import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
 
 
 class DatabaseConnection:
