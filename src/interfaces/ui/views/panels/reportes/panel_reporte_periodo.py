@@ -347,7 +347,7 @@ class PeriodReportPanel(ctk.CTkFrame):
                 # Intentar obtener 20 UserIDs aleatorios de la BD
                 self.cursor.execute("""
                     SELECT UserId
-                    FROM Usuario
+                    FROM instituto_Usuario
                     ORDER BY RAND()
                     LIMIT 20
                 """)

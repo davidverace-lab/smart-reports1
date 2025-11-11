@@ -258,7 +258,7 @@ class UnitReportPanel(ctk.CTkFrame):
             # Intentar obtener las unidades de la BD
             self.cursor.execute("""
                 SELECT DISTINCT NombreUnidad
-                FROM UnidadDeNegocio
+                FROM instituto_UnidadDeNegocio
                 ORDER BY NombreUnidad
             """)
             results = self.cursor.fetchall()
@@ -277,8 +277,8 @@ class UnitReportPanel(ctk.CTkFrame):
         try:
             self.cursor.execute("""
                 SELECT COUNT(*)
-                FROM Usuario u
-                JOIN UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+                FROM instituto_Usuario u
+                JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
                 WHERE un.NombreUnidad = %s
             """, (unit_name,))
             result = self.cursor.fetchone()

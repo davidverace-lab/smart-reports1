@@ -762,9 +762,9 @@ class ConfiguracionPanel(ctk.CTkFrame):
                     '' as Division,
                     '' as Position,
                     '' as Grupo,
-                    '' as Ubicacion,
+                    u.Ubicacion,
                     u.UserStatus as Status
-                FROM Usuario u
+                FROM instituto_Usuario u
                 WHERE u.UserId LIKE {placeholder} OR u.NombreCompleto LIKE {placeholder}
                 ORDER BY u.UserId
             """
@@ -824,12 +824,12 @@ class ConfiguracionPanel(ctk.CTkFrame):
                     r.NombreRol as Nivel,
                     u.Division,
                     u.Position,
-                    '' as Grupo,
+                    u.Grupo,
                     un.NombreUnidad as Ubicacion,
                     u.UserStatus as Status
-                FROM Usuario u
-                LEFT JOIN Rol r ON u.IdRol = r.IdRol
-                LEFT JOIN UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+                FROM instituto_Usuario u
+                LEFT JOIN instituto_Rol r ON u.IdRol = r.IdRol
+                LEFT JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
                 ORDER BY u.UserId
             """)
 
@@ -907,14 +907,14 @@ class ConfiguracionPanel(ctk.CTkFrame):
             placeholder = '%s' if is_mysql else '?'
 
             # Verificar si el usuario ya existe
-            self.cursor.execute(f"SELECT COUNT(*) FROM Usuario WHERE UserId = {placeholder}", (user_id,))
+            self.cursor.execute(f"SELECT COUNT(*) FROM instituto_Usuario WHERE UserId = {placeholder}", (user_id,))
             if self.cursor.fetchone()[0] > 0:
                 messagebox.showerror("Error", f"El User ID '{user_id}' ya existe")
                 return
 
-            # Insertar usuario (columnas básicas del esquema real)
+            # Insertar usuario (columnas del esquema instituto_Usuario)
             insert_query = f"""
-                INSERT INTO Usuario
+                INSERT INTO instituto_Usuario
                 (UserId, NombreCompleto, UserEmail, PasswordHash, UserStatus, FechaCreacion)
                 VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, NOW())
             """
@@ -924,7 +924,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 nombre,
                 email or None,
                 'default123',  # Contraseña temporal
-                'Active'       # Estado activo por defecto
+                'Activo'       # Estado activo por defecto
             ))
 
             self.db.commit()
@@ -955,9 +955,9 @@ class ConfiguracionPanel(ctk.CTkFrame):
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
-            # Actualizar usuario (columnas del esquema real)
+            # Actualizar usuario (columnas del esquema instituto_Usuario)
             update_query = f"""
-                UPDATE Usuario
+                UPDATE instituto_Usuario
                 SET NombreCompleto = {placeholder},
                     UserEmail = {placeholder}
                 WHERE UserId = {placeholder}
@@ -1008,8 +1008,8 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
             # Desactivar usuario (mejor práctica que DELETE)
             delete_query = f"""
-                UPDATE Usuario
-                SET UserStatus = 'Inactive'
+                UPDATE instituto_Usuario
+                SET UserStatus = 'Inactivo', Activo = 0
                 WHERE UserId = {placeholder}
             """
 
@@ -1061,25 +1061,25 @@ class ConfiguracionPanel(ctk.CTkFrame):
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
-            # Verificar si la tabla Rol existe (compatible con ambas BD)
+            # Verificar si la tabla instituto_Rol existe (compatible con ambas BD)
             if is_mysql:
                 self.cursor.execute("""
                     SELECT COUNT(*)
                     FROM INFORMATION_SCHEMA.TABLES
-                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Rol'
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'instituto_Rol'
                 """)
             else:
                 self.cursor.execute("""
                     SELECT COUNT(*)
                     FROM INFORMATION_SCHEMA.TABLES
-                    WHERE TABLE_NAME = 'Rol'
+                    WHERE TABLE_NAME = 'instituto_Rol'
                 """)
 
             tabla_existe = self.cursor.fetchone()[0] > 0
 
             if not tabla_existe:
                 # Tabla no existe, mostrar mensaje informativo
-                self.support_history_tree.insert('', 'end', values=('', 'Tabla de soportes no creada. Ejecuta create_soporte_table.sql', '', ''))
+                self.support_history_tree.insert('', 'end', values=('', 'Tabla instituto_Rol no creada. Ejecuta create_tables_instituto.sql', '', ''))
                 return
 
             # Consultar soportes del usuario (compatible con ambas BD)
