@@ -7,11 +7,11 @@ from src.main.res.config.themes import HUTCHISON_COLORS
 from src.main.res.config.gestor_temas import get_theme_manager
 
 # Paneles de reportes
-from src.interfaces.ui.views.panels.reportes.panel_reporte_usuario import UserReportPanel
-from src.interfaces.ui.views.panels.reportes.panel_reporte_unidad import UnitReportPanel
-from src.interfaces.ui.views.panels.reportes.panel_reporte_periodo import PeriodReportPanel
-from src.interfaces.ui.views.panels.reportes.panel_reporte_global import GlobalReportPanel
-from src.interfaces.ui.views.panels.reportes.panel_niveles_mando import ManagementLevelsPanel
+from src.main.python.ui.fragments.reportes.panel_reporte_usuario import UserReportPanel
+from src.main.python.ui.fragments.reportes.panel_reporte_unidad import UnitReportPanel
+from src.main.python.ui.fragments.reportes.panel_reporte_periodo import PeriodReportPanel
+from src.main.python.ui.fragments.reportes.panel_reporte_global import GlobalReportPanel
+from src.main.python.ui.fragments.reportes.panel_niveles_mando import ManagementLevelsPanel
 
 
 class MenuReportes:

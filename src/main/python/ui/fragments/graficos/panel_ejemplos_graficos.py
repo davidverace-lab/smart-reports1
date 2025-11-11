@@ -2,7 +2,7 @@
 Panel de Ejemplos de Gráficos - Muestra todos los tipos de gráficos disponibles
 """
 import customtkinter as ctk
-from src.interfaces.ui.views.components.charts.tarjeta_grafico import ChartCard
+from src.main.python.ui.widgets.charts.tarjeta_grafico import ChartCard
 
 
 class ChartExamplesPanel(ctk.CTkFrame):

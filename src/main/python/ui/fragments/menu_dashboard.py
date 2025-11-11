@@ -3,7 +3,7 @@ MenuDashboard - Módulo de interfaz para Dashboard
 Separado de ventana principal para mejor organización
 """
 import customtkinter as ctk
-from src.interfaces.ui.views.panels.dashboard.panel_dashboards_gerenciales import DashboardsGerencialesPanel
+from src.main.python.ui.fragments.dashboard.panel_dashboards_gerenciales import DashboardsGerencialesPanel
 
 
 def show_dashboard_menu(parent, db_connection, username, user_role):
