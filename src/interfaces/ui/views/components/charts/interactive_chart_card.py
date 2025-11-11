@@ -90,14 +90,28 @@ class InteractiveChartCard(ctk.CTkFrame):
         controls = ctk.CTkFrame(header, fg_color='transparent')
         controls.pack(side='right')
 
+        # Botón Exportar Interactivo (NUEVO - como en el diseño)
+        export_btn = ctk.CTkButton(
+            controls,
+            text="📥 Exportar",
+            width=110,
+            height=32,
+            font=('Segoe UI', 11, 'bold'),
+            fg_color='#22d3ee',  # Cyan como en el diseño
+            hover_color='#06b6d4',
+            text_color='#1a1d2e',
+            command=self._export_chart
+        )
+        export_btn.pack(side='left', padx=5)
+
         # Botón ampliar (si hay callback)
         if self.on_fullscreen_callback:
             fullscreen_btn = ctk.CTkButton(
                 controls,
-                text="🔍",
+                text="↗",
                 width=35,
-                height=30,
-                font=('Segoe UI', 14),
+                height=32,
+                font=('Segoe UI', 16, 'bold'),
                 fg_color=HUTCHISON_COLORS['aqua_green'],
                 hover_color=HUTCHISON_COLORS['ports_sea_blue'],
                 command=lambda: self.on_fullscreen_callback(self)
@@ -120,10 +134,10 @@ class InteractiveChartCard(ctk.CTkFrame):
         # Botón resetear
         reset_btn = ctk.CTkButton(
             controls,
-            text="↻ Reset",
-            width=70,
+            text="↻",
+            width=35,
             height=30,
-            font=('Segoe UI', 11),
+            font=('Segoe UI', 14, 'bold'),
             fg_color='#666666',
             hover_color='#555555',
             command=self._reset_chart
