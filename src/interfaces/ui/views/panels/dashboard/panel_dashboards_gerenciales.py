@@ -4,7 +4,7 @@ Sistema de navegación: Grid view ↔ Fullscreen view (D3.js embebido)
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
-from src.interfaces.ui.views.components.charts.matplotlib_chart_card import MatplotlibChartCard
+from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
 from src.infrastructure.visualization.d3_generator import MotorTemplatesD3
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
@@ -242,7 +242,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 1: Usuarios por Unidad de Negocio (Barras)
         print("    → Creando dashboard Usuarios por Unidad...")
-        self.chart_usuarios_unidad = MatplotlibChartCard(
+        self.chart_usuarios_unidad = InteractiveChartCard(
             row1,
             title="Usuarios por Unidad de Negocio",
             width=650,
@@ -253,7 +253,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 2: Progreso por Unidad (Donut)
         print("    → Creando dashboard Progreso por Unidad...")
-        self.chart_progreso_unidad = MatplotlibChartCard(
+        self.chart_progreso_unidad = InteractiveChartCard(
             row1,
             title="Progreso General por Unidad de Negocio",
             width=450,
@@ -269,7 +269,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 3: Distribución por Departamento
         print("    → Creando dashboard Distribución Departamentos...")
-        self.chart_departamentos = MatplotlibChartCard(
+        self.chart_departamentos = InteractiveChartCard(
             row2,
             title="Distribución por Departamentos",
             width=500,
@@ -280,7 +280,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 4: Tendencia de Módulos
         print("    → Creando dashboard Tendencia Módulos...")
-        self.chart_modulos_tendencia = MatplotlibChartCard(
+        self.chart_modulos_tendencia = InteractiveChartCard(
             row2,
             title="Tendencia de Completación de Módulos",
             width=500,
@@ -296,7 +296,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 5: Actividad Mensual
         print("    → Creando dashboard Actividad Mensual...")
-        self.chart_actividad = MatplotlibChartCard(
+        self.chart_actividad = InteractiveChartCard(
             row3,
             title="Actividad Mensual del Sistema",
             width=500,
@@ -307,7 +307,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 6: Resultados de Evaluaciones
         print("    → Creando dashboard Evaluaciones...")
-        self.chart_evaluaciones = MatplotlibChartCard(
+        self.chart_evaluaciones = InteractiveChartCard(
             row3,
             title="Resultados de Evaluaciones",
             width=500,
