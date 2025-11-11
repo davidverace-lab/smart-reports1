@@ -78,7 +78,7 @@ class MainWindow:
     def verify_database_tables(self):
         """Verificar que las tablas necesarias existan"""
         tables_needed = ['Instituto_UnidadDeNegocio', 'Instituto_Usuario',
-                        'Instituto_Modulo', 'Instituto_ProgresoModulo']
+                        'instituto_Modulo', 'instituto_ProgresoModulo']
         placeholders = ','.join(['?' for _ in tables_needed])
 
         try:
@@ -1304,14 +1304,13 @@ class MainWindow:
                     u.Division,
                     m.NombreModulo,
                     pm.EstatusModuloUsuario,
-                    DATE_FORMAT(pm.FechaInicio, '%d/%m/%Y') as FechaAsignacion,
-                    DATE_FORMAT(pm.FechaFinalizacion, '%d/%m/%Y') as FechaFinalizacion
+                    CONVERT(VARCHAR(10), pm.FechaInicio, 103) as FechaAsignacion,
+                    CONVERT(VARCHAR(10), pm.FechaFinalizacion, 103) as FechaFinalizacion
                 FROM instituto_Usuario u
                 LEFT JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
-                LEFT JOIN instituto_Rol r ON u.IdRol = r.IdRol
                 LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
                 LEFT JOIN instituto_Modulo m ON pm.IdModulo = m.IdModulo
-                WHERE u.UserId = %s
+                WHERE u.UserId = ?
                 ORDER BY m.NombreModulo
             """, (user_id,))
 
@@ -1331,7 +1330,7 @@ class MainWindow:
             return
 
         try:
-            self.cursor.execute("SELECT DISTINCT NombreUnidad FROM instituto_UnidadDeNegocio WHERE Activo = 1 ORDER BY NombreUnidad")
+            self.cursor.execute("SELECT DISTINCT NombreUnidad FROM instituto_UnidadDeNegocio ORDER BY NombreUnidad")
             units = self.cursor.fetchall()
             unit_names = [unit[0] for unit in units]
 
@@ -1361,9 +1360,9 @@ class MainWindow:
                 FROM instituto_Usuario u
                 JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
                 LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
-                WHERE un.NombreUnidad = %s AND u.Activo = 1
-                GROUP BY u.UserId, u.NombreCompleto, u.UserEmail, un.NombreUnidad
-                ORDER BY u.NombreCompleto
+                WHERE un.NombreUnidad = ?
+                GROUP BY u.UserId, u.Nombre, u.Email, un.NombreUnidad
+                ORDER BY u.Nombre
             """, (unit_name,))
 
             results = self.cursor.fetchall()
@@ -1394,8 +1393,7 @@ class MainWindow:
                 FROM instituto_Usuario u
                 LEFT JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
                 LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
-                WHERE u.Activo = 1
-                GROUP BY u.UserId, u.NombreCompleto, u.UserEmail, un.NombreUnidad
+                GROUP BY u.UserId, u.Nombre, u.Email, un.NombreUnidad
                 ORDER BY u.UserId
             """)
 
@@ -1461,10 +1459,10 @@ class MainWindow:
     def show_progress_stats(self):
         """Mostrar estadísticas de progreso"""
         try:
-            self.cursor.execute("SELECT COUNT(*) FROM Instituto_Usuario")
+            self.cursor.execute("SELECT COUNT(*) FROM instituto_Usuario")
             total_users = self.cursor.fetchone()[0]
 
-            self.cursor.execute("SELECT COUNT(*) FROM Instituto_Modulo")
+            self.cursor.execute("SELECT COUNT(*) FROM instituto_Modulo")
             total_modules = self.cursor.fetchone()[0]
 
             self.cursor.execute("""
@@ -1472,7 +1470,7 @@ class MainWindow:
                     SUM(CASE WHEN EstatusModuloUsuario = 'Terminado' THEN 1 ELSE 0 END) as Completados,
                     SUM(CASE WHEN EstatusModuloUsuario = 'En Progreso' THEN 1 ELSE 0 END) as EnProgreso,
                     COUNT(*) as Total
-                FROM Instituto_ProgresoModulo
+                FROM instituto_ProgresoModulo
             """)
             result = self.cursor.fetchone()
 
@@ -1631,7 +1629,7 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
         try:
             self.cursor.execute("""
                 SELECT DISTINCT IdModulo, NombreModulo
-                FROM Instituto_Modulo
+                FROM instituto_Modulo
                 ORDER BY IdModulo
             """)
             modules = [row[1] for row in self.cursor.fetchall()]  # row[1] es NombreModulo
@@ -1663,10 +1661,10 @@ Porcentaje Completado: {(result[0]/result[2]*100):.1f}%
                 pm.EstatusModuloUsuario,
                 pm.FechaInicio,
                 pm.FechaFin
-            FROM Instituto_Usuario u
-            LEFT JOIN Instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
-            LEFT JOIN Instituto_ProgresoModulo pm ON u.UserId = pm.UserId
-            LEFT JOIN Instituto_Modulo m ON pm.IdModulo = m.IdModulo
+            FROM instituto_Usuario u
+            LEFT JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+            LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
+            LEFT JOIN instituto_Modulo m ON pm.IdModulo = m.IdModulo
             WHERE 1=1
         """
 
