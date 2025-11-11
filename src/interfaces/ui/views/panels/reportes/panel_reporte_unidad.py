@@ -24,6 +24,7 @@ except ImportError:
     print("ReportLab no está instalado. Instala con: pip install reportlab")
 
 from config.gestor_temas import get_theme_manager
+from src.interfaces.ui.views.components.charts.previsualizador_reporte import PrevisualizadorReporte
 
 
 class UnitReportPanel(ctk.CTkFrame):
@@ -60,7 +61,6 @@ class UnitReportPanel(ctk.CTkFrame):
             # Guardar el estado actual
             current_unit = ''
             current_module = ''
-            preview_content = ''
             save_button_state = 'disabled'
 
             if hasattr(self, 'unit_dropdown') and self.unit_dropdown.winfo_exists():
@@ -69,8 +69,7 @@ class UnitReportPanel(ctk.CTkFrame):
             if hasattr(self, 'module_dropdown') and self.module_dropdown.winfo_exists():
                 current_module = self.module_dropdown.get()
 
-            if hasattr(self, 'preview_text') and self.preview_text.winfo_exists():
-                preview_content = self.preview_text.get('1.0', 'end-1c')
+            # Preview widget ya no necesita guardar contenido (se regenera)
 
             if hasattr(self, 'save_button') and self.save_button.winfo_exists():
                 save_button_state = str(self.save_button.cget('state'))
@@ -85,11 +84,7 @@ class UnitReportPanel(ctk.CTkFrame):
             if current_module and hasattr(self, 'module_dropdown'):
                 self.module_dropdown.set(current_module)
 
-            if preview_content and preview_content.strip() and hasattr(self, 'preview_text'):
-                self.preview_text.configure(state='normal')
-                self.preview_text.delete('1.0', 'end')
-                self.preview_text.insert('1.0', preview_content)
-                self.preview_text.configure(state='disabled')
+            # Preview widget se regenera automáticamente si es necesario
 
             if save_button_state == 'normal' and hasattr(self, 'save_button'):
                 self.save_button.configure(state='normal')
@@ -250,19 +245,9 @@ class UnitReportPanel(ctk.CTkFrame):
         )
         self.save_button.grid(row=0, column=1, sticky='e', padx=(15, 0))
 
-        # Área de vista previa - Más grande y profesional
-        self.preview_text = ctk.CTkTextbox(
-            preview_section,
-            font=('Courier New', 13),
-            wrap='none',
-            corner_radius=10,
-            height=600
-        )
-        self.preview_text.pack(fill='both', expand=True, padx=30, pady=(0, 30))
-
-        # Mensaje inicial
-        self.preview_text.insert('1.0', 'Seleccione una Unidad de Negocio y Módulo, luego haga clic en "Generar Vista Previa" para ver el reporte.')
-        self.preview_text.configure(state='disabled')
+        # Área de vista previa - HTML profesional estilo Word
+        self.preview_widget = PrevisualizadorReporte(preview_section)
+        self.preview_widget.pack(fill='both', expand=True, padx=30, pady=(0, 30))
 
     def _get_units_from_db(self):
         """Obtener unidades de negocio desde la base de datos"""
@@ -524,9 +509,13 @@ class UnitReportPanel(ctk.CTkFrame):
         self.current_pdf_buffer = buffer
 
     def _show_preview_text(self, unit, module, population):
-        """Mostrar vista previa en formato profesional"""
-        self.preview_text.configure(state='normal')
-        self.preview_text.delete('1.0', 'end')
+        """Mostrar vista previa en HTML profesional"""
+        # Preparar datos de la unidad
+        datos_unidad = {
+            'unit': unit,
+            'module': module,
+            'population': population
+        }
 
         # Generar datos de tabla según selección
         if module == 'Todos':
@@ -535,70 +524,23 @@ class UnitReportPanel(ctk.CTkFrame):
             module_num = int(module.split()[1])
             modules_list = [module_num]
 
-        # Construir tabla de módulos
-        table_rows = []
+        # Preparar estadísticas por módulo
+        estadisticas = []
         for mod_num in modules_list:
             sin_iniciar = int(population * 0.15)
             en_proceso = int(population * 0.25)
             completado = population - sin_iniciar - en_proceso
 
-            table_rows.append(
-                f"    │ Módulo {mod_num:<2} │    {population:<6} │   {sin_iniciar:<4}  │   {en_proceso:<4}   │   {completado:<4}    │"
-            )
+            estadisticas.append({
+                'modulo': f'Módulo {mod_num}',
+                'poblacion_asignada': population,
+                'sin_iniciar': sin_iniciar,
+                'en_proceso': en_proceso,
+                'completado': completado
+            })
 
-        # Calcular totales
-        total_sin_iniciar = len(modules_list) * int(population * 0.15)
-        total_en_proceso = len(modules_list) * int(population * 0.25)
-        total_completado = len(modules_list) * population - total_sin_iniciar - total_en_proceso
-        total_registros = len(modules_list) * population
-
-        preview = f"""
-════════════════════════════════════════════════════════════════════════════════
-                  REPORTE DE PROGRESO POR UNIDAD DE NEGOCIO
-                          {unit}
-                       Instituto Hutchison Ports
-════════════════════════════════════════════════════════════════════════════════
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ INFORMACIÓN GENERAL                                                         │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-    Unidad de Negocio:    {unit}
-    Módulo(s):            {module}
-    Población Total:      {population} usuarios
-    Fecha de Reporte:     {datetime.now().strftime('%d de %B de %Y - %H:%M hrs')}
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ PROGRESO POR MÓDULO                                                         │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-    ┌────────────┬────────────┬──────────┬────────────┬─────────────┐
-    │   Módulo   │ Población  │   Sin    │     En     │ Completado  │
-    │            │  Asignada  │ Iniciar  │  Proceso   │             │
-    ├────────────┼────────────┼──────────┼────────────┼─────────────┤
-{chr(10).join(table_rows)}
-    └────────────┴────────────┴──────────┴────────────┴─────────────┘
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ RESUMEN GENERAL                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-    📊 Total de Registros:     {total_registros}
-    ⏸️  Sin Iniciar:            {total_sin_iniciar} ({(total_sin_iniciar/total_registros*100):.1f}%)
-    🔄 En Proceso:             {total_en_proceso} ({(total_en_proceso/total_registros*100):.1f}%)
-    ✅ Completado:             {total_completado} ({(total_completado/total_registros*100):.1f}%)
-
-
-════════════════════════════════════════════════════════════════════════════════
-         Generado automáticamente por Smart Reports v2.0
-         {datetime.now().strftime('%d/%m/%Y a las %H:%M hrs')}
-════════════════════════════════════════════════════════════════════════════════
-"""
-
-        self.preview_text.insert('1.0', preview)
-        self.preview_text.configure(state='disabled')
+        # Mostrar en widget HTML
+        self.preview_widget.mostrar_reporte_unidad(datos_unidad, estadisticas)
 
     def _save_pdf(self):
         """Guardar PDF en PC"""
