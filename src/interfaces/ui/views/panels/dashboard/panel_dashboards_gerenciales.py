@@ -1,10 +1,11 @@
 """
 Panel de Dashboards Gerenciales - HUTCHISON PORTS (CON DATOS ESTÁTICOS)
-Sistema de navegación: Grid view ↔ Fullscreen view
+Sistema de navegación: Grid view ↔ Modal Fullscreen con animación
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
 from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
+from src.interfaces.ui.views.components.charts.modal_fullscreen_chart import ModalFullscreenChart
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 
@@ -405,29 +406,30 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
     def _show_fullscreen_chart(self, chart):
         """
-        Mostrar un gráfico en modo fullscreen
+        Mostrar un gráfico en modo fullscreen usando MODAL con animación
 
         Args:
             chart: InteractiveChartCard a ampliar
         """
-        print(f"🔍 Ampliando gráfico: {chart.title_text}")
+        print(f"🔍 Ampliando gráfico en MODAL: {chart.title_text}")
 
-        # Actualizar título del header
-        self.fullscreen_title.configure(text=f"📊 {chart.title_text}")
-
-        # Copiar datos del chart original al fullscreen
+        # Crear y mostrar modal fullscreen con animación
         if chart.chart_data and chart.chart_type:
-            self.fullscreen_chart.set_chart(
-                chart.chart_type,
-                {
+            modal = ModalFullscreenChart(
+                parent=self,
+                title=chart.title_text,
+                chart_type=chart.chart_type,
+                chart_data={
                     'labels': chart.chart_data['labels'].copy(),
                     'values': chart.chart_data['values'].copy()
                 }
             )
 
-        # Cambiar vista: ocultar grid, mostrar fullscreen
-        self.grid_frame.pack_forget()
-        self.fullscreen_frame.pack(fill='both', expand=True)
+            # Mantener foco en el modal
+            modal.focus_force()
+            modal.grab_set()
+
+            print(f"  ✅ Modal fullscreen creado con animación deslizante")
 
     def _create_metric_card(self, parent, title, value, subtitle, icon, color):
         """Crear tarjeta de métrica estándar"""
