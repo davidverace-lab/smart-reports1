@@ -227,7 +227,7 @@ class ManagementLevelsPanel(ctk.CTkFrame):
             return 1525  # Valor por defecto
 
         try:
-            self.cursor.execute("SELECT COUNT(*) FROM Instituto_Usuario")
+            self.cursor.execute("SELECT COUNT(*) FROM Usuario")
             result = self.cursor.fetchone()
             return result[0] if result else 1525
         except Exception as e:

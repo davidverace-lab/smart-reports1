@@ -243,9 +243,9 @@ class UserReportPanel(ctk.CTkFrame):
         try:
             # Obtener datos del usuario
             self.cursor.execute("""
-                SELECT UserId, Nombre, Email
-                FROM Instituto_Usuario
-                WHERE UserId = ?
+                SELECT UserId, NombreCompleto, UserEmail
+                FROM Usuario
+                WHERE UserId = %s
             """, (userid,))
 
             user = self.cursor.fetchone()
