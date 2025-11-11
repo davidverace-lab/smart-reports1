@@ -15,7 +15,7 @@ if str(BASE_DIR) not in sys.path:
 import customtkinter as ctk
 from config.settings import UI_CONFIG, APP_NAME
 from src.interfaces.ui.views.windows.ventana_login import LoginWindow
-from src.interfaces.ui.views.windows.ventana_principal import MainWindow
+from src.interfaces.ui.views.windows.ventana_principal_view import VentanaPrincipalView as MainWindow
 
 
 def main():
