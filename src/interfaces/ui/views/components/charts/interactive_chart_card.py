@@ -629,3 +629,56 @@ class InteractiveChartCard(ctk.CTkFrame):
         self.sort_order = 'desc'
         self.sort_btn.configure(text="↓ Desc")
         self._render_chart()
+
+    def _export_chart(self):
+        """
+        Exportar gráfico como imagen PNG
+
+        Funcionalidad:
+        - Guarda el gráfico actual como imagen PNG
+        - Abre diálogo para seleccionar ubicación
+        - Incluye fecha/hora en el nombre del archivo
+        """
+        from tkinter import filedialog
+        from datetime import datetime
+
+        if not self.fig:
+            print("⚠️ No hay gráfico para exportar")
+            return
+
+        try:
+            # Generar nombre de archivo sugerido
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            title_clean = self.title_text.replace(" ", "_").replace("/", "-")[:30]
+            filename = f"grafico_{title_clean}_{timestamp}.png"
+
+            # Abrir diálogo de guardado
+            filepath = filedialog.asksaveasfilename(
+                defaultextension=".png",
+                initialfile=filename,
+                filetypes=[
+                    ("PNG Image", "*.png"),
+                    ("PDF Document", "*.pdf"),
+                    ("SVG Vector", "*.svg"),
+                    ("Todos los archivos", "*.*")
+                ],
+                title="Exportar Gráfico"
+            )
+
+            if filepath:
+                # Guardar según extensión
+                if filepath.lower().endswith('.png'):
+                    self.fig.savefig(filepath, dpi=300, bbox_inches='tight', facecolor='white')
+                elif filepath.lower().endswith('.pdf'):
+                    self.fig.savefig(filepath, format='pdf', bbox_inches='tight')
+                elif filepath.lower().endswith('.svg'):
+                    self.fig.savefig(filepath, format='svg', bbox_inches='tight')
+                else:
+                    self.fig.savefig(filepath, dpi=300, bbox_inches='tight', facecolor='white')
+
+                print(f"✅ Gráfico exportado: {filepath}")
+
+        except Exception as e:
+            print(f"❌ Error exportando gráfico: {e}")
+            import traceback
+            traceback.print_exc()
