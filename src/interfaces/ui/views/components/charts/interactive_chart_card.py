@@ -20,7 +20,7 @@ class InteractiveChartCard(ctk.CTkFrame):
 
     def __init__(self, parent, title='', width=500, height=400, **kwargs):
         # Extract custom parameters that CTkFrame doesn't support
-        on_fullscreen = kwargs.pop('on_fullscreen', None)
+        self.on_fullscreen_callback = kwargs.pop('on_fullscreen', None)
 
         super().__init__(parent, fg_color='transparent', **kwargs)
 
@@ -77,6 +77,20 @@ class InteractiveChartCard(ctk.CTkFrame):
         # Botones de control
         controls = ctk.CTkFrame(header, fg_color='transparent')
         controls.pack(side='right')
+
+        # Botón ampliar (si hay callback)
+        if self.on_fullscreen_callback:
+            fullscreen_btn = ctk.CTkButton(
+                controls,
+                text="🔍",
+                width=35,
+                height=30,
+                font=('Segoe UI', 14),
+                fg_color=HUTCHISON_COLORS['aqua_green'],
+                hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+                command=lambda: self.on_fullscreen_callback(self)
+            )
+            fullscreen_btn.pack(side='left', padx=2)
 
         # Botón ordenar
         self.sort_btn = ctk.CTkButton(

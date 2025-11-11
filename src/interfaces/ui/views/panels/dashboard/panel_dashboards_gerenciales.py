@@ -246,7 +246,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row1,
             title="Usuarios por Unidad de Negocio",
             width=650,
-            height=450
+            height=450,
+            on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_usuarios_unidad.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
 
@@ -256,7 +257,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row1,
             title="Progreso General por Unidad de Negocio",
             width=450,
-            height=450
+            height=450,
+            on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_progreso_unidad.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
 
@@ -271,7 +273,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row2,
             title="Distribución por Departamentos",
             width=500,
-            height=400
+            height=400,
+            on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_departamentos.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
@@ -281,7 +284,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row2,
             title="Tendencia de Completación de Módulos",
             width=500,
-            height=400
+            height=400,
+            on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_modulos_tendencia.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -296,7 +300,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row3,
             title="Actividad Mensual del Sistema",
             width=500,
-            height=400
+            height=400,
+            on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_actividad.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
@@ -306,7 +311,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row3,
             title="Resultados de Evaluaciones",
             width=500,
-            height=400
+            height=400,
+            on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_evaluaciones.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -346,22 +352,21 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         )
         self.fullscreen_title.pack(side='left', padx=20)
 
-        # Container para el HTML embebido
-        if TKINTERWEB_AVAILABLE:
-            self.fullscreen_html = HtmlFrame(
-                self.fullscreen_frame,
-                messages_enabled=False
-            )
-            self.fullscreen_html.pack(fill='both', expand=True, padx=20, pady=20)
-        else:
-            # Fallback: mostrar mensaje
-            msg = ctk.CTkLabel(
-                self.fullscreen_frame,
-                text="⚠️ tkinterweb no disponible\nInstalar con: pip install tkinterweb",
-                font=('Segoe UI', 16),
-                text_color=theme['text_secondary']
-            )
-            msg.pack(fill='both', expand=True, padx=20, pady=20)
+        # Container para el gráfico ampliado
+        self.fullscreen_chart_container = ctk.CTkFrame(
+            self.fullscreen_frame,
+            fg_color='transparent'
+        )
+        self.fullscreen_chart_container.pack(fill='both', expand=True, padx=20, pady=20)
+
+        # Crear InteractiveChartCard grande para fullscreen
+        self.fullscreen_chart = InteractiveChartCard(
+            self.fullscreen_chart_container,
+            title="",
+            width=1200,
+            height=700
+        )
+        self.fullscreen_chart.pack(fill='both', expand=True)
 
     def show_grid_view(self):
         """Mostrar vista grid (ocultar fullscreen)"""
@@ -369,22 +374,29 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.fullscreen_frame.pack_forget()
         self.grid_frame.pack(fill='both', expand=True, padx=10, pady=10)
 
-    def show_fullscreen_view(self, title, html_path):
-        """Mostrar vista fullscreen (ocultar grid)"""
-        print(f"🖥️ Mostrando vista FULLSCREEN: {title}")
+    def _show_fullscreen_chart(self, chart):
+        """
+        Mostrar un gráfico en modo fullscreen
 
-        # Actualizar título
-        self.fullscreen_title.configure(text=f"📊 {title}")
+        Args:
+            chart: InteractiveChartCard a ampliar
+        """
+        print(f"🔍 Ampliando gráfico: {chart.title_text}")
 
-        # Cargar HTML si tkinterweb está disponible
-        if TKINTERWEB_AVAILABLE and hasattr(self, 'fullscreen_html'):
-            try:
-                self.fullscreen_html.load_file(html_path)
-                print(f"  ✓ HTML cargado: {html_path}")
-            except Exception as e:
-                print(f"  ⚠️ Error cargando HTML: {e}")
+        # Actualizar título del header
+        self.fullscreen_title.configure(text=f"📊 {chart.title_text}")
 
-        # Cambiar de vista
+        # Copiar datos del chart original al fullscreen
+        if chart.chart_data and chart.chart_type:
+            self.fullscreen_chart.set_chart(
+                chart.chart_type,
+                {
+                    'labels': chart.chart_data['labels'].copy(),
+                    'values': chart.chart_data['values'].copy()
+                }
+            )
+
+        # Cambiar vista: ocultar grid, mostrar fullscreen
         self.grid_frame.pack_forget()
         self.fullscreen_frame.pack(fill='both', expand=True)
 
@@ -534,11 +546,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
                 print("    ⚠ Usando datos de ejemplo")
                 datos_unidades = self._get_datos_ejemplo_unidades()
 
-            # Generar D3.js y obtener URL
-            url_d3 = self._generate_d3_html_and_url('bar', datos_unidades, "Usuarios por Unidad de Negocio")
-
-            # Cargar en Matplotlib + URL D3
-            self.chart_usuarios_unidad.set_chart('bar', datos_unidades, d3_url=url_d3)
+            # Cargar en InteractiveChartCard
+            self.chart_usuarios_unidad.set_chart('bar', datos_unidades)
             print(f"    ✓ Cargado con {len(datos_unidades['values'])} unidades")
 
             # Dashboard 2: Progreso por Unidad
@@ -548,22 +557,16 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
                 print("    ⚠ Usando datos de ejemplo")
                 datos_progreso = self._get_datos_ejemplo_progreso()
 
-            # Generar D3.js y obtener URL
-            url_d3 = self._generate_d3_html_and_url('donut', datos_progreso, "Progreso General por Unidad de Negocio")
-
-            # Cargar en Matplotlib + URL D3
-            self.chart_progreso_unidad.set_chart('donut', datos_progreso, d3_url=url_d3)
+            # Cargar en InteractiveChartCard
+            self.chart_progreso_unidad.set_chart('donut', datos_progreso)
             print(f"    ✓ Cargado con {len(datos_progreso['values'])} unidades")
 
             # Dashboard 3: Distribución por Departamentos
             print("  → Dashboard 3: Distribución Departamentos (donut)")
             datos_deptos = self._get_distribucion_departamentos()
 
-            # Generar D3.js y obtener URL
-            url_d3 = self._generate_d3_html_and_url('donut', datos_deptos, "Distribución por Departamentos")
-
-            # Cargar en Matplotlib + URL D3
-            self.chart_departamentos.set_chart('donut', datos_deptos, d3_url=url_d3)
+            # Cargar en InteractiveChartCard
+            self.chart_departamentos.set_chart('donut', datos_deptos)
             print(f"    ✓ Cargado con {len(datos_deptos['values'])} departamentos")
 
             # Dashboard 4: Tendencia de Módulos
@@ -573,11 +576,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
                 'values': [92, 88, 85, 82, 78, 75, 72, 70]
             }
 
-            # Generar D3.js y obtener URL
-            url_d3 = self._generate_d3_html_and_url('line', datos_tendencia, "Tendencia de Progreso por Módulos")
-
-            # Cargar en Matplotlib + URL D3
-            self.chart_modulos_tendencia.set_chart('line', datos_tendencia, d3_url=url_d3)
+            # Cargar en InteractiveChartCard
+            self.chart_modulos_tendencia.set_chart('line', datos_tendencia)
             print(f"    ✓ Cargado con {len(datos_tendencia['values'])} módulos")
 
             # Dashboard 5: Actividad Mensual
@@ -587,11 +587,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
                 'values': [850, 920, 980, 1050, 1120, 1180, 1250, 1320, 1380, 1450, 1500, 1525]
             }
 
-            # Generar D3.js y obtener URL
-            url_d3 = self._generate_d3_html_and_url('line', datos_actividad, "Actividad de Usuarios Mensual")
-
-            # Cargar en Matplotlib + URL D3
-            self.chart_actividad.set_chart('line', datos_actividad, d3_url=url_d3)
+            # Cargar en InteractiveChartCard
+            self.chart_actividad.set_chart('line', datos_actividad)
             print(f"    ✓ Cargado con {len(datos_actividad['values'])} meses")
 
             # Dashboard 6: Resultados de Evaluaciones
@@ -601,11 +598,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
                 'values': [1068, 284, 142, 31]
             }
 
-            # Generar D3.js y obtener URL
-            url_d3 = self._generate_d3_html_and_url('bar', datos_eval, "Resultados de Evaluaciones")
-
-            # Cargar en Matplotlib + URL D3
-            self.chart_evaluaciones.set_chart('bar', datos_eval, d3_url=url_d3)
+            # Cargar en InteractiveChartCard
+            self.chart_evaluaciones.set_chart('bar', datos_eval)
             print(f"    ✓ Cargado con {len(datos_eval['values'])} categorías")
 
             print("\n" + "="*70)
