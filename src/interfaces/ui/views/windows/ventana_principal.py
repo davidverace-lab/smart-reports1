@@ -1297,20 +1297,21 @@ class MainWindow:
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    u.Nombre,
-                    u.Email,
+                    u.NombreCompleto,
+                    u.UserEmail,
                     un.NombreUnidad,
-                    u.Nivel,
+                    r.NombreRol as Nivel,
                     u.Division,
                     m.NombreModulo,
                     pm.EstatusModuloUsuario,
-                    CONVERT(VARCHAR(10), pm.FechaInicio, 103) as FechaAsignacion,
-                    CONVERT(VARCHAR(10), pm.FechaFinalizacion, 103) as FechaFinalizacion
-                FROM Instituto_Usuario u
-                LEFT JOIN Instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
-                LEFT JOIN Instituto_ProgresoModulo pm ON u.UserId = pm.UserId
-                LEFT JOIN Instituto_Modulo m ON pm.IdModulo = m.IdModulo
-                WHERE u.UserId = ?
+                    DATE_FORMAT(pm.FechaInicio, '%d/%m/%Y') as FechaAsignacion,
+                    DATE_FORMAT(pm.FechaFinalizacion, '%d/%m/%Y') as FechaFinalizacion
+                FROM instituto_Usuario u
+                LEFT JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+                LEFT JOIN instituto_Rol r ON u.IdRol = r.IdRol
+                LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
+                LEFT JOIN instituto_Modulo m ON pm.IdModulo = m.IdModulo
+                WHERE u.UserId = %s
                 ORDER BY m.NombreModulo
             """, (user_id,))
 
@@ -1330,7 +1331,7 @@ class MainWindow:
             return
 
         try:
-            self.cursor.execute("SELECT DISTINCT NombreUnidad FROM Instituto_UnidadDeNegocio ORDER BY NombreUnidad")
+            self.cursor.execute("SELECT DISTINCT NombreUnidad FROM instituto_UnidadDeNegocio WHERE Activo = 1 ORDER BY NombreUnidad")
             units = self.cursor.fetchall()
             unit_names = [unit[0] for unit in units]
 
@@ -1352,25 +1353,30 @@ class MainWindow:
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    u.Nombre,
-                    u.Email,
+                    u.NombreCompleto,
+                    u.UserEmail,
                     un.NombreUnidad,
                     COUNT(DISTINCT pm.IdModulo) as TotalModulos,
                     SUM(CASE WHEN pm.EstatusModuloUsuario = 'Terminado' THEN 1 ELSE 0 END) as Completados
-                FROM Instituto_Usuario u
-                JOIN Instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
-                LEFT JOIN Instituto_ProgresoModulo pm ON u.UserId = pm.UserId
-                WHERE un.NombreUnidad = ?
-                GROUP BY u.UserId, u.Nombre, u.Email, un.NombreUnidad
-                ORDER BY u.Nombre
+                FROM instituto_Usuario u
+                JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+                LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
+                WHERE un.NombreUnidad = %s AND u.Activo = 1
+                GROUP BY u.UserId, u.NombreCompleto, u.UserEmail, un.NombreUnidad
+                ORDER BY u.NombreCompleto
             """, (unit_name,))
 
             results = self.cursor.fetchall()
             if results:
                 self.display_search_results(results,
                     ['User ID', 'Nombre', 'Email', 'Unidad', 'Total Módulos', 'Completados'])
+                # Actualizar contador
+                if hasattr(self, 'results_counter_label'):
+                    self.results_counter_label.configure(text=f'Mostrando {len(results)} resultados')
             else:
                 messagebox.showinfo("Sin resultados", f"No hay usuarios en {unit_name}")
+                if hasattr(self, 'results_counter_label'):
+                    self.results_counter_label.configure(text='Mostrando 0 resultados')
         except Exception as e:
             messagebox.showerror("Error", f"Error en consulta: {str(e)}")
 
@@ -1380,15 +1386,16 @@ class MainWindow:
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    u.Nombre,
-                    u.Email,
+                    u.NombreCompleto,
+                    u.UserEmail,
                     un.NombreUnidad,
                     COUNT(DISTINCT pm.IdModulo) as TotalModulos,
                     SUM(CASE WHEN pm.EstatusModuloUsuario = 'Completado' THEN 1 ELSE 0 END) as Completados
-                FROM Instituto_Usuario u
-                LEFT JOIN Instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
-                LEFT JOIN Instituto_ProgresoModulo pm ON u.UserId = pm.UserId
-                GROUP BY u.UserId, u.Nombre, u.Email, un.NombreUnidad
+                FROM instituto_Usuario u
+                LEFT JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+                LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
+                WHERE u.Activo = 1
+                GROUP BY u.UserId, u.NombreCompleto, u.UserEmail, un.NombreUnidad
                 ORDER BY u.UserId
             """)
 
@@ -1396,8 +1403,13 @@ class MainWindow:
             if results:
                 self.display_search_results(results,
                     ['User ID', 'Nombre', 'Email', 'Unidad', 'Total Módulos', 'Completados'])
+                # Actualizar contador
+                if hasattr(self, 'results_counter_label'):
+                    self.results_counter_label.configure(text=f'Mostrando {len(results)} resultados')
             else:
                 messagebox.showinfo("Sin resultados", "No hay usuarios en el sistema")
+                if hasattr(self, 'results_counter_label'):
+                    self.results_counter_label.configure(text='Mostrando 0 resultados')
         except Exception as e:
             messagebox.showerror("Error", f"Error en consulta: {str(e)}")
 
