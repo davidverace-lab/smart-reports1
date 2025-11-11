@@ -1,16 +1,23 @@
 """
 Panel de Dashboards Gerenciales - HUTCHISON PORTS
-Sistema híbrido: Matplotlib para previews + CEF Python para fullscreen D3.js interactivo
+Sistema de navegación: Grid view ↔ Fullscreen view (D3.js embebido)
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
-from src.interfaces.ui.views.components.charts.matplotlib_chart_card import MatplotlibChartCard
-from src.interfaces.ui.views.components.charts.cef_browser_window import open_cef_window
+from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
 from src.infrastructure.visualization.d3_generator import MotorTemplatesD3
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 import tempfile
 import os
+
+# Importar tkinterweb para embeber HTML
+try:
+    from tkinterweb import HtmlFrame
+    TKINTERWEB_AVAILABLE = True
+except ImportError:
+    TKINTERWEB_AVAILABLE = False
+    print("⚠️ tkinterweb no disponible")
 
 
 class DashboardsGerencialesPanel(ctk.CTkFrame):
@@ -47,7 +54,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             # Crear pestañas
             print("  → Agregando pestañas...")
             self.tab_general = self.tab_view.add("General", "📊")
-            self.tab_gerencial = self.tab_view.add("Dashboards Gerenciales", "📈")
+            self.tab_gerencial = self.tab_view.add("Dashboard", "📈")
 
             # Crear contenido
             print("  → Creando contenido de tabs...")
@@ -192,15 +199,31 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.card_objetivos.grid(row=1, column=1, padx=10, pady=10, sticky='nsew')
 
     def _create_gerencial_tab(self):
-        """Crear pestaña Dashboards Gerenciales con TODOS los gráficos D3.js"""
+        """Crear pestaña Dashboards Gerenciales con sistema de navegación Grid ↔ Fullscreen"""
         theme = self.theme_manager.get_current_theme()
 
-        # Container con scroll
-        container = ctk.CTkScrollableFrame(
+        # === VISTA GRID (6 dashboards) ===
+        self.grid_frame = ctk.CTkScrollableFrame(
             self.tab_gerencial,
             fg_color='transparent'
         )
-        container.pack(fill='both', expand=True, padx=10, pady=10)
+        self.grid_frame.pack(fill='both', expand=True, padx=10, pady=10)
+
+        # === VISTA FULLSCREEN (1 dashboard grande) ===
+        self.fullscreen_frame = ctk.CTkFrame(
+            self.tab_gerencial,
+            fg_color='transparent'
+        )
+        # No se empaqueta inicialmente (oculto)
+
+        # Crear ambas vistas
+        self._create_grid_view()
+        self._create_fullscreen_view()
+
+    def _create_grid_view(self):
+        """Crear vista grid con los 6 dashboards"""
+        theme = self.theme_manager.get_current_theme()
+        container = self.grid_frame
 
         # Título de sección
         section_title = ctk.CTkLabel(
@@ -219,7 +242,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 1: Usuarios por Unidad de Negocio (Barras)
         print("    → Creando dashboard Usuarios por Unidad...")
-        self.chart_usuarios_unidad = MatplotlibChartCard(
+        self.chart_usuarios_unidad = InteractiveChartCard(
             row1,
             title="Usuarios por Unidad de Negocio",
             width=650,
@@ -230,7 +253,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 2: Progreso por Unidad (Donut)
         print("    → Creando dashboard Progreso por Unidad...")
-        self.chart_progreso_unidad = MatplotlibChartCard(
+        self.chart_progreso_unidad = InteractiveChartCard(
             row1,
             title="Progreso General por Unidad de Negocio",
             width=450,
@@ -246,7 +269,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 3: Distribución por Departamento
         print("    → Creando dashboard Distribución Departamentos...")
-        self.chart_departamentos = MatplotlibChartCard(
+        self.chart_departamentos = InteractiveChartCard(
             row2,
             title="Distribución por Departamentos",
             width=500,
@@ -257,7 +280,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 4: Tendencia de Módulos
         print("    → Creando dashboard Tendencia Módulos...")
-        self.chart_modulos_tendencia = MatplotlibChartCard(
+        self.chart_modulos_tendencia = InteractiveChartCard(
             row2,
             title="Tendencia de Completación de Módulos",
             width=500,
@@ -273,7 +296,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 5: Actividad Mensual
         print("    → Creando dashboard Actividad Mensual...")
-        self.chart_actividad = MatplotlibChartCard(
+        self.chart_actividad = InteractiveChartCard(
             row3,
             title="Actividad Mensual del Sistema",
             width=500,
@@ -284,7 +307,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 6: Resultados de Evaluaciones
         print("    → Creando dashboard Evaluaciones...")
-        self.chart_evaluaciones = MatplotlibChartCard(
+        self.chart_evaluaciones = InteractiveChartCard(
             row3,
             title="Resultados de Evaluaciones",
             width=500,
@@ -292,6 +315,84 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             on_fullscreen=self._on_dashboard_fullscreen
         )
         self.chart_evaluaciones.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
+
+    def _create_fullscreen_view(self):
+        """Crear vista fullscreen para mostrar un dashboard grande"""
+        theme = self.theme_manager.get_current_theme()
+
+        # Header con botón volver
+        header = ctk.CTkFrame(
+            self.fullscreen_frame,
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            height=70,
+            corner_radius=0
+        )
+        header.pack(fill='x', side='top')
+        header.pack_propagate(False)
+
+        # Botón volver
+        back_btn = ctk.CTkButton(
+            header,
+            text="← Volver a Dashboards",
+            font=('Segoe UI', 14, 'bold'),
+            fg_color='#003D8F',
+            hover_color='#001a3d',
+            command=self.show_grid_view,
+            width=200,
+            height=40
+        )
+        back_btn.pack(side='left', padx=20, pady=15)
+
+        # Título del dashboard actual
+        self.fullscreen_title = ctk.CTkLabel(
+            header,
+            text="",
+            font=('Segoe UI', 20, 'bold'),
+            text_color='white'
+        )
+        self.fullscreen_title.pack(side='left', padx=20)
+
+        # Container para el HTML embebido
+        if TKINTERWEB_AVAILABLE:
+            self.fullscreen_html = HtmlFrame(
+                self.fullscreen_frame,
+                messages_enabled=False
+            )
+            self.fullscreen_html.pack(fill='both', expand=True, padx=20, pady=20)
+        else:
+            # Fallback: mostrar mensaje
+            msg = ctk.CTkLabel(
+                self.fullscreen_frame,
+                text="⚠️ tkinterweb no disponible\nInstalar con: pip install tkinterweb",
+                font=('Segoe UI', 16),
+                text_color=theme['text_secondary']
+            )
+            msg.pack(fill='both', expand=True, padx=20, pady=20)
+
+    def show_grid_view(self):
+        """Mostrar vista grid (ocultar fullscreen)"""
+        print("📊 Mostrando vista GRID")
+        self.fullscreen_frame.pack_forget()
+        self.grid_frame.pack(fill='both', expand=True, padx=10, pady=10)
+
+    def show_fullscreen_view(self, title, html_path):
+        """Mostrar vista fullscreen (ocultar grid)"""
+        print(f"🖥️ Mostrando vista FULLSCREEN: {title}")
+
+        # Actualizar título
+        self.fullscreen_title.configure(text=f"📊 {title}")
+
+        # Cargar HTML si tkinterweb está disponible
+        if TKINTERWEB_AVAILABLE and hasattr(self, 'fullscreen_html'):
+            try:
+                self.fullscreen_html.load_file(html_path)
+                print(f"  ✓ HTML cargado: {html_path}")
+            except Exception as e:
+                print(f"  ⚠️ Error cargando HTML: {e}")
+
+        # Cambiar de vista
+        self.grid_frame.pack_forget()
+        self.fullscreen_frame.pack(fill='both', expand=True)
 
     def _create_metric_card(self, parent, title, value, subtitle, icon, color):
         """Crear tarjeta de métrica estándar"""
@@ -705,12 +806,14 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         return f"file://{filepath}"
 
     def _on_dashboard_fullscreen(self, title, chart_type, data, subtitle, url):
-        """Abrir ventana CEF con D3.js interactivo"""
-        print(f"\n🖥️  Activando fullscreen CEF: {title}")
+        """Cambiar a vista fullscreen dentro de la app"""
+        print(f"\n🖥️  Activando fullscreen interno: {title}")
 
-        # Abrir ventana CEF con D3.js interactivo
-        open_cef_window(
-            parent=self.winfo_toplevel(),
-            title=title,
-            url=url
-        )
+        # Convertir file:// URL a path
+        if url.startswith('file://'):
+            html_path = url.replace('file://', '')
+        else:
+            html_path = url
+
+        # Cambiar a vista fullscreen
+        self.show_fullscreen_view(title, html_path)

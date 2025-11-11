@@ -24,11 +24,14 @@ class CustomTabButton(ctk.CTkButton):
 
         display_text = f"{icon}  {text}" if icon else text
 
+        # Color gris inicial para tab inactivo
+        inactive_gray = '#666666' if self.theme_manager.is_dark_mode() else '#999999'
+
         super().__init__(
             parent,
             text=display_text,
             font=('Segoe UI', 13, 'bold'),
-            fg_color='transparent',
+            fg_color=inactive_gray,  # Inicia gris en lugar de transparente
             text_color='#ffffff',
             hover_color='#555555',
             corner_radius=8,
