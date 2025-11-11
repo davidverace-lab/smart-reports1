@@ -756,15 +756,17 @@ class ConfiguracionPanel(ctk.CTkFrame):
             query = f"""
                 SELECT
                     u.UserId,
-                    u.Nombre,
-                    u.Email,
-                    '' as Nivel,
-                    '' as Division,
-                    '' as Position,
-                    '' as Grupo,
-                    u.Ubicacion,
+                    u.NombreCompleto,
+                    u.UserEmail,
+                    r.NombreRol as Nivel,
+                    u.Division,
+                    u.Position,
+                    u.Grupo,
+                    un.NombreUnidad as Ubicacion,
                     u.UserStatus as Status
                 FROM instituto_Usuario u
+                LEFT JOIN instituto_Rol r ON u.IdRol = r.IdRol
+                LEFT JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
                 WHERE u.UserId LIKE {placeholder} OR u.NombreCompleto LIKE {placeholder}
                 ORDER BY u.UserId
             """
@@ -1174,7 +1176,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 return
 
             # Verificar que el usuario existe
-            self.cursor.execute(f"SELECT UserId FROM Instituto_Usuario WHERE UserId = {placeholder}", (userid,))
+            self.cursor.execute(f"SELECT UserId FROM instituto_Usuario WHERE UserId = {placeholder}", (userid,))
             if not self.cursor.fetchone():
                 messagebox.showerror("Error", f"El User ID '{userid}' no existe en el sistema")
                 return
