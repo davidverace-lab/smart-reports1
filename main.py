@@ -1,7 +1,7 @@
 """
 SMART REPORTS - INSTITUTO HUTCHISON PORTS
-Punto de entrada principal con arquitectura DDD + Hexagonal
-Versión 2.0
+MainActivity - Punto de entrada (Android Studio style)
+Versión 2.1 - Android Studio Architecture
 """
 import sys
 import os
@@ -13,9 +13,11 @@ if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 import customtkinter as ctk
-from config.settings import UI_CONFIG, APP_NAME
-from src.interfaces.ui.views.windows.ventana_login import LoginWindow
-from src.interfaces.ui.views.windows.ventana_principal_view import VentanaPrincipalView as MainWindow
+
+# Android Studio structure imports
+from src.main.res.config.settings import UI_CONFIG, APP_NAME
+from src.main.python.ui.activities.ventana_login import LoginWindow
+from src.main.python.ui.activities.ventana_principal_view import VentanaPrincipalView as MainWindow
 
 
 def main():

@@ -1,237 +1,259 @@
-# 🚀 Smart Reports - Instituto Hutchison Ports
+# 🏢 Smart Reports - Instituto Hutchison Ports
 
-Sistema de reportes y dashboards para capacitación con **arquitectura DDD + Hexagonal escalable** y **20 dashboards D3.js interactivos**.
+Sistema de gestión y análisis de capacitación empresarial con dashboards interactivos.
 
 ---
 
-## ⚡ Inicio Rápido
+## 📐 Arquitectura del Proyecto
 
+Este proyecto sigue la estructura **EXACTA de Android Studio**, adaptada para Python/CustomTkinter:
+
+```
+smart-reports/
+│
+├── src/main/                         # Como Android Studio
+│   ├── python/                       # Como "java/" en Android
+│   │   ├── ui/                       # UI Components
+│   │   │   ├── activities/           # Ventanas principales (MainActivity, etc.)
+│   │   │   ├── fragments/            # Paneles y menús (Fragments)
+│   │   │   └── widgets/              # Componentes reutilizables (Custom Views)
+│   │   │
+│   │   ├── viewmodels/               # Lógica de UI (ViewModels)
+│   │   ├── data/                     # Capa de datos
+│   │   │   ├── repositories/         # Repositorios (acceso a datos)
+│   │   │   └── database/             # Queries SQL
+│   │   │
+│   │   ├── domain/                   # Lógica de negocio
+│   │   │   ├── models/               # Modelos de dominio
+│   │   │   └── services/             # Servicios de negocio
+│   │   │
+│   │   └── utils/                    # Utilidades
+│   │
+│   └── res/                          # Recursos (como Android)
+│       ├── config/                   # Configuración (strings.xml equivalente)
+│       └── themes/                   # Temas (themes.xml equivalente)
+│
+├── docs/                             # Documentación completa
+│   ├── ARQUITECTURA.md
+│   ├── FIXES_APPLIED.md
+│   └── assets/
+│
+├── tests/                            # Tests (como Android)
+│   └── java/
+│       ├── unit/
+│       └── integration/
+│
+├── config/                           # Config legado (mantener por compatibilidad)
+├── database/                         # Scripts SQL
+│
+└── main.py                           # Punto de entrada (MainActivity equivalente)
+```
+
+---
+
+## 🎯 Comparación con Android Studio
+
+| Android Studio | Smart Reports (Python) |
+|----------------|------------------------|
+| `src/main/java/` | `src/main/python/` |
+| `Activity` | `activities/ventana_*.py` |
+| `Fragment` | `fragments/panel_*.py` |
+| `Custom View` | `widgets/` |
+| `ViewModel` | `viewmodels/` |
+| `Repository` | `data/repositories/` |
+| `res/values/` | `res/config/` |
+| `res/drawable/` | (no usado - CustomTkinter) |
+| `AndroidManifest.xml` | `main.py` |
+
+---
+
+## 🚀 Inicio Rápido
+
+### 1. Instalar dependencias
 ```bash
-# Instalar dependencias
 pip install -r requirements.txt
+```
 
-# Ejecutar aplicación
+### 2. Configurar base de datos
+Edita `src/main/res/config/settings.py` con tus credenciales:
+```python
+DATABASE_CONFIG = {
+    'server': 'tu_servidor',
+    'database': 'tu_bd',
+    'username': 'usuario',
+    'password': 'contraseña'
+}
+```
+
+### 3. Ejecutar aplicación
+```bash
 python main.py
 ```
 
-**Credenciales por defecto:**
-- `admin` / `1234` (Administrador)
-- `demo` / `demo` (Demo)
+---
+
+## 📁 Estructura Detallada
+
+### 🎨 UI Layer (`src/main/python/ui/`)
+
+#### **activities/** - Ventanas Principales
+Como `MainActivity`, `LoginActivity` en Android
+- `ventana_login.py` - Pantalla de inicio de sesión
+- `ventana_principal_view.py` - Ventana principal de la app
+
+#### **fragments/** - Paneles y Módulos
+Como `Fragment` en Android (reutilizables, pueden agregarse/quitarse)
+- `dashboard/` - Dashboards gerenciales
+- `reportes/` - Generación de reportes
+- `configuracion/` - Configuración del sistema
+- `menu_*.py` - Módulos de menú
+
+#### **widgets/** - Componentes Personalizados
+Como `Custom View` en Android
+- `charts/` - Gráficos interactivos
+- `navigation/` - Barras de navegación
+- `forms/` - Formularios reutilizables
 
 ---
 
-## 📂 Arquitectura DDD + Hexagonal
+### 🧠 ViewModels (`src/main/python/viewmodels/`)
+
+Lógica de UI separada de la vista (patrón MVVM)
+- `database_query_controller.py` - Consultas a BD
+- `file_import_controller.py` - Importación de archivos
+- `reports_controller.py` - Generación de reportes
+- `navigation_controller.py` - Navegación entre pantallas
+
+---
+
+### 💾 Data Layer (`src/main/python/data/`)
+
+#### **repositories/** - Acceso a Datos
+- `persistence/` - Conexiones a BD
+- Patrón Repository para abstraer acceso a datos
+
+#### **database/** - SQL Queries
+- `queries_hutchison.py` - Queries específicas del proyecto
+
+---
+
+### 🏗️ Domain Layer (`src/main/python/domain/`)
+
+#### **models/** - Modelos de Negocio
+Entidades del dominio (si existen)
+
+#### **services/** - Servicios de Negocio
+- `importador_capacitacion.py` - Lógica de importación
+- `metricas_gerenciales_service.py` - Cálculo de métricas
+
+---
+
+### ⚙️ Res (`src/main/res/`)
+
+Recursos de configuración (como `res/values/` en Android)
+- `config/` - Configuración de la app (settings, themes)
+- `themes/` - Definición de temas visuales
+
+---
+
+## 🔄 Flujo de Datos (MVVM)
 
 ```
-smart-reports1/
-├── main.py                                    # 🚀 Punto de entrada único
-├── config/                                    # ⚙️ Configuración centralizada
-│   ├── settings.py                            # Configuración general
-│   ├── database.py                            # Conexión MySQL
-│   └── themes.py                              # Temas UI
-├── src/                                       # 📦 Código fuente
-│   ├── domain/                                # 🧠 Lógica de negocio pura
-│   │   ├── entities/                          # Entidades de dominio
-│   │   ├── value_objects/                     # Objetos de valor
-│   │   └── repositories/                      # Interfaces de repositorios
-│   ├── application/                           # 💼 Casos de uso
-│   │   └── services/                          # Servicios de aplicación
-│   │       └── metricas_gerenciales_service.py  # ✨ NEW: Servicio de métricas
-│   ├── infrastructure/                        # 🔧 Implementaciones técnicas
-│   │   ├── persistence/                       # Persistencia de datos
-│   │   │   ├── mysql/                         # Implementación MySQL
-│   │   │   └── excel/                         # Importación Excel
-│   │   └── visualization/                     # Generadores D3.js
-│   └── interfaces/ui/                         # 🎨 Interfaz Desktop
-│       └── views/                             # Vistas y componentes
-│           ├── windows/                       # Ventanas principales
-│           ├── panels/                        # Paneles de contenido
-│           │   └── dashboard/                 # ✨ 20 Dashboards D3.js
-│           └── components/                    # Componentes reutilizables
-├── tests/                                     # 🧪 Tests
-└── data/                                      # 📊 Excel para importar
+User Interaction
+    ↓
+Activity/Fragment (View)
+    ↓
+ViewModel (Lógica)
+    ↓
+Repository (Acceso a datos)
+    ↓
+Database/API
 ```
 
-**Principios aplicados:**
-- **Domain-Driven Design (DDD)**: Lógica de negocio separada de infraestructura
-- **Hexagonal Architecture**: Puertos y adaptadores para flexibilidad
-- **SOLID**: Código mantenible y escalable
-- **Separation of Concerns**: Cada capa con responsabilidad única
+**Ejemplo concreto**:
+1. Usuario hace clic en "Generar Reporte" → `fragments/menu_reportes.py`
+2. Fragment llama a ViewModel → `viewmodels/reports_controller.py`
+3. ViewModel consulta Repository → `data/repositories/`
+4. Repository ejecuta query → `data/database/queries_hutchison.py`
+5. Datos regresan por la cadena hasta el Fragment
+6. Fragment actualiza la UI con los resultados
 
 ---
 
-## 🎨 Dashboards Gerenciales (20 Gráficos D3.js)
+## 🎓 Para Desarrolladores
 
-### 📊 Rendimiento (4 gráficos)
-- Rendimiento por Unidad de Negocio
-- Top 10 Departamentos
-- Progreso Mensual Acumulado
-- Comparativa Trimestral
+### Si vienes de **Android Studio**:
+- ✅ Estructura **idéntica** a Android
+- `activities/` = Activities
+- `fragments/` = Fragments
+- `widgets/` = Custom Views
+- `viewmodels/` = ViewModels
+- `res/` = Resources
 
-### 📈 Comparativas (4 gráficos)
-- Tendencia de Cumplimiento por Unidad
-- Distribución de Estatus en el Tiempo
-- Progreso vs Meta Mensual
-- Evolución Suavizada de Métricas
-
-### 🍩 Distribución (4 gráficos)
-- Distribución de Estatus Global
-- Usuarios por Categoría de Módulo
-- Distribución por Nivel Jerárquico
-- Progreso Detallado por Área
-
-### 📉 Tendencias (4 gráficos)
-- Serie Temporal - Últimos 12 Meses
-- Tendencia con Proyección a 3 Meses
-- Variación % Mensual
-- Análisis de Cambios Acumulados
-
-### 🔵 Relaciones (4 gráficos)
-- Relación Tiempo vs Calificación
-- Comparativa Año Actual vs Anterior
-- Matriz de Rendimiento por Área
-- Análisis Multi-Variable (Burbujas)
-
-**Características técnicas:**
-- ✅ Datos reales desde MySQL (`instituto_*` tables)
-- ✅ HTTP server local (puerto 8050) para ejecución JavaScript
-- ✅ Lazy loading optimizado
-- ✅ Fallback a datos mock si no hay conexión
-- ✅ Colores navy blue (#002E6D → #99E1FA)
-- ✅ 100% interactivo en desktop app
+### Si vienes de **React**:
+- `activities/` = Pages (páginas completas)
+- `fragments/` = Containers (secciones de páginas)
+- `widgets/` = Components (componentes reutilizables)
+- `viewmodels/` = Custom Hooks (lógica separada)
 
 ---
 
-## 🎯 Pestañas del Sistema
+## 📝 Cómo Agregar Nueva Funcionalidad
 
-- **📊 Dashboards Gerenciales**: 20 gráficos D3.js con datos en tiempo real
-- **👥 Consulta Usuarios**: Búsqueda y filtros avanzados
-- **🔄 Cruce de Datos**: Sincronización Cornerstone (Fase 2)
-- **📄 Reportes**: PDF profesionales (usuario, unidad, global, período)
-- **⚙️ Configuración**: Gestión de usuarios y ajustes
+### Agregar nueva pantalla (Activity):
+1. Crear `src/main/python/ui/activities/ventana_NOMBRE.py`
+2. Importar en `main.py`
+
+### Agregar nuevo panel (Fragment):
+1. Crear `src/main/python/ui/fragments/panel_NOMBRE.py`
+2. Importar en activity correspondiente
+
+### Agregar nueva lógica (ViewModel):
+1. Agregar método en ViewModel existente
+2. O crear nuevo: `src/main/python/viewmodels/NOMBRE_controller.py`
 
 ---
 
-## 📥 Importar Excel (Fase 1)
+## 🛠️ Tecnologías
+
+- **UI Framework**: CustomTkinter (Python)
+- **Gráficos**: Matplotlib
+- **Base de Datos**: SQL Server (ODBC Driver 17)
+- **Arquitectura**: MVVM + Repository Pattern
+- **Estructura**: Android Studio Style
+
+---
+
+## 📚 Documentación
+
+Toda la documentación está en `/docs/`:
+- `ARQUITECTURA.md` - Arquitectura detallada
+- `FIXES_APPLIED.md` - Historial de correcciones
+- `MAPEO_COLUMNAS_EXCEL_BD.md` - Mapeo de columnas
+
+---
+
+## 🧪 Testing
 
 ```bash
-# 1. Coloca 3 archivos Excel en data/:
-#    - usuarios.xlsx
-#    - asignaciones.xlsx
-#    - completados.xlsx
+# Ejecutar tests unitarios
+python -m pytest tests/java/unit/
 
-# 2. Configura MySQL en config/database.py o .env:
-export DB_HOST=localhost
-export DB_PORT=3306
-export DB_USER=root
-export DB_PASSWORD=tu_password
-export DB_NAME=tngcore
-
-# 3. Ejecuta el importador:
-python database/importar_excel_simple.py
-```
-
-**Tablas MySQL:**
-- `instituto_usuarios`
-- `instituto_asignaciones`
-- `instituto_completados`
-
----
-
-## 🔧 Configuración
-
-### Base de Datos
-Edita `config/database.py`:
-```python
-MYSQL_CONFIG = {
-    'host': 'localhost',
-    'port': 3306,
-    'user': 'root',
-    'password': 'tu_password',
-    'database': 'tngcore',
-}
-```
-
-### D3.js Server
-Edita `config/settings.py`:
-```python
-D3_CONFIG = {
-    "http_server_port": 8050,  # Puerto HTTP local
-    "cache_enabled": True,
-    "temp_dir": "smartreports_d3_charts"
-}
+# Ejecutar tests de integración
+python -m pytest tests/java/integration/
 ```
 
 ---
 
-## ✅ Características Implementadas
+## 📞 Soporte
 
-### Core
-- ✅ Arquitectura DDD + Hexagonal completa
-- ✅ 20 dashboards D3.js interactivos con datos reales
-- ✅ Servicio de métricas gerenciales con queries SQL optimizadas
-- ✅ Sistema de temas claro/oscuro
-- ✅ Navegación moderna con transiciones fluidas
-
-### Visualización
-- ✅ D3.js embebido en CustomTkinter via tkinterweb
-- ✅ HTTP server local para JavaScript execution
-- ✅ Gráficos de barras, líneas, donut/pie, áreas
-- ✅ Colores navy blue corporativos
-- ✅ Lazy loading y optimización de performance
-
-### Reportes
-- ✅ Previsualizaciones HTML estilo Word
-- ✅ Exportación PDF profesional
-- ✅ Reportes por usuario, unidad, período, global
-- ✅ Análisis de niveles de mando
-
-### Integración
-- ✅ MySQL (tngcore database)
-- ✅ Excel import/export
-- ✅ Cornerstone API ready (Fase 2)
+Para consultas o issues:
+1. Revisa la documentación en `/docs/`
+2. Consulta el código en estructura Android Studio
+3. Sigue los patrones establecidos
 
 ---
 
-## 🚀 Roadmap
-
-### Fase 1 (Actual) ✅
-- [x] Importación desde 3 Excel
-- [x] 20 Dashboards D3.js interactivos
-- [x] Arquitectura DDD + Hexagonal
-- [x] Servicio de métricas gerenciales
-- [x] Queries SQL optimizadas
-
-### Fase 2 (Próxima)
-- [ ] Integración API Cornerstone en tiempo real
-- [ ] Sincronización automática
-- [ ] Notificaciones push
-- [ ] Dashboard en tiempo real
-
----
-
-## 📚 Documentación Técnica
-
-Ver `PROPUESTA_ARQUITECTURA.md` para análisis completo de la arquitectura DDD + Hexagonal implementada.
-
----
-
-## 🐛 Troubleshooting
-
-### D3.js no se muestra
-1. Verifica que tkinterweb esté instalado: `pip install tkinterweb`
-2. Verifica que el puerto 8050 esté disponible
-3. Revisa logs en consola para errores 404
-
-### Error de conexión MySQL
-1. Verifica credenciales en `config/database.py`
-2. Asegúrate de que MySQL esté corriendo
-3. Verifica que la base de datos `tngcore` exista
-
-### Dashboards vacíos
-- Si no hay datos en BD, se usan datos mock automáticamente
-- Verifica que las tablas `instituto_*` tengan datos
-
----
-
-**v2.0.0** - Instituto Hutchison Ports © 2025
+**Versión**: 2.1 - Android Studio Structure
+**Última actualización**: 2025-11-11
+**Arquitectura**: MVVM + Repository Pattern + Android Studio Layout
