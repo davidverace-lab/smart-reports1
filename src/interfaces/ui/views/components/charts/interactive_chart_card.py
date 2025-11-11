@@ -206,18 +206,28 @@ class InteractiveChartCard(ctk.CTkFrame):
             filtered_values = values
             self.hidden_items = set()
 
-        # Colores Hutchison
-        colors = [
-            HUTCHISON_COLORS['ports_sea_blue'],
-            HUTCHISON_COLORS['ports_sky_blue'],
-            HUTCHISON_COLORS['aqua_green'],
-            HUTCHISON_COLORS['sunset_orange'],
-            '#003D8F', '#00A3E0', '#7CC576', '#FFB84D'
-        ] * 10
+        # Paleta de azules navy pastel suaves
+        pastel_navy_colors = [
+            '#4A6FA5',  # Navy oscuro pastel
+            '#6B8EC7',  # Navy medio pastel
+            '#8FADD3',  # Navy claro pastel
+            '#A8C5E2',  # Azul cyan pastel
+            '#B8D4E8',  # Azul gris pastel
+            '#C4D7F0',  # Azul lavanda pastel
+            '#5D7FAF',  # Navy intermedio
+            '#7A9BCF',  # Azul periwinkle pastel
+        ] * 5
 
-        # Crear barras horizontales
+        # Crear barras horizontales con bordes suaves
         y_pos = np.arange(len(filtered_labels))
-        self.bars = self.ax.barh(y_pos, filtered_values, color=colors[:len(filtered_labels)])
+        self.bars = self.ax.barh(
+            y_pos,
+            filtered_values,
+            color=pastel_navy_colors[:len(filtered_labels)],
+            edgecolor='#ffffff',
+            linewidth=0.5,
+            alpha=0.85
+        )
 
         # Configurar ejes
         self.ax.set_yticks(y_pos)
@@ -258,27 +268,31 @@ class InteractiveChartCard(ctk.CTkFrame):
             filtered_values = values
             self.hidden_items = set()
 
-        # Colores
-        colors = [
-            HUTCHISON_COLORS['ports_sea_blue'],
-            HUTCHISON_COLORS['aqua_green'],
-            HUTCHISON_COLORS['sunset_orange'],
-            HUTCHISON_COLORS['ports_sky_blue'],
-            '#003D8F', '#7CC576', '#FFB84D'
-        ] * 10
+        # Paleta de azules navy pastel suaves (mismo que barras)
+        pastel_navy_colors = [
+            '#4A6FA5',  # Navy oscuro pastel
+            '#6B8EC7',  # Navy medio pastel
+            '#8FADD3',  # Navy claro pastel
+            '#A8C5E2',  # Azul cyan pastel
+            '#B8D4E8',  # Azul gris pastel
+            '#C4D7F0',  # Azul lavanda pastel
+            '#5D7FAF',  # Navy intermedio
+            '#7A9BCF',  # Azul periwinkle pastel
+        ] * 5
 
-        # Crear donut
+        # Crear donut con bordes suaves
         wedges, texts, autotexts = self.ax.pie(
             filtered_values,
             labels=filtered_labels,
-            colors=colors[:len(filtered_labels)],
+            colors=pastel_navy_colors[:len(filtered_labels)],
             autopct='%1.1f%%',
             startangle=90,
-            textprops={'color': text_color, 'fontsize': 10}
+            textprops={'color': text_color, 'fontsize': 10, 'fontweight': 'bold'},
+            wedgeprops={'edgecolor': '#ffffff', 'linewidth': 2, 'alpha': 0.85}
         )
 
-        # Hacer donut (círculo en el centro)
-        centre_circle = plt.Circle((0, 0), 0.70, fc=self.ax.get_facecolor())
+        # Hacer donut (círculo en el centro más grande para look más moderno)
+        centre_circle = plt.Circle((0, 0), 0.65, fc=self.ax.get_facecolor(), edgecolor='white', linewidth=2)
         self.ax.add_artist(centre_circle)
 
         # Guardar wedges para interactividad
@@ -303,25 +317,29 @@ class InteractiveChartCard(ctk.CTkFrame):
             filtered_labels = labels
             filtered_values = values
 
-        # Crear línea
+        # Crear línea suave con colores pastel navy
         self.ax.plot(
             filtered_labels,
             filtered_values,
             marker='o',
-            linewidth=2.5,
-            markersize=8,
-            color=HUTCHISON_COLORS['ports_sea_blue'],
-            markerfacecolor=HUTCHISON_COLORS['aqua_green'],
-            markeredgewidth=2,
-            markeredgecolor=HUTCHISON_COLORS['ports_sea_blue']
+            linewidth=3,
+            markersize=10,
+            color='#4A6FA5',  # Navy oscuro pastel
+            markerfacecolor='#8FADD3',  # Navy claro pastel
+            markeredgewidth=2.5,
+            markeredgecolor='#4A6FA5',
+            alpha=0.9,
+            linestyle='-',
+            solid_capstyle='round'
         )
 
-        # Área bajo la línea
+        # Área bajo la línea con gradiente visual
         self.ax.fill_between(
             range(len(filtered_labels)),
             filtered_values,
-            alpha=0.2,
-            color=HUTCHISON_COLORS['ports_sky_blue']
+            alpha=0.25,
+            color='#6B8EC7',  # Navy medio pastel
+            linewidth=0
         )
 
         # Configurar ejes

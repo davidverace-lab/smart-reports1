@@ -763,9 +763,9 @@ class ConfiguracionPanel(ctk.CTkFrame):
                     '' as Position,
                     '' as Grupo,
                     '' as Ubicacion,
-                    u.TipoDeCorreo as Status
-                FROM Instituto_Usuario u
-                WHERE u.UserId LIKE {placeholder} OR u.Nombre LIKE {placeholder}
+                    u.UserStatus as Status
+                FROM Usuario u
+                WHERE u.UserId LIKE {placeholder} OR u.NombreCompleto LIKE {placeholder}
                 ORDER BY u.UserId
             """
 
@@ -819,15 +819,17 @@ class ConfiguracionPanel(ctk.CTkFrame):
             self.cursor.execute("""
                 SELECT
                     u.UserId,
-                    u.Nombre,
-                    u.Email,
-                    '' as Nivel,
-                    '' as Division,
-                    '' as Position,
+                    u.NombreCompleto,
+                    u.UserEmail,
+                    r.NombreRol as Nivel,
+                    u.Division,
+                    u.Position,
                     '' as Grupo,
-                    '' as Ubicacion,
-                    u.TipoDeCorreo as Status
-                FROM Instituto_Usuario u
+                    un.NombreUnidad as Ubicacion,
+                    u.UserStatus as Status
+                FROM Usuario u
+                LEFT JOIN Rol r ON u.IdRol = r.IdRol
+                LEFT JOIN UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
                 ORDER BY u.UserId
             """)
 
@@ -905,23 +907,24 @@ class ConfiguracionPanel(ctk.CTkFrame):
             placeholder = '%s' if is_mysql else '?'
 
             # Verificar si el usuario ya existe
-            self.cursor.execute(f"SELECT COUNT(*) FROM Instituto_Usuario WHERE UserId = {placeholder}", (user_id,))
+            self.cursor.execute(f"SELECT COUNT(*) FROM Usuario WHERE UserId = {placeholder}", (user_id,))
             if self.cursor.fetchone()[0] > 0:
                 messagebox.showerror("Error", f"El User ID '{user_id}' ya existe")
                 return
 
-            # Insertar usuario (solo columnas reales)
+            # Insertar usuario (columnas básicas del esquema real)
             insert_query = f"""
-                INSERT INTO Instituto_Usuario
-                (UserId, Nombre, Email, TipoDeCorreo)
-                VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder})
+                INSERT INTO Usuario
+                (UserId, NombreCompleto, UserEmail, PasswordHash, UserStatus, FechaCreacion)
+                VALUES ({placeholder}, {placeholder}, {placeholder}, {placeholder}, {placeholder}, NOW())
             """
 
             self.cursor.execute(insert_query, (
                 user_id,
                 nombre,
                 email or None,
-                'Corporativo'  # Valor por defecto
+                'default123',  # Contraseña temporal
+                'Active'       # Estado activo por defecto
             ))
 
             self.db.commit()
@@ -952,11 +955,11 @@ class ConfiguracionPanel(ctk.CTkFrame):
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
-            # Actualizar usuario (solo columnas reales)
+            # Actualizar usuario (columnas del esquema real)
             update_query = f"""
-                UPDATE Instituto_Usuario
-                SET Nombre = {placeholder},
-                    Email = {placeholder}
+                UPDATE Usuario
+                SET NombreCompleto = {placeholder},
+                    UserEmail = {placeholder}
                 WHERE UserId = {placeholder}
             """
 
@@ -1003,9 +1006,10 @@ class ConfiguracionPanel(ctk.CTkFrame):
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
-            # Delete permanente (la tabla no tiene campo UserStatus)
+            # Desactivar usuario (mejor práctica que DELETE)
             delete_query = f"""
-                DELETE FROM Instituto_Usuario
+                UPDATE Usuario
+                SET UserStatus = 'Inactive'
                 WHERE UserId = {placeholder}
             """
 
@@ -1057,18 +1061,18 @@ class ConfiguracionPanel(ctk.CTkFrame):
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 
-            # Verificar si la tabla existe (compatible con ambas BD)
+            # Verificar si la tabla Rol existe (compatible con ambas BD)
             if is_mysql:
                 self.cursor.execute("""
                     SELECT COUNT(*)
                     FROM INFORMATION_SCHEMA.TABLES
-                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Instituto_Soporte'
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Rol'
                 """)
             else:
                 self.cursor.execute("""
                     SELECT COUNT(*)
                     FROM INFORMATION_SCHEMA.TABLES
-                    WHERE TABLE_NAME = 'Instituto_Soporte'
+                    WHERE TABLE_NAME = 'Rol'
                 """)
 
             tabla_existe = self.cursor.fetchone()[0] > 0
