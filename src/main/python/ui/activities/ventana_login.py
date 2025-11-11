@@ -7,7 +7,9 @@ import customtkinter as ctk
 from tkinter import messagebox
 import os
 from PIL import Image
-from config.themes import HUTCHISON_COLORS, DARK_THEME
+
+# Android Studio structure imports
+from src.main.res.config.themes import HUTCHISON_COLORS, DARK_THEME
 
 
 class LoginWindow:
