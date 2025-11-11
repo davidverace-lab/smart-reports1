@@ -9,7 +9,7 @@ import pandas as pd
 from src.main.res.config.gestor_temas import get_theme_manager
 from src.main.res.config.themes import HUTCHISON_COLORS
 from src.main.python.domain.services.importador_capacitacion import ImportadorCapacitacion
-from src.interfaces.ui.views.components.importacion import (
+from src.main.python.ui.widgets.importacion import (
     DialogoMatching,
     BarraProgresoImportacion,
     ExportadorLogs,

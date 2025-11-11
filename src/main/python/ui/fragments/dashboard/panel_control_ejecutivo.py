@@ -12,8 +12,8 @@ Diseño EXACTO según especificaciones:
 ✅ Modo claro/oscuro integrado
 """
 import customtkinter as ctk
-from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
-from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
+from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
+from src.main.python.ui.widgets.charts.interactive_chart_card import InteractiveChartCard
 from src.main.res.config.gestor_temas import get_theme_manager
 from src.main.res.config.themes import HUTCHISON_COLORS
 
@@ -415,7 +415,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
 
         # TODO: Implementar vista fullscreen in-place
         # Por ahora, usamos el modal existente del sistema
-        from src.interfaces.ui.views.components.charts.modal_fullscreen_chart import ModalFullscreenChart
+        from src.main.python.ui.widgets.charts.modal_fullscreen_chart import ModalFullscreenChart
 
         if chart.chart_data and chart.chart_type:
             modal = ModalFullscreenChart(

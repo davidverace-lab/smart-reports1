@@ -4,8 +4,8 @@ Dashboards especializados para área de RRHH
 Adaptado al esquema REAL de base de datos Hutchison
 """
 import customtkinter as ctk
-from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
-from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
+from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
+from src.main.python.ui.widgets.charts.interactive_chart_card import InteractiveChartCard
 from src.main.python.data.database.queries_hutchison import *
 from src.main.res.config.gestor_temas import get_theme_manager
 from src.main.res.config.themes import HUTCHISON_COLORS

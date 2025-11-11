@@ -3,7 +3,7 @@ Panel de gráficos interactivos D3.js embebidos
 ACTUALIZADO: Gráficos D3.js profesionales con múltiples fallbacks
 """
 import customtkinter as ctk
-from src.interfaces.ui.views.components.charts.tarjeta_d3_profesional import ProfessionalD3ChartCard
+from src.main.python.ui.widgets.charts.tarjeta_d3_profesional import ProfessionalD3ChartCard
 from src.main.res.config.themes import HUTCHISON_COLORS, EXECUTIVE_CHART_COLORS
 from src.main.res.config.gestor_temas import get_theme_manager
 

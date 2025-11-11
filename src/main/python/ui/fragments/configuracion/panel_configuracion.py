@@ -6,7 +6,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 import tkinter.ttk as ttk
 from src.main.res.config.gestor_temas import get_theme_manager
-from src.interfaces.ui.views.components.charts.tarjeta_configuracion import ConfigCard
+from src.main.python.ui.widgets.charts.tarjeta_configuracion import ConfigCard
 
 
 class ConfiguracionPanel(ctk.CTkFrame):
