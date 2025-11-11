@@ -258,7 +258,7 @@ class UnitReportPanel(ctk.CTkFrame):
             # Intentar obtener las unidades de la BD
             self.cursor.execute("""
                 SELECT DISTINCT NombreUnidad
-                FROM instituto_UnidadDeNegocio
+                FROM UnidadDeNegocio
                 ORDER BY NombreUnidad
             """)
             results = self.cursor.fetchall()
