@@ -217,21 +217,21 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
                 cursor = self.db_connection.cursor()
 
                 # Completados
-                cursor.execute("SELECT COUNT(*) FROM ProgresoModulo WHERE EstatusModulo = 'Completado'")
+                cursor.execute("SELECT COUNT(*) FROM instituto_ProgresoModulo WHERE EstatusModulo = 'Completado'")
                 completados = cursor.fetchone()[0] or 0
 
                 # En Progreso
-                cursor.execute("SELECT COUNT(*) FROM ProgresoModulo WHERE EstatusModulo = 'En Progreso'")
+                cursor.execute("SELECT COUNT(*) FROM instituto_ProgresoModulo WHERE EstatusModulo = 'En Progreso'")
                 en_progreso = cursor.fetchone()[0] or 0
 
                 # Pendientes (usuarios activos * módulos - asignados)
-                cursor.execute("SELECT COUNT(*) FROM Usuario WHERE UserStatus = 'Active'")
+                cursor.execute("SELECT COUNT(*) FROM instituto_Usuario WHERE UserStatus = 'Active'")
                 total_usuarios = cursor.fetchone()[0] or 0
 
-                cursor.execute("SELECT COUNT(*) FROM Modulo WHERE Activo = 1")
+                cursor.execute("SELECT COUNT(*) FROM instituto_Modulo WHERE Activo = 1")
                 total_modulos = cursor.fetchone()[0] or 0
 
-                cursor.execute("SELECT COUNT(*) FROM ProgresoModulo")
+                cursor.execute("SELECT COUNT(*) FROM instituto_ProgresoModulo")
                 asignados = cursor.fetchone()[0] or 0
 
                 total_posible = total_usuarios * total_modulos

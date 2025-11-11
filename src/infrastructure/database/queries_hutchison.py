@@ -10,7 +10,7 @@ Usar estas queries en los paneles de dashboards
 # Total de usuarios activos
 QUERY_TOTAL_USUARIOS = """
     SELECT COUNT(*) as total
-    FROM Usuario
+    FROM instituto_Usuario
     WHERE UserStatus = 'Active'
 """
 
@@ -19,8 +19,8 @@ QUERY_USUARIOS_POR_UNIDAD = """
     SELECT
         COALESCE(un.NombreUnidad, 'SIN UNIDAD') as unidad,
         COUNT(u.IdUsuario) as cantidad
-    FROM Usuario u
-    LEFT JOIN UnidadDeNegocio un
+    FROM instituto_Usuario u
+    LEFT JOIN instituto_UnidadDeNegocio un
         ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
     WHERE u.UserStatus = 'Active'
     GROUP BY un.NombreUnidad
@@ -36,9 +36,9 @@ QUERY_PROGRESO_POR_UNIDAD = """
             NULLIF(COUNT(pm.IdInscripcion), 0) * 100,
             1
         ) as porcentaje
-    FROM UnidadDeNegocio un
-    LEFT JOIN Usuario u ON un.IdUnidadDeNegocio = u.IdUnidadDeNegocio
-    LEFT JOIN ProgresoModulo pm ON u.UserId = pm.UserId
+    FROM instituto_UnidadDeNegocio un
+    LEFT JOIN instituto_Usuario u ON un.IdUnidadDeNegocio = u.IdUnidadDeNegocio
+    LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
     WHERE un.Activo = 1 AND u.UserStatus = 'Active'
     GROUP BY un.NombreUnidad
     HAVING COUNT(pm.IdInscripcion) > 0
@@ -50,7 +50,7 @@ QUERY_DISTRIBUCION_DEPARTAMENTOS = """
     SELECT
         COALESCE(u.Division, 'Sin División') as departamento,
         COUNT(u.IdUsuario) as cantidad
-    FROM Usuario u
+    FROM instituto_Usuario u
     WHERE u.UserStatus = 'Active'
     GROUP BY u.Division
     ORDER BY cantidad DESC
@@ -65,7 +65,7 @@ QUERY_PERSONAL_POR_DEPARTAMENTO = """
     SELECT
         COALESCE(u.Division, 'Sin División') as departamento,
         COUNT(*) as Total
-    FROM Usuario u
+    FROM instituto_Usuario u
     WHERE u.UserStatus = 'Active'
     GROUP BY u.Division
     ORDER BY Total DESC
@@ -75,19 +75,19 @@ QUERY_PERSONAL_POR_DEPARTAMENTO = """
 QUERY_ESTADO_CAPACITACION = """
     -- Completados
     SELECT COUNT(*) as Completados
-    FROM ProgresoModulo
+    FROM instituto_ProgresoModulo
     WHERE EstatusModulo = 'Completado';
 
     -- En Progreso
     SELECT COUNT(*) as EnProgreso
-    FROM ProgresoModulo
+    FROM instituto_ProgresoModulo
     WHERE EstatusModulo = 'En Progreso';
 
     -- Pendientes (usuarios activos * módulos - asignados)
     SELECT
-        (SELECT COUNT(*) FROM Usuario WHERE UserStatus = 'Active') *
-        (SELECT COUNT(*) FROM Modulo WHERE Activo = 1) -
-        (SELECT COUNT(*) FROM ProgresoModulo) as Pendientes;
+        (SELECT COUNT(*) FROM instituto_Usuario WHERE UserStatus = 'Active') *
+        (SELECT COUNT(*) FROM instituto_Modulo WHERE Activo = 1) -
+        (SELECT COUNT(*) FROM instituto_ProgresoModulo) as Pendientes;
 """
 
 # Promedio de calificaciones por área
@@ -95,9 +95,9 @@ QUERY_CALIFICACIONES_POR_AREA = """
     SELECT
         COALESCE(u.Division, 'Sin División') as area,
         AVG(CAST(re.PuntajeObtenido AS FLOAT)) as PromedioCalif
-    FROM ResultadoEvaluacion re
-    INNER JOIN ProgresoModulo pm ON re.IdInscripcion = pm.IdInscripcion
-    INNER JOIN Usuario u ON pm.UserId = u.UserId
+    FROM instituto_ResultadoEvaluacion re
+    INNER JOIN instituto_ProgresoModulo pm ON re.IdInscripcion = pm.IdInscripcion
+    INNER JOIN instituto_Usuario u ON pm.UserId = u.UserId
     WHERE re.Aprobado = 1 AND u.UserStatus = 'Active'
     GROUP BY u.Division
     ORDER BY PromedioCalif DESC
@@ -109,9 +109,9 @@ QUERY_CUMPLIMIENTO_UNIDADES = """
         un.NombreUnidad,
         CAST(COUNT(DISTINCT CASE WHEN pm.EstatusModulo = 'Completado' THEN u.IdUsuario END) AS FLOAT) /
         NULLIF(COUNT(DISTINCT u.IdUsuario), 0) * 100.0 as PorcentajeCumplimiento
-    FROM Usuario u
-    INNER JOIN UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
-    LEFT JOIN ProgresoModulo pm ON u.UserId = pm.UserId
+    FROM instituto_Usuario u
+    INNER JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+    LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
     WHERE u.UserStatus = 'Active' AND un.Activo = 1
     GROUP BY un.NombreUnidad
     ORDER BY PorcentajeCumplimiento DESC
@@ -122,7 +122,7 @@ QUERY_TENDENCIA_MENSUAL = """
     SELECT
         FORMAT(FechaFinalizacion, 'yyyy-MM') as Mes,
         COUNT(*) as Total
-    FROM ProgresoModulo
+    FROM instituto_ProgresoModulo
     WHERE EstatusModulo = 'Completado' AND FechaFinalizacion IS NOT NULL
     GROUP BY FORMAT(FechaFinalizacion, 'yyyy-MM')
     ORDER BY Mes
