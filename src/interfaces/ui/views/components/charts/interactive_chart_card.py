@@ -55,6 +55,11 @@ class InteractiveChartCard(ctk.CTkFrame):
         # Animación
         self.is_animating = False
 
+        # OPTIMIZACIÓN: Control de re-renderizado
+        self._last_draw_time = 0
+        self._draw_delay_ms = 50  # Mínimo 50ms entre draws (20 FPS para hover)
+        self._pending_draw = None
+
         self._create_ui()
 
     def _create_ui(self):
@@ -271,7 +276,7 @@ class InteractiveChartCard(ctk.CTkFrame):
             # Seleccionar colores del gradiente
             color_start, color_end = gradient_colors[i % len(gradient_colors)]
 
-            # Crear barra con gradiente
+            # Crear barra con gradiente (SIN SOMBRA para mejor rendimiento)
             bar = self.ax.barh(
                 y, val,
                 height=0.7,
@@ -282,14 +287,8 @@ class InteractiveChartCard(ctk.CTkFrame):
                 zorder=3
             )
 
-            # Agregar efecto de sombra (barra más oscura detrás)
-            shadow = self.ax.barh(
-                y - 0.02, val * 0.98,
-                height=0.7,
-                color='#000000',
-                alpha=0.15,
-                zorder=1
-            )
+            # OPTIMIZACIÓN: Eliminamos sombras para reducir objetos matplotlib a la mitad
+            # Esto mejora significativamente el rendimiento del hover
 
             self.bars.append(bar[0])
 
@@ -467,7 +466,7 @@ class InteractiveChartCard(ctk.CTkFrame):
                 self._reset_bar_effects()
             if self.annotation:
                 self.annotation.set_visible(False)
-                self.canvas.draw_idle()
+                self._throttled_draw()
             return
 
         # Detectar si el mouse está sobre una barra
@@ -487,7 +486,7 @@ class InteractiveChartCard(ctk.CTkFrame):
             self._reset_bar_effects()
             if self.annotation:
                 self.annotation.set_visible(False)
-                self.canvas.draw_idle()
+                self._throttled_draw()
 
     def _apply_hover_effect(self, index):
         """Aplicar efecto hover: resaltar barra + atenuar otras"""
@@ -505,7 +504,41 @@ class InteractiveChartCard(ctk.CTkFrame):
                 bar.set_edgecolor('white')
                 bar.set_linewidth(1.0)
 
-        self.canvas.draw_idle()
+        # OPTIMIZACIÓN: Throttled draw
+        self._throttled_draw()
+
+    def _throttled_draw(self):
+        """OPTIMIZACIÓN: Dibujar canvas con throttling para evitar lag"""
+        import time
+
+        current_time = time.time() * 1000  # Convertir a ms
+
+        # Si ya hay un draw pendiente, cancelarlo
+        if self._pending_draw:
+            try:
+                self.after_cancel(self._pending_draw)
+            except:
+                pass
+
+        # Calcular tiempo desde último draw
+        time_since_last_draw = current_time - self._last_draw_time
+
+        if time_since_last_draw >= self._draw_delay_ms:
+            # Suficiente tiempo ha pasado, dibujar inmediatamente
+            self._last_draw_time = current_time
+            self.canvas.draw_idle()
+        else:
+            # Programar draw para más tarde
+            delay = int(self._draw_delay_ms - time_since_last_draw)
+            self._pending_draw = self.after(delay, self._execute_pending_draw)
+
+    def _execute_pending_draw(self):
+        """Ejecutar draw pendiente"""
+        import time
+        self._last_draw_time = time.time() * 1000
+        self._pending_draw = None
+        if self.canvas:
+            self.canvas.draw_idle()
 
     def _reset_bar_effects(self):
         """Restaurar efectos originales de las barras"""
@@ -519,7 +552,7 @@ class InteractiveChartCard(ctk.CTkFrame):
             else:
                 bar.set_linewidth(1.5)
 
-        self.canvas.draw_idle()
+        self._throttled_draw()
 
     def _show_tooltip_pro(self, event, index):
         """Mostrar tooltip HERMOSO con información detallada"""
@@ -575,7 +608,7 @@ class InteractiveChartCard(ctk.CTkFrame):
         self.annotation.set_text(tooltip_text)
         self.annotation.xy = (event.xdata, event.ydata)
         self.annotation.set_visible(True)
-        self.canvas.draw_idle()
+        self._throttled_draw()
 
     def _on_click(self, event):
         """Manejar click en elementos del gráfico"""
