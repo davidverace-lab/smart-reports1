@@ -18,11 +18,8 @@ tkinterdnd2-universal>=1.7.3
 pillow>=10.0.0
 tkhtmlview>=0.1.1
 
-# Navegador web embebido (compatible con Python 3.11+)
-# Usa el navegador nativo del sistema (Edge en Windows, WebKit en macOS, GTK en Linux)
-pywebview>=4.0.0
-# Para Windows: integración con Edge WebView2
-pythonnet>=3.0.0; platform_system=="Windows"
+# HTML embebido dentro de la app (para D3.js fullscreen)
+tkinterweb>=3.23.0
 
 # Graficos y visualizacion
 matplotlib>=3.7.0
