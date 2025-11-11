@@ -4,7 +4,7 @@ Panel para CRUD de usuarios y asignación de roles
 """
 import customtkinter as ctk
 from tkinter import ttk, messagebox
-from config.gestor_temas import get_theme_manager
+from src.main.res.config.gestor_temas import get_theme_manager
 
 
 class ConfigUsuariosPanel(ctk.CTkFrame):

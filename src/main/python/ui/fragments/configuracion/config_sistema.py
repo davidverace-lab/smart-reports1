@@ -3,7 +3,7 @@ Configuración - Ajustes del Sistema
 Configuración general de la aplicación
 """
 import customtkinter as ctk
-from config.gestor_temas import get_theme_manager
+from src.main.res.config.gestor_temas import get_theme_manager
 
 
 class ConfigSistemaPanel(ctk.CTkFrame):

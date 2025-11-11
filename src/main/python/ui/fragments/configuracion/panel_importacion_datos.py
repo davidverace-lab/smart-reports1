@@ -6,9 +6,9 @@ import customtkinter as ctk
 from tkinter import filedialog, messagebox
 import threading
 import pandas as pd
-from config.gestor_temas import get_theme_manager
-from config.themes import HUTCHISON_COLORS
-from src.application.services.importador_capacitacion import ImportadorCapacitacion
+from src.main.res.config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
+from src.main.python.domain.services.importador_capacitacion import ImportadorCapacitacion
 from src.interfaces.ui.views.components.importacion import (
     DialogoMatching,
     BarraProgresoImportacion,

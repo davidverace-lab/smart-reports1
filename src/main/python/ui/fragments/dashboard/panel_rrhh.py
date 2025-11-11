@@ -6,9 +6,9 @@ Adaptado al esquema REAL de base de datos Hutchison
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
 from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
-from src.infrastructure.database.queries_hutchison import *
-from config.gestor_temas import get_theme_manager
-from config.themes import HUTCHISON_COLORS
+from src.main.python.data.database.queries_hutchison import *
+from src.main.res.config.gestor_temas import get_theme_manager
+from src.main.res.config.themes import HUTCHISON_COLORS
 
 
 class PanelDashboardsRRHH(ctk.CTkFrame):
