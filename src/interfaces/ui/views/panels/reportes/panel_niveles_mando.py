@@ -24,6 +24,7 @@ except ImportError:
     print("ReportLab no está instalado. Instala con: pip install reportlab")
 
 from config.gestor_temas import get_theme_manager
+from src.interfaces.ui.views.components.charts.previsualizador_reporte import PrevisualizadorReporte
 
 
 class ManagementLevelsPanel(ctk.CTkFrame):
@@ -58,14 +59,12 @@ class ManagementLevelsPanel(ctk.CTkFrame):
 
             # Guardar el estado actual
             current_module = ''
-            preview_content = ''
             save_button_state = 'disabled'
 
             if hasattr(self, 'module_dropdown') and self.module_dropdown.winfo_exists():
                 current_module = self.module_dropdown.get()
 
-            if hasattr(self, 'preview_text') and self.preview_text.winfo_exists():
-                preview_content = self.preview_text.get('1.0', 'end-1c')
+            # Preview widget ya no necesita guardar contenido (se regenera)
 
             if hasattr(self, 'save_button') and self.save_button.winfo_exists():
                 save_button_state = str(self.save_button.cget('state'))
@@ -77,11 +76,7 @@ class ManagementLevelsPanel(ctk.CTkFrame):
             if current_module and hasattr(self, 'module_dropdown'):
                 self.module_dropdown.set(current_module)
 
-            if preview_content and preview_content.strip() and hasattr(self, 'preview_text'):
-                self.preview_text.configure(state='normal')
-                self.preview_text.delete('1.0', 'end')
-                self.preview_text.insert('1.0', preview_content)
-                self.preview_text.configure(state='disabled')
+            # Preview widget se regenera automáticamente si es necesario
 
             if save_button_state == 'normal' and hasattr(self, 'save_button'):
                 self.save_button.configure(state='normal')
@@ -222,19 +217,9 @@ class ManagementLevelsPanel(ctk.CTkFrame):
         )
         self.save_button.grid(row=0, column=1, sticky='e', padx=(15, 0))
 
-        # Área de vista previa - Más grande y profesional
-        self.preview_text = ctk.CTkTextbox(
-            preview_section,
-            font=('Courier New', 13),
-            wrap='none',
-            corner_radius=10,
-            height=600
-        )
-        self.preview_text.pack(fill='both', expand=True, padx=30, pady=(0, 30))
-
-        # Mensaje inicial
-        self.preview_text.insert('1.0', 'Seleccione un Módulo y haga clic en "Generar Vista Previa" para ver el reporte.')
-        self.preview_text.configure(state='disabled')
+        # Área de vista previa - HTML profesional estilo Word
+        self.preview_widget = PrevisualizadorReporte(preview_section)
+        self.preview_widget.pack(fill='both', expand=True, padx=30, pady=(0, 30))
 
     def _get_total_users(self):
         """Obtener total de usuarios de la BD"""
@@ -514,71 +499,27 @@ class ManagementLevelsPanel(ctk.CTkFrame):
         self.current_pdf_buffer = buffer
 
     def _show_preview_text(self, module, data, total_population, modules_list):
-        """Mostrar vista previa en formato profesional"""
-        self.preview_text.configure(state='normal')
-        self.preview_text.delete('1.0', 'end')
+        """Mostrar vista previa en HTML profesional"""
+        # Preparar datos de niveles de mando
+        datos_niveles = {
+            'module': module,
+            'total_population': total_population,
+            'num_niveles': len(data)
+        }
 
-        # Construir tabla de niveles de mando con formato mejorado
-        table_rows = []
+        # Preparar estadísticas por nivel de mando
+        estadisticas = []
         for record in data:
-            comp_pct = (record['completado']/record['poblacion']*100)
-            reg_pct = (record['registrado']/record['poblacion']*100)
-            proc_pct = (record['en_proceso']/record['poblacion']*100)
+            estadisticas.append({
+                'nivel': record['nivel'],
+                'poblacion': record['poblacion'],
+                'completado': record['completado'],
+                'registrado': record['registrado'],
+                'en_proceso': record['en_proceso']
+            })
 
-            table_rows.append(
-                f"  │ {record['nivel']:<35} │ {record['poblacion']:>10,} │ {record['completado']:>10,}  ({comp_pct:>5.1f}%) │ {record['registrado']:>10,}  ({reg_pct:>5.1f}%) │ {record['en_proceso']:>10,}  ({proc_pct:>5.1f}%) │"
-            )
-
-        # Calcular totales
-        total_completado = sum(r['completado'] for r in data)
-        total_registrado = sum(r['registrado'] for r in data)
-        total_en_proceso = sum(r['en_proceso'] for r in data)
-
-        preview = f"""
-═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-                                                      REPORTE POR NIVELES DE MANDO
-                                                         Instituto Hutchison Ports
-═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ INFORMACIÓN GENERAL                                                                                                                         │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-    Módulo(s):              {module}
-    Población Total:        {total_population:,} usuarios
-    Niveles de Mando:       3 niveles
-    Fecha de Reporte:       {datetime.now().strftime('%d de %B de %Y - %H:%M hrs')}
-
-
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ ESTADÍSTICAS POR NIVEL DE MANDO                                                                                                            │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-  ┌─────────────────────────────────────┬────────────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┐
-  │         Nivel de Mando              │   Población    │      Completado          │      Registrado          │      En Proceso          │
-  ├─────────────────────────────────────┼────────────────┼──────────────────────────┼──────────────────────────┼──────────────────────────┤
-{chr(10).join(table_rows)}
-  └─────────────────────────────────────┴────────────────┴──────────────────────────┴──────────────────────────┴──────────────────────────┘
-
-
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ RESUMEN GENERAL                                                                                                                             │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-    📊 Total de Usuarios:       {total_population:,}
-    ✅ Total Completado:        {total_completado:,} ({(total_completado/total_population*100):.1f}%)
-    📝 Total Registrado:        {total_registrado:,} ({(total_registrado/total_population*100):.1f}%)
-    🔄 Total En Proceso:        {total_en_proceso:,} ({(total_en_proceso/total_population*100):.1f}%)
-
-
-═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-                                       Generado automáticamente por Smart Reports v2.0
-                                              {datetime.now().strftime('%d/%m/%Y a las %H:%M hrs')}
-═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-"""
-
-        self.preview_text.insert('1.0', preview)
-        self.preview_text.configure(state='disabled')
+        # Mostrar en widget HTML
+        self.preview_widget.mostrar_reporte_niveles_mando(datos_niveles, estadisticas)
 
     def _save_pdf(self):
         """Guardar PDF en PC"""

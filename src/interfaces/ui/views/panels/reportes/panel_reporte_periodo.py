@@ -25,6 +25,7 @@ except ImportError:
     print("ReportLab no está instalado. Instala con: pip install reportlab")
 
 from config.gestor_temas import get_theme_manager
+from src.interfaces.ui.views.components.charts.previsualizador_reporte import PrevisualizadorReporte
 
 
 class PeriodReportPanel(ctk.CTkFrame):
@@ -62,7 +63,6 @@ class PeriodReportPanel(ctk.CTkFrame):
             current_date_type = ''
             current_start_date = ''
             current_end_date = ''
-            preview_content = ''
             save_button_state = 'disabled'
 
             if hasattr(self, 'module_dropdown') and self.module_dropdown.winfo_exists():
@@ -77,8 +77,7 @@ class PeriodReportPanel(ctk.CTkFrame):
             if hasattr(self, 'end_date_entry') and self.end_date_entry.winfo_exists():
                 current_end_date = self.end_date_entry.get()
 
-            if hasattr(self, 'preview_text') and self.preview_text.winfo_exists():
-                preview_content = self.preview_text.get('1.0', 'end-1c')
+            # Preview widget ya no necesita guardar contenido (se regenera)
 
             if hasattr(self, 'save_button') and self.save_button.winfo_exists():
                 save_button_state = str(self.save_button.cget('state'))
@@ -102,11 +101,7 @@ class PeriodReportPanel(ctk.CTkFrame):
                 self.end_date_entry.delete(0, 'end')
                 self.end_date_entry.insert(0, current_end_date)
 
-            if preview_content and preview_content.strip() and hasattr(self, 'preview_text'):
-                self.preview_text.configure(state='normal')
-                self.preview_text.delete('1.0', 'end')
-                self.preview_text.insert('1.0', preview_content)
-                self.preview_text.configure(state='disabled')
+            # Preview widget se regenera automáticamente si es necesario
 
             if save_button_state == 'normal' and hasattr(self, 'save_button'):
                 self.save_button.configure(state='normal')
@@ -319,19 +314,9 @@ class PeriodReportPanel(ctk.CTkFrame):
         )
         self.save_button.grid(row=0, column=1, sticky='e', padx=(15, 0))
 
-        # Área de vista previa - Más grande y profesional
-        self.preview_text = ctk.CTkTextbox(
-            preview_section,
-            font=('Courier New', 13),
-            wrap='none',
-            corner_radius=10,
-            height=600
-        )
-        self.preview_text.pack(fill='both', expand=True, padx=30, pady=(0, 30))
-
-        # Mensaje inicial
-        self.preview_text.insert('1.0', 'Seleccione un Módulo y Fecha(s), luego haga clic en "Generar Vista Previa" para ver el reporte.')
-        self.preview_text.configure(state='disabled')
+        # Área de vista previa - HTML profesional estilo Word
+        self.preview_widget = PrevisualizadorReporte(preview_section)
+        self.preview_widget.pack(fill='both', expand=True, padx=30, pady=(0, 30))
 
     def _on_date_type_change(self, choice):
         """Cambiar labels según el tipo de búsqueda"""
@@ -617,66 +602,28 @@ class PeriodReportPanel(ctk.CTkFrame):
         self.current_pdf_buffer = buffer
 
     def _show_preview_text(self, module, date_type, start_date, end_date, data):
-        """Mostrar vista previa en formato profesional"""
-        self.preview_text.configure(state='normal')
-        self.preview_text.delete('1.0', 'end')
+        """Mostrar vista previa en HTML profesional"""
+        # Preparar datos del periodo
+        datos_periodo = {
+            'module': module,
+            'date_type': date_type,
+            'start_date': start_date.strftime('%d/%m/%Y'),
+            'end_date': end_date.strftime('%d/%m/%Y'),
+            'total_registros': len(data)
+        }
 
-        # Construir tabla de usuarios con formato mejorado
-        table_rows = []
-        for idx, record in enumerate(data, 1):
-            table_rows.append(
-                f"  │ {idx:>3} │ {record['usuario']:<30} │ {record['id']:<12} │   Módulo {record['modulo']}   │ {record['fecha'].strftime('%d/%m/%Y')} │"
-            )
+        # Preparar registros
+        registros = []
+        for record in data:
+            registros.append({
+                'usuario': record['usuario'],
+                'id': record['id'],
+                'modulo': f"Módulo {record['modulo']}",
+                'fecha': record['fecha'].strftime('%d/%m/%Y')
+            })
 
-        periodo_str = f"{start_date.strftime('%d/%m/%Y')}"
-        if date_type == 'Rango de Fechas':
-            periodo_str += f" - {end_date.strftime('%d/%m/%Y')}"
-
-        preview = f"""
-═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-                                             REPORTE DE PROGRESO POR PERIODO
-                                                 Instituto Hutchison Ports
-═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ INFORMACIÓN DEL PERIODO                                                                                                         │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-    Módulo(s):               {module}
-    Tipo de Búsqueda:        {date_type}
-    Periodo:                 {periodo_str}
-    Total de Registros:      {len(data)} usuarios
-    Fecha de Reporte:        {datetime.now().strftime('%d de %B de %Y - %H:%M hrs')}
-
-
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ DETALLE DE USUARIOS                                                                                                             │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-  ┌─────┬────────────────────────────────┬──────────────┬─────────────────┬──────────────┐
-  │  #  │           Usuario              │   User ID    │     Módulo      │    Fecha     │
-  ├─────┼────────────────────────────────┼──────────────┼─────────────────┼──────────────┤
-{chr(10).join(table_rows)}
-  └─────┴────────────────────────────────┴──────────────┴─────────────────┴──────────────┘
-
-
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ RESUMEN                                                                                                                         │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-    📊 Total de Registros en el Periodo:    {len(data)} usuarios
-    📅 Rango de Fechas Analizado:           {periodo_str}
-    📚 Módulo(s) Incluido(s):               {module}
-
-
-═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-                                    Generado automáticamente por Smart Reports v2.0
-                                           {datetime.now().strftime('%d/%m/%Y a las %H:%M hrs')}
-═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-"""
-
-        self.preview_text.insert('1.0', preview)
-        self.preview_text.configure(state='disabled')
+        # Mostrar en widget HTML
+        self.preview_widget.mostrar_reporte_periodo(datos_periodo, registros)
 
     def _save_pdf(self):
         """Guardar PDF en PC"""
