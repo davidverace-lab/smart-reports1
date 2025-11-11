@@ -1,10 +1,12 @@
 """
 Panel de Dashboards de Recursos Humanos - HUTCHISON PORTS
 Dashboards especializados para área de RRHH
+Adaptado al esquema REAL de base de datos Hutchison
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
 from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
+from src.infrastructure.database.queries_hutchison import *
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
 
@@ -193,57 +195,46 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             traceback.print_exc()
 
     def _get_personal_por_departamento(self):
-        """Obtener cantidad de personal por departamento"""
+        """Obtener cantidad de personal por departamento (usando esquema REAL)"""
         try:
             if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT
-                        Departamento,
-                        COUNT(*) as Total
-                    FROM instituto_Usuario
-                    WHERE Activo = 1
-                    GROUP BY Departamento
-                    ORDER BY Total DESC
-                """
-                cursor.execute(query)
-                results = cursor.fetchall()
-
+                results = ejecutar_query_lista(self.db_connection, QUERY_PERSONAL_POR_DEPARTAMENTO)
                 if results:
-                    labels = [row[0] for row in results]
-                    values = [row[1] for row in results]
-                    return {'labels': labels, 'values': values}
+                    return query_to_chart_data(results, label_index=0, value_index=1)
         except Exception as e:
             print(f"  ⚠ Error consultando personal: {e}")
 
         # Datos de ejemplo
         return {
-            'labels': ['Operaciones', 'Logística', 'Administración', 'Mantenimiento', 'Recursos Humanos', 'Comercial', 'Seguridad', 'Sistemas'],
-            'values': [245, 180, 95, 120, 42, 68, 85, 35]
+            'labels': ['Operaciones', 'Logística', 'Administración', 'Comercial', 'Recursos Humanos'],
+            'values': [12, 9, 6, 3, 2]
         }
 
     def _get_estado_capacitacion(self):
-        """Obtener estado de capacitación (completado, en progreso, pendiente)"""
+        """Obtener estado de capacitación (usando esquema REAL)"""
         try:
             if self.db_connection:
                 cursor = self.db_connection.cursor()
 
                 # Completados
-                cursor.execute("SELECT COUNT(*) FROM instituto_UsuarioModulo WHERE Progreso = 100 AND Aprobado = 1")
+                cursor.execute("SELECT COUNT(*) FROM ProgresoModulo WHERE EstatusModulo = 'Completado'")
                 completados = cursor.fetchone()[0] or 0
 
                 # En Progreso
-                cursor.execute("SELECT COUNT(*) FROM instituto_UsuarioModulo WHERE Progreso > 0 AND Progreso < 100")
+                cursor.execute("SELECT COUNT(*) FROM ProgresoModulo WHERE EstatusModulo = 'En Progreso'")
                 en_progreso = cursor.fetchone()[0] or 0
 
-                # No iniciados (total usuarios * 8 módulos - asignados)
-                cursor.execute("SELECT COUNT(*) FROM instituto_Usuario WHERE Activo = 1")
+                # Pendientes (usuarios activos * módulos - asignados)
+                cursor.execute("SELECT COUNT(*) FROM Usuario WHERE UserStatus = 'Active'")
                 total_usuarios = cursor.fetchone()[0] or 0
-                total_posible = total_usuarios * 8
 
-                cursor.execute("SELECT COUNT(*) FROM instituto_UsuarioModulo")
+                cursor.execute("SELECT COUNT(*) FROM Modulo WHERE Activo = 1")
+                total_modulos = cursor.fetchone()[0] or 0
+
+                cursor.execute("SELECT COUNT(*) FROM ProgresoModulo")
                 asignados = cursor.fetchone()[0] or 0
 
+                total_posible = total_usuarios * total_modulos
                 pendientes = max(0, total_posible - asignados)
 
                 return {
@@ -256,27 +247,14 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         # Datos de ejemplo
         return {
             'labels': ['Completados', 'En Progreso', 'Pendientes'],
-            'values': [1850, 420, 3180]
+            'values': [150, 30, 76]
         }
 
     def _get_calificaciones_por_area(self):
-        """Obtener promedio de calificaciones por área"""
+        """Obtener promedio de calificaciones por área (usando esquema REAL)"""
         try:
             if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT
-                        u.Departamento,
-                        AVG(CAST(um.CalificacionFinal AS FLOAT)) as PromedioCalif
-                    FROM instituto_UsuarioModulo um
-                    INNER JOIN instituto_Usuario u ON um.UsuarioID = u.UsuarioID
-                    WHERE um.CalificacionFinal IS NOT NULL AND um.Aprobado = 1
-                    GROUP BY u.Departamento
-                    ORDER BY PromedioCalif DESC
-                """
-                cursor.execute(query)
-                results = cursor.fetchall()
-
+                results = ejecutar_query_lista(self.db_connection, QUERY_CALIFICACIONES_POR_AREA)
                 if results:
                     labels = [row[0] for row in results]
                     values = [round(row[1], 1) for row in results]
@@ -286,29 +264,15 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
 
         # Datos de ejemplo
         return {
-            'labels': ['Seguridad', 'Operaciones', 'Logística', 'Sistemas', 'Administración', 'RRHH', 'Comercial', 'Mantenimiento'],
-            'values': [92.5, 90.2, 89.8, 88.5, 87.3, 86.9, 85.4, 84.2]
+            'labels': ['Operaciones', 'Logística', 'Administración', 'Comercial'],
+            'values': [88.5, 86.2, 84.7, 82.1]
         }
 
     def _get_cumplimiento_unidades(self):
-        """Obtener % de cumplimiento por unidad de negocio"""
+        """Obtener % de cumplimiento por unidad de negocio (usando esquema REAL)"""
         try:
             if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT
-                        un.Nombre,
-                        COUNT(DISTINCT um.UsuarioID) * 100.0 / COUNT(DISTINCT u.UsuarioID) as PorcentajeCumplimiento
-                    FROM instituto_Usuario u
-                    INNER JOIN instituto_UnidadNegocio un ON u.UnidadNegocioID = un.UnidadID
-                    LEFT JOIN instituto_UsuarioModulo um ON u.UsuarioID = um.UsuarioID AND um.Progreso = 100
-                    WHERE u.Activo = 1
-                    GROUP BY un.Nombre
-                    ORDER BY PorcentajeCumplimiento DESC
-                """
-                cursor.execute(query)
-                results = cursor.fetchall()
-
+                results = ejecutar_query_lista(self.db_connection, QUERY_CUMPLIMIENTO_UNIDADES)
                 if results:
                     labels = [row[0] for row in results]
                     values = [round(row[1], 1) for row in results]
@@ -318,27 +282,15 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
 
         # Datos de ejemplo
         return {
-            'labels': ['Terminal 1', 'Logística', 'RRHH', 'TI', 'Seguridad', 'Terminal 2', 'Operaciones', 'Administración'],
-            'values': [95.5, 92.3, 91.8, 89.2, 88.5, 85.7, 83.2, 80.5]
+            'labels': ['CCI', 'ECV', 'HPML', 'HPMX', 'TNG', 'LCTM', 'EIT', 'ICAVE', 'LCT TILH', 'TIMSA'],
+            'values': [95.5, 92.3, 91.8, 89.2, 88.5, 85.7, 83.2, 80.5, 78.3, 75.1]
         }
 
     def _get_tendencia_mensual(self):
-        """Obtener tendencia de módulos completados por mes"""
+        """Obtener tendencia de módulos completados por mes (usando esquema REAL)"""
         try:
             if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT
-                        FORMAT(FechaFinalizacion, 'yyyy-MM') as Mes,
-                        COUNT(*) as Total
-                    FROM instituto_UsuarioModulo
-                    WHERE Progreso = 100 AND FechaFinalizacion IS NOT NULL
-                    GROUP BY FORMAT(FechaFinalizacion, 'yyyy-MM')
-                    ORDER BY Mes
-                """
-                cursor.execute(query)
-                results = cursor.fetchall()
-
+                results = ejecutar_query_lista(self.db_connection, QUERY_TENDENCIA_MENSUAL)
                 if results:
                     # Convertir "2024-01" a "Ene 2024"
                     meses = {
@@ -355,5 +307,5 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         # Datos de ejemplo
         return {
             'labels': ['Ene 2024', 'Feb 2024', 'Mar 2024', 'Abr 2024', 'May 2024', 'Jun 2024', 'Jul 2024'],
-            'values': [145, 198, 225, 268, 312, 285, 295]
+            'values': [20, 28, 35, 42, 48, 45, 50]
         }
