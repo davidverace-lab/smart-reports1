@@ -1,49 +1,78 @@
 """
-Panel de Dashboards Gerenciales - HUTCHISON PORTS
-Sistema de navegación: Grid view ↔ Fullscreen view (D3.js embebido)
+Panel de Dashboards Gerenciales - HUTCHISON PORTS (CON DATOS ESTÁTICOS)
+Sistema de navegación: Grid view ↔ Fullscreen view
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
 from src.interfaces.ui.views.components.charts.interactive_chart_card import InteractiveChartCard
-from src.infrastructure.visualization.d3_generator import MotorTemplatesD3
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
-import tempfile
-import os
 
-# Importar tkinterweb para embeber HTML
-try:
-    from tkinterweb import HtmlFrame
-    TKINTERWEB_AVAILABLE = True
-except ImportError:
-    TKINTERWEB_AVAILABLE = False
-    print("⚠️ tkinterweb no disponible")
+
+# ============================================
+# DATOS ESTÁTICOS PARA DASHBOARDS
+# ============================================
+
+# Dashboard 1: Avance por Módulo - CCI
+AVANCE_CCI_DATA = {
+    'labels': ['Mod 1\nFilosofía', 'Mod 2\nSostenibilidad', 'Mod 3\nOperaciones', 'Mod 4\nRel. Laborales',
+               'Mod 5\nSeguridad', 'Mod 6\nCiberseguridad', 'Mod 7\nSalud Laboral', 'Mod 8\nRRHH'],
+    'values': [95, 92, 88, 85, 82, 78, 75, 70]
+}
+
+# Dashboard 2: Avance por Módulo - ECV/EIT
+AVANCE_ECV_EIT_DATA = {
+    'labels': ['Mod 1\nFilosofía', 'Mod 2\nSostenibilidad', 'Mod 3\nOperaciones', 'Mod 4\nRel. Laborales',
+               'Mod 5\nSeguridad', 'Mod 6\nCiberseguridad', 'Mod 7\nSalud Laboral', 'Mod 8\nRRHH'],
+    'values': [90, 87, 84, 80, 77, 73, 70, 65]
+}
+
+# Dashboard 3: Población por Unidad de Negocio
+POBLACION_UN_DATA = {
+    'labels': ['CCI', 'ECV', 'EIT', 'HPML', 'HPMX', 'ICAVE', 'LCTM', 'LCT TILH', 'TIMSA', 'TNG', 'CORPORATIVO'],
+    'values': [145, 178, 223, 156, 195, 134, 189, 167, 145, 178, 95]
+}
+
+# Dashboard 4: Comportamiento Jerárquico - Resumen
+COMPORTAMIENTO_JERARQUICO_RESUMEN = {
+    'labels': ['Directores\ny Alta Gerencia', 'Gerentes\nMedios', 'Supervisores\ny Coordinadores',
+               'Analistas\ny Especialistas', 'Personal\nOperativo'],
+    'values': [98, 92, 85, 78, 70]
+}
+
+# Dashboard 5: Comportamiento Generacional
+COMPORTAMIENTO_GENERACIONAL = {
+    'labels': ['Baby Boomers\n(1946-1964)', 'Gen X\n(1965-1980)', 'Millennials\n(1981-1996)',
+               'Gen Z\n(1997-2012)', 'Gen Alpha\n(2013+)'],
+    'values': [88, 92, 85, 78, 65]
+}
+
+# Dashboard 6: Top 10 Posiciones con Mejor Avance
+TOP_10_POSICIONES = {
+    'labels': ['Director\nGeneral', 'Gerente\nOperaciones', 'Coordinador\nLogística', 'Jefe\nSeguridad',
+               'Supervisor\nPatio', 'Analista\nFinanzas', 'Especialista\nIT', 'Jefe\nRRHH',
+               'Coordinador\nCalidad', 'Supervisor\nMantenimiento'],
+    'values': [98, 95, 93, 91, 89, 87, 85, 83, 81, 79]
+}
 
 
 class DashboardsGerencialesPanel(ctk.CTkFrame):
     """
     Panel de Control - SMART REPORTS INSTITUTO HUTCHISON PORTS
 
-    Diseño NUEVO:
+    Diseño:
     - Tab "General": Información general del instituto (cartas informativas)
-    - Tab "Dashboards Gerenciales": Todos los gráficos D3.js interactivos (6 dashboards)
+    - Tab "Dashboards Gerenciales": 6 gráficos interactivos con datos estáticos
     """
 
     def __init__(self, parent, db_connection=None, usuario_actual=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
 
-        print("🚀 Inicializando DashboardsGerencialesPanel...")
+        print("🚀 Inicializando DashboardsGerencialesPanel (DATOS ESTÁTICOS)...")
 
         self.theme_manager = get_theme_manager()
         self.db_connection = db_connection
         self.usuario_actual = usuario_actual or {"nombre": "Admin"}
-
-        # Motor D3.js para generar HTMLs interactivos
-        self.motor_d3 = MotorTemplatesD3()
-
-        # Directorio temporal para D3.js
-        self.d3_temp_dir = os.path.join(tempfile.gettempdir(), 'smartreports_d3')
-        os.makedirs(self.d3_temp_dir, exist_ok=True)
 
         try:
             # Tabs de navegación
@@ -61,9 +90,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             self._create_general_tab()
             self._create_gerencial_tab()
 
-            # Cargar datos
-            print("  → Programando carga de datos...")
-            self.after(500, self._load_data)
+            # Cargar datos estáticos
+            print("  → Programando carga de datos estáticos...")
+            self.after(500, self._load_static_data)
 
             print("✅ DashboardsGerencialesPanel inicializado correctamente")
 
@@ -124,7 +153,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.metric_usuarios = self._create_metric_card(
             metrics_frame,
             title="Total de Usuarios",
-            value="0",
+            value="1,805",
             subtitle="Usuarios activos en el sistema",
             icon="👥",
             color=HUTCHISON_COLORS['ports_sky_blue']
@@ -146,7 +175,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.metric_completado = self._create_metric_card(
             metrics_frame,
             title="Tasa de Completado",
-            value="70.0%",
+            value="82.5%",
             subtitle="Progreso general del instituto",
             icon="✓",
             color=HUTCHISON_COLORS['success']
@@ -234,87 +263,87 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         )
         section_title.pack(anchor='w', padx=10, pady=(10, 20))
 
-        # === FILA 1: Usuarios y Progreso por Unidad (los que estaban en General) ===
+        # === FILA 1: Avance por Módulo CCI y ECV/EIT ===
         row1 = ctk.CTkFrame(container, fg_color='transparent')
         row1.pack(fill='x', pady=(0, 20))
-        row1.columnconfigure(0, weight=6)  # 60%
-        row1.columnconfigure(1, weight=4)  # 40%
+        row1.columnconfigure((0, 1), weight=1)
 
-        # Dashboard 1: Usuarios por Unidad de Negocio (Barras)
-        print("    → Creando dashboard Usuarios por Unidad...")
-        self.chart_usuarios_unidad = InteractiveChartCard(
+        # Dashboard 1: Avance CCI
+        print("    → Creando dashboard Avance CCI...")
+        self.chart_avance_cci = InteractiveChartCard(
             row1,
-            title="Usuarios por Unidad de Negocio",
-            width=650,
+            title="Avance por Módulo - CCI",
+            width=550,
             height=450,
             on_fullscreen=self._show_fullscreen_chart
         )
-        self.chart_usuarios_unidad.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
+        self.chart_avance_cci.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
 
-        # Dashboard 2: Progreso por Unidad (Donut)
-        print("    → Creando dashboard Progreso por Unidad...")
-        self.chart_progreso_unidad = InteractiveChartCard(
+        # Dashboard 2: Avance ECV/EIT
+        print("    → Creando dashboard Avance ECV/EIT...")
+        self.chart_avance_ecv = InteractiveChartCard(
             row1,
-            title="Progreso General por Unidad de Negocio",
-            width=450,
+            title="Avance por Módulo - ECV/EIT",
+            width=550,
             height=450,
             on_fullscreen=self._show_fullscreen_chart
         )
-        self.chart_progreso_unidad.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
+        self.chart_avance_ecv.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
 
-        # === FILA 2: Distribución y Tendencias ===
+        # === FILA 2: Población UN y Comportamiento Jerárquico ===
         row2 = ctk.CTkFrame(container, fg_color='transparent')
         row2.pack(fill='x', pady=(0, 20))
-        row2.columnconfigure((0, 1), weight=1)
+        row2.columnconfigure(0, weight=6)  # 60%
+        row2.columnconfigure(1, weight=4)  # 40%
 
-        # Dashboard 3: Distribución por Departamento
-        print("    → Creando dashboard Distribución Departamentos...")
-        self.chart_departamentos = InteractiveChartCard(
+        # Dashboard 3: Población por Unidad de Negocio
+        print("    → Creando dashboard Población UN...")
+        self.chart_poblacion_un = InteractiveChartCard(
             row2,
-            title="Distribución por Departamentos",
-            width=500,
+            title="Población por Unidad de Negocio",
+            width=650,
             height=400,
             on_fullscreen=self._show_fullscreen_chart
         )
-        self.chart_departamentos.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
+        self.chart_poblacion_un.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
 
-        # Dashboard 4: Tendencia de Módulos
-        print("    → Creando dashboard Tendencia Módulos...")
-        self.chart_modulos_tendencia = InteractiveChartCard(
+        # Dashboard 4: Comportamiento Jerárquico
+        print("    → Creando dashboard Comportamiento Jerárquico...")
+        self.chart_jerarquico = InteractiveChartCard(
             row2,
-            title="Tendencia de Completación de Módulos",
-            width=500,
+            title="Comportamiento Jerárquico",
+            width=450,
             height=400,
             on_fullscreen=self._show_fullscreen_chart
         )
-        self.chart_modulos_tendencia.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
+        self.chart_jerarquico.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
 
-        # === FILA 3: Actividad y Evaluaciones ===
+        # === FILA 3: Generacional y Top 10 Posiciones ===
         row3 = ctk.CTkFrame(container, fg_color='transparent')
         row3.pack(fill='x', pady=(0, 20))
         row3.columnconfigure((0, 1), weight=1)
 
-        # Dashboard 5: Actividad Mensual
-        print("    → Creando dashboard Actividad Mensual...")
-        self.chart_actividad = InteractiveChartCard(
+        # Dashboard 5: Comportamiento Generacional
+        print("    → Creando dashboard Comportamiento Generacional...")
+        self.chart_generacional = InteractiveChartCard(
             row3,
-            title="Actividad Mensual del Sistema",
+            title="Comportamiento Generacional",
             width=500,
             height=400,
             on_fullscreen=self._show_fullscreen_chart
         )
-        self.chart_actividad.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
+        self.chart_generacional.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 6: Resultados de Evaluaciones
-        print("    → Creando dashboard Evaluaciones...")
-        self.chart_evaluaciones = InteractiveChartCard(
+        # Dashboard 6: Top 10 Posiciones
+        print("    → Creando dashboard Top 10 Posiciones...")
+        self.chart_top_posiciones = InteractiveChartCard(
             row3,
-            title="Resultados de Evaluaciones",
+            title="Top 10 Posiciones con Mejor Avance",
             width=500,
             height=400,
             on_fullscreen=self._show_fullscreen_chart
         )
-        self.chart_evaluaciones.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
+        self.chart_top_posiciones.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
     def _create_fullscreen_view(self):
         """Crear vista fullscreen para mostrar un dashboard grande"""
@@ -515,293 +544,42 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         return card
 
-    def _load_data(self):
-        """Cargar datos reales desde la base de datos"""
+    def _load_static_data(self):
+        """Cargar datos estáticos en los dashboards"""
         print("\n" + "="*70)
-        print("📊 CARGANDO DATOS DEL DASHBOARD - HUTCHISON PORTS")
+        print("📊 CARGANDO DATOS ESTÁTICOS - HUTCHISON PORTS INSTITUTO")
         print("="*70)
 
         try:
-            # === PASO 1: CARGAR MÉTRICAS ===
-            print("\n[1/2] 📈 Cargando métricas principales...")
+            print("\n[1/6] 📈 Dashboard 1: Avance por Módulo - CCI")
+            self.chart_avance_cci.set_chart('bar', AVANCE_CCI_DATA)
+            print(f"  ✓ Cargado con {len(AVANCE_CCI_DATA['values'])} módulos")
 
-            # Métrica 1: Total de Usuarios
-            total_usuarios = self._get_total_usuarios()
-            self.metric_usuarios.value_label.configure(text=f"{total_usuarios:,}")
-            print(f"  ✓ Total usuarios: {total_usuarios:,}")
+            print("\n[2/6] 📈 Dashboard 2: Avance por Módulo - ECV/EIT")
+            self.chart_avance_ecv.set_chart('line', AVANCE_ECV_EIT_DATA)
+            print(f"  ✓ Cargado con {len(AVANCE_ECV_EIT_DATA['values'])} módulos")
 
-            # Métrica 2: Módulos (fijo en 8)
-            print(f"  ✓ Módulos disponibles: 8")
+            print("\n[3/6] 📊 Dashboard 3: Población por Unidad de Negocio")
+            self.chart_poblacion_un.set_chart('bar', POBLACION_UN_DATA)
+            print(f"  ✓ Cargado con {len(POBLACION_UN_DATA['values'])} unidades")
 
-            # Métrica 3: Tasa de Completado
-            print(f"  ✓ Tasa de completado: 70.0%")
+            print("\n[4/6] 🔵 Dashboard 4: Comportamiento Jerárquico")
+            self.chart_jerarquico.set_chart('donut', COMPORTAMIENTO_JERARQUICO_RESUMEN)
+            print(f"  ✓ Cargado con {len(COMPORTAMIENTO_JERARQUICO_RESUMEN['values'])} niveles")
 
-            # === PASO 2: CARGAR DASHBOARDS D3.JS ===
-            print("\n[2/2] 📊 Cargando dashboards interactivos...")
+            print("\n[5/6] 👥 Dashboard 5: Comportamiento Generacional")
+            self.chart_generacional.set_chart('donut', COMPORTAMIENTO_GENERACIONAL)
+            print(f"  ✓ Cargado con {len(COMPORTAMIENTO_GENERACIONAL['values'])} generaciones")
 
-            # Dashboard 1: Usuarios por Unidad de Negocio
-            print("  → Dashboard 1: Usuarios por Unidad (bar)")
-            datos_unidades = self._get_usuarios_por_unidad()
-            if not datos_unidades or not datos_unidades['values']:
-                print("    ⚠ Usando datos de ejemplo")
-                datos_unidades = self._get_datos_ejemplo_unidades()
-
-            # Cargar en InteractiveChartCard
-            self.chart_usuarios_unidad.set_chart('bar', datos_unidades)
-            print(f"    ✓ Cargado con {len(datos_unidades['values'])} unidades")
-
-            # Dashboard 2: Progreso por Unidad
-            print("  → Dashboard 2: Progreso por Unidad (donut)")
-            datos_progreso = self._get_progreso_por_unidad()
-            if not datos_progreso or not datos_progreso['values']:
-                print("    ⚠ Usando datos de ejemplo")
-                datos_progreso = self._get_datos_ejemplo_progreso()
-
-            # Cargar en InteractiveChartCard
-            self.chart_progreso_unidad.set_chart('donut', datos_progreso)
-            print(f"    ✓ Cargado con {len(datos_progreso['values'])} unidades")
-
-            # Dashboard 3: Distribución por Departamentos
-            print("  → Dashboard 3: Distribución Departamentos (donut)")
-            datos_deptos = self._get_distribucion_departamentos()
-
-            # Cargar en InteractiveChartCard
-            self.chart_departamentos.set_chart('donut', datos_deptos)
-            print(f"    ✓ Cargado con {len(datos_deptos['values'])} departamentos")
-
-            # Dashboard 4: Tendencia de Módulos
-            print("  → Dashboard 4: Tendencia Módulos (line)")
-            datos_tendencia = {
-                'labels': ['Mod 1', 'Mod 2', 'Mod 3', 'Mod 4', 'Mod 5', 'Mod 6', 'Mod 7', 'Mod 8'],
-                'values': [92, 88, 85, 82, 78, 75, 72, 70]
-            }
-
-            # Cargar en InteractiveChartCard
-            self.chart_modulos_tendencia.set_chart('line', datos_tendencia)
-            print(f"    ✓ Cargado con {len(datos_tendencia['values'])} módulos")
-
-            # Dashboard 5: Actividad Mensual
-            print("  → Dashboard 5: Actividad Mensual (line)")
-            datos_actividad = {
-                'labels': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-                'values': [850, 920, 980, 1050, 1120, 1180, 1250, 1320, 1380, 1450, 1500, 1525]
-            }
-
-            # Cargar en InteractiveChartCard
-            self.chart_actividad.set_chart('line', datos_actividad)
-            print(f"    ✓ Cargado con {len(datos_actividad['values'])} meses")
-
-            # Dashboard 6: Resultados de Evaluaciones
-            print("  → Dashboard 6: Evaluaciones (bar)")
-            datos_eval = {
-                'labels': ['Aprobados', 'En Proceso', 'Pendientes', 'No Aprobados'],
-                'values': [1068, 284, 142, 31]
-            }
-
-            # Cargar en InteractiveChartCard
-            self.chart_evaluaciones.set_chart('bar', datos_eval)
-            print(f"    ✓ Cargado con {len(datos_eval['values'])} categorías")
+            print("\n[6/6] 🏆 Dashboard 6: Top 10 Posiciones con Mejor Avance")
+            self.chart_top_posiciones.set_chart('bar', TOP_10_POSICIONES)
+            print(f"  ✓ Cargado con {len(TOP_10_POSICIONES['values'])} posiciones")
 
             print("\n" + "="*70)
-            print("✅ TODOS LOS DATOS CARGADOS EXITOSAMENTE")
+            print("✅ TODOS LOS DASHBOARDS CARGADOS EXITOSAMENTE")
             print("="*70 + "\n")
 
         except Exception as e:
-            print(f"❌ Error cargando datos del dashboard: {e}")
+            print(f"❌ Error cargando datos estáticos: {e}")
             import traceback
             traceback.print_exc()
-
-    # ============================================
-    # MÉTODOS DE CONSULTA A BASE DE DATOS
-    # ============================================
-
-    def _get_total_usuarios(self):
-        """Obtener total de usuarios activos desde BD"""
-        try:
-            if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT COUNT(*) as total
-                    FROM instituto_Usuario
-                    WHERE Activo = 1
-                """
-                cursor.execute(query)
-                result = cursor.fetchone()
-                if result and result[0]:
-                    return result[0]
-        except Exception as e:
-            print(f"  ⚠ Error consultando total usuarios: {e}")
-
-        return 1525
-
-    def _get_usuarios_por_unidad(self):
-        """Obtener usuarios por unidad de negocio"""
-        try:
-            if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT
-                        COALESCE(un.Codigo, 'SIN UNIDAD') as unidad,
-                        COUNT(u.IdUsuario) as cantidad
-                    FROM instituto_Usuario u
-                    LEFT JOIN instituto_UnidadDeNegocio un
-                        ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
-                    WHERE u.Activo = 1
-                    GROUP BY un.Codigo
-                    ORDER BY cantidad ASC
-                """
-                cursor.execute(query)
-                results = cursor.fetchall()
-
-                if results:
-                    labels = [row[0] for row in results]
-                    values = [row[1] for row in results]
-                    return {'labels': labels, 'values': values}
-        except Exception as e:
-            print(f"  ⚠ Error consultando usuarios por unidad: {e}")
-
-        return None
-
-    def _get_datos_ejemplo_unidades(self):
-        """Datos de ejemplo para usuarios por unidad"""
-        return {
-            'labels': ['LCMT', 'HPLM', 'ECV', 'TILH', 'CCI', 'TNG', 'HPMX', 'TIMSA', 'LCT', 'EIT', 'ICAVE'],
-            'values': [3, 9, 23, 71, 76, 129, 145, 195, 226, 276, 372]
-        }
-
-    def _get_progreso_por_unidad(self):
-        """Obtener progreso promedio por unidad de negocio"""
-        try:
-            if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT
-                        un.Codigo as unidad,
-                        ROUND(AVG(pm.PorcentajeAvance), 1) as promedio
-                    FROM instituto_UnidadDeNegocio un
-                    LEFT JOIN instituto_Usuario u ON un.IdUnidadDeNegocio = u.IdUnidadDeNegocio
-                    LEFT JOIN instituto_ProgresoModulo pm ON u.UserId = pm.UserId
-                    WHERE un.Activo = 1
-                    GROUP BY un.IdUnidadDeNegocio, un.Codigo
-                    HAVING promedio > 0
-                    ORDER BY promedio DESC
-                    LIMIT 5
-                """
-                cursor.execute(query)
-                results = cursor.fetchall()
-
-                if results:
-                    labels = [f"{row[0]} - {row[1]:.0f}%" for row in results]
-                    values = [row[1] for row in results]
-                    return {'labels': labels, 'values': values}
-        except Exception as e:
-            print(f"  ⚠ Error consultando progreso por unidad: {e}")
-
-        return None
-
-    def _get_datos_ejemplo_progreso(self):
-        """Datos de ejemplo para progreso por unidad"""
-        return {
-            'labels': ['TNG - 100%', 'ICAVE - 82%', 'ECV - 75%', 'CCI - 68%', 'HPMX - 62%'],
-            'values': [100, 82, 75, 68, 62]
-        }
-
-    def _get_distribucion_departamentos(self):
-        """Obtener distribución de usuarios por departamento"""
-        try:
-            if self.db_connection:
-                cursor = self.db_connection.cursor()
-                query = """
-                    SELECT
-                        COALESCE(d.NombreDepartamento, 'Sin Departamento') as departamento,
-                        COUNT(u.IdUsuario) as cantidad
-                    FROM instituto_Usuario u
-                    LEFT JOIN instituto_Departamento d ON u.IdDepartamento = d.IdDepartamento
-                    WHERE u.Activo = 1
-                    GROUP BY d.NombreDepartamento
-                    ORDER BY cantidad DESC
-                    LIMIT 8
-                """
-                cursor.execute(query)
-                results = cursor.fetchall()
-
-                if results:
-                    labels = [row[0] for row in results]
-                    values = [row[1] for row in results]
-                    return {'labels': labels, 'values': values}
-        except Exception as e:
-            print(f"  ⚠ Error consultando distribución departamentos: {e}")
-
-        # Datos de ejemplo
-        return {
-            'labels': ['Operaciones', 'Logística', 'Comercial', 'Administración', 'TI', 'RRHH', 'Finanzas', 'Legal'],
-            'values': [385, 298, 245, 187, 156, 134, 98, 67]
-        }
-
-    # ==================== SISTEMA FULLSCREEN CON CEF ====================
-
-    def _generate_d3_html_and_url(self, chart_type, datos, titulo, subtitulo=''):
-        """
-        Generar HTML D3.js y guardar en archivo temporal
-
-        Returns:
-            str: URL del archivo HTML generado
-        """
-        # Obtener tema
-        tema = 'dark' if self.theme_manager.is_dark_mode() else 'light'
-
-        # Generar HTML según tipo
-        if chart_type == 'bar':
-            html = self.motor_d3.generar_grafico_barras(
-                titulo=titulo,
-                datos=datos,
-                subtitulo=subtitulo,
-                tema=tema,
-                interactivo=True
-            )
-        elif chart_type == 'donut':
-            html = self.motor_d3.generar_grafico_donut(
-                titulo=titulo,
-                datos=datos,
-                subtitulo=subtitulo,
-                tema=tema
-            )
-        elif chart_type == 'line':
-            html = self.motor_d3.generar_grafico_lineas(
-                titulo=titulo,
-                datos=datos,
-                subtitulo=subtitulo,
-                tema=tema
-            )
-        elif chart_type == 'area':
-            html = self.motor_d3.generar_grafico_area(
-                titulo=titulo,
-                datos=datos,
-                subtitulo=subtitulo,
-                tema=tema
-            )
-        else:
-            html = f"<html><body><p>Tipo no soportado: {chart_type}</p></body></html>"
-
-        # Guardar en archivo temporal
-        filename = f"chart_{chart_type}_{id(self)}.html"
-        filepath = os.path.join(self.d3_temp_dir, filename)
-
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(html)
-
-        # Retornar URL file://
-        return f"file://{filepath}"
-
-    def _on_dashboard_fullscreen(self, title, chart_type, data, subtitle, url):
-        """Cambiar a vista fullscreen dentro de la app"""
-        print(f"\n🖥️  Activando fullscreen interno: {title}")
-
-        # Convertir file:// URL a path
-        if url.startswith('file://'):
-            html_path = url.replace('file://', '')
-        else:
-            html_path = url
-
-        # Cambiar a vista fullscreen
-        self.show_fullscreen_view(title, html_path)
