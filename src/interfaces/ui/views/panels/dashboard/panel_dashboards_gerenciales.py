@@ -27,6 +27,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.db_connection = db_connection
         self.usuario_actual = usuario_actual or {"nombre": "Admin"}
 
+        # Estado para fullscreen
+        self.current_fullscreen_data = None
+
         try:
             # Tabs de navegación
             print("  → Creando tabs...")
@@ -42,6 +45,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             print("  → Creando contenido de tabs...")
             self._create_general_tab()
             self._create_gerencial_tab()
+            self._create_fullscreen_frame()
 
             # Cargar datos
             print("  → Programando carga de datos...")
@@ -212,7 +216,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row1,
             title="Usuarios por Unidad de Negocio",
             width=650,
-            height=450
+            height=450,
+            on_fullscreen=self._on_dashboard_fullscreen
         )
         self.chart_usuarios_unidad.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
 
@@ -222,7 +227,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row1,
             title="Progreso General por Unidad de Negocio",
             width=450,
-            height=450
+            height=450,
+            on_fullscreen=self._on_dashboard_fullscreen
         )
         self.chart_progreso_unidad.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
 
@@ -237,7 +243,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row2,
             title="Distribución por Departamentos",
             width=500,
-            height=400
+            height=400,
+            on_fullscreen=self._on_dashboard_fullscreen
         )
         self.chart_departamentos.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
@@ -247,7 +254,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row2,
             title="Tendencia de Completación de Módulos",
             width=500,
-            height=400
+            height=400,
+            on_fullscreen=self._on_dashboard_fullscreen
         )
         self.chart_modulos_tendencia.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -262,7 +270,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row3,
             title="Actividad Mensual del Sistema",
             width=500,
-            height=400
+            height=400,
+            on_fullscreen=self._on_dashboard_fullscreen
         )
         self.chart_actividad.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
@@ -272,7 +281,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row3,
             title="Resultados de Evaluaciones",
             width=500,
-            height=400
+            height=400,
+            on_fullscreen=self._on_dashboard_fullscreen
         )
         self.chart_evaluaciones.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -603,3 +613,110 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             'labels': ['Operaciones', 'Logística', 'Comercial', 'Administración', 'TI', 'RRHH', 'Finanzas', 'Legal'],
             'values': [385, 298, 245, 187, 156, 134, 98, 67]
         }
+
+    # ==================== SISTEMA FULLSCREEN ====================
+
+    def _create_fullscreen_frame(self):
+        """Crear frame para vista fullscreen de dashboards"""
+        theme = self.theme_manager.get_current_theme()
+
+        # Frame fullscreen (inicialmente oculto)
+        self.fullscreen_frame = ctk.CTkFrame(
+            self.tab_gerencial,
+            fg_color='transparent'
+        )
+        # NO hacer pack() aquí - solo se muestra cuando se activa fullscreen
+
+        # Header con botón volver
+        header_frame = ctk.CTkFrame(self.fullscreen_frame, fg_color='transparent', height=60)
+        header_frame.pack(fill='x', padx=20, pady=(10, 20))
+        header_frame.pack_propagate(False)
+
+        # Botón Volver
+        back_btn = ctk.CTkButton(
+            header_frame,
+            text='← Volver a Dashboards',
+            font=('Montserrat', 14, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            hover_color='#001a3d',
+            text_color='white',
+            corner_radius=10,
+            height=45,
+            width=220,
+            command=self.show_grid_view
+        )
+        back_btn.pack(side='left')
+
+        # Título del dashboard (se actualiza dinámicamente)
+        self.fullscreen_title_label = ctk.CTkLabel(
+            header_frame,
+            text='Dashboard Fullscreen',
+            font=('Montserrat', 24, 'bold'),
+            text_color=theme['text']
+        )
+        self.fullscreen_title_label.pack(side='left', padx=30)
+
+        # Contenedor para el dashboard fullscreen
+        self.fullscreen_container = ctk.CTkFrame(
+            self.fullscreen_frame,
+            fg_color=theme['surface'],
+            corner_radius=15,
+            border_width=1,
+            border_color=theme['border']
+        )
+        self.fullscreen_container.pack(fill='both', expand=True, padx=20, pady=(0, 20))
+
+    def _on_dashboard_fullscreen(self, title, chart_type, data, subtitle, url):
+        """Manejar evento de fullscreen desde un dashboard"""
+        print(f"\n🖥️  Activando fullscreen: {title}")
+
+        # Guardar datos para fullscreen
+        self.current_fullscreen_data = {
+            'title': title,
+            'chart_type': chart_type,
+            'data': data,
+            'subtitle': subtitle,
+            'url': url
+        }
+
+        # Actualizar título
+        self.fullscreen_title_label.configure(text=f"📊 {title}")
+
+        # Limpiar contenedor
+        for widget in self.fullscreen_container.winfo_children():
+            widget.destroy()
+
+        # Crear dashboard fullscreen GRANDE
+        fullscreen_chart = D3ChartCard(
+            self.fullscreen_container,
+            title='',  # Sin título porque ya está en el header
+            width=1200,
+            height=700,
+            on_fullscreen=None  # No necesita botón fullscreen en modo fullscreen
+        )
+        fullscreen_chart.pack(fill='both', expand=True, padx=30, pady=30)
+
+        # Cargar el mismo gráfico
+        fullscreen_chart.set_chart(chart_type, data, subtitle)
+
+        # Cambiar a vista fullscreen
+        self.show_fullscreen_view()
+
+    def show_grid_view(self):
+        """Mostrar vista grid de dashboards"""
+        # Ocultar fullscreen
+        self.fullscreen_frame.pack_forget()
+
+        # Mostrar contenido normal del tab (ya está visible por defecto)
+        print("  ↩️  Volviendo a vista grid")
+
+    def show_fullscreen_view(self):
+        """Mostrar vista fullscreen de un dashboard"""
+        # Ocultar grid (necesitamos obtener el container del tab gerencial)
+        # Los widgets del tab ya están, solo agregamos fullscreen encima
+
+        # Mostrar fullscreen - colocar al frente
+        self.fullscreen_frame.pack(fill='both', expand=True)
+        self.fullscreen_frame.lift()  # Traer al frente
+
+        print("  ⛶ Mostrando fullscreen")

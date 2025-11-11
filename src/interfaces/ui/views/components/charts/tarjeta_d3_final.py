@@ -103,7 +103,7 @@ class D3ChartCard(ctk.CTkFrame):
     Los gráficos SIEMPRE se generan correctamente y se ven hermosos.
     """
 
-    def __init__(self, parent, title='', width=500, height=400, **kwargs):
+    def __init__(self, parent, title='', width=500, height=400, on_fullscreen=None, **kwargs):
         self.theme_manager = get_theme_manager()
         theme = self.theme_manager.get_current_theme()
 
@@ -120,11 +120,15 @@ class D3ChartCard(ctk.CTkFrame):
         self._width = width
         self._height = height
         self.motor_d3 = MotorTemplatesD3()
+        self.on_fullscreen = on_fullscreen  # Callback para modo fullscreen
 
         # Estado
         self.chart_url = None
         self.chart_filepath = None
         self.html_content = None
+        self.chart_type = None
+        self.chart_data = None
+        self.chart_subtitle = None
 
         # Crear UI
         self._create_header()
@@ -183,6 +187,22 @@ class D3ChartCard(ctk.CTkFrame):
         )
         mode_badge.pack(side='left', padx=5)
 
+        # Botón fullscreen (si hay callback)
+        if self.on_fullscreen:
+            fullscreen_btn = ctk.CTkButton(
+                badge_frame,
+                text='⛶',
+                font=('Montserrat', 14, 'bold'),
+                fg_color=HUTCHISON_COLORS['aqua_green'],
+                hover_color='#00b386',
+                text_color='white',
+                corner_radius=6,
+                width=35,
+                height=28,
+                command=self._trigger_fullscreen
+            )
+            fullscreen_btn.pack(side='left', padx=5)
+
         # Botón navegador
         browser_btn = ctk.CTkButton(
             badge_frame,
@@ -218,6 +238,11 @@ class D3ChartCard(ctk.CTkFrame):
             datos: {'labels': [...], 'values': [...]}
             subtitulo: Subtítulo opcional
         """
+        # Guardar datos del chart para fullscreen
+        self.chart_type = chart_type
+        self.chart_data = datos
+        self.chart_subtitle = subtitulo
+
         # Limpiar contenido anterior
         for widget in self.content_container.winfo_children():
             widget.destroy()
@@ -373,6 +398,19 @@ class D3ChartCard(ctk.CTkFrame):
             print(f"  🌐 Abierto en navegador: {self.chart_url}")
         except Exception as e:
             print(f"  ❌ Error abriendo navegador: {e}")
+
+    def _trigger_fullscreen(self):
+        """Activar modo fullscreen (llamar al callback)"""
+        if self.on_fullscreen and self.chart_url:
+            # Pasar todos los datos necesarios para recrear el chart en fullscreen
+            self.on_fullscreen(
+                title=self._title,
+                chart_type=self.chart_type,
+                data=self.chart_data,
+                subtitle=self.chart_subtitle,
+                url=self.chart_url
+            )
+            print(f"  ⛶ Activando fullscreen para: {self._title}")
 
     def clear(self):
         """Limpiar gráfico"""
