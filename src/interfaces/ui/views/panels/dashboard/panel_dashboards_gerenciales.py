@@ -1,12 +1,16 @@
 """
 Panel de Dashboards Gerenciales - HUTCHISON PORTS
-Reorganizado: Tab General con info del instituto, Tab Dashboards con gráficos D3.js
+Sistema híbrido: Matplotlib para previews + CEF Python para fullscreen D3.js interactivo
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
-from src.interfaces.ui.views.components.charts.tarjeta_d3_final import D3ChartCard
+from src.interfaces.ui.views.components.charts.matplotlib_chart_card import MatplotlibChartCard
+from src.interfaces.ui.views.components.charts.cef_browser_window import open_cef_window
+from src.infrastructure.visualization.d3_generator import MotorTemplatesD3
 from config.gestor_temas import get_theme_manager
 from config.themes import HUTCHISON_COLORS
+import tempfile
+import os
 
 
 class DashboardsGerencialesPanel(ctk.CTkFrame):
@@ -27,8 +31,12 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.db_connection = db_connection
         self.usuario_actual = usuario_actual or {"nombre": "Admin"}
 
-        # Estado para fullscreen
-        self.current_fullscreen_data = None
+        # Motor D3.js para generar HTMLs interactivos
+        self.motor_d3 = MotorTemplatesD3()
+
+        # Directorio temporal para D3.js
+        self.d3_temp_dir = os.path.join(tempfile.gettempdir(), 'smartreports_d3')
+        os.makedirs(self.d3_temp_dir, exist_ok=True)
 
         try:
             # Tabs de navegación
@@ -45,7 +53,6 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             print("  → Creando contenido de tabs...")
             self._create_general_tab()
             self._create_gerencial_tab()
-            self._create_fullscreen_frame()
 
             # Cargar datos
             print("  → Programando carga de datos...")
@@ -212,7 +219,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 1: Usuarios por Unidad de Negocio (Barras)
         print("    → Creando dashboard Usuarios por Unidad...")
-        self.chart_usuarios_unidad = D3ChartCard(
+        self.chart_usuarios_unidad = MatplotlibChartCard(
             row1,
             title="Usuarios por Unidad de Negocio",
             width=650,
@@ -223,7 +230,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 2: Progreso por Unidad (Donut)
         print("    → Creando dashboard Progreso por Unidad...")
-        self.chart_progreso_unidad = D3ChartCard(
+        self.chart_progreso_unidad = MatplotlibChartCard(
             row1,
             title="Progreso General por Unidad de Negocio",
             width=450,
@@ -239,7 +246,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 3: Distribución por Departamento
         print("    → Creando dashboard Distribución Departamentos...")
-        self.chart_departamentos = D3ChartCard(
+        self.chart_departamentos = MatplotlibChartCard(
             row2,
             title="Distribución por Departamentos",
             width=500,
@@ -250,7 +257,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 4: Tendencia de Módulos
         print("    → Creando dashboard Tendencia Módulos...")
-        self.chart_modulos_tendencia = D3ChartCard(
+        self.chart_modulos_tendencia = MatplotlibChartCard(
             row2,
             title="Tendencia de Completación de Módulos",
             width=500,
@@ -266,7 +273,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 5: Actividad Mensual
         print("    → Creando dashboard Actividad Mensual...")
-        self.chart_actividad = D3ChartCard(
+        self.chart_actividad = MatplotlibChartCard(
             row3,
             title="Actividad Mensual del Sistema",
             width=500,
@@ -277,7 +284,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         # Dashboard 6: Resultados de Evaluaciones
         print("    → Creando dashboard Evaluaciones...")
-        self.chart_evaluaciones = D3ChartCard(
+        self.chart_evaluaciones = MatplotlibChartCard(
             row3,
             title="Resultados de Evaluaciones",
             width=500,
@@ -428,28 +435,41 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             # Dashboard 1: Usuarios por Unidad de Negocio
             print("  → Dashboard 1: Usuarios por Unidad (bar)")
             datos_unidades = self._get_usuarios_por_unidad()
-            if datos_unidades and datos_unidades['values']:
-                self.chart_usuarios_unidad.set_chart('bar', datos_unidades)
-                print(f"    ✓ Cargado con {len(datos_unidades['values'])} unidades")
-            else:
+            if not datos_unidades or not datos_unidades['values']:
                 print("    ⚠ Usando datos de ejemplo")
-                self.chart_usuarios_unidad.set_chart('bar', self._get_datos_ejemplo_unidades())
+                datos_unidades = self._get_datos_ejemplo_unidades()
+
+            # Generar D3.js y obtener URL
+            url_d3 = self._generate_d3_html_and_url('bar', datos_unidades, "Usuarios por Unidad de Negocio")
+
+            # Cargar en Matplotlib + URL D3
+            self.chart_usuarios_unidad.set_chart('bar', datos_unidades, d3_url=url_d3)
+            print(f"    ✓ Cargado con {len(datos_unidades['values'])} unidades")
 
             # Dashboard 2: Progreso por Unidad
             print("  → Dashboard 2: Progreso por Unidad (donut)")
             datos_progreso = self._get_progreso_por_unidad()
-            if datos_progreso and datos_progreso['values']:
-                self.chart_progreso_unidad.set_chart('donut', datos_progreso)
-                print(f"    ✓ Cargado con {len(datos_progreso['values'])} unidades")
-            else:
+            if not datos_progreso or not datos_progreso['values']:
                 print("    ⚠ Usando datos de ejemplo")
-                self.chart_progreso_unidad.set_chart('donut', self._get_datos_ejemplo_progreso())
+                datos_progreso = self._get_datos_ejemplo_progreso()
+
+            # Generar D3.js y obtener URL
+            url_d3 = self._generate_d3_html_and_url('donut', datos_progreso, "Progreso General por Unidad de Negocio")
+
+            # Cargar en Matplotlib + URL D3
+            self.chart_progreso_unidad.set_chart('donut', datos_progreso, d3_url=url_d3)
+            print(f"    ✓ Cargado con {len(datos_progreso['values'])} unidades")
 
             # Dashboard 3: Distribución por Departamentos
             print("  → Dashboard 3: Distribución Departamentos (donut)")
             datos_deptos = self._get_distribucion_departamentos()
-            self.chart_departamentos.set_chart('donut', datos_deptos)
-            print("    ✓ Completado")
+
+            # Generar D3.js y obtener URL
+            url_d3 = self._generate_d3_html_and_url('donut', datos_deptos, "Distribución por Departamentos")
+
+            # Cargar en Matplotlib + URL D3
+            self.chart_departamentos.set_chart('donut', datos_deptos, d3_url=url_d3)
+            print(f"    ✓ Cargado con {len(datos_deptos['values'])} departamentos")
 
             # Dashboard 4: Tendencia de Módulos
             print("  → Dashboard 4: Tendencia Módulos (line)")
@@ -457,8 +477,13 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
                 'labels': ['Mod 1', 'Mod 2', 'Mod 3', 'Mod 4', 'Mod 5', 'Mod 6', 'Mod 7', 'Mod 8'],
                 'values': [92, 88, 85, 82, 78, 75, 72, 70]
             }
-            self.chart_modulos_tendencia.set_chart('line', datos_tendencia)
-            print("    ✓ Completado")
+
+            # Generar D3.js y obtener URL
+            url_d3 = self._generate_d3_html_and_url('line', datos_tendencia, "Tendencia de Progreso por Módulos")
+
+            # Cargar en Matplotlib + URL D3
+            self.chart_modulos_tendencia.set_chart('line', datos_tendencia, d3_url=url_d3)
+            print(f"    ✓ Cargado con {len(datos_tendencia['values'])} módulos")
 
             # Dashboard 5: Actividad Mensual
             print("  → Dashboard 5: Actividad Mensual (line)")
@@ -466,8 +491,13 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
                 'labels': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                 'values': [850, 920, 980, 1050, 1120, 1180, 1250, 1320, 1380, 1450, 1500, 1525]
             }
-            self.chart_actividad.set_chart('line', datos_actividad)
-            print("    ✓ Completado")
+
+            # Generar D3.js y obtener URL
+            url_d3 = self._generate_d3_html_and_url('line', datos_actividad, "Actividad de Usuarios Mensual")
+
+            # Cargar en Matplotlib + URL D3
+            self.chart_actividad.set_chart('line', datos_actividad, d3_url=url_d3)
+            print(f"    ✓ Cargado con {len(datos_actividad['values'])} meses")
 
             # Dashboard 6: Resultados de Evaluaciones
             print("  → Dashboard 6: Evaluaciones (bar)")
@@ -475,8 +505,13 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
                 'labels': ['Aprobados', 'En Proceso', 'Pendientes', 'No Aprobados'],
                 'values': [1068, 284, 142, 31]
             }
-            self.chart_evaluaciones.set_chart('bar', datos_eval)
-            print("    ✓ Completado")
+
+            # Generar D3.js y obtener URL
+            url_d3 = self._generate_d3_html_and_url('bar', datos_eval, "Resultados de Evaluaciones")
+
+            # Cargar en Matplotlib + URL D3
+            self.chart_evaluaciones.set_chart('bar', datos_eval, d3_url=url_d3)
+            print(f"    ✓ Cargado con {len(datos_eval['values'])} categorías")
 
             print("\n" + "="*70)
             print("✅ TODOS LOS DATOS CARGADOS EXITOSAMENTE")
@@ -614,109 +649,68 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             'values': [385, 298, 245, 187, 156, 134, 98, 67]
         }
 
-    # ==================== SISTEMA FULLSCREEN ====================
+    # ==================== SISTEMA FULLSCREEN CON CEF ====================
 
-    def _create_fullscreen_frame(self):
-        """Crear frame para vista fullscreen de dashboards"""
-        theme = self.theme_manager.get_current_theme()
+    def _generate_d3_html_and_url(self, chart_type, datos, titulo, subtitulo=''):
+        """
+        Generar HTML D3.js y guardar en archivo temporal
 
-        # Frame fullscreen (inicialmente oculto)
-        self.fullscreen_frame = ctk.CTkFrame(
-            self.tab_gerencial,
-            fg_color='transparent'
-        )
-        # NO hacer pack() aquí - solo se muestra cuando se activa fullscreen
+        Returns:
+            str: URL del archivo HTML generado
+        """
+        # Obtener tema
+        tema = 'dark' if self.theme_manager.is_dark_mode() else 'light'
 
-        # Header con botón volver
-        header_frame = ctk.CTkFrame(self.fullscreen_frame, fg_color='transparent', height=60)
-        header_frame.pack(fill='x', padx=20, pady=(10, 20))
-        header_frame.pack_propagate(False)
+        # Generar HTML según tipo
+        if chart_type == 'bar':
+            html = self.motor_d3.generar_grafico_barras(
+                titulo=titulo,
+                datos=datos,
+                subtitulo=subtitulo,
+                tema=tema,
+                interactivo=True
+            )
+        elif chart_type == 'donut':
+            html = self.motor_d3.generar_grafico_donut(
+                titulo=titulo,
+                datos=datos,
+                subtitulo=subtitulo,
+                tema=tema
+            )
+        elif chart_type == 'line':
+            html = self.motor_d3.generar_grafico_lineas(
+                titulo=titulo,
+                datos=datos,
+                subtitulo=subtitulo,
+                tema=tema
+            )
+        elif chart_type == 'area':
+            html = self.motor_d3.generar_grafico_area(
+                titulo=titulo,
+                datos=datos,
+                subtitulo=subtitulo,
+                tema=tema
+            )
+        else:
+            html = f"<html><body><p>Tipo no soportado: {chart_type}</p></body></html>"
 
-        # Botón Volver
-        back_btn = ctk.CTkButton(
-            header_frame,
-            text='← Volver a Dashboards',
-            font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
-            hover_color='#001a3d',
-            text_color='white',
-            corner_radius=10,
-            height=45,
-            width=220,
-            command=self.show_grid_view
-        )
-        back_btn.pack(side='left')
+        # Guardar en archivo temporal
+        filename = f"chart_{chart_type}_{id(self)}.html"
+        filepath = os.path.join(self.d3_temp_dir, filename)
 
-        # Título del dashboard (se actualiza dinámicamente)
-        self.fullscreen_title_label = ctk.CTkLabel(
-            header_frame,
-            text='Dashboard Fullscreen',
-            font=('Montserrat', 24, 'bold'),
-            text_color=theme['text']
-        )
-        self.fullscreen_title_label.pack(side='left', padx=30)
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(html)
 
-        # Contenedor para el dashboard fullscreen
-        self.fullscreen_container = ctk.CTkFrame(
-            self.fullscreen_frame,
-            fg_color=theme['surface'],
-            corner_radius=15,
-            border_width=1,
-            border_color=theme['border']
-        )
-        self.fullscreen_container.pack(fill='both', expand=True, padx=20, pady=(0, 20))
+        # Retornar URL file://
+        return f"file://{filepath}"
 
     def _on_dashboard_fullscreen(self, title, chart_type, data, subtitle, url):
-        """Manejar evento de fullscreen desde un dashboard"""
-        print(f"\n🖥️  Activando fullscreen: {title}")
+        """Abrir ventana CEF con D3.js interactivo"""
+        print(f"\n🖥️  Activando fullscreen CEF: {title}")
 
-        # Guardar datos para fullscreen
-        self.current_fullscreen_data = {
-            'title': title,
-            'chart_type': chart_type,
-            'data': data,
-            'subtitle': subtitle,
-            'url': url
-        }
-
-        # Actualizar título
-        self.fullscreen_title_label.configure(text=f"📊 {title}")
-
-        # Limpiar contenedor
-        for widget in self.fullscreen_container.winfo_children():
-            widget.destroy()
-
-        # Crear dashboard fullscreen GRANDE
-        fullscreen_chart = D3ChartCard(
-            self.fullscreen_container,
-            title='',  # Sin título porque ya está en el header
-            width=1200,
-            height=700,
-            on_fullscreen=None  # No necesita botón fullscreen en modo fullscreen
+        # Abrir ventana CEF con D3.js interactivo
+        open_cef_window(
+            parent=self.winfo_toplevel(),
+            title=title,
+            url=url
         )
-        fullscreen_chart.pack(fill='both', expand=True, padx=30, pady=30)
-
-        # Cargar el mismo gráfico
-        fullscreen_chart.set_chart(chart_type, data, subtitle)
-
-        # Cambiar a vista fullscreen
-        self.show_fullscreen_view()
-
-    def show_grid_view(self):
-        """Mostrar vista grid de dashboards"""
-        # Ocultar fullscreen
-        self.fullscreen_frame.pack_forget()
-
-        # Mostrar contenido normal del tab (ya está visible por defecto)
-        print("  ↩️  Volviendo a vista grid")
-
-    def show_fullscreen_view(self):
-        """Mostrar vista fullscreen de un dashboard"""
-        # Ocultar grid (necesitamos obtener el container del tab gerencial)
-        # Los widgets del tab ya están, solo agregamos fullscreen encima
-
-        # Mostrar fullscreen - colocar al frente
-        self.fullscreen_frame.pack(fill='both', expand=True)
-        self.fullscreen_frame.lift()  # Traer al frente
-
-        print("  ⛶ Mostrando fullscreen")
