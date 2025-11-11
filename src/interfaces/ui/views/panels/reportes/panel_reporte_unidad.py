@@ -279,7 +279,7 @@ class UnitReportPanel(ctk.CTkFrame):
                 SELECT COUNT(*)
                 FROM instituto_Usuario u
                 JOIN instituto_UnidadDeNegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
-                WHERE un.NombreUnidad = %s
+                WHERE un.NombreUnidad = ?
             """, (unit_name,))
             result = self.cursor.fetchone()
             return result[0] if result else 150
