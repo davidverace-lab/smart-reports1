@@ -1,17 +1,15 @@
 """
 ╔════════════════════════════════════════════════════════════════════╗
-║  PANEL DE CONTROL - HUTCHISON PORTS                               ║
+║  PANEL DE CONTROL EJECUTIVO - HUTCHISON PORTS                     ║
 ║  Sistema de Dashboards Gerenciales Profesional                    ║
 ╚════════════════════════════════════════════════════════════════════╝
 
-Diseño EXACTO según especificaciones del usuario:
-✅ Tab "General" con métricas + gráficas principales (Panel de Control)
+Diseño EXACTO según especificaciones:
+✅ Tab "General" con métricas + gráficas principales
 ✅ Tab "Dashboards" con grid de 6 cards interactivas
 ✅ Sistema de expansión IN-PLACE (sin navegador)
 ✅ Gráficas matplotlib profesionales con gradientes navy blue
-✅ Botón "Exportar Interactivo" cyan (#22d3ee)
 ✅ Modo claro/oscuro integrado
-✅ Datos estáticos según diseño del usuario
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.components.navigation.boton_pestana import CustomTabView
@@ -25,14 +23,12 @@ from config.themes import HUTCHISON_COLORS
 # ═══════════════════════════════════════════════════════════════════
 
 # 📊 Gráfica 1: Usuarios por Unidad de Negocio (Barras Horizontales)
-# Datos EXACTOS del diseño del usuario
 USUARIOS_POR_UNIDAD_DATA = {
     'labels': ['LCMT', 'HPLM', 'ECV', 'TILH', 'CCI', 'TNG', 'HPMX', 'TIMSA', 'LCT', 'EIT', 'ICAVE'],
     'values': [3, 9, 23, 71, 76, 129, 145, 195, 226, 276, 372]
 }
 
 # 🍩 Gráfica 2: Progreso General por Unidad de Negocio (Dona)
-# Con porcentajes exactos del diseño
 PROGRESO_UNIDADES_DATA = {
     'labels': ['TNG - 100%', 'ICAVE - 82%', 'ECV - 75%', 'Container - 68%', 'HPMX - 62%'],
     'values': [100, 82, 75, 68, 62]
@@ -63,11 +59,11 @@ MODULOS_MENOR_AVANCE_DATA = {
 }
 
 
-class DashboardsGerencialesPanel(ctk.CTkFrame):
+class PanelControlEjecutivo(ctk.CTkFrame):
     """
-    Panel de Control - HUTCHISON PORTS
+    Panel de Control Ejecutivo - HUTCHISON PORTS
 
-    Diseño EXACTO del usuario:
+    Estructura:
     ┌─────────────────────────────────────────────────────────────┐
     │  Panel de Control                                           │
     │  ┌─────────────┐ ┌──────────────────────┐                 │
@@ -75,28 +71,15 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
     │  │  (activo)   │ │ Gerenciales         │                  │
     │  └─────────────┘ └──────────────────────┘                 │
     ├─────────────────────────────────────────────────────────────┤
-    │                                                             │
-    │  TAB GENERAL:                                               │
-    │  ┌──────┐  ┌─────────────────────┐  ┌───────────┐        │
-    │  │ 👥  │  │ 📄 Módulo Actual    │  │ ✓ Tasa   │        │
-    │  │1,525│  │ Módulo 8 - RRHH     │  │ 70.0%    │        │
-    │  └──────┘  └─────────────────────┘  └───────────┘        │
-    │                                                             │
-    │  ┌────────────────────┐  ┌─────────────────────────┐      │
-    │  │ Usuarios por UN    │  │ Progreso General por UN │      │
-    │  │ (Barras Horiz.)    │  │ (Dona con leyenda)      │      │
-    │  │ [Exportar]         │  │ [Exportar]              │      │
-    │  └────────────────────┘  └─────────────────────────┘      │
-    │                                                             │
-    │  TAB DASHBOARDS:                                            │
-    │  Grid 2x3 con 6 gráficas mini (cada una expandible)        │
+    │  [Vista General: 3 métricas + 2 gráficas grandes]          │
+    │  [Vista Dashboards: Grid 2x3 con 6 gráficas]               │
     └─────────────────────────────────────────────────────────────┘
     """
 
     def __init__(self, parent, db_connection=None, usuario_actual=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
 
-        print("🚀 Inicializando Panel de Control - Dashboards Gerenciales...")
+        print("🚀 Inicializando Panel de Control Ejecutivo...")
 
         self.theme_manager = get_theme_manager()
         self.db_connection = db_connection
@@ -110,9 +93,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.chart_cumplimiento = None
         self.chart_menor_avance = None
 
-        # Referencias para grid
-        self.chart_usuarios_unidad_grid = None
-        self.chart_progreso_dona_grid = None
+        # Estado de navegación
+        self.fullscreen_chart = None  # Gráfica actualmente en fullscreen
 
         try:
             self._create_tabs()
@@ -122,7 +104,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             # Cargar datos después de 500ms
             self.after(500, self._load_all_data)
 
-            print("✅ Panel de Control inicializado correctamente")
+            print("✅ Panel de Control Ejecutivo inicializado correctamente")
 
         except Exception as e:
             print(f"❌ Error inicializando panel: {e}")
@@ -136,7 +118,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self.tab_view = CustomTabView(self)
         self.tab_view.pack(fill='both', expand=True, padx=20, pady=(10, 20))
 
-        # Tab 1: General (Panel de Control con métricas + 2 gráficas grandes)
+        # Tab 1: General (métricas + gráficas principales)
         self.tab_general = self.tab_view.add("General", "📊")
 
         # Tab 2: Dashboards Gerenciales (grid de 6 dashboards)
@@ -148,28 +130,25 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
     def _create_general_tab(self):
         """
-        Crear Tab "General" con diseño EXACTO del usuario:
+        Crear Tab "General" con diseño EXACTO:
 
-        ╔═══════════════════════════════════════════════════════════╗
-        ║  Panel de Control                                         ║
-        ╠═══════════════════════════════════════════════════════════╣
-        ║  ┌─────────┐  ┌──────────────────────┐  ┌─────────────┐ ║
-        ║  │ 👥      │  │ 📄 Módulo Actual     │  │ ✓ Tasa de  ║ ║
-        ║  │ Total   │  │ Módulo 8 - RRHH      │  │ Completado ║ ║
-        ║  │ 1,525   │  │                       │  │   70.0%    ║ ║
-        ║  └─────────┘  └──────────────────────┘  └─────────────┘ ║
-        ╠═══════════════════════════════════════════════════════════╣
-        ║  ┌──────────────────────┐  ┌──────────────────────────┐ ║
-        ║  │ Usuarios por Unidad  │  │ Progreso General por UN  ║ ║
-        ║  │ [📥 Exportar]        │  │ [📥 Exportar]            ║ ║
-        ║  │  ICAVE  ████████ 372 │  │      ╭──────╮            ║ ║
-        ║  │  EIT    ███████ 276  │  │    ╱  TNG    ╲           ║ ║
-        ║  │  LCT    ██████ 226   │  │   │   100%   │          ║ ║
-        ║  │  ...                 │  │    ╲  387    ╱           ║ ║
-        ║  └──────────────────────┘  │      ╰──────╯            ║ ║
-        ║                             │  Leyenda: TNG-100%...    ║ ║
-        ║                             └──────────────────────────┘ ║
-        ╚═══════════════════════════════════════════════════════════╝
+        ┌───────────────────────────────────────────────────────────┐
+        │  Panel de Control                                         │
+        ├───────────────────────────────────────────────────────────┤
+        │  ┌─────────┐  ┌──────────────────────┐  ┌─────────────┐ │
+        │  │ 👥      │  │ 📄 Módulo Actual     │  │ ✓ Tasa de  │ │
+        │  │ Total   │  │ Módulo 8 - RRHH      │  │ Completado │ │
+        │  │ 1,525   │  │                       │  │   70.0%    │ │
+        │  └─────────┘  └──────────────────────┘  └─────────────┘ │
+        ├───────────────────────────────────────────────────────────┤
+        │  ┌──────────────────────┐  ┌──────────────────────────┐ │
+        │  │ Usuarios por Unidad  │  │ Progreso General por UN  │ │
+        │  │ (Barras Horizontales)│  │ (Gráfica de Dona)        │ │
+        │  │                      │  │                          │ │
+        │  │  [Gráfica Grande]    │  │    [Gráfica Grande]      │ │
+        │  │                      │  │                          │ │
+        │  └──────────────────────┘  └──────────────────────────┘ │
+        └───────────────────────────────────────────────────────────┘
         """
         theme = self.theme_manager.get_current_theme()
 
@@ -197,12 +176,13 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             color=HUTCHISON_COLORS['ports_sky_blue']
         ).grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Card 2: Módulo Actual (EXACTO del diseño)
-        self._create_metric_card_modulo(
+        # Card 2: Módulo Actual
+        self._create_metric_card(
             metrics_frame,
             icon="📄",
             title="Módulo Actual",
-            value="Módulo 8 - Procesos de\nRecursos Humanos",
+            value="Módulo 8",
+            subtitle="Procesos de Recursos Humanos",
             color=HUTCHISON_COLORS['aqua_green']
         ).grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -221,27 +201,25 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         charts_frame = ctk.CTkFrame(container, fg_color='transparent')
         charts_frame.pack(fill='both', expand=True, pady=(10, 0))
-        charts_frame.columnconfigure(0, weight=6)  # 60% para barras horizontales
+        charts_frame.columnconfigure(0, weight=6)  # 60% para barras
         charts_frame.columnconfigure(1, weight=4)  # 40% para dona
 
         # Gráfica 1: Usuarios por Unidad de Negocio (Barras Horizontales)
-        # CON DATOS EXACTOS: LCMT(3), HPLM(9), ECV(23)... ICAVE(372)
         self.chart_usuarios_unidad = InteractiveChartCard(
             charts_frame,
-            title="Usuarios por Unidad de Negocio",
-            width=750,
-            height=580,
+            title="📊 Usuarios por Unidad de Negocio",
+            width=700,
+            height=550,
             on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_usuarios_unidad.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
 
         # Gráfica 2: Progreso General por Unidad de Negocio (Dona)
-        # CON LEYENDA: TNG-100%, ICAVE-82%, ECV-75%, Container-68%, HPMX-62%
         self.chart_progreso_dona = InteractiveChartCard(
             charts_frame,
-            title="Progreso General por Unidad de Negocio\n(TNG 100% - 8 Módulos)",
+            title="🍩 Progreso General por Unidad de Negocio (TNG 100% - 8 Módulos)",
             width=500,
-            height=580,
+            height=550,
             on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_progreso_dona.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
@@ -254,22 +232,20 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         """
         Crear Tab "Dashboards Gerenciales" con grid 2x3:
 
-        ╔═══════════════════════════════════════════════════════════╗
-        ║  📊 Dashboards                                    [🔍] [⚙️]║
-        ╠═══════════════════════════════════════════════════════════╣
-        ║  ┌────────────┐  ┌────────────┐  ┌────────────┐         ║
-        ║  │ 📊 Usuarios│  │ 🍩 Progreso│  │ 📈 Tendenc.│         ║
-        ║  │   por UN   │  │   General  │  │   Semanal  │         ║
-        ║  │ [preview]  │  │ [preview]  │  │ [preview]  │         ║
-        ║  │ [↗Expandir]│  │ [↗Expandir]│  │ [↗Expandir]│         ║
-        ║  └────────────┘  └────────────┘  └────────────┘         ║
-        ║  ┌────────────┐  ┌────────────┐  ┌────────────┐         ║
-        ║  │ 📊 Top 5   │  │ 🎯 Cumpli. │  │ 📉 Menor   │         ║
-        ║  │  Unidades  │  │  Objetivos │  │   Avance   │         ║
-        ║  │ [preview]  │  │ [preview]  │  │ [preview]  │         ║
-        ║  │ [↗Expandir]│  │ [↗Expandir]│  │ [↗Expandir]│         ║
-        ║  └────────────┘  └────────────┘  └────────────┘         ║
-        ╚═══════════════════════════════════════════════════════════╝
+        ┌──────────────────────────────────────────────────────┐
+        │  ┌────────────┐  ┌────────────┐  ┌────────────┐    │
+        │  │ 📊 Usuarios│  │ 🍩 Progreso│  │ 📈 Tendenc.│    │
+        │  │   por UN   │  │   General  │  │   Semanal  │    │
+        │  │ [preview]  │  │ [preview]  │  │ [preview]  │    │
+        │  │ [Expandir] │  │ [Expandir] │  │ [Expandir] │    │
+        │  └────────────┘  └────────────┘  └────────────┘    │
+        │  ┌────────────┐  ┌────────────┐  ┌────────────┐    │
+        │  │ 📊 Top 5   │  │ 🎯 Cumpli. │  │ 📉 Menor   │    │
+        │  │  Unidades  │  │  Objetivos │  │   Avance   │    │
+        │  │ [preview]  │  │ [preview]  │  │ [preview]  │    │
+        │  │ [Expandir] │  │ [Expandir] │  │ [Expandir] │    │
+        │  └────────────┘  └────────────┘  └────────────┘    │
+        └──────────────────────────────────────────────────────┘
         """
         theme = self.theme_manager.get_current_theme()
 
@@ -284,7 +260,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         section_title = ctk.CTkLabel(
             container,
             text="📊 Dashboards Interactivos - Sistema Ejecutivo",
-            font=('Segoe UI', 24, 'bold'),
+            font=('Segoe UI', 22, 'bold'),
             text_color=HUTCHISON_COLORS['ports_sea_blue']
         )
         section_title.pack(anchor='w', padx=20, pady=(10, 20))
@@ -302,7 +278,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             grid_frame,
             title="📊 Usuarios por Unidad",
             width=400,
-            height=370,
+            height=350,
             on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_usuarios_unidad_grid.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
@@ -312,7 +288,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             grid_frame,
             title="🍩 Progreso General por Unidad",
             width=400,
-            height=370,
+            height=350,
             on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_progreso_dona_grid.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
@@ -322,7 +298,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             grid_frame,
             title="📈 Tendencia Semanal",
             width=400,
-            height=370,
+            height=350,
             on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_tendencia.grid(row=0, column=2, padx=10, pady=10, sticky='nsew')
@@ -334,7 +310,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             grid_frame,
             title="📊 Top 5 Unidades de Mayor Progreso",
             width=400,
-            height=370,
+            height=350,
             on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_top5.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
@@ -344,7 +320,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             grid_frame,
             title="🎯 Cumplimiento de Objetivos",
             width=400,
-            height=370,
+            height=350,
             on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_cumplimiento.grid(row=1, column=1, padx=10, pady=10, sticky='nsew')
@@ -354,7 +330,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             grid_frame,
             title="📉 Módulos con Menor Avance",
             width=400,
-            height=370,
+            height=350,
             on_fullscreen=self._show_fullscreen_chart
         )
         self.chart_menor_avance.grid(row=1, column=2, padx=10, pady=10, sticky='nsew')
@@ -379,7 +355,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         card = ctk.CTkFrame(
             parent,
             fg_color=theme['surface'],
-            corner_radius=16,
+            corner_radius=15,
             border_width=2,
             border_color=color
         )
@@ -391,7 +367,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         icon_label = ctk.CTkLabel(
             inner,
             text=icon,
-            font=('Segoe UI', 44),
+            font=('Segoe UI', 42),
             text_color=color
         )
         icon_label.pack(anchor='center', pady=(0, 15))
@@ -400,7 +376,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         value_label = ctk.CTkLabel(
             inner,
             text=value,
-            font=('Segoe UI', 38, 'bold'),
+            font=('Segoe UI', 36, 'bold'),
             text_color=theme['text']
         )
         value_label.pack(anchor='center', pady=(0, 8))
@@ -426,83 +402,19 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         return card
 
-    def _create_metric_card_modulo(self, parent, icon, title, value, color):
-        """
-        Crear tarjeta ESPECIAL para "Módulo Actual" (más ancha)
-
-        ┌─────────────────────────────┐
-        │           📄                │
-        │     Módulo Actual           │
-        │                             │
-        │  Módulo 8 - Procesos de     │
-        │  Recursos Humanos           │
-        └─────────────────────────────┘
-        """
-        theme = self.theme_manager.get_current_theme()
-
-        card = ctk.CTkFrame(
-            parent,
-            fg_color=theme['surface'],
-            corner_radius=16,
-            border_width=2,
-            border_color=color
-        )
-
-        inner = ctk.CTkFrame(card, fg_color='transparent')
-        inner.pack(fill='both', expand=True, padx=25, pady=25)
-
-        # Ícono
-        icon_label = ctk.CTkLabel(
-            inner,
-            text=icon,
-            font=('Segoe UI', 44),
-            text_color=color
-        )
-        icon_label.pack(anchor='center', pady=(0, 10))
-
-        # Título
-        title_label = ctk.CTkLabel(
-            inner,
-            text=title,
-            font=('Segoe UI', 14, 'bold'),
-            text_color=theme['text_secondary']
-        )
-        title_label.pack(anchor='center', pady=(0, 15))
-
-        # Valor (módulo actual con saltos de línea)
-        value_label = ctk.CTkLabel(
-            inner,
-            text=value,
-            font=('Segoe UI', 16, 'bold'),
-            text_color=theme['text'],
-            justify='center'
-        )
-        value_label.pack(anchor='center')
-
-        return card
-
     def _show_fullscreen_chart(self, chart):
         """
-        Mostrar gráfica en modo fullscreen (IN-PLACE con modal)
+        Mostrar gráfica en modo fullscreen (IN-PLACE, sin nueva ventana)
 
-        Comportamiento según diseño del usuario:
-        ╔═══════════════════════════════════════════════════════════╗
-        ║  [← Regresar]         📊 Usuarios por Unidad        [⋮]  ║
-        ╠═══════════════════════════════════════════════════════════╣
-        ║  📥 Exportar    📧 Compartir    🖨️ Imprimir              ║
-        ║                                                           ║
-        ║  ┌─ Ordenar: ──────────────────────────────────────────┐ ║
-        ║  │  [🔼 Ascendente]  [🔽 Descendente]  [↻ Restablecer]│ ║
-        ║  └────────────────────────────────────────────────────┘ ║
-        ║                                                           ║
-        ║  [GRÁFICA GIGANTE INTERACTIVA]                           ║
-        ║                                                           ║
-        ║  📊 Total: 1,525 | 📈 Promedio: 138.6 | ⭐ Mayor: ICAVE  ║
-        ╚═══════════════════════════════════════════════════════════╝
+        Comportamiento:
+        - Oculta el contenido del tab actual
+        - Muestra la gráfica ampliada con controles
+        - Botón "← Regresar" para volver
         """
         print(f"🔍 Expandiendo gráfica: {chart.title_text}")
 
-        # Importar modal fullscreen
+        # TODO: Implementar vista fullscreen in-place
+        # Por ahora, usamos el modal existente del sistema
         from src.interfaces.ui.views.components.charts.modal_fullscreen_chart import ModalFullscreenChart
 
         if chart.chart_data and chart.chart_type:
@@ -518,8 +430,6 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             modal.focus_force()
             modal.grab_set()
 
-            print(f"  ✅ Modal fullscreen creado con controles completos")
-
     # ═══════════════════════════════════════════════════════════════
     #  CARGA DE DATOS
     # ═══════════════════════════════════════════════════════════════
@@ -532,15 +442,13 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         try:
             # ═══ TAB GENERAL ═══
-            print("\n[TAB GENERAL - Panel de Control]")
+            print("\n[TAB GENERAL]")
 
             print("  [1/2] 📊 Usuarios por Unidad de Negocio (Barras Horizontales)")
-            print("        Datos: LCMT(3), HPLM(9), ECV(23)... ICAVE(372)")
             self.chart_usuarios_unidad.set_chart('bar', USUARIOS_POR_UNIDAD_DATA)
             print(f"        ✓ {len(USUARIOS_POR_UNIDAD_DATA['values'])} unidades cargadas")
 
             print("  [2/2] 🍩 Progreso General por Unidad (Dona)")
-            print("        Datos: TNG-100%, ICAVE-82%, ECV-75%, Container-68%, HPMX-62%")
             self.chart_progreso_dona.set_chart('donut', PROGRESO_UNIDADES_DATA)
             print(f"        ✓ {len(PROGRESO_UNIDADES_DATA['values'])} unidades cargadas")
 
@@ -566,13 +474,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             self.chart_menor_avance.set_chart('bar', MODULOS_MENOR_AVANCE_DATA)
 
             print("\n" + "═"*70)
-            print("✅ PANEL DE CONTROL COMPLETAMENTE CARGADO")
+            print("✅ TODOS LOS DASHBOARDS CARGADOS EXITOSAMENTE")
             print("   • Tab General: 3 métricas + 2 gráficas grandes")
             print("   • Tab Dashboards: 6 gráficas en grid 2x3")
-            print("   • Datos exactos según diseño del usuario")
-            print("   • Colores navy blue corporativos (#002E6D → #009BDE)")
-            print("   • Botón 'Exportar Interactivo' cyan (#22d3ee)")
-            print("   • Sistema de expansión in-place funcional")
             print("═"*70 + "\n")
 
         except Exception as e:
@@ -595,14 +499,14 @@ if __name__ == "__main__":
 
     # Crear ventana
     root = ctk.CTk()
-    root.title("Panel de Control - HUTCHISON PORTS")
-    root.geometry("1600x950")
+    root.title("Panel de Control Ejecutivo - HUTCHISON PORTS")
+    root.geometry("1400x900")
 
     # Inicializar gestor de temas
     initialize_theme_manager(root)
 
     # Crear panel
-    panel = DashboardsGerencialesPanel(root)
+    panel = PanelControlEjecutivo(root)
     panel.pack(fill='both', expand=True)
 
     root.mainloop()
