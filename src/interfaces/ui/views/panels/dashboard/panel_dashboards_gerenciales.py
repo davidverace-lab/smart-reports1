@@ -246,8 +246,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row1,
             title="Usuarios por Unidad de Negocio",
             width=650,
-            height=450,
-            on_fullscreen=self._on_dashboard_fullscreen
+            height=450
         )
         self.chart_usuarios_unidad.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
 
@@ -257,8 +256,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row1,
             title="Progreso General por Unidad de Negocio",
             width=450,
-            height=450,
-            on_fullscreen=self._on_dashboard_fullscreen
+            height=450
         )
         self.chart_progreso_unidad.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
 
@@ -273,8 +271,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row2,
             title="Distribución por Departamentos",
             width=500,
-            height=400,
-            on_fullscreen=self._on_dashboard_fullscreen
+            height=400
         )
         self.chart_departamentos.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
@@ -284,8 +281,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row2,
             title="Tendencia de Completación de Módulos",
             width=500,
-            height=400,
-            on_fullscreen=self._on_dashboard_fullscreen
+            height=400
         )
         self.chart_modulos_tendencia.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -300,8 +296,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row3,
             title="Actividad Mensual del Sistema",
             width=500,
-            height=400,
-            on_fullscreen=self._on_dashboard_fullscreen
+            height=400
         )
         self.chart_actividad.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
@@ -311,8 +306,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             row3,
             title="Resultados de Evaluaciones",
             width=500,
-            height=400,
-            on_fullscreen=self._on_dashboard_fullscreen
+            height=400
         )
         self.chart_evaluaciones.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
