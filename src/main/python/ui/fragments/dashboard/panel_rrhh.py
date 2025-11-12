@@ -5,7 +5,7 @@ Adaptado al esquema REAL de base de datos Hutchison
 """
 import customtkinter as ctk
 from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
-from src.main.python.ui.widgets.charts.interactive_chart_card import InteractiveChartCard
+from src.main.python.ui.widgets.charts.grafica_expandible import GraficaExpandible
 from src.main.python.data.database.queries_hutchison import *
 from src.main.res.config.gestor_temas import get_theme_manager
 from src.main.res.config.themes import HUTCHISON_COLORS
@@ -99,21 +99,21 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
 
         # Dashboard 1: Personal por Departamento
         print("    → Creando dashboard Personal por Departamento...")
-        self.chart_personal_depto = InteractiveChartCard(
+        self.chart_personal_depto = GraficaExpandible(
             row1,
-            title="👥 Personal por Departamento",
-            width=600,
-            height=450
+            tipo='barras',
+            titulo="👥 Personal por Departamento",
+            altura_compacta=450
         )
         self.chart_personal_depto.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
         # Dashboard 2: Capacitación Completada
         print("    → Creando dashboard Capacitación...")
-        self.chart_capacitacion = InteractiveChartCard(
+        self.chart_capacitacion = GraficaExpandible(
             row1,
-            title="📚 Estado de Capacitación",
-            width=500,
-            height=450
+            tipo='dona',
+            titulo="📚 Estado de Capacitación",
+            altura_compacta=450
         )
         self.chart_capacitacion.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -124,21 +124,21 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
 
         # Dashboard 3: Promedio de Calificaciones por Área
         print("    → Creando dashboard Calificaciones por Área...")
-        self.chart_calif_area = InteractiveChartCard(
+        self.chart_calif_area = GraficaExpandible(
             row2,
-            title="⭐ Promedio de Calificaciones por Área",
-            width=550,
-            height=400
+            tipo='barras',
+            titulo="⭐ Promedio de Calificaciones por Área",
+            altura_compacta=400
         )
         self.chart_calif_area.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
         # Dashboard 4: Cumplimiento por Unidad de Negocio
         print("    → Creando dashboard Cumplimiento...")
-        self.chart_cumplimiento = InteractiveChartCard(
+        self.chart_cumplimiento = GraficaExpandible(
             row2,
-            title="✓ % Cumplimiento por Unidad de Negocio",
-            width=550,
-            height=400
+            tipo='barras',
+            titulo="✓ % Cumplimiento por Unidad de Negocio",
+            altura_compacta=400
         )
         self.chart_cumplimiento.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
@@ -149,11 +149,11 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
 
         # Dashboard 5: Tendencia de Capacitación Mensual
         print("    → Creando dashboard Tendencia Mensual...")
-        self.chart_tendencia = InteractiveChartCard(
+        self.chart_tendencia = GraficaExpandible(
             row3,
-            title="📈 Módulos Completados por Mes",
-            width=700,
-            height=400
+            tipo='linea',
+            titulo="📈 Módulos Completados por Mes",
+            altura_compacta=400
         )
         self.chart_tendencia.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky='nsew')
 
@@ -164,27 +164,27 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         try:
             # Dashboard 1: Personal por Departamento
             datos_personal = self._get_personal_por_departamento()
-            self.chart_personal_depto.set_chart('bar', datos_personal)
+            self.chart_personal_depto.set_data(datos_personal['labels'], datos_personal['values'])
             print(f"  ✓ Dashboard 1: {len(datos_personal['values'])} departamentos")
 
             # Dashboard 2: Estado de Capacitación
             datos_capacitacion = self._get_estado_capacitacion()
-            self.chart_capacitacion.set_chart('donut', datos_capacitacion)
+            self.chart_capacitacion.set_data(datos_capacitacion['labels'], datos_capacitacion['values'])
             print(f"  ✓ Dashboard 2: Estado capacitación")
 
             # Dashboard 3: Calificaciones por Área
             datos_calif = self._get_calificaciones_por_area()
-            self.chart_calif_area.set_chart('bar', datos_calif)
+            self.chart_calif_area.set_data(datos_calif['labels'], datos_calif['values'])
             print(f"  ✓ Dashboard 3: Calificaciones")
 
             # Dashboard 4: Cumplimiento
             datos_cumplimiento = self._get_cumplimiento_unidades()
-            self.chart_cumplimiento.set_chart('bar', datos_cumplimiento)
+            self.chart_cumplimiento.set_data(datos_cumplimiento['labels'], datos_cumplimiento['values'])
             print(f"  ✓ Dashboard 4: Cumplimiento")
 
             # Dashboard 5: Tendencia Mensual
             datos_tendencia = self._get_tendencia_mensual()
-            self.chart_tendencia.set_chart('line', datos_tendencia)
+            self.chart_tendencia.set_data(datos_tendencia['labels'], datos_tendencia['values'])
             print(f"  ✓ Dashboard 5: Tendencia")
 
             print("✅ Todos los dashboards RRHH cargados")
@@ -211,36 +211,49 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         }
 
     def _get_estado_capacitacion(self):
-        """Obtener estado de capacitación (usando esquema REAL)"""
+        """Obtener estado de capacitación (OPTIMIZADO - 5 queries → 1 query)"""
         try:
             if self.db_connection:
+                # OPTIMIZACIÓN: Aplicar caché (5 minutos)
+                from src.main.python.utils.cache_manager import get_cache_manager
+                cache = get_cache_manager()
+
+                cache_key = "dashboard_rrhh_estado_capacitacion"
+                cached_result = cache.get(cache_key)
+                if cached_result:
+                    return cached_result  # ¡Instantáneo desde caché!
+
                 cursor = self.db_connection.cursor()
 
-                # Completados
-                cursor.execute("SELECT COUNT(*) FROM instituto_ProgresoModulo WHERE EstatusModulo = 'Completado'")
-                completados = cursor.fetchone()[0] or 0
+                # OPTIMIZACIÓN: Combinar 5 queries en 1 sola
+                cursor.execute("""
+                    SELECT
+                        (SELECT COUNT(*) FROM instituto_ProgresoModulo WHERE EstatusModulo = 'Completado') as completados,
+                        (SELECT COUNT(*) FROM instituto_ProgresoModulo WHERE EstatusModulo = 'En Progreso') as en_progreso,
+                        (SELECT COUNT(*) FROM instituto_Usuario WHERE UserStatus = 'Active') as total_usuarios,
+                        (SELECT COUNT(*) FROM instituto_Modulo WHERE Activo = 1) as total_modulos,
+                        (SELECT COUNT(*) FROM instituto_ProgresoModulo) as asignados
+                """)
 
-                # En Progreso
-                cursor.execute("SELECT COUNT(*) FROM instituto_ProgresoModulo WHERE EstatusModulo = 'En Progreso'")
-                en_progreso = cursor.fetchone()[0] or 0
-
-                # Pendientes (usuarios activos * módulos - asignados)
-                cursor.execute("SELECT COUNT(*) FROM instituto_Usuario WHERE UserStatus = 'Active'")
-                total_usuarios = cursor.fetchone()[0] or 0
-
-                cursor.execute("SELECT COUNT(*) FROM instituto_Modulo WHERE Activo = 1")
-                total_modulos = cursor.fetchone()[0] or 0
-
-                cursor.execute("SELECT COUNT(*) FROM instituto_ProgresoModulo")
-                asignados = cursor.fetchone()[0] or 0
+                row = cursor.fetchone()
+                completados = row[0] or 0
+                en_progreso = row[1] or 0
+                total_usuarios = row[2] or 0
+                total_modulos = row[3] or 0
+                asignados = row[4] or 0
 
                 total_posible = total_usuarios * total_modulos
                 pendientes = max(0, total_posible - asignados)
 
-                return {
+                result = {
                     'labels': ['Completados', 'En Progreso', 'Pendientes'],
                     'values': [completados, en_progreso, pendientes]
                 }
+
+                # Cachear por 5 minutos (300 segundos)
+                cache.set(cache_key, result, ttl_seconds=300)
+
+                return result
         except Exception as e:
             print(f"  ⚠ Error consultando capacitación: {e}")
 
