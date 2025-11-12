@@ -130,7 +130,6 @@ class VentanaPrincipalView:
         navigation_callbacks = {
             'dashboard': self.show_dashboard,
             'consultas': self.show_consultas,
-            'actualizar': self.show_actualizar,
             'importacion': self.show_importacion,
             'reportes': self.show_reportes,
             'configuracion': self.show_configuracion,
@@ -329,8 +328,6 @@ class VentanaPrincipalView:
             self.show_dashboard()
         elif self.current_view == 'consultas':
             self.show_consultas()
-        elif self.current_view == 'actualizar':
-            self.show_actualizar()
         elif self.current_view == 'importacion':
             self.show_importacion()
         elif self.current_view == 'reportes':

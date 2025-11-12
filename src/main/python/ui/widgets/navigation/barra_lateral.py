@@ -103,7 +103,6 @@ class ModernSidebar(ctk.CTkFrame):
         nav_items = [
             ('📊', 'Dashboards Gerenciales', 'dashboard'),
             ('🔍', 'Consulta de Empleados', 'consultas'),
-            ('📤', 'Cruce de Datos (Cornerstone)', 'actualizar'),
             ('📥', 'Importación de Datos', 'importacion'),
             ('📄', 'Generar Reportes', 'reportes'),
             ('⚙️', 'Configuración', 'configuracion'),

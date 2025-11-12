@@ -564,6 +564,66 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         canvas.draw()
         canvas.get_tk_widget().pack(fill='both', expand=True)
 
+        # === TOOLTIPS INTERACTIVOS (HOVER) ===
+        # Crear anotación que se mostrará al hacer hover
+        annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
+                           bbox=dict(boxstyle="round,pad=0.8", fc=HUTCHISON_COLORS['ports_sea_blue'],
+                                    ec='white', lw=2, alpha=0.95),
+                           arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0.3",
+                                          color='white', lw=2),
+                           fontsize=12, fontweight='bold', color='white',
+                           visible=False, zorder=1000)
+
+        def update_annot(bar_or_point, label, value):
+            """Actualizar posición y texto del tooltip"""
+            if self.current_chart_type in ['barras', 'barras_h']:
+                # Para barras
+                if self.current_chart_type == 'barras':
+                    x = bar_or_point.get_x() + bar_or_point.get_width() / 2
+                    y = bar_or_point.get_height()
+                    annot.xy = (x, y)
+                else:  # barras_h
+                    x = bar_or_point.get_width()
+                    y = bar_or_point.get_y() + bar_or_point.get_height() / 2
+                    annot.xy = (x, y)
+            else:
+                # Para líneas y puntos
+                annot.xy = bar_or_point
+
+            text = f"{label}\n{int(value):,}"
+            annot.set_text(text)
+            annot.get_bbox_patch().set_alpha(0.95)
+
+        def hover(event):
+            """Manejar evento de hover del mouse"""
+            vis = annot.get_visible()
+            if event.inaxes == ax:
+                if self.current_chart_type in ['barras', 'barras_h']:
+                    # Detectar hover sobre barras
+                    for i, bar in enumerate(bars):
+                        cont, ind = bar.contains(event)
+                        if cont:
+                            update_annot(bar, labels[i], values[i])
+                            annot.set_visible(True)
+                            fig.canvas.draw_idle()
+                            return
+                elif self.current_chart_type == 'linea':
+                    # Detectar hover sobre puntos de línea
+                    for i, (x, y) in enumerate(zip(range(len(labels)), values)):
+                        if abs(event.xdata - x) < 0.3 and abs(event.ydata - y) < max(values) * 0.05:
+                            update_annot((x, y), labels[i], values[i])
+                            annot.set_visible(True)
+                            fig.canvas.draw_idle()
+                            return
+
+                # Si no está sobre ningún elemento, ocultar tooltip
+                if vis:
+                    annot.set_visible(False)
+                    fig.canvas.draw_idle()
+
+        # Conectar evento de movimiento del mouse
+        fig.canvas.mpl_connect("motion_notify_event", hover)
+
         # Toolbar de navegación
         toolbar_frame = ctk.CTkFrame(self.expanded_chart_container, fg_color=theme['surface'])
         toolbar_frame.pack(fill='x', pady=(10, 0))
