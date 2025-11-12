@@ -424,7 +424,7 @@ class ModalFullscreenChart(ctk.CTkToplevel):
         self.canvas.draw_idle()
 
     def _show_tooltip(self, event, index):
-        """Tooltip hermoso"""
+        """Tooltip hermoso con instrucción para ocultar"""
         labels = [l for l in self.chart_data['labels'] if l not in self.hidden_items]
         values = [v for i, v in enumerate(self.chart_data['values'])
                  if self.chart_data['labels'][i] not in self.hidden_items]
@@ -440,27 +440,39 @@ class ModalFullscreenChart(ctk.CTkToplevel):
         if not self.annotation:
             self.annotation = self.ax.annotate(
                 '', xy=(0, 0), xytext=(30, 30), textcoords="offset points",
-                bbox=dict(boxstyle="round,pad=1", fc='#1a1d2e', ec=HUTCHISON_COLORS['ports_sky_blue'],
+                bbox=dict(boxstyle="round,pad=1.2", fc='#1a1d2e', ec=HUTCHISON_COLORS['ports_sky_blue'],
                          alpha=0.98, linewidth=3),
                 arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.3',
                                color=HUTCHISON_COLORS['ports_sky_blue'], lw=3),
-                fontsize=12, color='white', fontweight='700', zorder=1000
+                fontsize=11, color='white', fontweight='700', zorder=1000
             )
 
-        tooltip_text = f"📊 {label}\n{'─' * 22}\n👥 {int(value):,} usuarios\n📈 {percentage:.1f}% del total\n🏆 Ranking: #{ranking}"
+        # Tooltip mejorado con instrucción de clic
+        tooltip_text = (
+            f"📊 {label}\n"
+            f"{'─' * 26}\n"
+            f"👥 {int(value):,} usuarios\n"
+            f"📈 {percentage:.1f}% del total\n"
+            f"🏆 Ranking: #{ranking}\n"
+            f"{'─' * 26}\n"
+            f"👆 Click para ocultar/mostrar"
+        )
         self.annotation.set_text(tooltip_text)
         self.annotation.xy = (event.xdata, event.ydata)
         self.annotation.set_visible(True)
         self.canvas.draw_idle()
 
     def _on_click(self, event):
-        """Click para ocultar"""
+        """Click para ocultar con efecto visual"""
         if event.inaxes != self.ax or not self.bars:
             return
 
         for i, bar in enumerate(self.bars):
             contains, _ = bar.contains(event)
             if contains:
+                # Efecto visual de clic - parpadeo
+                self._flash_click_effect(bar)
+
                 labels = self.chart_data['labels']
                 if i < len(labels):
                     label = labels[i]
@@ -468,8 +480,27 @@ class ModalFullscreenChart(ctk.CTkToplevel):
                         self.hidden_items.remove(label)
                     else:
                         self.hidden_items.add(label)
-                    self._render_chart()
+
+                    # Pequeño delay para que se vea el efecto antes de re-renderizar
+                    self.after(200, self._render_chart)
                     break
+
+    def _flash_click_effect(self, bar):
+        """Efecto de parpadeo al hacer clic"""
+        try:
+            # Guardar color original
+            original_color = bar.get_facecolor()
+            original_edge = bar.get_edgecolor()
+
+            # Cambiar a color de clic
+            bar.set_facecolor('#FFD700')  # Amarillo/dorado
+            bar.set_edgecolor('#FFD700')
+            bar.set_linewidth(4)
+            self.canvas.draw_idle()
+
+            # Restaurar después de 150ms (el re-render lo hará)
+        except:
+            pass
 
     def _toggle_sort(self):
         """Ordenar"""
