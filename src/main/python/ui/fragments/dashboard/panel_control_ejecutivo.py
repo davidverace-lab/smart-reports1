@@ -13,7 +13,7 @@ Diseño EXACTO según especificaciones:
 """
 import customtkinter as ctk
 from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
-from src.main.python.ui.widgets.charts.interactive_chart_card import InteractiveChartCard
+from src.main.python.ui.widgets.charts.grafica_expandible import GraficaExpandible
 from src.main.res.config.gestor_temas import get_theme_manager
 from src.main.res.config.themes import HUTCHISON_COLORS
 
@@ -205,22 +205,20 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         charts_frame.columnconfigure(1, weight=4)  # 40% para dona
 
         # Gráfica 1: Usuarios por Unidad de Negocio (Barras Horizontales)
-        self.chart_usuarios_unidad = InteractiveChartCard(
+        self.chart_usuarios_unidad = GraficaExpandible(
             charts_frame,
-            title="📊 Usuarios por Unidad de Negocio",
-            width=700,
-            height=550,
-            on_fullscreen=self._show_fullscreen_chart
+            tipo='barras',
+            titulo="📊 Usuarios por Unidad de Negocio",
+            altura_compacta=550
         )
         self.chart_usuarios_unidad.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
 
         # Gráfica 2: Progreso General por Unidad de Negocio (Dona)
-        self.chart_progreso_dona = InteractiveChartCard(
+        self.chart_progreso_dona = GraficaExpandible(
             charts_frame,
-            title="🍩 Progreso General por Unidad de Negocio (TNG 100% - 8 Módulos)",
-            width=500,
-            height=550,
-            on_fullscreen=self._show_fullscreen_chart
+            tipo='dona',
+            titulo="🍩 Progreso General por Unidad de Negocio (TNG 100% - 8 Módulos)",
+            altura_compacta=550
         )
         self.chart_progreso_dona.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
 
@@ -274,64 +272,58 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         # ═══ FILA 1 ═══
 
         # Dashboard 1: Usuarios por Unidad
-        self.chart_usuarios_unidad_grid = InteractiveChartCard(
+        self.chart_usuarios_unidad_grid = GraficaExpandible(
             grid_frame,
-            title="📊 Usuarios por Unidad",
-            width=400,
-            height=350,
-            on_fullscreen=self._show_fullscreen_chart
+            tipo='barras',
+            titulo="📊 Usuarios por Unidad",
+            altura_compacta=350
         )
         self.chart_usuarios_unidad_grid.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
         # Dashboard 2: Progreso General
-        self.chart_progreso_dona_grid = InteractiveChartCard(
+        self.chart_progreso_dona_grid = GraficaExpandible(
             grid_frame,
-            title="🍩 Progreso General por Unidad",
-            width=400,
-            height=350,
-            on_fullscreen=self._show_fullscreen_chart
+            tipo='dona',
+            titulo="🍩 Progreso General por Unidad",
+            altura_compacta=350
         )
         self.chart_progreso_dona_grid.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
         # Dashboard 3: Tendencia Semanal
-        self.chart_tendencia = InteractiveChartCard(
+        self.chart_tendencia = GraficaExpandible(
             grid_frame,
-            title="📈 Tendencia Semanal",
-            width=400,
-            height=350,
-            on_fullscreen=self._show_fullscreen_chart
+            tipo='linea',
+            titulo="📈 Tendencia Semanal",
+            altura_compacta=350
         )
         self.chart_tendencia.grid(row=0, column=2, padx=10, pady=10, sticky='nsew')
 
         # ═══ FILA 2 ═══
 
         # Dashboard 4: Top 5 Unidades
-        self.chart_top5 = InteractiveChartCard(
+        self.chart_top5 = GraficaExpandible(
             grid_frame,
-            title="📊 Top 5 Unidades de Mayor Progreso",
-            width=400,
-            height=350,
-            on_fullscreen=self._show_fullscreen_chart
+            tipo='barras',
+            titulo="📊 Top 5 Unidades de Mayor Progreso",
+            altura_compacta=350
         )
         self.chart_top5.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
 
         # Dashboard 5: Cumplimiento de Objetivos
-        self.chart_cumplimiento = InteractiveChartCard(
+        self.chart_cumplimiento = GraficaExpandible(
             grid_frame,
-            title="🎯 Cumplimiento de Objetivos",
-            width=400,
-            height=350,
-            on_fullscreen=self._show_fullscreen_chart
+            tipo='dona',
+            titulo="🎯 Cumplimiento de Objetivos",
+            altura_compacta=350
         )
         self.chart_cumplimiento.grid(row=1, column=1, padx=10, pady=10, sticky='nsew')
 
         # Dashboard 6: Módulos con Menor Avance
-        self.chart_menor_avance = InteractiveChartCard(
+        self.chart_menor_avance = GraficaExpandible(
             grid_frame,
-            title="📉 Módulos con Menor Avance",
-            width=400,
-            height=350,
-            on_fullscreen=self._show_fullscreen_chart
+            tipo='barras',
+            titulo="📉 Módulos con Menor Avance",
+            altura_compacta=350
         )
         self.chart_menor_avance.grid(row=1, column=2, padx=10, pady=10, sticky='nsew')
 
@@ -445,33 +437,33 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             print("\n[TAB GENERAL]")
 
             print("  [1/2] 📊 Usuarios por Unidad de Negocio (Barras Horizontales)")
-            self.chart_usuarios_unidad.set_chart('bar', USUARIOS_POR_UNIDAD_DATA)
+            self.chart_usuarios_unidad.set_data(USUARIOS_POR_UNIDAD_DATA['labels'], USUARIOS_POR_UNIDAD_DATA['values'])
             print(f"        ✓ {len(USUARIOS_POR_UNIDAD_DATA['values'])} unidades cargadas")
 
             print("  [2/2] 🍩 Progreso General por Unidad (Dona)")
-            self.chart_progreso_dona.set_chart('donut', PROGRESO_UNIDADES_DATA)
+            self.chart_progreso_dona.set_data(PROGRESO_UNIDADES_DATA['labels'], PROGRESO_UNIDADES_DATA['values'])
             print(f"        ✓ {len(PROGRESO_UNIDADES_DATA['values'])} unidades cargadas")
 
             # ═══ TAB DASHBOARDS ═══
             print("\n[TAB DASHBOARDS - GRID 2x3]")
 
             print("  [1/6] 📊 Usuarios por Unidad (Grid)")
-            self.chart_usuarios_unidad_grid.set_chart('bar', USUARIOS_POR_UNIDAD_DATA)
+            self.chart_usuarios_unidad_grid.set_data(USUARIOS_POR_UNIDAD_DATA['labels'], USUARIOS_POR_UNIDAD_DATA['values'])
 
             print("  [2/6] 🍩 Progreso General (Grid)")
-            self.chart_progreso_dona_grid.set_chart('donut', PROGRESO_UNIDADES_DATA)
+            self.chart_progreso_dona_grid.set_data(PROGRESO_UNIDADES_DATA['labels'], PROGRESO_UNIDADES_DATA['values'])
 
             print("  [3/6] 📈 Tendencia Semanal")
-            self.chart_tendencia.set_chart('line', TENDENCIA_SEMANAL_DATA)
+            self.chart_tendencia.set_data(TENDENCIA_SEMANAL_DATA['labels'], TENDENCIA_SEMANAL_DATA['values'])
 
             print("  [4/6] 📊 Top 5 Unidades")
-            self.chart_top5.set_chart('bar', TOP_5_UNIDADES_DATA)
+            self.chart_top5.set_data(TOP_5_UNIDADES_DATA['labels'], TOP_5_UNIDADES_DATA['values'])
 
             print("  [5/6] 🎯 Cumplimiento de Objetivos")
-            self.chart_cumplimiento.set_chart('donut', CUMPLIMIENTO_OBJETIVOS_DATA)
+            self.chart_cumplimiento.set_data(CUMPLIMIENTO_OBJETIVOS_DATA['labels'], CUMPLIMIENTO_OBJETIVOS_DATA['values'])
 
             print("  [6/6] 📉 Módulos con Menor Avance")
-            self.chart_menor_avance.set_chart('bar', MODULOS_MENOR_AVANCE_DATA)
+            self.chart_menor_avance.set_data(MODULOS_MENOR_AVANCE_DATA['labels'], MODULOS_MENOR_AVANCE_DATA['values'])
 
             print("\n" + "═"*70)
             print("✅ TODOS LOS DASHBOARDS CARGADOS EXITOSAMENTE")
