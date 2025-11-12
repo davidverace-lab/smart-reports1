@@ -1,19 +1,13 @@
 """
-╔════════════════════════════════════════════════════════════════════╗
-║  PANEL DE CONTROL EJECUTIVO - HUTCHISON PORTS                     ║
-║  Sistema de Dashboards Gerenciales Profesional                    ║
-╚════════════════════════════════════════════════════════════════════╝
-
-Diseño EXACTO según especificaciones:
-✅ Tab "General" con métricas + gráficas principales
-✅ Tab "Dashboards" con grid de 6 cards interactivas
-✅ Sistema de expansión IN-PLACE (sin navegador)
-✅ Gráficas matplotlib profesionales con gradientes navy blue
-✅ Modo claro/oscuro integrado
+Panel de Control Ejecutivo - HUTCHISON PORTS
+Sistema de navegación: GRID ↔ EXPANDIDA (pantalla completa)
+Dashboards ejecutivos con gráficas interactivas expandibles
 """
 import customtkinter as ctk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
 from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
-from src.main.python.ui.widgets.charts.grafica_expandible import GraficaExpandible
 from src.main.res.config.gestor_temas import get_theme_manager
 from src.main.res.config.themes import HUTCHISON_COLORS
 
@@ -61,48 +55,52 @@ MODULOS_MENOR_AVANCE_DATA = {
 
 class PanelControlEjecutivo(ctk.CTkFrame):
     """
-    Panel de Control Ejecutivo - HUTCHISON PORTS
+    Panel de Control Ejecutivo con navegación expandible
 
-    Estructura:
-    ┌─────────────────────────────────────────────────────────────┐
-    │  Panel de Control                                           │
-    │  ┌─────────────┐ ┌──────────────────────┐                 │
-    │  │  General    │ │ Dashboards          │                  │
-    │  │  (activo)   │ │ Gerenciales         │                  │
-    │  └─────────────┘ └──────────────────────┘                 │
-    ├─────────────────────────────────────────────────────────────┤
-    │  [Vista General: 3 métricas + 2 gráficas grandes]          │
-    │  [Vista Dashboards: Grid 2x3 con 6 gráficas]               │
-    └─────────────────────────────────────────────────────────────┘
+    Sistema de navegación:
+    GRID VIEW → Todas las gráficas en miniatura
+    EXPANDED VIEW → Una gráfica en pantalla completa con botón volver
     """
 
     def __init__(self, parent, db_connection=None, usuario_actual=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
 
-        print("🚀 Inicializando Panel de Control Ejecutivo...")
+        print("🚀 Inicializando Panel de Control Ejecutivo con navegación expandible...")
 
         self.theme_manager = get_theme_manager()
         self.db_connection = db_connection
         self.usuario_actual = usuario_actual or {"nombre": "Admin"}
 
-        # Referencias a gráficas para fullscreen
-        self.chart_usuarios_unidad = None
-        self.chart_progreso_dona = None
-        self.chart_tendencia = None
-        self.chart_top5 = None
-        self.chart_cumplimiento = None
-        self.chart_menor_avance = None
+        # Datos de las gráficas
+        self.datos_graficas = {
+            'usuarios_unidad': USUARIOS_POR_UNIDAD_DATA,
+            'progreso_unidades': PROGRESO_UNIDADES_DATA,
+            'tendencia_semanal': TENDENCIA_SEMANAL_DATA,
+            'top5_unidades': TOP_5_UNIDADES_DATA,
+            'cumplimiento': CUMPLIMIENTO_OBJETIVOS_DATA,
+            'menor_avance': MODULOS_MENOR_AVANCE_DATA
+        }
 
         # Estado de navegación
-        self.fullscreen_chart = None  # Gráfica actualmente en fullscreen
+        self.current_view = 'grid'  # 'grid' o 'expanded'
+        self.current_chart_id = None
+        self.current_chart_title = None
+        self.current_chart_type = None
+        self.current_chart_data = None
+
+        # Referencias a vistas
+        self.grid_view = None
+        self.expanded_view = None
+        self.expanded_chart_container = None
+        self.expanded_title_label = None
 
         try:
-            self._create_tabs()
-            self._create_general_tab()
-            self._create_dashboards_tab()
+            # Crear ambas vistas
+            self._create_grid_view()
+            self._create_expanded_view()
 
-            # Cargar datos después de 500ms
-            self.after(500, self._load_all_data)
+            # Mostrar grid por defecto
+            self.show_grid_view()
 
             print("✅ Panel de Control Ejecutivo inicializado correctamente")
 
@@ -111,57 +109,82 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             import traceback
             traceback.print_exc()
 
-    def _create_tabs(self):
-        """Crear sistema de tabs: General | Dashboards Gerenciales"""
-        print("  → Creando tabs de navegación...")
+    # ==================== NAVEGACIÓN ENTRE VISTAS ====================
 
-        self.tab_view = CustomTabView(self)
-        self.tab_view.pack(fill='both', expand=True, padx=20, pady=(10, 20))
+    def show_grid_view(self):
+        """Mostrar vista GRID con todas las gráficas"""
+        self.current_view = 'grid'
+        if self.expanded_view:
+            self.expanded_view.pack_forget()
+        if self.grid_view:
+            self.grid_view.pack(fill='both', expand=True)
 
-        # Tab 1: General (métricas + gráficas principales)
-        self.tab_general = self.tab_view.add("General", "📊")
-
-        # Tab 2: Dashboards Gerenciales (grid de 6 dashboards)
-        self.tab_dashboards = self.tab_view.add("Dashboards Gerenciales", "📈")
-
-    # ═══════════════════════════════════════════════════════════════
-    #  TAB 1: GENERAL (Panel de Control Principal)
-    # ═══════════════════════════════════════════════════════════════
-
-    def _create_general_tab(self):
+    def show_expanded_view(self, chart_id, title, chart_type='barras'):
         """
-        Crear Tab "General" con diseño EXACTO:
+        Mostrar vista EXPANDIDA con una gráfica en pantalla completa
 
-        ┌───────────────────────────────────────────────────────────┐
-        │  Panel de Control                                         │
-        ├───────────────────────────────────────────────────────────┤
-        │  ┌─────────┐  ┌──────────────────────┐  ┌─────────────┐ │
-        │  │ 👥      │  │ 📄 Módulo Actual     │  │ ✓ Tasa de  │ │
-        │  │ Total   │  │ Módulo 8 - RRHH      │  │ Completado │ │
-        │  │ 1,525   │  │                       │  │   70.0%    │ │
-        │  └─────────┘  └──────────────────────┘  └─────────────┘ │
-        ├───────────────────────────────────────────────────────────┤
-        │  ┌──────────────────────┐  ┌──────────────────────────┐ │
-        │  │ Usuarios por Unidad  │  │ Progreso General por UN  │ │
-        │  │ (Barras Horizontales)│  │ (Gráfica de Dona)        │ │
-        │  │                      │  │                          │ │
-        │  │  [Gráfica Grande]    │  │    [Gráfica Grande]      │ │
-        │  │                      │  │                          │ │
-        │  └──────────────────────┘  └──────────────────────────┘ │
-        └───────────────────────────────────────────────────────────┘
+        Args:
+            chart_id: ID de la gráfica
+            title: Título de la gráfica
+            chart_type: 'barras', 'barras_h', 'dona', 'linea'
         """
+        self.current_view = 'expanded'
+        self.current_chart_id = chart_id
+        self.current_chart_title = title
+        self.current_chart_type = chart_type
+        self.current_chart_data = self.datos_graficas.get(chart_id, {'labels': [], 'values': []})
+
+        # Ocultar grid y mostrar expandida
+        if self.grid_view:
+            self.grid_view.pack_forget()
+
+        # Renderizar gráfica expandida
+        self._render_expanded_chart()
+
+        if self.expanded_view:
+            self.expanded_view.pack(fill='both', expand=True)
+
+    # ==================== CREAR VISTA GRID ====================
+
+    def _create_grid_view(self):
+        """Crear vista GRID con tabs y gráficas miniatura"""
         theme = self.theme_manager.get_current_theme()
 
-        # Container principal con scroll
-        container = ctk.CTkScrollableFrame(
-            self.tab_general,
-            fg_color='transparent'
-        )
+        self.grid_view = ctk.CTkFrame(self, fg_color='transparent')
+
+        # Header
+        header = ctk.CTkFrame(self.grid_view, fg_color='transparent', height=60)
+        header.pack(fill='x', padx=20, pady=(15, 10))
+        header.pack_propagate(False)
+
+        # Título
+        ctk.CTkLabel(
+            header,
+            text="📊 Panel de Control Ejecutivo",
+            font=('Montserrat', 24, 'bold'),
+            text_color=theme['text']
+        ).pack(side='left')
+
+        # Tabs
+        self.tab_view = CustomTabView(self.grid_view)
+        self.tab_view.pack(fill='both', expand=True, padx=10, pady=10)
+
+        # Tab 1: General
+        self.tab_general = self.tab_view.add("General", "📊")
+        self._create_general_tab_content()
+
+        # Tab 2: Dashboards
+        self.tab_dashboards = self.tab_view.add("Dashboards Gerenciales", "📈")
+        self._create_dashboards_tab_content()
+
+    def _create_general_tab_content(self):
+        """Crear contenido del tab General"""
+        theme = self.theme_manager.get_current_theme()
+
+        container = ctk.CTkScrollableFrame(self.tab_general, fg_color='transparent')
         container.pack(fill='both', expand=True, padx=10, pady=10)
 
-        # ═══ SECCIÓN 1: TARJETAS DE MÉTRICAS (3 CARDS) ═══
-        print("  → Creando tarjetas de métricas...")
-
+        # ═══ MÉTRICAS ═══
         metrics_frame = ctk.CTkFrame(container, fg_color='transparent')
         metrics_frame.pack(fill='x', pady=(0, 20))
         metrics_frame.columnconfigure((0, 1, 2), weight=1)
@@ -196,152 +219,362 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             color=HUTCHISON_COLORS['success']
         ).grid(row=0, column=2, padx=10, pady=10, sticky='nsew')
 
-        # ═══ SECCIÓN 2: GRÁFICAS PRINCIPALES (2 GRANDES) ═══
-        print("  → Creando gráficas principales...")
-
+        # ═══ GRÁFICAS PRINCIPALES ═══
         charts_frame = ctk.CTkFrame(container, fg_color='transparent')
         charts_frame.pack(fill='both', expand=True, pady=(10, 0))
-        charts_frame.columnconfigure(0, weight=6)  # 60% para barras
-        charts_frame.columnconfigure(1, weight=4)  # 40% para dona
+        charts_frame.columnconfigure((0, 1), weight=1)
 
-        # Gráfica 1: Usuarios por Unidad de Negocio (Barras Horizontales)
-        self.chart_usuarios_unidad = GraficaExpandible(
+        # Gráfica 1: Usuarios por Unidad
+        self._create_mini_chart(
             charts_frame,
-            tipo='barras',
-            titulo="📊 Usuarios por Unidad de Negocio",
-            altura_compacta=550
+            "📊 Usuarios por Unidad de Negocio",
+            chart_id='usuarios_unidad',
+            chart_type='barras_h',
+            row=0, column=0
         )
-        self.chart_usuarios_unidad.grid(row=0, column=0, padx=(10, 5), pady=10, sticky='nsew')
 
-        # Gráfica 2: Progreso General por Unidad de Negocio (Dona)
-        self.chart_progreso_dona = GraficaExpandible(
+        # Gráfica 2: Progreso General
+        self._create_mini_chart(
             charts_frame,
-            tipo='dona',
-            titulo="🍩 Progreso General por Unidad de Negocio (TNG 100% - 8 Módulos)",
-            altura_compacta=550
+            "🍩 Progreso General por Unidad de Negocio",
+            chart_id='progreso_unidades',
+            chart_type='dona',
+            row=0, column=1
         )
-        self.chart_progreso_dona.grid(row=0, column=1, padx=(5, 10), pady=10, sticky='nsew')
 
-    # ═══════════════════════════════════════════════════════════════
-    #  TAB 2: DASHBOARDS (Grid de 6 Tarjetas)
-    # ═══════════════════════════════════════════════════════════════
-
-    def _create_dashboards_tab(self):
-        """
-        Crear Tab "Dashboards Gerenciales" con grid 2x3:
-
-        ┌──────────────────────────────────────────────────────┐
-        │  ┌────────────┐  ┌────────────┐  ┌────────────┐    │
-        │  │ 📊 Usuarios│  │ 🍩 Progreso│  │ 📈 Tendenc.│    │
-        │  │   por UN   │  │   General  │  │   Semanal  │    │
-        │  │ [preview]  │  │ [preview]  │  │ [preview]  │    │
-        │  │ [Expandir] │  │ [Expandir] │  │ [Expandir] │    │
-        │  └────────────┘  └────────────┘  └────────────┘    │
-        │  ┌────────────┐  ┌────────────┐  ┌────────────┐    │
-        │  │ 📊 Top 5   │  │ 🎯 Cumpli. │  │ 📉 Menor   │    │
-        │  │  Unidades  │  │  Objetivos │  │   Avance   │    │
-        │  │ [preview]  │  │ [preview]  │  │ [preview]  │    │
-        │  │ [Expandir] │  │ [Expandir] │  │ [Expandir] │    │
-        │  └────────────┘  └────────────┘  └────────────┘    │
-        └──────────────────────────────────────────────────────┘
-        """
+    def _create_dashboards_tab_content(self):
+        """Crear contenido del tab Dashboards con grid 2x3"""
         theme = self.theme_manager.get_current_theme()
 
-        # Container con scroll
-        container = ctk.CTkScrollableFrame(
-            self.tab_dashboards,
-            fg_color='transparent'
-        )
+        container = ctk.CTkScrollableFrame(self.tab_dashboards, fg_color='transparent')
         container.pack(fill='both', expand=True, padx=10, pady=10)
 
-        # Título de sección
-        section_title = ctk.CTkLabel(
+        # Título
+        ctk.CTkLabel(
             container,
             text="📊 Dashboards Interactivos - Sistema Ejecutivo",
-            font=('Segoe UI', 22, 'bold'),
+            font=('Montserrat', 20, 'bold'),
             text_color=HUTCHISON_COLORS['ports_sea_blue']
-        )
-        section_title.pack(anchor='w', padx=20, pady=(10, 20))
+        ).pack(anchor='w', padx=20, pady=(10, 20))
 
-        # Grid Frame para 6 dashboards (2 filas x 3 columnas)
+        # Grid 2x3
         grid_frame = ctk.CTkFrame(container, fg_color='transparent')
         grid_frame.pack(fill='both', expand=True, padx=10, pady=10)
         grid_frame.columnconfigure((0, 1, 2), weight=1)
         grid_frame.rowconfigure((0, 1), weight=1)
 
-        # ═══ FILA 1 ═══
-
-        # Dashboard 1: Usuarios por Unidad
-        self.chart_usuarios_unidad_grid = GraficaExpandible(
+        # FILA 1
+        self._create_mini_chart(
             grid_frame,
-            tipo='barras',
-            titulo="📊 Usuarios por Unidad",
-            altura_compacta=350
+            "📊 Usuarios por Unidad",
+            chart_id='usuarios_unidad',
+            chart_type='barras_h',
+            row=0, column=0
         )
-        self.chart_usuarios_unidad_grid.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 2: Progreso General
-        self.chart_progreso_dona_grid = GraficaExpandible(
+        self._create_mini_chart(
             grid_frame,
-            tipo='dona',
-            titulo="🍩 Progreso General por Unidad",
-            altura_compacta=350
+            "🍩 Progreso General por Unidad",
+            chart_id='progreso_unidades',
+            chart_type='dona',
+            row=0, column=1
         )
-        self.chart_progreso_dona_grid.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 3: Tendencia Semanal
-        self.chart_tendencia = GraficaExpandible(
+        self._create_mini_chart(
             grid_frame,
-            tipo='linea',
-            titulo="📈 Tendencia Semanal",
-            altura_compacta=350
+            "📈 Tendencia Semanal",
+            chart_id='tendencia_semanal',
+            chart_type='linea',
+            row=0, column=2
         )
-        self.chart_tendencia.grid(row=0, column=2, padx=10, pady=10, sticky='nsew')
 
-        # ═══ FILA 2 ═══
-
-        # Dashboard 4: Top 5 Unidades
-        self.chart_top5 = GraficaExpandible(
+        # FILA 2
+        self._create_mini_chart(
             grid_frame,
-            tipo='barras',
-            titulo="📊 Top 5 Unidades de Mayor Progreso",
-            altura_compacta=350
+            "📊 Top 5 Unidades de Mayor Progreso",
+            chart_id='top5_unidades',
+            chart_type='barras',
+            row=1, column=0
         )
-        self.chart_top5.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 5: Cumplimiento de Objetivos
-        self.chart_cumplimiento = GraficaExpandible(
+        self._create_mini_chart(
             grid_frame,
-            tipo='dona',
-            titulo="🎯 Cumplimiento de Objetivos",
-            altura_compacta=350
+            "🎯 Cumplimiento de Objetivos",
+            chart_id='cumplimiento',
+            chart_type='dona',
+            row=1, column=1
         )
-        self.chart_cumplimiento.grid(row=1, column=1, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 6: Módulos con Menor Avance
-        self.chart_menor_avance = GraficaExpandible(
+        self._create_mini_chart(
             grid_frame,
-            tipo='barras',
-            titulo="📉 Módulos con Menor Avance",
-            altura_compacta=350
+            "📉 Módulos con Menor Avance",
+            chart_id='menor_avance',
+            chart_type='barras_h',
+            row=1, column=2
         )
-        self.chart_menor_avance.grid(row=1, column=2, padx=10, pady=10, sticky='nsew')
 
-    # ═══════════════════════════════════════════════════════════════
-    #  COMPONENTES AUXILIARES
-    # ═══════════════════════════════════════════════════════════════
+    def _create_mini_chart(self, parent, title, chart_id, chart_type, row, column):
+        """Crear tarjeta de gráfica miniatura con botón expandir"""
+        theme = self.theme_manager.get_current_theme()
+
+        card = ctk.CTkFrame(
+            parent,
+            fg_color=theme['surface'],
+            corner_radius=12,
+            border_width=1,
+            border_color=theme['border']
+        )
+        card.grid(row=row, column=column, padx=10, pady=10, sticky='nsew')
+
+        # Header con título y botón expandir
+        header = ctk.CTkFrame(card, fg_color='transparent', height=40)
+        header.pack(fill='x', padx=15, pady=(10, 5))
+        header.pack_propagate(False)
+
+        # Título
+        ctk.CTkLabel(
+            header,
+            text=title,
+            font=('Montserrat', 12, 'bold'),
+            text_color=theme['text']
+        ).pack(side='left')
+
+        # Botón expandir - NAVY BLUE
+        expand_btn = ctk.CTkButton(
+            header,
+            text="⛶ Ver Grande",
+            font=('Montserrat', 10, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            hover_color='#003D8F',
+            text_color='white',
+            corner_radius=8,
+            height=26,
+            width=100,
+            command=lambda: self.show_expanded_view(chart_id, title, chart_type)
+        )
+        expand_btn.pack(side='right')
+
+        # Preview de la gráfica
+        preview_frame = ctk.CTkFrame(
+            card,
+            fg_color=theme['background'],
+            corner_radius=8,
+            height=200
+        )
+        preview_frame.pack(fill='both', expand=True, padx=15, pady=(5, 15))
+        preview_frame.pack_propagate(False)
+
+        # Renderizar preview
+        self._render_chart_preview(preview_frame, chart_id, chart_type)
+
+    def _render_chart_preview(self, container, chart_id, chart_type):
+        """Renderizar preview pequeño de la gráfica"""
+        theme = self.theme_manager.get_current_theme()
+        data = self.datos_graficas.get(chart_id, {'labels': [], 'values': []})
+
+        if not data.get('values'):
+            # Placeholder si no hay datos
+            ctk.CTkLabel(
+                container,
+                text="📊",
+                font=('Segoe UI', 36),
+                text_color=theme['text_tertiary']
+            ).place(relx=0.5, rely=0.5, anchor='center')
+            return
+
+        # Crear figura pequeña
+        fig = Figure(figsize=(4, 2.5), dpi=80, facecolor=theme['background'])
+        ax = fig.add_subplot(111)
+
+        labels = data.get('labels', [])
+        values = data.get('values', [])
+
+        # Renderizar según tipo
+        if chart_type == 'barras':
+            ax.bar(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=7)
+
+        elif chart_type == 'barras_h':
+            ax.barh(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            ax.tick_params(axis='y', labelsize=7)
+
+        elif chart_type == 'dona':
+            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['ports_sea_blue'],
+                     HUTCHISON_COLORS['ports_sky_blue'], '#FFC107', '#FF5722']
+            ax.pie(values, labels=None, colors=colors[:len(values)], startangle=90)
+            ax.axis('equal')
+
+        elif chart_type == 'linea':
+            ax.plot(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], linewidth=2, marker='o')
+            ax.fill_between(range(len(labels)), values, alpha=0.3, color=HUTCHISON_COLORS['ports_sky_blue'])
+            plt.setp(ax.xaxis.get_majorticklabels(), fontsize=7)
+
+        # Estilo minimalista
+        ax.set_facecolor(theme['background'])
+        ax.tick_params(colors=theme['text'], labelsize=7)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_color(theme['border'])
+        ax.spines['left'].set_color(theme['border'])
+
+        fig.tight_layout()
+
+        # Integrar con tkinter
+        canvas = FigureCanvasTkAgg(fig, container)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill='both', expand=True)
+
+    # ==================== CREAR VISTA EXPANDIDA ====================
+
+    def _create_expanded_view(self):
+        """Crear vista EXPANDIDA con gráfica en pantalla completa"""
+        theme = self.theme_manager.get_current_theme()
+
+        self.expanded_view = ctk.CTkFrame(self, fg_color=theme['background'])
+
+        # Header con botón volver
+        header = ctk.CTkFrame(
+            self.expanded_view,
+            fg_color=theme['surface'],
+            height=70
+        )
+        header.pack(fill='x')
+        header.pack_propagate(False)
+
+        header_content = ctk.CTkFrame(header, fg_color='transparent')
+        header_content.pack(fill='both', expand=True, padx=20, pady=15)
+
+        # Botón volver - NAVY BLUE
+        volver_btn = ctk.CTkButton(
+            header_content,
+            text="← Volver",
+            font=('Montserrat', 14, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            hover_color='#003D8F',
+            text_color='white',
+            corner_radius=10,
+            height=45,
+            width=130,
+            command=self.show_grid_view
+        )
+        volver_btn.pack(side='left')
+
+        # Título de la gráfica
+        self.expanded_title_label = ctk.CTkLabel(
+            header_content,
+            text="",
+            font=('Montserrat', 20, 'bold'),
+            text_color=theme['text']
+        )
+        self.expanded_title_label.pack(side='left', padx=25)
+
+        # Info
+        ctk.CTkLabel(
+            header_content,
+            text="🔍 Gráfica interactiva | Rueda del mouse para zoom",
+            font=('Montserrat', 11),
+            text_color=theme['text_secondary']
+        ).pack(side='right')
+
+        # Container para la gráfica gigante
+        self.expanded_chart_container = ctk.CTkFrame(
+            self.expanded_view,
+            fg_color=theme['background']
+        )
+        self.expanded_chart_container.pack(fill='both', expand=True, padx=20, pady=20)
+
+    def _render_expanded_chart(self):
+        """Renderizar gráfica expandida en pantalla completa"""
+        # Limpiar container
+        for widget in self.expanded_chart_container.winfo_children():
+            widget.destroy()
+
+        if not self.current_chart_data:
+            return
+
+        # Actualizar título
+        self.expanded_title_label.configure(text=self.current_chart_title)
+
+        theme = self.theme_manager.get_current_theme()
+
+        # Crear figura grande
+        fig = Figure(figsize=(14, 8), dpi=100, facecolor=theme['background'])
+        ax = fig.add_subplot(111)
+
+        # Renderizar según tipo
+        labels = self.current_chart_data.get('labels', [])
+        values = self.current_chart_data.get('values', [])
+
+        if self.current_chart_type == 'barras':
+            bars = ax.bar(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            # Etiquetas en barras
+            for bar in bars:
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height,
+                       f'{int(height)}',
+                       ha='center', va='bottom', fontsize=12, fontweight='bold')
+            ax.set_ylabel('Valor', fontsize=14)
+            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=12)
+
+        elif self.current_chart_type == 'barras_h':
+            bars = ax.barh(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            # Etiquetas en barras
+            for bar in bars:
+                width = bar.get_width()
+                ax.text(width, bar.get_y() + bar.get_height()/2.,
+                       f'{int(width)}',
+                       ha='left', va='center', fontsize=12, fontweight='bold', color='white')
+            ax.set_xlabel('Cantidad', fontsize=14)
+            ax.tick_params(axis='y', labelsize=11)
+
+        elif self.current_chart_type == 'dona':
+            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['ports_sea_blue'],
+                     HUTCHISON_COLORS['ports_sky_blue'], '#FFC107', '#FF5722']
+            wedges, texts, autotexts = ax.pie(
+                values, labels=labels, autopct='%1.1f%%', startangle=90,
+                colors=colors[:len(values)], textprops={'fontsize': 12, 'fontweight': 'bold'}
+            )
+            for autotext in autotexts:
+                autotext.set_color('white')
+            ax.axis('equal')
+
+        elif self.current_chart_type == 'linea':
+            ax.plot(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'],
+                   linewidth=3, marker='o', markersize=10)
+            ax.fill_between(range(len(labels)), values, alpha=0.3,
+                           color=HUTCHISON_COLORS['ports_sky_blue'])
+            # Etiquetas en puntos
+            for i, v in enumerate(values):
+                ax.text(i, v, str(int(v)), ha='center', va='bottom', fontsize=11, fontweight='bold')
+            ax.set_xlabel('Tiempo', fontsize=14)
+            ax.set_ylabel('Valor', fontsize=14)
+            plt.setp(ax.xaxis.get_majorticklabels(), fontsize=11)
+
+        # Estilo
+        ax.set_facecolor(theme['background'])
+        ax.tick_params(colors=theme['text'], labelsize=11)
+        ax.spines['bottom'].set_color(theme['border'])
+        ax.spines['left'].set_color(theme['border'])
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        fig.tight_layout()
+
+        # Integrar con tkinter
+        canvas = FigureCanvasTkAgg(fig, self.expanded_chart_container)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill='both', expand=True)
+
+        # Toolbar de navegación
+        toolbar_frame = ctk.CTkFrame(self.expanded_chart_container, fg_color=theme['surface'])
+        toolbar_frame.pack(fill='x', pady=(10, 0))
+        toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
+        toolbar.update()
+
+    # ==================== COMPONENTES AUXILIARES ====================
 
     def _create_metric_card(self, parent, icon, title, value, subtitle, color):
-        """
-        Crear tarjeta de métrica estándar con diseño corporativo
-
-        ┌─────────────────┐
-        │       👥        │
-        │     1,525       │
-        │ Total Usuarios  │
-        │  (activos)      │
-        └─────────────────┘
-        """
+        """Crear tarjeta de métrica"""
         theme = self.theme_manager.get_current_theme()
 
         card = ctk.CTkFrame(
@@ -355,126 +588,40 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         inner = ctk.CTkFrame(card, fg_color='transparent')
         inner.pack(fill='both', expand=True, padx=25, pady=25)
 
-        # Ícono grande
-        icon_label = ctk.CTkLabel(
+        # Ícono
+        ctk.CTkLabel(
             inner,
             text=icon,
             font=('Segoe UI', 42),
             text_color=color
-        )
-        icon_label.pack(anchor='center', pady=(0, 15))
+        ).pack(anchor='center', pady=(0, 15))
 
-        # Valor principal (grande y destacado)
-        value_label = ctk.CTkLabel(
+        # Valor
+        ctk.CTkLabel(
             inner,
             text=value,
             font=('Segoe UI', 36, 'bold'),
             text_color=theme['text']
-        )
-        value_label.pack(anchor='center', pady=(0, 8))
+        ).pack(anchor='center', pady=(0, 8))
 
         # Título
-        title_label = ctk.CTkLabel(
+        ctk.CTkLabel(
             inner,
             text=title,
             font=('Segoe UI', 14, 'bold'),
             text_color=theme['text_secondary']
-        )
-        title_label.pack(anchor='center', pady=(0, 5))
+        ).pack(anchor='center', pady=(0, 5))
 
         # Subtítulo
-        subtitle_label = ctk.CTkLabel(
+        ctk.CTkLabel(
             inner,
             text=subtitle,
             font=('Segoe UI', 11),
             text_color=theme['text_tertiary'],
             wraplength=200
-        )
-        subtitle_label.pack(anchor='center')
+        ).pack(anchor='center')
 
         return card
-
-    def _show_fullscreen_chart(self, chart):
-        """
-        Mostrar gráfica en modo fullscreen (IN-PLACE, sin nueva ventana)
-
-        Comportamiento:
-        - Oculta el contenido del tab actual
-        - Muestra la gráfica ampliada con controles
-        - Botón "← Regresar" para volver
-        """
-        print(f"🔍 Expandiendo gráfica: {chart.title_text}")
-
-        # TODO: Implementar vista fullscreen in-place
-        # Por ahora, usamos el modal existente del sistema
-        from src.main.python.ui.widgets.charts.modal_fullscreen_chart import ModalFullscreenChart
-
-        if chart.chart_data and chart.chart_type:
-            modal = ModalFullscreenChart(
-                parent=self,
-                title=chart.title_text,
-                chart_type=chart.chart_type,
-                chart_data={
-                    'labels': chart.chart_data['labels'].copy(),
-                    'values': chart.chart_data['values'].copy()
-                }
-            )
-            modal.focus_force()
-            modal.grab_set()
-
-    # ═══════════════════════════════════════════════════════════════
-    #  CARGA DE DATOS
-    # ═══════════════════════════════════════════════════════════════
-
-    def _load_all_data(self):
-        """Cargar todos los datos estáticos en las gráficas"""
-        print("\n" + "═"*70)
-        print("📊 CARGANDO DATOS - PANEL DE CONTROL EJECUTIVO")
-        print("═"*70)
-
-        try:
-            # ═══ TAB GENERAL ═══
-            print("\n[TAB GENERAL]")
-
-            print("  [1/2] 📊 Usuarios por Unidad de Negocio (Barras Horizontales)")
-            self.chart_usuarios_unidad.set_data(USUARIOS_POR_UNIDAD_DATA['labels'], USUARIOS_POR_UNIDAD_DATA['values'])
-            print(f"        ✓ {len(USUARIOS_POR_UNIDAD_DATA['values'])} unidades cargadas")
-
-            print("  [2/2] 🍩 Progreso General por Unidad (Dona)")
-            self.chart_progreso_dona.set_data(PROGRESO_UNIDADES_DATA['labels'], PROGRESO_UNIDADES_DATA['values'])
-            print(f"        ✓ {len(PROGRESO_UNIDADES_DATA['values'])} unidades cargadas")
-
-            # ═══ TAB DASHBOARDS ═══
-            print("\n[TAB DASHBOARDS - GRID 2x3]")
-
-            print("  [1/6] 📊 Usuarios por Unidad (Grid)")
-            self.chart_usuarios_unidad_grid.set_data(USUARIOS_POR_UNIDAD_DATA['labels'], USUARIOS_POR_UNIDAD_DATA['values'])
-
-            print("  [2/6] 🍩 Progreso General (Grid)")
-            self.chart_progreso_dona_grid.set_data(PROGRESO_UNIDADES_DATA['labels'], PROGRESO_UNIDADES_DATA['values'])
-
-            print("  [3/6] 📈 Tendencia Semanal")
-            self.chart_tendencia.set_data(TENDENCIA_SEMANAL_DATA['labels'], TENDENCIA_SEMANAL_DATA['values'])
-
-            print("  [4/6] 📊 Top 5 Unidades")
-            self.chart_top5.set_data(TOP_5_UNIDADES_DATA['labels'], TOP_5_UNIDADES_DATA['values'])
-
-            print("  [5/6] 🎯 Cumplimiento de Objetivos")
-            self.chart_cumplimiento.set_data(CUMPLIMIENTO_OBJETIVOS_DATA['labels'], CUMPLIMIENTO_OBJETIVOS_DATA['values'])
-
-            print("  [6/6] 📉 Módulos con Menor Avance")
-            self.chart_menor_avance.set_data(MODULOS_MENOR_AVANCE_DATA['labels'], MODULOS_MENOR_AVANCE_DATA['values'])
-
-            print("\n" + "═"*70)
-            print("✅ TODOS LOS DASHBOARDS CARGADOS EXITOSAMENTE")
-            print("   • Tab General: 3 métricas + 2 gráficas grandes")
-            print("   • Tab Dashboards: 6 gráficas en grid 2x3")
-            print("═"*70 + "\n")
-
-        except Exception as e:
-            print(f"❌ Error cargando datos: {e}")
-            import traceback
-            traceback.print_exc()
 
 
 # ═══════════════════════════════════════════════════════════════════

@@ -15,6 +15,7 @@ class ConfiguracionPrincipalFragment(ctk.CTkFrame):
                  on_gestionar_empleados=None,
                  on_registro_soporte=None,
                  on_historial_reportes=None,
+                 on_importacion_datos=None,
                  **kwargs):
         """
         Args:
@@ -22,12 +23,14 @@ class ConfiguracionPrincipalFragment(ctk.CTkFrame):
             on_gestionar_empleados: Callback para navegar a gestión de empleados
             on_registro_soporte: Callback para navegar a registro de soporte
             on_historial_reportes: Callback para navegar a historial de reportes
+            on_importacion_datos: Callback para navegar a importación de datos
         """
         super().__init__(parent, fg_color='transparent', **kwargs)
 
         self.on_gestionar_empleados = on_gestionar_empleados
         self.on_registro_soporte = on_registro_soporte
         self.on_historial_reportes = on_historial_reportes
+        self.on_importacion_datos = on_importacion_datos
         self.theme_manager = get_theme_manager()
 
         # Crear interfaz
@@ -80,14 +83,16 @@ class ConfiguracionPrincipalFragment(ctk.CTkFrame):
         subtitle.pack(side='left', padx=(20, 0), pady=20)
 
     def _create_cards_grid(self, parent, theme):
-        """Crear grid 2x2 de tarjetas de configuración"""
-        # Contenedor principal con grid 2x2
+        """Crear grid de tarjetas de configuración (3 columnas, 2 filas)"""
+        # Contenedor principal con grid
         grid_container = ctk.CTkFrame(parent, fg_color='transparent')
         grid_container.pack(fill='both', expand=True, padx=20, pady=(0, 20))
 
-        # Configurar grid
-        grid_container.grid_columnconfigure((0, 1), weight=1)
+        # Configurar grid: 3 columnas, 2 filas
+        grid_container.grid_columnconfigure((0, 1, 2), weight=1)
         grid_container.grid_rowconfigure((0, 1), weight=1)
+
+        # === FILA 1: 3 tarjetas ===
 
         # Card 1: Gestionar Empleados
         card1 = ConfigCard(
@@ -111,8 +116,21 @@ class ConfiguracionPrincipalFragment(ctk.CTkFrame):
         )
         card2.grid(row=0, column=1, padx=15, pady=15, sticky='nsew')
 
-        # Card 3: Historial de Reportes
+        # Card 3: Importación de Datos
         card3 = ConfigCard(
+            grid_container,
+            icon='📥',
+            title='Importación de Datos',
+            description='Importar y cruzar datos desde archivos Excel CSOD',
+            button_text='Importar',
+            command=self.on_importacion_datos if self.on_importacion_datos else None
+        )
+        card3.grid(row=0, column=2, padx=15, pady=15, sticky='nsew')
+
+        # === FILA 2: 2 tarjetas centradas ===
+
+        # Card 4: Historial de Reportes
+        card4 = ConfigCard(
             grid_container,
             icon='📋',
             title='Historial de Reportes',
@@ -120,10 +138,10 @@ class ConfiguracionPrincipalFragment(ctk.CTkFrame):
             button_text='Ver Historial',
             command=self.on_historial_reportes if self.on_historial_reportes else None
         )
-        card3.grid(row=1, column=0, padx=15, pady=15, sticky='nsew')
+        card4.grid(row=1, column=0, padx=15, pady=15, sticky='nsew')
 
-        # Card 4: Acerca de
-        card4 = ConfigCard(
+        # Card 5: Acerca de
+        card5 = ConfigCard(
             grid_container,
             icon='ℹ️',
             title='Acerca de',
@@ -131,7 +149,7 @@ class ConfiguracionPrincipalFragment(ctk.CTkFrame):
             button_text='Ver Info',
             command=self._show_about
         )
-        card4.grid(row=1, column=1, padx=15, pady=15, sticky='nsew')
+        card5.grid(row=1, column=1, padx=15, pady=15, sticky='nsew')
 
     # ==================== LÓGICA DE NEGOCIO ====================
 

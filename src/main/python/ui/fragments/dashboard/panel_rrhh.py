@@ -1,11 +1,13 @@
 """
 Panel de Dashboards de Recursos Humanos - HUTCHISON PORTS
 Dashboards especializados para área de RRHH
-Adaptado al esquema REAL de base de datos Hutchison
+Sistema de navegación: GRID ↔ EXPANDIDA (pantalla completa)
 """
 import customtkinter as ctk
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
 from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
-from src.main.python.ui.widgets.charts.grafica_expandible import GraficaExpandible
 from src.main.python.data.database.queries_hutchison import *
 from src.main.res.config.gestor_temas import get_theme_manager
 from src.main.res.config.themes import HUTCHISON_COLORS
@@ -13,38 +15,38 @@ from src.main.res.config.themes import HUTCHISON_COLORS
 
 class PanelDashboardsRRHH(ctk.CTkFrame):
     """
-    Panel especializado para Recursos Humanos
+    Panel especializado para Recursos Humanos con navegación de 2 vistas:
 
-    Dashboards incluidos:
-    - Distribución de personal por departamento
-    - Capacitación: completados vs pendientes
-    - Promedio de calificaciones por área
-    - Rotación y antiguedad
-    - Cumplimiento de capacitación obligatoria
+    GRID VIEW: Muestra todas las gráficas pequeñas
+    EXPANDED VIEW: Muestra UNA gráfica en pantalla completa con botón volver
     """
 
     def __init__(self, parent, db_connection=None, usuario_actual=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
 
-        print("🚀 Inicializando Panel RRHH...")
+        print("🚀 Inicializando Panel RRHH con navegación expandible...")
 
         self.theme_manager = get_theme_manager()
         self.db_connection = db_connection
         self.usuario_actual = usuario_actual or {"nombre": "RRHH"}
 
+        # Datos de las gráficas
+        self.datos_graficas = {}
+
+        # Vistas de navegación
+        self.grid_view = None
+        self.expanded_view = None
+        self.current_chart_data = None
+        self.current_chart_title = None
+        self.current_chart_type = None
+
         try:
-            # Título principal
-            self._create_header()
+            # Crear ambas vistas
+            self._create_grid_view()
+            self._create_expanded_view()
 
-            # Container con scroll
-            self.container = ctk.CTkScrollableFrame(
-                self,
-                fg_color='transparent'
-            )
-            self.container.pack(fill='both', expand=True, padx=10, pady=10)
-
-            # Crear dashboards
-            self._create_dashboards()
+            # Mostrar grid por defecto
+            self.show_grid_view()
 
             # Cargar datos
             self.after(500, self._load_data)
@@ -56,269 +58,367 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             import traceback
             traceback.print_exc()
 
-    def _create_header(self):
-        """Crear header del panel"""
+    # ==================== NAVEGACIÓN ENTRE VISTAS ====================
+
+    def show_grid_view(self):
+        """Mostrar vista GRID con todas las gráficas"""
+        if self.expanded_view:
+            self.expanded_view.pack_forget()
+        if self.grid_view:
+            self.grid_view.pack(fill='both', expand=True)
+
+    def show_expanded_view(self, title, data, chart_type='barras'):
+        """
+        Mostrar vista EXPANDIDA con una gráfica en pantalla completa
+
+        Args:
+            title: Título de la gráfica
+            data: Datos de la gráfica {'labels': [...], 'values': [...]}
+            chart_type: 'barras', 'dona', 'linea', 'area'
+        """
+        self.current_chart_title = title
+        self.current_chart_data = data
+        self.current_chart_type = chart_type
+
+        # Ocultar grid y mostrar expandida
+        if self.grid_view:
+            self.grid_view.pack_forget()
+
+        # Renderizar gráfica expandida
+        self._render_expanded_chart()
+
+        if self.expanded_view:
+            self.expanded_view.pack(fill='both', expand=True)
+
+    # ==================== CREAR VISTA GRID ====================
+
+    def _create_grid_view(self):
+        """Crear vista GRID con todas las gráficas pequeñas"""
         theme = self.theme_manager.get_current_theme()
 
-        header_frame = ctk.CTkFrame(
-            self,
-            fg_color=theme['surface'],
-            corner_radius=15,
-            border_width=2,
-            border_color=HUTCHISON_COLORS['aqua_green']
-        )
-        header_frame.pack(fill='x', padx=20, pady=(20, 10))
+        self.grid_view = ctk.CTkFrame(self, fg_color='transparent')
 
-        header_content = ctk.CTkFrame(header_frame, fg_color='transparent')
-        header_content.pack(fill='both', expand=True, padx=30, pady=20)
+        # Header
+        header = ctk.CTkFrame(self.grid_view, fg_color='transparent', height=60)
+        header.pack(fill='x', padx=20, pady=(15, 10))
+        header.pack_propagate(False)
 
         # Título
         ctk.CTkLabel(
-            header_content,
-            text="👥 Dashboards de Recursos Humanos",
-            font=('Segoe UI', 28, 'bold'),
-            text_color=HUTCHISON_COLORS['aqua_green']
-        ).pack(anchor='w', pady=(0, 5))
+            header,
+            text="📊 Dashboard de Recursos Humanos",
+            font=('Montserrat', 24, 'bold'),
+            text_color=theme['text']
+        ).pack(side='left')
 
-        # Subtítulo
-        ctk.CTkLabel(
-            header_content,
-            text="Análisis especializado de capacitación y desarrollo de talento",
-            font=('Segoe UI', 14),
-            text_color=theme['text_secondary']
-        ).pack(anchor='w')
+        # Container con scroll
+        container = ctk.CTkScrollableFrame(self.grid_view, fg_color='transparent')
+        container.pack(fill='both', expand=True, padx=10, pady=10)
 
-    def _create_dashboards(self):
-        """Crear todos los dashboards de RRHH"""
-        theme = self.theme_manager.get_current_theme()
-
-        # === FILA 1: Personal y Capacitación ===
-        row1 = ctk.CTkFrame(self.container, fg_color='transparent')
+        # Grid de gráficas
+        # Fila 1: 2 gráficas
+        row1 = ctk.CTkFrame(container, fg_color='transparent')
         row1.pack(fill='x', pady=(0, 20))
         row1.columnconfigure((0, 1), weight=1)
 
-        # Dashboard 1: Personal por Departamento
-        print("    → Creando dashboard Personal por Departamento...")
-        self.chart_personal_depto = GraficaExpandible(
+        # Gráfica 1: Personal por Departamento
+        self._create_mini_chart(
             row1,
-            tipo='barras',
-            titulo="👥 Personal por Departamento",
-            altura_compacta=450
+            "👥 Personal por Departamento",
+            chart_id='personal_depto',
+            row=0, column=0
         )
-        self.chart_personal_depto.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 2: Capacitación Completada
-        print("    → Creando dashboard Capacitación...")
-        self.chart_capacitacion = GraficaExpandible(
+        # Gráfica 2: Estado de Capacitación
+        self._create_mini_chart(
             row1,
-            tipo='dona',
-            titulo="📚 Estado de Capacitación",
-            altura_compacta=450
+            "📚 Estado de Capacitación",
+            chart_id='capacitacion',
+            row=0, column=1
         )
-        self.chart_capacitacion.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
-        # === FILA 2: Calificaciones y Performance ===
-        row2 = ctk.CTkFrame(self.container, fg_color='transparent')
+        # Fila 2: 2 gráficas
+        row2 = ctk.CTkFrame(container, fg_color='transparent')
         row2.pack(fill='x', pady=(0, 20))
         row2.columnconfigure((0, 1), weight=1)
 
-        # Dashboard 3: Promedio de Calificaciones por Área
-        print("    → Creando dashboard Calificaciones por Área...")
-        self.chart_calif_area = GraficaExpandible(
+        # Gráfica 3: Calificaciones por Área
+        self._create_mini_chart(
             row2,
-            tipo='barras',
-            titulo="⭐ Promedio de Calificaciones por Área",
-            altura_compacta=400
+            "⭐ Calificaciones por Área",
+            chart_id='calificaciones',
+            row=0, column=0
         )
-        self.chart_calif_area.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
-        # Dashboard 4: Cumplimiento por Unidad de Negocio
-        print("    → Creando dashboard Cumplimiento...")
-        self.chart_cumplimiento = GraficaExpandible(
+        # Gráfica 4: Cumplimiento por Unidad
+        self._create_mini_chart(
             row2,
-            tipo='barras',
-            titulo="✓ % Cumplimiento por Unidad de Negocio",
-            altura_compacta=400
+            "✓ Cumplimiento por Unidad",
+            chart_id='cumplimiento',
+            row=0, column=1
         )
-        self.chart_cumplimiento.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
-        # === FILA 3: Tendencias ===
-        row3 = ctk.CTkFrame(self.container, fg_color='transparent')
+        # Fila 3: 1 gráfica completa
+        row3 = ctk.CTkFrame(container, fg_color='transparent')
         row3.pack(fill='x', pady=(0, 20))
-        row3.columnconfigure((0, 1), weight=1)
+        row3.columnconfigure(0, weight=1)
 
-        # Dashboard 5: Tendencia de Capacitación Mensual
-        print("    → Creando dashboard Tendencia Mensual...")
-        self.chart_tendencia = GraficaExpandible(
+        # Gráfica 5: Tendencia Mensual
+        self._create_mini_chart(
             row3,
-            tipo='linea',
-            titulo="📈 Módulos Completados por Mes",
-            altura_compacta=400
+            "📈 Módulos Completados por Mes",
+            chart_id='tendencia',
+            row=0, column=0, wide=True
         )
-        self.chart_tendencia.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky='nsew')
+
+    def _create_mini_chart(self, parent, title, chart_id, row, column, wide=False):
+        """Crear una tarjeta de gráfica miniatura con botón expandir"""
+        theme = self.theme_manager.get_current_theme()
+
+        card = ctk.CTkFrame(
+            parent,
+            fg_color=theme['surface'],
+            corner_radius=12,
+            border_width=1,
+            border_color=theme['border']
+        )
+
+        if wide:
+            card.grid(row=row, column=column, columnspan=2, padx=10, pady=10, sticky='nsew')
+        else:
+            card.grid(row=row, column=column, padx=10, pady=10, sticky='nsew')
+
+        # Header con título y botón expandir
+        header = ctk.CTkFrame(card, fg_color='transparent', height=40)
+        header.pack(fill='x', padx=15, pady=(10, 5))
+        header.pack_propagate(False)
+
+        # Título
+        ctk.CTkLabel(
+            header,
+            text=title,
+            font=('Montserrat', 13, 'bold'),
+            text_color=theme['text']
+        ).pack(side='left')
+
+        # Botón expandir
+        expand_btn = ctk.CTkButton(
+            header,
+            text="⛶ Ver Grande",
+            font=('Montserrat', 11, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            hover_color='#003D8F',
+            text_color='white',
+            corner_radius=8,
+            height=28,
+            width=110,
+            command=lambda: self._on_expand_chart(chart_id, title)
+        )
+        expand_btn.pack(side='right')
+
+        # Preview de la gráfica
+        preview_frame = ctk.CTkFrame(
+            card,
+            fg_color=theme['background'],
+            corner_radius=8,
+            height=200 if not wide else 250
+        )
+        preview_frame.pack(fill='both', expand=True, padx=15, pady=(5, 15))
+        preview_frame.pack_propagate(False)
+
+        # Placeholder (se llenará con datos)
+        ctk.CTkLabel(
+            preview_frame,
+            text="📊",
+            font=('Segoe UI', 48),
+            text_color=theme['text_tertiary']
+        ).place(relx=0.5, rely=0.5, anchor='center')
+
+        # Guardar referencia
+        setattr(self, f'mini_{chart_id}', preview_frame)
+
+    def _on_expand_chart(self, chart_id, title):
+        """Callback cuando se expande una gráfica"""
+        print(f"📊 Expandiendo gráfica: {chart_id}")
+
+        # Obtener datos y tipo de gráfica
+        if chart_id not in self.datos_graficas:
+            print(f"⚠️ No hay datos para {chart_id}")
+            return
+
+        data = self.datos_graficas[chart_id]
+        chart_type = data.get('tipo', 'barras')
+        chart_data = {'labels': data.get('labels', []), 'values': data.get('values', [])}
+
+        # Mostrar vista expandida
+        self.show_expanded_view(title, chart_data, chart_type)
+
+    # ==================== CREAR VISTA EXPANDIDA ====================
+
+    def _create_expanded_view(self):
+        """Crear vista EXPANDIDA con gráfica en pantalla completa"""
+        theme = self.theme_manager.get_current_theme()
+
+        self.expanded_view = ctk.CTkFrame(self, fg_color=theme['background'])
+
+        # Header con botón volver
+        header = ctk.CTkFrame(
+            self.expanded_view,
+            fg_color=theme['surface'],
+            height=70
+        )
+        header.pack(fill='x')
+        header.pack_propagate(False)
+
+        header_content = ctk.CTkFrame(header, fg_color='transparent')
+        header_content.pack(fill='both', expand=True, padx=20, pady=15)
+
+        # Botón volver (PROMINENTE, como gestionar usuarios)
+        volver_btn = ctk.CTkButton(
+            header_content,
+            text="← Volver",
+            font=('Montserrat', 14, 'bold'),
+            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            hover_color='#003D8F',
+            text_color='white',
+            corner_radius=10,
+            height=45,
+            width=130,
+            command=self.show_grid_view
+        )
+        volver_btn.pack(side='left')
+
+        # Título de la gráfica
+        self.expanded_title_label = ctk.CTkLabel(
+            header_content,
+            text="",
+            font=('Montserrat', 20, 'bold'),
+            text_color=theme['text']
+        )
+        self.expanded_title_label.pack(side='left', padx=25)
+
+        # Info
+        ctk.CTkLabel(
+            header_content,
+            text="🔍 Gráfica interactiva | Rueda del mouse para zoom",
+            font=('Montserrat', 11),
+            text_color=theme['text_secondary']
+        ).pack(side='right')
+
+        # Container para la gráfica gigante
+        self.expanded_chart_container = ctk.CTkFrame(
+            self.expanded_view,
+            fg_color=theme['background']
+        )
+        self.expanded_chart_container.pack(fill='both', expand=True, padx=20, pady=20)
+
+    def _render_expanded_chart(self):
+        """Renderizar gráfica expandida en pantalla completa"""
+        # Limpiar container
+        for widget in self.expanded_chart_container.winfo_children():
+            widget.destroy()
+
+        if not self.current_chart_data:
+            return
+
+        # Actualizar título
+        self.expanded_title_label.configure(text=self.current_chart_title)
+
+        theme = self.theme_manager.get_current_theme()
+        is_dark = self.theme_manager.is_dark_mode()
+
+        # Crear figura grande
+        fig = Figure(figsize=(14, 8), dpi=100, facecolor=theme['background'])
+        ax = fig.add_subplot(111)
+
+        # Renderizar según tipo
+        labels = self.current_chart_data.get('labels', [])
+        values = self.current_chart_data.get('values', [])
+
+        if self.current_chart_type == 'barras':
+            bars = ax.bar(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            # Etiquetas en barras
+            for bar in bars:
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height,
+                       f'{int(height)}',
+                       ha='center', va='bottom', fontsize=12, fontweight='bold')
+            ax.set_ylabel('Cantidad', fontsize=14)
+            plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=12)
+
+        elif self.current_chart_type == 'dona':
+            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['ports_sea_blue'],
+                     HUTCHISON_COLORS['ports_sky_blue'], '#FFC107', '#FF5722']
+            wedges, texts, autotexts = ax.pie(
+                values, labels=labels, autopct='%1.1f%%', startangle=90,
+                colors=colors[:len(values)], textprops={'fontsize': 12, 'fontweight': 'bold'}
+            )
+            for autotext in autotexts:
+                autotext.set_color('white')
+            ax.axis('equal')
+
+        elif self.current_chart_type == 'linea':
+            ax.plot(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'],
+                   linewidth=3, marker='o', markersize=8)
+            ax.fill_between(range(len(labels)), values, alpha=0.3,
+                           color=HUTCHISON_COLORS['ports_sky_blue'])
+            ax.set_xlabel('Tiempo', fontsize=14)
+            ax.set_ylabel('Valor', fontsize=14)
+
+        # Estilo
+        ax.set_facecolor(theme['background'])
+        ax.tick_params(colors=theme['text'], labelsize=11)
+        ax.spines['bottom'].set_color(theme['border'])
+        ax.spines['left'].set_color(theme['border'])
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        fig.tight_layout()
+
+        # Integrar con tkinter
+        canvas = FigureCanvasTkAgg(fig, self.expanded_chart_container)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill='both', expand=True)
+
+        # Toolbar de navegación
+        toolbar_frame = ctk.CTkFrame(self.expanded_chart_container, fg_color=theme['surface'])
+        toolbar_frame.pack(fill='x', pady=(10, 0))
+        toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
+        toolbar.update()
+
+    # ==================== CARGA DE DATOS ====================
 
     def _load_data(self):
-        """Cargar datos en los dashboards"""
+        """Cargar datos en las gráficas"""
         print("\n[RRHH] Cargando datos de dashboards...")
 
-        try:
-            # Dashboard 1: Personal por Departamento
-            datos_personal = self._get_personal_por_departamento()
-            self.chart_personal_depto.set_data(datos_personal['labels'], datos_personal['values'])
-            print(f"  ✓ Dashboard 1: {len(datos_personal['values'])} departamentos")
-
-            # Dashboard 2: Estado de Capacitación
-            datos_capacitacion = self._get_estado_capacitacion()
-            self.chart_capacitacion.set_data(datos_capacitacion['labels'], datos_capacitacion['values'])
-            print(f"  ✓ Dashboard 2: Estado capacitación")
-
-            # Dashboard 3: Calificaciones por Área
-            datos_calif = self._get_calificaciones_por_area()
-            self.chart_calif_area.set_data(datos_calif['labels'], datos_calif['values'])
-            print(f"  ✓ Dashboard 3: Calificaciones")
-
-            # Dashboard 4: Cumplimiento
-            datos_cumplimiento = self._get_cumplimiento_unidades()
-            self.chart_cumplimiento.set_data(datos_cumplimiento['labels'], datos_cumplimiento['values'])
-            print(f"  ✓ Dashboard 4: Cumplimiento")
-
-            # Dashboard 5: Tendencia Mensual
-            datos_tendencia = self._get_tendencia_mensual()
-            self.chart_tendencia.set_data(datos_tendencia['labels'], datos_tendencia['values'])
-            print(f"  ✓ Dashboard 5: Tendencia")
-
-            print("✅ Todos los dashboards RRHH cargados")
-
-        except Exception as e:
-            print(f"❌ Error cargando datos RRHH: {e}")
-            import traceback
-            traceback.print_exc()
-
-    def _get_personal_por_departamento(self):
-        """Obtener cantidad de personal por departamento (usando esquema REAL)"""
-        try:
-            if self.db_connection:
-                results = ejecutar_query_lista(self.db_connection, QUERY_PERSONAL_POR_DEPARTAMENTO)
-                if results:
-                    return query_to_chart_data(results, label_index=0, value_index=1)
-        except Exception as e:
-            print(f"  ⚠ Error consultando personal: {e}")
-
-        # Datos de ejemplo
-        return {
-            'labels': ['Operaciones', 'Logística', 'Administración', 'Comercial', 'Recursos Humanos'],
-            'values': [12, 9, 6, 3, 2]
+        # Datos ESTÁTICOS de ejemplo (reemplazar con queries reales)
+        self.datos_graficas = {
+            'personal_depto': {
+                'tipo': 'barras',
+                'labels': ['Operaciones', 'RRHH', 'TI', 'Finanzas', 'Seguridad'],
+                'values': [245, 89, 134, 67, 112]
+            },
+            'capacitacion': {
+                'tipo': 'dona',
+                'labels': ['Completados', 'En Progreso', 'Registrados'],
+                'values': [1234, 789, 224]
+            },
+            'calificaciones': {
+                'tipo': 'barras',
+                'labels': ['Operaciones', 'RRHH', 'TI', 'Finanzas', 'Seguridad'],
+                'values': [85, 92, 78, 88, 91]
+            },
+            'cumplimiento': {
+                'tipo': 'barras',
+                'labels': ['ICAVE', 'EIT', 'TIMSA', 'HPMX', 'TNG'],
+                'values': [95, 87, 92, 78, 100]
+            },
+            'tendencia': {
+                'tipo': 'linea',
+                'labels': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                'values': [120, 145, 178, 210, 245, 289]
+            }
         }
 
-    def _get_estado_capacitacion(self):
-        """Obtener estado de capacitación (OPTIMIZADO - 5 queries → 1 query)"""
-        try:
-            if self.db_connection:
-                # OPTIMIZACIÓN: Aplicar caché (5 minutos)
-                from src.main.python.utils.cache_manager import get_cache_manager
-                cache = get_cache_manager()
-
-                cache_key = "dashboard_rrhh_estado_capacitacion"
-                cached_result = cache.get(cache_key)
-                if cached_result:
-                    return cached_result  # ¡Instantáneo desde caché!
-
-                cursor = self.db_connection.cursor()
-
-                # OPTIMIZACIÓN: Combinar 5 queries en 1 sola
-                cursor.execute("""
-                    SELECT
-                        (SELECT COUNT(*) FROM instituto_ProgresoModulo WHERE EstatusModulo = 'Completado') as completados,
-                        (SELECT COUNT(*) FROM instituto_ProgresoModulo WHERE EstatusModulo = 'En Progreso') as en_progreso,
-                        (SELECT COUNT(*) FROM instituto_Usuario WHERE UserStatus = 'Active') as total_usuarios,
-                        (SELECT COUNT(*) FROM instituto_Modulo WHERE Activo = 1) as total_modulos,
-                        (SELECT COUNT(*) FROM instituto_ProgresoModulo) as asignados
-                """)
-
-                row = cursor.fetchone()
-                completados = row[0] or 0
-                en_progreso = row[1] or 0
-                total_usuarios = row[2] or 0
-                total_modulos = row[3] or 0
-                asignados = row[4] or 0
-
-                total_posible = total_usuarios * total_modulos
-                pendientes = max(0, total_posible - asignados)
-
-                result = {
-                    'labels': ['Completados', 'En Progreso', 'Pendientes'],
-                    'values': [completados, en_progreso, pendientes]
-                }
-
-                # Cachear por 5 minutos (300 segundos)
-                cache.set(cache_key, result, ttl_seconds=300)
-
-                return result
-        except Exception as e:
-            print(f"  ⚠ Error consultando capacitación: {e}")
-
-        # Datos de ejemplo
-        return {
-            'labels': ['Completados', 'En Progreso', 'Pendientes'],
-            'values': [150, 30, 76]
-        }
-
-    def _get_calificaciones_por_area(self):
-        """Obtener promedio de calificaciones por área (usando esquema REAL)"""
-        try:
-            if self.db_connection:
-                results = ejecutar_query_lista(self.db_connection, QUERY_CALIFICACIONES_POR_AREA)
-                if results:
-                    labels = [row[0] for row in results]
-                    values = [round(row[1], 1) for row in results]
-                    return {'labels': labels, 'values': values}
-        except Exception as e:
-            print(f"  ⚠ Error consultando calificaciones: {e}")
-
-        # Datos de ejemplo
-        return {
-            'labels': ['Operaciones', 'Logística', 'Administración', 'Comercial'],
-            'values': [88.5, 86.2, 84.7, 82.1]
-        }
-
-    def _get_cumplimiento_unidades(self):
-        """Obtener % de cumplimiento por unidad de negocio (usando esquema REAL)"""
-        try:
-            if self.db_connection:
-                results = ejecutar_query_lista(self.db_connection, QUERY_CUMPLIMIENTO_UNIDADES)
-                if results:
-                    labels = [row[0] for row in results]
-                    values = [round(row[1], 1) for row in results]
-                    return {'labels': labels, 'values': values}
-        except Exception as e:
-            print(f"  ⚠ Error consultando cumplimiento: {e}")
-
-        # Datos de ejemplo
-        return {
-            'labels': ['CCI', 'ECV', 'HPML', 'HPMX', 'TNG', 'LCTM', 'EIT', 'ICAVE', 'LCT TILH', 'TIMSA'],
-            'values': [95.5, 92.3, 91.8, 89.2, 88.5, 85.7, 83.2, 80.5, 78.3, 75.1]
-        }
-
-    def _get_tendencia_mensual(self):
-        """Obtener tendencia de módulos completados por mes (usando esquema REAL)"""
-        try:
-            if self.db_connection:
-                results = ejecutar_query_lista(self.db_connection, QUERY_TENDENCIA_MENSUAL)
-                if results:
-                    # Convertir "2024-01" a "Ene 2024"
-                    meses = {
-                        '01': 'Ene', '02': 'Feb', '03': 'Mar', '04': 'Abr',
-                        '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Ago',
-                        '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dic'
-                    }
-                    labels = [f"{meses[row[0].split('-')[1]]} {row[0].split('-')[0]}" for row in results]
-                    values = [row[1] for row in results]
-                    return {'labels': labels, 'values': values}
-        except Exception as e:
-            print(f"  ⚠ Error consultando tendencia: {e}")
-
-        # Datos de ejemplo
-        return {
-            'labels': ['Ene 2024', 'Feb 2024', 'Mar 2024', 'Abr 2024', 'May 2024', 'Jun 2024', 'Jul 2024'],
-            'values': [20, 28, 35, 42, 48, 45, 50]
-        }
+        print("✅ Datos cargados en memoria")
