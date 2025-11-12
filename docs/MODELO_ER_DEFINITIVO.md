@@ -3,7 +3,17 @@
 
 ---
 
-## 📋 ANÁLISIS DE TU BASE DE DATOS ACTUAL
+## 📑 ÍNDICE
+
+1. [Modelo Actual (18 Tablas)](#modelo-actual-18-tablas)
+2. [Modelo Propuesto Extendido (35 Tablas)](#modelo-propuesto-extendido-35-tablas)
+3. [Comparativa y Análisis](#comparativa-y-análisis)
+
+---
+
+# 📊 MODELO ACTUAL (18 Tablas)
+
+## 🔍 Estado Actual de la Base de Datos
 
 ### ✅ **LO QUE ESTÁ BIEN:**
 1. **18 tablas bien estructuradas** con prefijo `instituto_`
@@ -14,26 +24,202 @@
 6. **Foreign keys con CASCADE/RESTRICT** apropiadas
 7. **Constraints y validaciones** en campos críticos
 
-### ⚠️ **PROBLEMAS DETECTADOS:**
+### 📋 **TABLAS ACTUALES (18):**
 
-1. **INCONSISTENCIA EN QUERIES:**
-   - Tus queries en `queries_hutchison.py` usan nombres SIN prefijo `instituto_`
-   - La BD real usa prefijo `instituto_` en todas las tablas
-   - **Solución:** Actualizar todas las queries para usar el prefijo correcto
+#### Módulo de Seguridad (2 tablas)
+1. **instituto_Rol** - Roles de usuario
+2. **instituto_Usuario** - Usuarios del sistema
 
-2. **FALTA DE NORMALIZACIÓN EN Usuario:**
-   - Campos `Division`, `Position`, `Nivel` deberían ser tablas separadas
-   - Campos `TipoDeCorreo`, `Grupo` sin validación por FK
+#### Módulo Organizacional (2 tablas)
+3. **instituto_UnidadDeNegocio** - Unidades de negocio (ICAVE, EIT, LCT, etc.)
+4. **instituto_Departamento** - Departamentos por unidad
 
-3. **FALTA DE GESTIÓN DE PERMISOS:**
+#### Módulo de Capacitación (2 tablas)
+5. **instituto_Modulo** - Módulos de capacitación
+6. **instituto_ModuloDepartamento** - Asignación módulo-departamento
+
+#### Módulo de Progreso (1 tabla)
+7. **instituto_ProgresoModulo** - Progreso de usuarios en módulos
+
+#### Módulo de Evaluaciones (2 tablas)
+8. **instituto_Evaluacion** - Evaluaciones de módulos
+9. **instituto_ResultadoEvaluacion** - Resultados de evaluaciones
+
+#### Módulo de Certificados (1 tabla)
+10. **instituto_Certificado** - Certificados emitidos
+
+#### Módulo de Recursos (1 tabla)
+11. **instituto_RecursoModulo** - Recursos asociados a módulos
+
+#### Módulo de Comunicación (1 tabla)
+12. **instituto_Notificacion** - Notificaciones del sistema
+
+#### Módulo de Soporte (1 tabla)
+13. **instituto_Soporte** - Tickets de soporte
+
+#### Módulo de Reportes (1 tabla)
+14. **instituto_ReporteGuardado** - Reportes guardados por usuarios
+
+#### Módulo de Auditoría (2 tablas)
+15. **instituto_AuditoriaAcceso** - Auditoría de accesos
+16. **instituto_HistorialProgreso** - Historial de cambios en progreso
+
+### 📊 DIAGRAMA ER MODELO ACTUAL (18 TABLAS)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         MODELO ACTUAL (18 TABLAS)                       │
+└─────────────────────────────────────────────────────────────────────────┘
+
+SEGURIDAD:
+┌──────────────────┐
+│  instituto_Rol   │
+├──────────────────┤           ┌──────────────────┐
+│ IdRol (PK)       │───────────┤instituto_Usuario │
+│ NombreRol        │   1:N     │                  │
+│ Descripcion      │           ├──────────────────┤
+│ Activo           │           │ IdUsuario (PK)   │
+└──────────────────┘           │ UserId (UQ)      │
+                               │ IdUnidadDeNeg(FK)│
+                               │ IdDepartamento FK│
+                               │ IdRol (FK)       │
+                               │ NombreCompleto   │
+                               │ UserEmail        │
+                               │ Nivel            │
+                               │ Division         │
+                               │ Position         │
+                               └──────────────────┘
+
+ORGANIZACIONAL:
+┌────────────────────┐
+│instituto_UnidadDe- │
+│     Negocio        │
+├────────────────────┤
+│ IdUnidadDeNegocio  │
+│   (PK)             │
+│ NombreUnidad       │
+│ Codigo             │
+└────────────────────┘
+        │ 1:N
+        ▼
+┌────────────────────┐
+│instituto_Departa-  │
+│      mento         │
+├────────────────────┤
+│ IdDepartamento(PK) │
+│ IdUnidadDeNego(FK) │
+│ NombreDepartamento │
+│ Codigo             │
+└────────────────────┘
+
+CAPACITACIÓN:
+┌──────────────────┐           ┌──────────────────┐
+│instituto_Modulo  │           │instituto_Modulo- │
+├──────────────────┤           │   Departamento   │
+│ IdModulo (PK)    │───────────├──────────────────┤
+│ NombreModulo     │   1:N     │ IdModuloDepto PK │
+│ FechaInicio      │           │ IdModulo (FK)    │
+│ FechaCierre      │           │ IdDepartamento FK│
+│ CategoriaModulo  │           │ Obligatorio      │
+│ DuracionEstHoras │           └──────────────────┘
+└──────────────────┘
+        │ 1:N
+        ▼
+┌──────────────────┐
+│instituto_Recurso-│
+│     Modulo       │
+├──────────────────┤
+│ IdRecurso (PK)   │
+│ IdModulo (FK)    │
+│ NombreRecurso    │
+│ TipoRecurso      │
+│ UrlRecurso       │
+└──────────────────┘
+
+PROGRESO Y EVALUACIONES:
+┌──────────────────┐
+│instituto_Progreso│
+│     Modulo       │
+├──────────────────┤
+│ IdInscripcion PK │
+│ UserId (FK)      │
+│ IdModulo (FK)    │
+│ EstatusModulo    │
+│ PorcentajeAvance │
+│ TiempoInvertido  │
+└──────────────────┘
+        │ 1:N
+        ├──────────────┐
+        ▼              ▼
+┌──────────────────┐  ┌──────────────────┐
+│instituto_        │  │instituto_        │
+│ Certificado      │  │HistorialProgreso │
+├──────────────────┤  ├──────────────────┤
+│ IdCertificado PK │  │ IdHistorial (PK) │
+│ IdInscripcion FK │  │ IdInscripcion FK │
+│ CodigoCertificado│  │ EstatusAnterior  │
+│ FechaEmision     │  │ EstatusNuevo     │
+└──────────────────┘  └──────────────────┘
+
+┌──────────────────┐           ┌──────────────────┐
+│instituto_        │           │instituto_Resultado│
+│   Evaluacion     │───────────│   Evaluacion     │
+├──────────────────┤   1:N     ├──────────────────┤
+│ IdEvaluacion (PK)│           │ IdResultado (PK) │
+│ IdModulo (FK)    │           │ IdInscripcion FK │
+│ NombreEvaluacion │           │ IdEvaluacion (FK)│
+│ PuntajeMinimo    │           │ PuntajeObtenido  │
+└──────────────────┘           │ Aprobado         │
+                               └──────────────────┘
+
+COMUNICACIÓN Y SOPORTE:
+┌──────────────────┐           ┌──────────────────┐
+│instituto_        │           │instituto_Soporte │
+│  Notificacion    │           ├──────────────────┤
+├──────────────────┤           │ IdSoporte (PK)   │
+│ IdNotificacion PK│           │ IdUsuario (FK)   │
+│ IdUsuario (FK)   │           │ Asunto           │
+│ TipoNotificacion │           │ Descripcion      │
+│ Titulo           │           │ Estatus          │
+│ Leida            │           │ Prioridad        │
+└──────────────────┘           └──────────────────┘
+
+REPORTES Y AUDITORÍA:
+┌──────────────────┐           ┌──────────────────┐
+│instituto_Reporte-│           │instituto_        │
+│    Guardado      │           │ AuditoriaAcceso  │
+├──────────────────┤           ├──────────────────┤
+│ IdReporte (PK)   │           │ IdAuditoria (PK) │
+│ IdUsuarioCreador │           │ IdUsuario (FK)   │
+│ NombreReporte    │           │ Accion           │
+│ TipoReporte      │           │ Modulo           │
+│ FiltrosJSON      │           │ DireccionIP      │
+└──────────────────┘           │ FechaAccion      │
+                               └──────────────────┘
+```
+
+### ⚠️ **LIMITACIONES DEL MODELO ACTUAL:**
+
+1. **FALTA DE NORMALIZACIÓN:**
+   - Campos `Division`, `Position`, `Nivel` en Usuario deberían ser tablas
+   - Campo `CategoriaModulo` como texto sin FK
+
+2. **FALTA DE GESTIÓN DE PERMISOS:**
    - No hay tabla de permisos granulares
-   - Solo hay roles sin definir qué puede hacer cada rol
+   - Solo hay roles sin definir acciones específicas
 
-4. **FALTA DE TRAZABILIDAD COMPLETA:**
-   - No se registra quién modificó módulos, departamentos, etc.
-   - Solo hay auditoría de accesos
+3. **FALTA DE ESTRUCTURA DETALLADA:**
+   - No hay lecciones dentro de módulos
+   - No hay preguntas/opciones para evaluaciones
+   - Recursos vinculados directamente a módulos (no a lecciones)
+
+4. **FALTA DE TRAZABILIDAD:**
+   - No se registra quién modificó módulos, departamentos
+   - Auditoría limitada a accesos
 
 ---
+
+# 🚀 MODELO PROPUESTO EXTENDIDO (35 Tablas)
 
 ## 🎯 MODELO ER OPTIMIZADO - PROPUESTA DEFINITIVA
 
@@ -712,4 +898,93 @@ ORDER BY pm.FechaVencimiento;
 
 ---
 
-**Próximo documento:** `MIGRACIONES_BD.sql` con scripts de migración
+# 📊 COMPARATIVA Y ANÁLISIS
+
+## 🔄 COMPARACIÓN: MODELO ACTUAL vs PROPUESTO
+
+| Aspecto | Modelo Actual (18 tablas) | Modelo Propuesto (35 tablas) | Mejora |
+|---------|---------------------------|------------------------------|--------|
+| **Total de Tablas** | 18 | 35 | +17 tablas nuevas |
+| **Permisos** | Solo Roles | Roles + Permisos + RolPermiso | ✅ Granularidad |
+| **Normalización** | Parcial | Completa | ✅ Nivel, Posición como tablas |
+| **Estructura Módulos** | Módulo → Recursos | Módulo → Lecciones → Recursos | ✅ Mejor organización |
+| **Evaluaciones** | Básica | Preguntas + Opciones detalladas | ✅ Más flexibilidad |
+| **Progreso** | Por módulo | Por módulo + Por lección | ✅ Seguimiento detallado |
+| **Auditoría** | Solo accesos | Accesos + Cambios en datos | ✅ Trazabilidad completa |
+| **Comunicación** | Notificaciones | Notificaciones + Anuncios | ✅ Más canales |
+| **Soporte** | Tickets básicos | Tickets + Seguimiento | ✅ Mejor gestión |
+| **Reportes** | Guardado simple | Guardado + Compartido | ✅ Colaboración |
+| **Categorías** | Texto libre | Tabla normalizada | ✅ Consistencia |
+| **Equipos** | No existe | Tabla de equipos | ✅ Organización fina |
+| **Configuración** | Código | Tabla de configuración | ✅ Mantenibilidad |
+| **Plantillas** | Hardcoded | Tabla de plantillas | ✅ Flexibilidad |
+
+## 🎯 ESTRATEGIA DE MIGRACIÓN
+
+### **OPCIÓN 1: Mantener Modelo Actual (Recomendado para corto plazo)**
+✅ **Pros:**
+- No requiere migración
+- Sistema funcional actual
+- Menor riesgo
+- Menos tiempo de desarrollo
+
+⚠️ **Contras:**
+- Limitaciones en funcionalidades avanzadas
+- Menos escalabilidad
+- Auditoría limitada
+
+### **OPCIÓN 2: Migración Gradual (Recomendado para mediano plazo)**
+✅ **Pros:**
+- Implementación por fases
+- Menor impacto en producción
+- Testing incremental
+- Rollback más fácil
+
+📋 **Fases sugeridas:**
+1. **Fase 1:** Permisos + Categorías (2 semanas)
+2. **Fase 2:** Lecciones + Progreso Lección (3 semanas)
+3. **Fase 3:** Preguntas + Opciones (2 semanas)
+4. **Fase 4:** Resto de mejoras (4 semanas)
+
+### **OPCIÓN 3: Migración Completa (Largo plazo)**
+✅ **Pros:**
+- Sistema completo desde el inicio
+- Sin deuda técnica
+- Todas las funcionalidades
+
+⚠️ **Contras:**
+- Mayor tiempo de desarrollo (3-4 meses)
+- Mayor riesgo
+- Testing complejo
+
+## 🏆 RECOMENDACIÓN FINAL
+
+**Para Smart Reports - Instituto Hutchison Ports:**
+
+1. **Corto Plazo (1-2 meses):**
+   - ✅ Mantener modelo actual de 18 tablas
+   - ✅ Optimizar queries existentes
+   - ✅ Agregar índices adicionales
+   - ✅ Mejorar vistas y procedimientos
+
+2. **Mediano Plazo (3-6 meses):**
+   - 🔄 Implementar Fase 1 y 2 del modelo extendido
+   - 🔄 Añadir: Permisos, Categorías, Lecciones, ProgresoLección
+
+3. **Largo Plazo (6-12 meses):**
+   - 🚀 Completar migración a modelo de 35 tablas
+   - 🚀 Implementar todas las funcionalidades avanzadas
+
+---
+
+## 📚 DOCUMENTOS RELACIONADOS
+
+- `MIGRACIONES_BD.sql` - Scripts de migración
+- `create_tables_instituto.sql` - Esquema actual (18 tablas)
+- `queries_hutchison.py` - Queries de la aplicación
+
+---
+
+**Fecha de actualización:** 2025-11-12
+**Versión:** 2.0
+**Autor:** Sistema Smart Reports

@@ -54,41 +54,58 @@ class PanelConsultas(ctk.CTkFrame):
         # === SECCIÓN: CONSULTAS PREDEFINIDAS ===
         self._create_predefined_queries_section(main_container, theme)
 
-        # === SECCIÓN 1: BÚSQUEDA POR ID ===
-        self._create_search_by_id_section(main_container, theme)
+        # === GRID DE BÚSQUEDAS (2x2) ===
+        searches_grid = ctk.CTkFrame(main_container, fg_color='transparent')
+        searches_grid.pack(fill='x', pady=(0, 15))
+        searches_grid.grid_columnconfigure((0, 1), weight=1, uniform='searches')
 
-        # === SECCIÓN 2: BÚSQUEDA POR UNIDAD ===
-        self._create_search_by_unit_section(main_container, theme)
+        # SECCIÓN 1: BÚSQUEDA POR ID (Top-Left)
+        search_id_container = ctk.CTkFrame(searches_grid, fg_color='transparent')
+        search_id_container.grid(row=0, column=0, padx=(0, 10), sticky='ew')
+        self._create_search_by_id_section(search_id_container, theme)
 
-        # === SECCIÓN 3: USUARIOS NUEVOS ===
-        self._create_new_users_section(main_container, theme)
+        # SECCIÓN 2: BÚSQUEDA POR UNIDAD (Top-Right)
+        search_unit_container = ctk.CTkFrame(searches_grid, fg_color='transparent')
+        search_unit_container.grid(row=0, column=1, padx=(10, 0), sticky='ew')
+        self._create_search_by_unit_section(search_unit_container, theme)
 
-        # === SECCIÓN 4: ESTADÍSTICAS GLOBALES ===
-        self._create_stats_section(main_container, theme)
+        # SECCIÓN 3: USUARIOS NUEVOS (Bottom-Left)
+        new_users_container = ctk.CTkFrame(searches_grid, fg_color='transparent')
+        new_users_container.grid(row=1, column=0, padx=(0, 10), pady=(15, 0), sticky='ew')
+        self._create_new_users_section(new_users_container, theme)
+
+        # SECCIÓN 4: ESTADÍSTICAS GLOBALES (Bottom-Right)
+        stats_container = ctk.CTkFrame(searches_grid, fg_color='transparent')
+        stats_container.grid(row=1, column=1, padx=(10, 0), pady=(15, 0), sticky='ew')
+        self._create_stats_section(stats_container, theme)
 
         # === RESULTADOS ===
         self._create_results_section(main_container, theme)
 
     def _create_header(self, parent, theme):
         """Crear header del panel"""
+        # Determinar si es tema oscuro
+        is_dark = theme.get('background') == '#1a1d2e'
+
         header_frame = ctk.CTkFrame(
             parent,
             fg_color=theme['surface'],
             corner_radius=15,
             border_width=2,
-            border_color=HUTCHISON_COLORS['aqua_green']
+            border_color=HUTCHISON_COLORS['ports_sea_blue']  # Navy para el borde
         )
         header_frame.pack(fill='x', pady=(0, 20))
 
         header_content = ctk.CTkFrame(header_frame, fg_color='transparent')
         header_content.pack(fill='x', padx=30, pady=20)
 
-        # Título
+        # Título - Blanco en oscuro, Navy en claro
+        title_color = 'white' if is_dark else HUTCHISON_COLORS['ports_sea_blue']
         ctk.CTkLabel(
             header_content,
             text="🔍 Panel de Consultas",
             font=('Montserrat', 28, 'bold'),
-            text_color=HUTCHISON_COLORS['aqua_green']
+            text_color=title_color
         ).pack(anchor='w', pady=(0, 5))
 
         # Subtítulo
@@ -196,7 +213,7 @@ class PanelConsultas(ctk.CTkFrame):
             fg_color=theme['surface'],
             corner_radius=12
         )
-        section_frame.pack(fill='x', pady=(0, 15))
+        section_frame.pack(fill='both', expand=True)
 
         content = ctk.CTkFrame(section_frame, fg_color='transparent')
         content.pack(fill='x', padx=20, pady=20)
@@ -252,7 +269,7 @@ class PanelConsultas(ctk.CTkFrame):
             fg_color=theme['surface'],
             corner_radius=12
         )
-        section_frame.pack(fill='x', pady=(0, 15))
+        section_frame.pack(fill='both', expand=True)
 
         content = ctk.CTkFrame(section_frame, fg_color='transparent')
         content.pack(fill='x', padx=20, pady=20)
@@ -308,7 +325,7 @@ class PanelConsultas(ctk.CTkFrame):
             fg_color=theme['surface'],
             corner_radius=12
         )
-        section_frame.pack(fill='x', pady=(0, 15))
+        section_frame.pack(fill='both', expand=True)
 
         content = ctk.CTkFrame(section_frame, fg_color='transparent')
         content.pack(fill='x', padx=20, pady=20)
@@ -366,7 +383,7 @@ class PanelConsultas(ctk.CTkFrame):
             fg_color=theme['surface'],
             corner_radius=12
         )
-        section_frame.pack(fill='x', pady=(0, 15))
+        section_frame.pack(fill='both', expand=True)
 
         content = ctk.CTkFrame(section_frame, fg_color='transparent')
         content.pack(fill='x', padx=20, pady=20)
