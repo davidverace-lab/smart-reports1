@@ -8,6 +8,7 @@ from src.main.python.ui.fragments.configuracion.configuracion_principal_fragment
 from src.main.python.ui.fragments.configuracion.gestion_usuarios_fragment import GestionUsuariosFragment
 from src.main.python.ui.fragments.configuracion.soporte_tickets_fragment import SoporteTicketsFragment
 from src.main.python.ui.fragments.configuracion.historial_reportes_fragment import HistorialReportesFragment
+from src.main.python.ui.fragments.configuracion.panel_importacion_datos import PanelImportacionDatos
 
 
 class ConfiguracionPanel(ctk.CTkFrame):
@@ -42,6 +43,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
         self.users_fragment = None
         self.tickets_fragment = None
         self.history_fragment = None
+        self.import_fragment = None
 
         # Mostrar fragment principal al inicio
         self.show_main_config_frame()
@@ -62,7 +64,8 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 self,
                 on_gestionar_empleados=self.show_user_manager_frame,
                 on_registro_soporte=self.show_support_ticket_frame,
-                on_historial_reportes=self.show_report_history_frame
+                on_historial_reportes=self.show_report_history_frame,
+                on_importacion_datos=self.show_import_data_frame
             )
 
         self.main_fragment.pack(fill='both', expand=True)
@@ -116,6 +119,40 @@ class ConfiguracionPanel(ctk.CTkFrame):
 
         self.history_fragment.pack(fill='both', expand=True)
 
+    def show_import_data_frame(self):
+        """Mostrar fragment de importación de datos"""
+        # Ocultar todos los fragments
+        self._hide_all_fragments()
+
+        # Crear o mostrar fragment de importación
+        if not self.import_fragment:
+            # PanelImportacionDatos ya tiene botón de volver integrado
+            # Lo envolvemos en un wrapper para agregar botón de volver consistente
+            wrapper = ctk.CTkFrame(self, fg_color='transparent')
+
+            # Botón volver
+            theme = self.theme_manager.get_current_theme()
+            back_btn = ctk.CTkButton(
+                wrapper,
+                text="← Volver",
+                command=self.show_main_config_frame,
+                fg_color=theme['surface'],
+                hover_color=theme['hover'],
+                text_color=theme['text'],
+                font=('Segoe UI', 13, 'bold'),
+                height=40,
+                width=120
+            )
+            back_btn.pack(anchor='nw', padx=20, pady=10)
+
+            # Panel de importación
+            import_panel = PanelImportacionDatos(wrapper, db_connection=self.db)
+            import_panel.pack(fill='both', expand=True)
+
+            self.import_fragment = wrapper
+
+        self.import_fragment.pack(fill='both', expand=True)
+
     def _hide_all_fragments(self):
         """Ocultar todos los fragments"""
         if self.main_fragment:
@@ -126,6 +163,8 @@ class ConfiguracionPanel(ctk.CTkFrame):
             self.tickets_fragment.pack_forget()
         if self.history_fragment:
             self.history_fragment.pack_forget()
+        if self.import_fragment:
+            self.import_fragment.pack_forget()
 
     # ==================== CALLBACKS ====================
 
