@@ -104,6 +104,7 @@ class ModernSidebar(ctk.CTkFrame):
             ('📊', 'Dashboards Gerenciales', 'dashboard'),
             ('🔍', 'Consulta de Empleados', 'consultas'),
             ('📤', 'Cruce de Datos (Cornerstone)', 'actualizar'),
+            ('📥', 'Importación de Datos', 'importacion'),
             ('📄', 'Generar Reportes', 'reportes'),
             ('⚙️', 'Configuración', 'configuracion'),
         ]
