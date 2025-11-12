@@ -7,7 +7,7 @@ Script de prueba para verificar las mejoras de gráficas
 """
 import customtkinter as ctk
 from src.interfaces.ui.views.panels.dashboard.panel_dashboards_gerenciales import DashboardsGerencialesPanel
-from config.gestor_temas import get_theme_manager
+from src.main.res.config.gestor_temas import get_theme_manager
 
 # Configurar tema
 ctk.set_appearance_mode("dark")
