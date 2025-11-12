@@ -54,12 +54,16 @@ class MenuReportes:
     def _create_title(self, parent):
         """Crear título del panel"""
         theme = self.theme_manager.get_current_theme()
+        is_dark = self.theme_manager.is_dark_mode()
+
+        # Color del título: Navy blue en modo claro, blanco en modo oscuro
+        title_color = HUTCHISON_COLORS['ports_sea_blue'] if not is_dark else '#FFFFFF'
 
         title_label = ctk.CTkLabel(
             parent,
             text="📊 Generación de Reportes",
             font=('Montserrat', 32, 'bold'),
-            text_color=HUTCHISON_COLORS['aqua_green']
+            text_color=title_color
         )
         title_label.pack(pady=(10, 5))
 

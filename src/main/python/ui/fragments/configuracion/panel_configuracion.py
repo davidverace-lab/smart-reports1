@@ -64,8 +64,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 self,
                 on_gestionar_empleados=self.show_user_manager_frame,
                 on_registro_soporte=self.show_support_ticket_frame,
-                on_historial_reportes=self.show_report_history_frame,
-                on_importacion_datos=self.show_import_data_frame
+                on_historial_reportes=self.show_report_history_frame
             )
 
         self.main_fragment.pack(fill='both', expand=True)

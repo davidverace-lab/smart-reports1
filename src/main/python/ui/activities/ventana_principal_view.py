@@ -67,6 +67,9 @@ class VentanaPrincipalView:
         # Theme Manager
         self.theme_manager = get_theme_manager()
 
+        # Track current view for theme refresh
+        self.current_view = None
+
         # Configurar appearance de customtkinter
         appearance = "dark" if self.theme_manager.is_dark_mode() else "light"
         ctk.set_appearance_mode(appearance)
@@ -127,7 +130,7 @@ class VentanaPrincipalView:
         navigation_callbacks = {
             'dashboard': self.show_dashboard,
             'consultas': self.show_consultas,
-            'actualizar': self.show_actualizar,
+            'importacion': self.show_importacion,
             'reportes': self.show_reportes,
             'configuracion': self.show_configuracion,
         }
@@ -177,6 +180,7 @@ class VentanaPrincipalView:
     def show_dashboard(self):
         """Mostrar panel de Dashboards Gerenciales"""
         self._clear_content()
+        self.current_view = 'dashboard'
         self.nav_controller.navigate_to('dashboard', None)
 
         # Usar módulo de menú (lógica separada)
@@ -189,8 +193,9 @@ class VentanaPrincipalView:
         panel.pack(fill='both', expand=True)
 
     def show_actualizar(self):
-        """Mostrar panel de Actualización/Importación de Datos"""
+        """Mostrar panel de Actualización/Cruce de Datos"""
         self._clear_content()
+        self.current_view = 'actualizar'
         self.nav_controller.navigate_to('actualizar', None)
 
         # Usar módulo de menú (lógica separada)
@@ -201,9 +206,26 @@ class VentanaPrincipalView:
         )
         panel.pack(fill='both', expand=True, padx=20, pady=20)
 
+    def show_importacion(self):
+        """Mostrar panel de Importación de Datos"""
+        self._clear_content()
+        self.current_view = 'importacion'
+        self.nav_controller.navigate_to('importacion', None)
+
+        # Importar PanelImportacionDatos
+        from src.main.python.ui.fragments.configuracion.panel_importacion_datos import PanelImportacionDatos
+
+        # Crear panel de importación
+        panel = PanelImportacionDatos(
+            self.content_area,
+            db_connection=self.conn
+        )
+        panel.pack(fill='both', expand=True)
+
     def show_consultas(self):
         """Mostrar panel de Consultas"""
         self._clear_content()
+        self.current_view = 'consultas'
         self.nav_controller.navigate_to('consultas', None)
 
         # Usar módulo de menú (lógica separada)
@@ -216,6 +238,7 @@ class VentanaPrincipalView:
     def show_reportes(self):
         """Mostrar panel de Reportes"""
         self._clear_content()
+        self.current_view = 'reportes'
         self.nav_controller.navigate_to('reportes', None)
 
         # Usar módulo de menú (lógica separada)
@@ -228,6 +251,7 @@ class VentanaPrincipalView:
     def show_configuracion(self):
         """Mostrar panel de Configuración"""
         self._clear_content()
+        self.current_view = 'configuracion'
         self.nav_controller.navigate_to('configuracion', None)
 
         # Usar módulo de menú (lógica separada)
@@ -298,6 +322,18 @@ class VentanaPrincipalView:
         # Refrescar colores del main container
         self.main_container.configure(fg_color=theme_colors['background'])
         self.content_area.configure(fg_color=theme_colors['background'])
+
+        # Refrescar el panel actual para aplicar cambios de tema inmediatamente
+        if self.current_view == 'dashboard':
+            self.show_dashboard()
+        elif self.current_view == 'consultas':
+            self.show_consultas()
+        elif self.current_view == 'importacion':
+            self.show_importacion()
+        elif self.current_view == 'reportes':
+            self.show_reportes()
+        elif self.current_view == 'configuracion':
+            self.show_configuracion()
 
 
 # Alias para mantener compatibilidad con código existente
