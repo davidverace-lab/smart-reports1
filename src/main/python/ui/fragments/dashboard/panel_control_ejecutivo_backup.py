@@ -483,7 +483,6 @@ class PanelControlEjecutivo(ctk.CTkFrame):
 
 if __name__ == "__main__":
     import customtkinter as ctk
-    from src.main.res.config.gestor_temas import initialize_theme_manager
 
     # Configurar tema
     ctk.set_appearance_mode("dark")
@@ -493,9 +492,6 @@ if __name__ == "__main__":
     root = ctk.CTk()
     root.title("Panel de Control Ejecutivo - HUTCHISON PORTS")
     root.geometry("1400x900")
-
-    # Inicializar gestor de temas
-    initialize_theme_manager(root)
 
     # Crear panel
     panel = PanelControlEjecutivo(root)
