@@ -5,7 +5,7 @@ Smart Reports v2.0
 import json
 import os
 from typing import Dict, Callable
-from config.themes import DARK_THEME, LIGHT_THEME
+from src.main.res.config.themes import DARK_THEME, LIGHT_THEME
 
 
 class ThemeManager:

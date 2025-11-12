@@ -119,6 +119,47 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         if self.grid_view:
             self.grid_view.pack(fill='both', expand=True)
 
+    def _animate_expanded_view(self):
+        """Animar la entrada de la vista expandida con efecto deslizante"""
+        # Configuración de la animación
+        duration_ms = 300  # 300ms duración total
+        fps = 60  # 60 FPS
+        frame_time = 1000 // fps  # ~16ms por frame
+        total_frames = duration_ms // frame_time  # ~18 frames
+
+        # Posición inicial y final
+        start_offset = -0.08  # Comienza 8% arriba (fuera de vista)
+        end_offset = 0.0  # Termina en posición normal
+
+        current_frame = [0]  # Usar lista para poder modificar en función anidada
+
+        def ease_out_cubic(t):
+            """Función de easing suave (ease-out cubic)"""
+            return 1 - pow(1 - t, 3)
+
+        def animate_frame():
+            if current_frame[0] <= total_frames:
+                # Calcular progreso (0.0 a 1.0)
+                progress = current_frame[0] / total_frames
+                eased_progress = ease_out_cubic(progress)
+
+                # Interpolar posición
+                current_offset = start_offset + (end_offset - start_offset) * eased_progress
+
+                # Aplicar posición usando place()
+                self.expanded_view.place(relx=0, rely=current_offset, relwidth=1, relheight=1)
+
+                # Siguiente frame
+                current_frame[0] += 1
+                self.after(frame_time, animate_frame)
+            else:
+                # Animación completa - cambiar a pack() para layout normal
+                self.expanded_view.place_forget()
+                self.expanded_view.pack(fill='both', expand=True)
+
+        # Iniciar animación
+        animate_frame()
+
     def show_expanded_view(self, chart_id, title, chart_type='barras'):
         """
         Mostrar vista EXPANDIDA con una gráfica en pantalla completa
@@ -142,7 +183,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self._render_expanded_chart()
 
         if self.expanded_view:
-            self.expanded_view.pack(fill='both', expand=True)
+            # Iniciar animación de entrada
+            self._animate_expanded_view()
 
     # ==================== CREAR VISTA GRID ====================
 
@@ -731,7 +773,6 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
 if __name__ == "__main__":
     import customtkinter as ctk
-    from src.main.res.config.gestor_temas import initialize_theme_manager
 
     # Configurar tema
     ctk.set_appearance_mode("dark")
@@ -741,9 +782,6 @@ if __name__ == "__main__":
     root = ctk.CTk()
     root.title("Dashboards Gerenciales - HUTCHISON PORTS")
     root.geometry("1400x900")
-
-    # Inicializar gestor de temas
-    initialize_theme_manager(root)
 
     # Crear panel
     panel = DashboardsGerencialesPanel(root)

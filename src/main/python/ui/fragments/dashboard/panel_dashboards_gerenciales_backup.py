@@ -590,14 +590,12 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
 if __name__ == "__main__":
     import customtkinter as ctk
-    from src.main.res.config.gestor_temas import initialize_theme_manager
 
     ctk.set_appearance_mode("dark")
     root = ctk.CTk()
     root.title("Panel de Control - HUTCHISON PORTS")
     root.geometry("1600x950")
 
-    initialize_theme_manager(root)
     panel = DashboardsGerencialesPanel(root)
     panel.pack(fill='both', expand=True)
 
