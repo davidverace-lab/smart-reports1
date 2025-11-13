@@ -43,12 +43,26 @@ class DatabaseConnection:
             return self._connection
 
         try:
+            # Validar tipo de BD con mensaje útil si hay typo
+            if self._db_type not in ['sqlserver', 'mysql']:
+                error_msg = f"Tipo de BD no soportado: '{self._db_type}'"
+
+                # Detectar typos comunes
+                if 'sqlsever' in self._db_type.lower():
+                    error_msg += "\n\n❌ TYPO DETECTADO: Dice 'sqlsever' pero debe ser 'sqlserver'"
+                    error_msg += "\n\n✅ SOLUCIÓN:"
+                    error_msg += "\n   1. Abre tu archivo .env (en la raíz del proyecto)"
+                    error_msg += "\n   2. Busca la línea: DB_TYPE=sqlsever"
+                    error_msg += "\n   3. Cámbiala a: DB_TYPE=sqlserver"
+                    error_msg += "\n   4. Guarda y reinicia la aplicación"
+                    error_msg += "\n\nOpciones válidas: 'sqlserver' o 'mysql'"
+
+                raise ValueError(error_msg)
+
             if self._db_type == 'sqlserver':
                 self._connection = self._connect_sqlserver()
             elif self._db_type == 'mysql':
                 self._connection = self._connect_mysql()
-            else:
-                raise ValueError(f"Tipo de BD no soportado: {self._db_type}")
 
             self._cursor = self._connection.cursor()
             return self._connection
