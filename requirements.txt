@@ -23,6 +23,8 @@ tkinterweb>=3.23.0
 
 # Graficos y visualizacion
 matplotlib>=3.7.0
+plotly>=5.18.0
+kaleido>=0.2.1
 
 # Reportes PDF
 reportlab>=4.0.0
