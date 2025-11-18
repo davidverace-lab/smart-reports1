@@ -173,7 +173,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             title="Total de Usuarios",
             value="1,525",
             subtitle="Usuarios activos en el sistema",
-            color=HUTCHISON_COLORS['ports_sky_blue']
+            color=HUTCHISON_COLORS['primary']
         ).grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
         # Card 2: Módulo Actual
@@ -259,7 +259,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             container,
             text="📊 Dashboards Interactivos - Sistema Ejecutivo",
             font=('Segoe UI', 22, 'bold'),
-            text_color=HUTCHISON_COLORS['ports_sea_blue']
+            text_color=HUTCHISON_COLORS['primary']
         )
         section_title.pack(anchor='w', padx=20, pady=(10, 20))
 

@@ -57,7 +57,7 @@ class MenuReportes:
         is_dark = self.theme_manager.is_dark_mode()
 
         # Color del título: Navy blue en modo claro, blanco en modo oscuro
-        title_color = HUTCHISON_COLORS['ports_sea_blue'] if not is_dark else '#FFFFFF'
+        title_color = HUTCHISON_COLORS['primary'] if not is_dark else '#FFFFFF'
 
         title_label = ctk.CTkLabel(
             parent,
@@ -177,7 +177,7 @@ class MenuReportes:
             content,
             text="Generar Reporte",
             font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             height=45,
             corner_radius=10,

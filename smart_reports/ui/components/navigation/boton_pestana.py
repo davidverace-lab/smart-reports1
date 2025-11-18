@@ -56,9 +56,9 @@ class CustomTabButton(ctk.CTkButton):
         if active:
             # Tab activo: azul navy con letras blancas
             self.configure(
-                fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Navy blue
+                fg_color=HUTCHISON_COLORS['primary'],  # Navy blue
                 text_color='#ffffff',
-                hover_color=HUTCHISON_COLORS['ports_sea_blue']
+                hover_color=HUTCHISON_COLORS['primary']
             )
         else:
             # Tab inactivo: gris con letras blancas

@@ -24,7 +24,7 @@ class ModernSidebar(ctk.CTkFrame):
         theme = self.theme_manager.get_current_theme()
 
         # En modo claro, usar azul navy como fondo del sidebar
-        sidebar_bg = HUTCHISON_COLORS['ports_sea_blue'] if not self.theme_manager.is_dark_mode() else theme['surface']
+        sidebar_bg = HUTCHISON_COLORS['primary'] if not self.theme_manager.is_dark_mode() else theme['surface']
 
         super().__init__(
             parent,
@@ -163,7 +163,7 @@ class ModernSidebar(ctk.CTkFrame):
             text='',
             width=50,
             height=24,
-            progress_color=HUTCHISON_COLORS['ports_sky_blue'],
+            progress_color=HUTCHISON_COLORS['primary'],
             button_color='#4a5a8a' if not is_dark else theme['surface_light'],
             button_hover_color='#6a7aa0' if not is_dark else theme['border'],
             fg_color='#6a7aa0' if not is_dark else theme['border'],
@@ -267,7 +267,7 @@ class ModernSidebar(ctk.CTkFrame):
         is_dark = self.theme_manager.is_dark_mode()
 
         # En modo claro, fondo azul navy; en modo oscuro, fondo del tema
-        sidebar_bg = HUTCHISON_COLORS['ports_sea_blue'] if not is_dark else theme_colors['surface']
+        sidebar_bg = HUTCHISON_COLORS['primary'] if not is_dark else theme_colors['surface']
         text_color = '#FFFFFF' if not is_dark else theme_colors['text']
         text_secondary_color = '#E0E0E0' if not is_dark else theme_colors['text_secondary']
         border_color = '#4a5a8a' if not is_dark else theme_colors['border']

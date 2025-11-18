@@ -92,7 +92,7 @@ class PanelConsultas(ctk.CTkFrame):
             fg_color=theme['surface'],
             corner_radius=15,
             border_width=2,
-            border_color=HUTCHISON_COLORS['ports_sea_blue']  # Navy para el borde
+            border_color=HUTCHISON_COLORS['primary']  # Navy para el borde
         )
         header_frame.pack(fill='x', pady=(0, 20))
 
@@ -100,7 +100,7 @@ class PanelConsultas(ctk.CTkFrame):
         header_content.pack(fill='x', padx=30, pady=20)
 
         # Título - Blanco en oscuro, Navy en claro
-        title_color = 'white' if is_dark else HUTCHISON_COLORS['ports_sea_blue']
+        title_color = 'white' if is_dark else HUTCHISON_COLORS['primary']
         ctk.CTkLabel(
             header_content,
             text="🔍 Panel de Consultas",
@@ -123,7 +123,7 @@ class PanelConsultas(ctk.CTkFrame):
             fg_color=theme['surface'],
             corner_radius=12,
             border_width=2,
-            border_color=HUTCHISON_COLORS['ports_sea_blue']
+            border_color=HUTCHISON_COLORS['primary']
         )
         section_frame.pack(fill='x', pady=(0, 20))
 
@@ -135,7 +135,7 @@ class PanelConsultas(ctk.CTkFrame):
             content,
             text="⚡ Consultas Predefinidas",
             font=('Montserrat', 18, 'bold'),
-            text_color=HUTCHISON_COLORS['ports_sea_blue']
+            text_color=HUTCHISON_COLORS['primary']
         ).pack(anchor='w', pady=(0, 15))
 
         # Grid de botones de consultas (3 columnas)
@@ -155,7 +155,7 @@ class PanelConsultas(ctk.CTkFrame):
                 buttons_grid,
                 text=text,
                 font=('Montserrat', 12, 'bold'),
-                fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+                fg_color=HUTCHISON_COLORS['primary'],
                 hover_color='#003D8F',
                 text_color='white',
                 corner_radius=10,
@@ -176,7 +176,7 @@ class PanelConsultas(ctk.CTkFrame):
                 buttons_grid,
                 text=text,
                 font=('Montserrat', 12, 'bold'),
-                fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+                fg_color=HUTCHISON_COLORS['primary'],
                 hover_color='#003D8F',
                 text_color='white',
                 corner_radius=10,
@@ -197,7 +197,7 @@ class PanelConsultas(ctk.CTkFrame):
                 buttons_grid,
                 text=text,
                 font=('Montserrat', 12, 'bold'),
-                fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+                fg_color=HUTCHISON_COLORS['primary'],
                 hover_color='#003D8F',
                 text_color='white',
                 corner_radius=10,
@@ -255,7 +255,7 @@ class PanelConsultas(ctk.CTkFrame):
             input_frame,
             text="🔍 Buscar",
             font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             height=40,
             width=120,
@@ -311,7 +311,7 @@ class PanelConsultas(ctk.CTkFrame):
             input_frame,
             text="🔍 Consultar",
             font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             height=40,
             width=120,
@@ -369,7 +369,7 @@ class PanelConsultas(ctk.CTkFrame):
             input_frame,
             text="🔍 Consultar",
             font=('Montserrat', 13, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             height=40,
             width=120,

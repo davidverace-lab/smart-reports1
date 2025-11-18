@@ -55,7 +55,7 @@ class ConfiguradorColumnas(ctk.CTkToplevel):
         theme = self.theme_manager.get_current_theme()
 
         # Header
-        header = ctk.CTkFrame(self, fg_color=HUTCHISON_COLORS['ports_sea_blue'], height=60)
+        header = ctk.CTkFrame(self, fg_color=HUTCHISON_COLORS['primary'], height=60)
         header.pack(fill='x')
         header.pack_propagate(False)
 
@@ -86,7 +86,7 @@ class ConfiguradorColumnas(ctk.CTkToplevel):
             btn_frame,
             text="📂 Cargar Config",
             font=('Segoe UI', 10, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             width=130,
             height=30,
             command=self._cargar_configuracion
@@ -180,7 +180,7 @@ class ConfiguradorColumnas(ctk.CTkToplevel):
             row,
             text="→",
             font=('Segoe UI', 14, 'bold'),
-            text_color=HUTCHISON_COLORS['ports_sky_blue']
+            text_color=HUTCHISON_COLORS['primary']
         )
         arrow.pack(side='left', padx=10)
 
@@ -191,9 +191,9 @@ class ConfiguradorColumnas(ctk.CTkToplevel):
             row,
             values=opciones,
             font=('Segoe UI', 11),
-            fg_color=HUTCHISON_COLORS['ports_horizon_blue'],
-            button_color=HUTCHISON_COLORS['ports_sea_blue'],
-            button_hover_color=HUTCHISON_COLORS['ports_sky_blue'],
+            fg_color=HUTCHISON_COLORS['info'],
+            button_color=HUTCHISON_COLORS['primary'],
+            button_hover_color=HUTCHISON_COLORS['primary'],
             width=250
         )
         dropdown.pack(side='left', padx=15, pady=10)

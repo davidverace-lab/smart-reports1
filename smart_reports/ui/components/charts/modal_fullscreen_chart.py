@@ -89,7 +89,7 @@ class ModalFullscreenChart(ctk.CTkToplevel):
         # === HEADER CON TÍTULO Y BOTÓN CERRAR ===
         header = ctk.CTkFrame(
             self,
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             height=80,
             corner_radius=0
         )
@@ -295,7 +295,7 @@ class ModalFullscreenChart(ctk.CTkToplevel):
                 va='center',
                 fontsize=14,
                 fontweight='bold',
-                color=HUTCHISON_COLORS['ports_sea_blue']
+                color=HUTCHISON_COLORS['primary']
             )
 
         if filtered_values:
@@ -346,7 +346,7 @@ class ModalFullscreenChart(ctk.CTkToplevel):
         # Total
         total = sum(filtered_values)
         self.ax.text(0, 0.1, f'{int(total):,}', ha='center', va='center', fontsize=32,
-                    fontweight='bold', color=HUTCHISON_COLORS['ports_sky_blue'])
+                    fontweight='bold', color=HUTCHISON_COLORS['primary'])
         self.ax.text(0, -0.2, 'TOTAL', ha='center', va='center', fontsize=14,
                     fontweight='700', color=text_color, alpha=0.7)
 
@@ -440,10 +440,10 @@ class ModalFullscreenChart(ctk.CTkToplevel):
         if not self.annotation:
             self.annotation = self.ax.annotate(
                 '', xy=(0, 0), xytext=(30, 30), textcoords="offset points",
-                bbox=dict(boxstyle="round,pad=1.2", fc='#1a1d2e', ec=HUTCHISON_COLORS['ports_sky_blue'],
+                bbox=dict(boxstyle="round,pad=1.2", fc='#1a1d2e', ec=HUTCHISON_COLORS['primary'],
                          alpha=0.98, linewidth=3),
                 arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.3',
-                               color=HUTCHISON_COLORS['ports_sky_blue'], lw=3),
+                               color=HUTCHISON_COLORS['primary'], lw=3),
                 fontsize=11, color='white', fontweight='700', zorder=1000
             )
 

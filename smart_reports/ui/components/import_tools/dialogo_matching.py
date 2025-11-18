@@ -56,7 +56,7 @@ class DialogoMatching(ctk.CTkToplevel):
         theme = self.theme_manager.get_current_theme()
 
         # Header
-        header = ctk.CTkFrame(self, fg_color=HUTCHISON_COLORS['ports_sea_blue'], height=70)
+        header = ctk.CTkFrame(self, fg_color=HUTCHISON_COLORS['primary'], height=70)
         header.pack(fill='x')
         header.pack_propagate(False)
 
@@ -99,7 +99,7 @@ class DialogoMatching(ctk.CTkToplevel):
         self.bd_frame = self._create_record_frame(
             compare_frame,
             "📁 Registro en Base de Datos",
-            HUTCHISON_COLORS['ports_sky_blue'],
+            HUTCHISON_COLORS['primary'],
             0
         )
 
@@ -218,8 +218,8 @@ class DialogoMatching(ctk.CTkToplevel):
             buttons_frame,
             text="📁 Mantener Existente",
             font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
+            hover_color=HUTCHISON_COLORS['primary'],
             height=50,
             command=lambda: self._tomar_decision('mantener')
         )

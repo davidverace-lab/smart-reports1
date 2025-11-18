@@ -21,7 +21,7 @@ class UnitSelector(ctk.CTkFrame):
             fg_color='#2b2d42',
             corner_radius=15,
             border_width=2,
-            border_color=HUTCHISON_COLORS['ports_sky_blue'],
+            border_color=HUTCHISON_COLORS['primary'],
             **kwargs
         )
 
@@ -48,11 +48,11 @@ class UnitSelector(ctk.CTkFrame):
             container,
             values=units,
             font=('Montserrat', 14),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            button_color=HUTCHISON_COLORS['ports_sea_blue'],
-            button_hover_color=HUTCHISON_COLORS['ports_horizon_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
+            button_color=HUTCHISON_COLORS['primary'],
+            button_hover_color=HUTCHISON_COLORS['info'],
             dropdown_fg_color='#2b2d42',
-            dropdown_hover_color=HUTCHISON_COLORS['ports_sky_blue'],
+            dropdown_hover_color=HUTCHISON_COLORS['primary'],
             dropdown_text_color='#ffffff',
             text_color='#ffffff',
             corner_radius=10,

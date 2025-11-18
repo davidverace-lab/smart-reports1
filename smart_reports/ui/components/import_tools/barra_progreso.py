@@ -39,7 +39,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
             fg_color=theme['surface'],
             corner_radius=12,
             border_width=2,
-            border_color=HUTCHISON_COLORS['ports_sky_blue']
+            border_color=HUTCHISON_COLORS['primary']
         )
         self.card.pack(fill='both', expand=True, padx=10, pady=10)
 
@@ -69,7 +69,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
             width=400,
             height=20,
             corner_radius=10,
-            progress_color=HUTCHISON_COLORS['ports_sky_blue']
+            progress_color=HUTCHISON_COLORS['primary']
         )
         self.progressbar.pack(padx=20, pady=(10, 5))
         self.progressbar.set(0)

@@ -78,7 +78,7 @@ class ModernPlotlyChart(ctk.CTkFrame):
             font=('Segoe UI', 14),
             width=35,
             height=35,
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             corner_radius=8,
             command=self._toggle_fullscreen
@@ -108,7 +108,7 @@ class ModernPlotlyChart(ctk.CTkFrame):
                 size=12
             ),
             hoverlabel=dict(
-                bgcolor=HUTCHISON_COLORS['ports_sea_blue'],
+                bgcolor=HUTCHISON_COLORS['primary'],
                 font_size=13,
                 font_family='Poppins',
                 font_color='white'
@@ -267,7 +267,7 @@ class ModernBarChart(ModernPlotlyChart):
                 self.chart_container,
                 text="🌐 Abrir en Navegador",
                 command=lambda: os.system(f'start {html_path}'),
-                fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+                fg_color=HUTCHISON_COLORS['primary'],
                 hover_color='#003D8F'
             ).pack(pady=10)
 
