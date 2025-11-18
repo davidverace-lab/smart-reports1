@@ -17,7 +17,7 @@ from pathlib import Path
 proyecto_root = Path(__file__).parent
 sys.path.insert(0, str(proyecto_root))
 
-from src.main.python.domain.services.etl_instituto_completo import (
+from smart_reports.etl.etl_instituto_completo import (
     ETLInstitutoCompleto,
     ETLConfig
 )
