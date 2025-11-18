@@ -326,15 +326,18 @@ class VentanaPrincipalView:
         # Solo necesitamos refrescar la interfaz
         pass
 
-    def _on_theme_changed(self, theme_colors):
+    def _on_theme_changed(self, theme_mode):
         """Callback cuando cambia el tema"""
         # Actualizar appearance mode de customtkinter
-        appearance = "dark" if self.theme_manager.is_dark_mode() else "light"
+        appearance = "dark" if theme_mode == 'dark' else "light"
         ctk.set_appearance_mode(appearance)
 
+        # Obtener los colores del nuevo tema
+        theme = self.theme_manager.get_current_theme()
+
         # Refrescar colores del main container
-        self.main_container.configure(fg_color=theme_colors['background'])
-        self.content_area.configure(fg_color=theme_colors['background'])
+        self.main_container.configure(fg_color=theme['colors']['background'])
+        self.content_area.configure(fg_color=theme['colors']['background'])
 
         # Refrescar el panel actual para aplicar cambios de tema inmediatamente
         if self.current_view == 'dashboard':
