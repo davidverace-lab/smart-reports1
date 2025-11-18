@@ -60,7 +60,6 @@ IF OBJECT_ID('instituto_Usuario', 'U') IS NOT NULL DROP TABLE instituto_Usuario;
 IF OBJECT_ID('instituto_Posicion', 'U') IS NOT NULL DROP TABLE instituto_Posicion;
 IF OBJECT_ID('instituto_Departamento', 'U') IS NOT NULL DROP TABLE instituto_Departamento;
 IF OBJECT_ID('instituto_UnidadDeNegocio', 'U') IS NOT NULL DROP TABLE instituto_UnidadDeNegocio;
-IF OBJECT_ID('instituto_Nivel', 'U') IS NOT NULL DROP TABLE instituto_Nivel;
 IF OBJECT_ID('instituto_RolPermiso', 'U') IS NOT NULL DROP TABLE instituto_RolPermiso;
 IF OBJECT_ID('instituto_Permiso', 'U') IS NOT NULL DROP TABLE instituto_Permiso;
 IF OBJECT_ID('instituto_Rol', 'U') IS NOT NULL DROP TABLE instituto_Rol;
@@ -123,18 +122,6 @@ CREATE TABLE instituto_RolPermiso (
 PRINT '✅ Tabla instituto_RolPermiso creada';
 GO
 
--- Tabla: instituto_Nivel
-CREATE TABLE instituto_Nivel (
-    IdNivel INT IDENTITY(1,1) NOT NULL,
-    NombreNivel VARCHAR(100) NOT NULL,
-    Jerarquia INT,
-    Descripcion NVARCHAR(MAX),
-    Activo BIT DEFAULT 1,
-    CONSTRAINT PK_instituto_Nivel PRIMARY KEY (IdNivel)
-);
-PRINT '✅ Tabla instituto_Nivel creada';
-GO
-
 PRINT '';
 PRINT '══════════════════════════════════════════════════════════════';
 PRINT '2. MÓDULO ORGANIZACIONAL';
@@ -195,11 +182,12 @@ CREATE TABLE instituto_Usuario (
     IdUnidadDeNegocio INT,
     IdDepartamento INT,
     IdRol INT NOT NULL,
-    IdNivel INT,
     IdPosicion INT,
     NombreCompleto VARCHAR(255) NOT NULL,
     UserEmail VARCHAR(255) NOT NULL,
     PasswordHash VARCHAR(255) NOT NULL,
+    Position VARCHAR(150), -- ⭐ Mapea a "Usuario - Cargo" del Excel
+    Nivel VARCHAR(100), -- ⭐ Mapea a "Usuario - Nivel" del Excel
     TipoDeCorreo VARCHAR(50),
     UserStatus VARCHAR(50),
     Ubicacion VARCHAR(255),
@@ -215,8 +203,6 @@ CREATE TABLE instituto_Usuario (
         REFERENCES instituto_Departamento(IdDepartamento) ON DELETE SET NULL,
     CONSTRAINT FK_Usuario_Rol FOREIGN KEY (IdRol)
         REFERENCES instituto_Rol(IdRol),
-    CONSTRAINT FK_Usuario_Nivel FOREIGN KEY (IdNivel)
-        REFERENCES instituto_Nivel(IdNivel) ON DELETE SET NULL,
     CONSTRAINT FK_Usuario_Posicion FOREIGN KEY (IdPosicion)
         REFERENCES instituto_Posicion(IdPosicion) ON DELETE SET NULL
 );
@@ -306,23 +292,16 @@ GO
 -- Tabla: instituto_ProgresoModulo
 CREATE TABLE instituto_ProgresoModulo (
     IdInscripcion INT IDENTITY(1,1) NOT NULL,
-    IdUsuario INT NOT NULL,
+    UserId VARCHAR(100) NOT NULL, -- ⭐ Usar UserId directamente para compatibilidad con Excel
     IdModulo INT NOT NULL,
-    EstatusModulo VARCHAR(50),
-    PorcentajeAvance INT DEFAULT 0,
+    EstatusModulo VARCHAR(50), -- ⭐ Mapea a "Estado del expediente" del Excel
     TiempoInvertido INT DEFAULT 0,
     FechaAsignacion DATETIME,
     FechaVencimiento DATETIME,
-    FechaInicio DATETIME,
-    FechaFinalizacion DATETIME,
-    IntentoActual INT DEFAULT 1,
-    IntentosPermitido INT,
+    FechaInicio DATETIME, -- ⭐ Mapea a "Fecha de inicio de la capacitación" del Excel
+    FechaFinalizacion DATETIME, -- ⭐ Mapea a "Fecha de finalización de expediente" del Excel
     CONSTRAINT PK_instituto_ProgresoModulo PRIMARY KEY (IdInscripcion),
-    CONSTRAINT FK_ProgresoMod_Usuario FOREIGN KEY (IdUsuario)
-        REFERENCES instituto_Usuario(IdUsuario) ON DELETE CASCADE,
-    CONSTRAINT FK_ProgresoMod_Modulo FOREIGN KEY (IdModulo)
-        REFERENCES instituto_Modulo(IdModulo) ON DELETE CASCADE,
-    CONSTRAINT UQ_UsuarioModulo UNIQUE (IdUsuario, IdModulo)
+    CONSTRAINT UQ_UsuarioModulo UNIQUE (UserId, IdModulo)
 );
 PRINT '✅ Tabla instituto_ProgresoModulo creada';
 GO
