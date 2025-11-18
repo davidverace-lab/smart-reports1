@@ -113,7 +113,8 @@ CSOD_Data_Source_for_Org_Planning_20251110_08_26_04_AM.xlsx
 | Columna Excel | Campo BD | Tabla BD | Tipo | Notas |
 |--------------|----------|----------|------|-------|
 | **Identificación de usuario** | `UserID` | `instituto_usuario` | VARCHAR(100) | ⚠️ **LLAVE MAESTRA** |
-| **Título de la capacitación** | N/A (filtro) | N/A | Control | Buscar módulo que contenga "MÓDULO X. NOMBRE" |
+| **Título de la capacitación** | `NombreModulo` | `instituto_modulo` | VARCHAR(255) | Se busca/crea en instituto_Modulo |
+| **Tipo de capacitación** | `TipoDeCapacitacion` | `instituto_modulo` | VARCHAR(50) | 'Curriculum' o 'Prueba' |
 | **Estado del expediente** | `EstatusModulo` | `instituto_progresomodulo` | VARCHAR(100) | Valores: Ver tabla de estados abajo |
 | **Fecha de registro de la transcripción** | `FechaAsignacion` | `instituto_progresomodulo` | DATETIME | Cuando se registró el módulo |
 | **Fecha de inicio de la capacitación** | `FechaInicio` | `instituto_progresomodulo` | DATETIME | Cuando el usuario comenzó |
@@ -176,8 +177,8 @@ def detectar_modulo(titulo_capacitacion):
 
 | Columna Excel | Campo BD | Tabla BD | Tipo | Notas |
 |--------------|----------|----------|------|-------|
-| **Tipo de capacitación** | N/A (filtro) | N/A | Control | Valor = "Prueba" |
-| **Título de la capacitación** | N/A (match) | `instituto_evaluacion` | VARCHAR(255) | Buscar evaluación sin "MÓDULO X." |
+| **Tipo de capacitación** | `TipoDeCapacitacion` | `instituto_modulo` | VARCHAR(50) | Valor = "Prueba" (para evaluaciones) |
+| **Título de la capacitación** | `NombreEvaluacion` | `instituto_evaluacion` | VARCHAR(255) | Nombre de la evaluación (sin "MÓDULO X.") |
 | **Puntuación de la transcripción** | `PuntajeObtenido` | `instituto_resultadoevaluacion` | DECIMAL(10,2) | Calificación 0-100 |
 | **Fecha de finalización de expediente** | `FechaRealizacion` | `instituto_resultadoevaluacion` | DATETIME | Cuando hizo la prueba |
 
