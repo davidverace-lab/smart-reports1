@@ -65,7 +65,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             left_frame,
             text="📥 Cruce e Importación de Datos",
             font=('Segoe UI', 22, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         title.pack(anchor='w', pady=(0, 2))
@@ -75,7 +75,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             left_frame,
             text="Sistema inteligente de validación, preview y matching de datos CSOD",
             font=('Segoe UI', 11),
-            text_color=theme['text_secondary'],
+            text_color=theme['colors']['text_secondary'],
             anchor='w'
         )
         subtitle.pack(anchor='w')
@@ -108,21 +108,21 @@ class PanelImportacionDatos(ctk.CTkFrame):
         self._create_files_section(container, theme)
 
         # Separador
-        sep1 = ctk.CTkFrame(container, fg_color=theme['border'], height=1)
+        sep1 = ctk.CTkFrame(container, fg_color=theme['colors']['border'], height=1)
         sep1.pack(fill='x', pady=20)
 
         # ========== SECCIÓN 2: PREVIEW Y VALIDACIÓN ==========
         self._create_preview_section(container, theme)
 
         # Separador
-        sep2 = ctk.CTkFrame(container, fg_color=theme['border'], height=1)
+        sep2 = ctk.CTkFrame(container, fg_color=theme['colors']['border'], height=1)
         sep2.pack(fill='x', pady=20)
 
         # ========== SECCIÓN 3: ACCIONES ==========
         self._create_actions_section(container, theme)
 
         # Separador
-        sep3 = ctk.CTkFrame(container, fg_color=theme['border'], height=1)
+        sep3 = ctk.CTkFrame(container, fg_color=theme['colors']['border'], height=1)
         sep3.pack(fill='x', pady=20)
 
         # ========== SECCIÓN 4: LOG ==========
@@ -135,7 +135,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             parent,
             text="📁 Archivos a Importar",
             font=('Segoe UI', 15, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         section_title.pack(anchor='w', pady=(0, 12))
@@ -173,10 +173,10 @@ class PanelImportacionDatos(ctk.CTkFrame):
 
         card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=10,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         card.grid(row=row, column=col, padx=8, pady=5, sticky='ew')
 
@@ -192,7 +192,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             info,
             text=title,
             font=('Segoe UI', 13, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         title_label.pack(anchor='w')
@@ -201,7 +201,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             info,
             text=subtitle,
             font=('Segoe UI', 10),
-            text_color=theme['text_secondary'],
+            text_color=theme['colors']['text_secondary'],
             anchor='w'
         )
         subtitle_label.pack(anchor='w')
@@ -246,7 +246,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             parent,
             text="🔍 Preview y Validación",
             font=('Segoe UI', 15, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         section_title.pack(anchor='w', pady=(0, 12))
@@ -303,10 +303,10 @@ class PanelImportacionDatos(ctk.CTkFrame):
         # Contenedor para el contenido dinámico
         self.preview_content_container = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=10,
             border_width=1,
-            border_color=theme['border'],
+            border_color=theme['colors']['border'],
             height=300
         )
         self.preview_content_container.pack(fill='both', expand=True, pady=(0, 10))
@@ -352,7 +352,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             parent,
             text=f"📋 Selecciona un archivo {tipo.upper()} para ver el preview",
             font=('Segoe UI', 12),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         msg.pack(expand=True)
 
@@ -372,8 +372,8 @@ class PanelImportacionDatos(ctk.CTkFrame):
         self.validation_text = ctk.CTkTextbox(
             parent,
             font=('Consolas', 10),
-            fg_color=theme['background'],
-            text_color=theme['text'],
+            fg_color=theme['colors']['background'],
+            text_color=theme['colors']['text'],
             wrap='word'
         )
         self.validation_text.pack(fill='both', expand=True, padx=10, pady=10)
@@ -507,7 +507,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             parent,
             text="📋 Log de Operaciones",
             font=('Segoe UI', 15, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         log_title.pack(anchor='w', pady=(0, 8))
@@ -515,28 +515,28 @@ class PanelImportacionDatos(ctk.CTkFrame):
         # Barra de progreso (oculta por defecto)
         self.progress_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=10,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         # No pack inicialmente, se mostrará durante importación
 
         # Textbox para log
         log_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=10,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         log_frame.pack(fill='both', expand=True)
 
         self.log_text = ctk.CTkTextbox(
             log_frame,
             font=('Consolas', 9),
-            fg_color=theme['background'],
-            text_color=theme['text'],
+            fg_color=theme['colors']['background'],
+            text_color=theme['colors']['text'],
             wrap='word',
             height=250
         )
@@ -660,18 +660,18 @@ class PanelImportacionDatos(ctk.CTkFrame):
             scroll_frame,
             text=f"📊 {title} - Primeras {len(df)} filas de {len(df.columns)} columnas",
             font=('Segoe UI', 11, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         info_label.pack(anchor='w', pady=(5, 10))
 
         # Crear tabla simple
-        table_frame = ctk.CTkFrame(scroll_frame, fg_color=theme['surface'])
+        table_frame = ctk.CTkFrame(scroll_frame, fg_color=theme['colors'].get('card_background', '#2d2d2d'))
         table_frame.pack(fill='both', expand=True)
 
         # Headers (primeras 5 columnas)
         cols_to_show = min(5, len(df.columns))
-        header_frame = ctk.CTkFrame(table_frame, fg_color=theme['surface_light'])
+        header_frame = ctk.CTkFrame(table_frame, fg_color=theme['colors'].get('background_secondary', '#2b2b2b'))
         header_frame.pack(fill='x', padx=5, pady=5)
 
         for i, col in enumerate(df.columns[:cols_to_show]):
@@ -679,7 +679,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
                 header_frame,
                 text=str(col)[:20],  # Truncar a 20 chars
                 font=('Segoe UI', 10, 'bold'),
-                text_color=theme['text'],
+                text_color=theme['colors']['text'],
                 width=150,
                 anchor='w'
             )
@@ -697,7 +697,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
                     row_frame,
                     text=value,
                     font=('Segoe UI', 9),
-                    text_color=theme['text_secondary'],
+                    text_color=theme['colors']['text_secondary'],
                     width=150,
                     anchor='w'
                 )
@@ -1200,7 +1200,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             ventana,
             text=f"Total de backups: {len(backups)}",
             font=('Segoe UI', 11),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         info.pack(padx=20, pady=(15, 10))
 
@@ -1216,9 +1216,9 @@ class PanelImportacionDatos(ctk.CTkFrame):
             ventana,
             text="✖ Cerrar",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=theme['border'],
-            hover_color=theme['surface_light'],
-            text_color=theme['text'],
+            fg_color=theme['colors']['border'],
+            hover_color=theme['colors'].get('background_secondary', '#2b2b2b'),
+            text_color=theme['colors']['text'],
             width=120,
             command=ventana.destroy
         )
@@ -1230,10 +1230,10 @@ class PanelImportacionDatos(ctk.CTkFrame):
 
         card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=8,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         card.pack(fill='x', pady=5)
 
@@ -1247,7 +1247,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             info_frame,
             text=f"📦 {backup['id']}",
             font=('Segoe UI', 12, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         id_label.pack(anchor='w')
@@ -1256,7 +1256,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             info_frame,
             text=f"📅 {fecha_str}",
             font=('Segoe UI', 10),
-            text_color=theme['text_secondary'],
+            text_color=theme['colors']['text_secondary'],
             anchor='w'
         )
         fecha_label.pack(anchor='w')

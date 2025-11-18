@@ -58,9 +58,9 @@ class SoporteTicketsFragment(ctk.CTkFrame):
             header,
             text='← Volver',
             font=('Montserrat', 14, 'bold'),
-            fg_color=theme['surface'],
-            text_color=theme['text'],
-            hover_color=theme['surface_light'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
+            text_color=theme['colors']['text'],
+            hover_color=theme['colors'].get('background_secondary', '#2b2b2b'),
             corner_radius=10,
             width=120,
             height=40,
@@ -84,10 +84,10 @@ class SoporteTicketsFragment(ctk.CTkFrame):
         """Card de formulario de registro de soporte"""
         form_card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         form_card.pack(fill='both', expand=True)
 
@@ -100,7 +100,7 @@ class SoporteTicketsFragment(ctk.CTkFrame):
             form_content,
             text='User ID del Usuario:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 10))
 
         self.soporte_userid = ctk.CTkEntry(
@@ -117,7 +117,7 @@ class SoporteTicketsFragment(ctk.CTkFrame):
             form_content,
             text='Asunto:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 10))
 
         self.ticket_asunto = ctk.CTkEntry(
@@ -134,18 +134,18 @@ class SoporteTicketsFragment(ctk.CTkFrame):
             form_content,
             text='Descripción del Problema y Solución:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 10))
 
-        textbox_bg = theme['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
+        textbox_bg = theme['colors']['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
         self.ticket_descripcion = ctk.CTkTextbox(
             form_content,
             fg_color=textbox_bg,
-            border_color=theme['border'],
+            border_color=theme['colors']['border'],
             border_width=1,
             corner_radius=10,
             font=('Montserrat', 13),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             height=300
         )
         self.ticket_descripcion.insert("1.0", "Problema reportado:\n\n\nSolución brindada:\n\n")
@@ -156,7 +156,7 @@ class SoporteTicketsFragment(ctk.CTkFrame):
             form_content,
             text='Categoría:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 10))
 
         self.ticket_categoria = ctk.CTkOptionMenu(
@@ -191,9 +191,9 @@ class SoporteTicketsFragment(ctk.CTkFrame):
             button_frame,
             text='🗑️ Limpiar',
             font=('Montserrat', 16, 'bold'),
-            fg_color=theme['surface_light'],
-            text_color=theme['text'],
-            hover_color=theme['border'],
+            fg_color=theme['colors'].get('background_secondary', '#2b2b2b'),
+            text_color=theme['colors']['text'],
+            hover_color=theme['colors']['border'],
             corner_radius=10,
             height=50,
             width=150,

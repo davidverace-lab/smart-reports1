@@ -69,10 +69,10 @@ class InteractiveChartCard(ctk.CTkFrame):
         # Card container
         self.card = ctk.CTkFrame(
             self,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         self.card.pack(fill='both', expand=True)
 
@@ -86,7 +86,7 @@ class InteractiveChartCard(ctk.CTkFrame):
             header,
             text=self.title_text,
             font=('Segoe UI', 14, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         title_label.pack(side='left', fill='x', expand=True)
@@ -193,8 +193,8 @@ class InteractiveChartCard(ctk.CTkFrame):
 
         # Obtener tema
         theme = self.theme_manager.get_current_theme()
-        bg_color = theme['background']
-        text_color = theme['text']
+        bg_color = theme['colors']['background']
+        text_color = theme['colors']['text']
 
         # Crear figura
         self.fig = Figure(figsize=(self._width/100, self._height/100), facecolor=bg_color)

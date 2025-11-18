@@ -78,10 +78,10 @@ class GraficaExpandible(ctk.CTkFrame):
         # Frame de la gráfica
         self.chart_frame = ctk.CTkFrame(
             self.container,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         self.chart_frame.pack(fill='both', expand=True)
 
@@ -95,7 +95,7 @@ class GraficaExpandible(ctk.CTkFrame):
             header,
             text=self.titulo,
             font=('Montserrat', 14, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(side='left')
 
         # Botón expandir (elegante)
@@ -105,7 +105,7 @@ class GraficaExpandible(ctk.CTkFrame):
             font=('Montserrat', 11, 'bold'),
             fg_color='transparent',
             text_color=HUTCHISON_COLORS['primary'],
-            hover_color=theme['surface_light'],
+            hover_color=theme['colors'].get('background_secondary', '#2b2b2b'),
             corner_radius=8,
             height=28,
             width=100,
@@ -118,7 +118,7 @@ class GraficaExpandible(ctk.CTkFrame):
         # Canvas para la gráfica compacta
         self.canvas_container = ctk.CTkFrame(
             self.chart_frame,
-            fg_color=theme['background'],
+            fg_color=theme['colors']['background'],
             corner_radius=8
         )
         self.canvas_container.pack(fill='both', expand=True, padx=15, pady=(5, 15))
@@ -138,7 +138,7 @@ class GraficaExpandible(ctk.CTkFrame):
         # Frame expandido (ocupa todo el espacio)
         self.expanded_frame = ctk.CTkFrame(
             self.container,
-            fg_color=theme['background'],
+            fg_color=theme['colors']['background'],
             corner_radius=0
         )
         self.expanded_frame.pack(fill='both', expand=True)
@@ -146,7 +146,7 @@ class GraficaExpandible(ctk.CTkFrame):
         # Header con botón volver
         header = ctk.CTkFrame(
             self.expanded_frame,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=0,
             height=60
         )
@@ -177,7 +177,7 @@ class GraficaExpandible(ctk.CTkFrame):
             header_content,
             text=self.titulo,
             font=('Montserrat', 20, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(side='left', padx=20)
 
         # Info adicional
@@ -185,13 +185,13 @@ class GraficaExpandible(ctk.CTkFrame):
             header_content,
             text="🔍 Usa la rueda del mouse para zoom | Click y arrastra para mover",
             font=('Montserrat', 11),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         ).pack(side='right')
 
         # Canvas para gráfica expandida (con toolbar)
         self.expanded_canvas_container = ctk.CTkFrame(
             self.expanded_frame,
-            fg_color=theme['background']
+            fg_color=theme['colors']['background']
         )
         self.expanded_canvas_container.pack(fill='both', expand=True, padx=20, pady=20)
 
@@ -232,7 +232,7 @@ class GraficaExpandible(ctk.CTkFrame):
             dpi = 100  # Mayor calidad en expandido
             parent_container = self.expanded_canvas_container
 
-        self.fig = Figure(figsize=figsize, dpi=dpi, facecolor=theme['background'])
+        self.fig = Figure(figsize=figsize, dpi=dpi, facecolor=theme['colors']['background'])
         self.ax = self.fig.add_subplot(111)
 
         # Renderizar según tipo
@@ -246,16 +246,16 @@ class GraficaExpandible(ctk.CTkFrame):
             self._render_area()
 
         # Configurar estilo del gráfico
-        self.ax.set_facecolor(theme['background'])
-        self.ax.tick_params(colors=theme['text'], labelsize=9 if compact else 11)
-        self.ax.spines['bottom'].set_color(theme['border'])
-        self.ax.spines['top'].set_color(theme['border'])
-        self.ax.spines['right'].set_color(theme['border'])
-        self.ax.spines['left'].set_color(theme['border'])
+        self.ax.set_facecolor(theme['colors']['background'])
+        self.ax.tick_params(colors=theme['colors']['text'], labelsize=9 if compact else 11)
+        self.ax.spines['bottom'].set_color(theme['colors']['border'])
+        self.ax.spines['top'].set_color(theme['colors']['border'])
+        self.ax.spines['right'].set_color(theme['colors']['border'])
+        self.ax.spines['left'].set_color(theme['colors']['border'])
 
         # Título (solo en modo compacto, en expandido está en header)
         if compact and self.titulo:
-            self.ax.set_title(self.titulo, color=theme['text'], fontsize=12, fontweight='bold')
+            self.ax.set_title(self.titulo, color=theme['colors']['text'], fontsize=12, fontweight='bold')
 
         # Grid sutil
         self.ax.grid(True, alpha=0.2, linestyle='--', linewidth=0.5)
@@ -273,7 +273,7 @@ class GraficaExpandible(ctk.CTkFrame):
             # Toolbar de navegación matplotlib
             from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 
-            toolbar_frame = ctk.CTkFrame(parent_container, fg_color=theme['surface'], height=40)
+            toolbar_frame = ctk.CTkFrame(parent_container, fg_color=theme['colors'].get('card_background', '#2d2d2d'), height=40)
             toolbar_frame.pack(fill='x', pady=(0, 5))
 
             toolbar = NavigationToolbar2Tk(self.canvas_widget, toolbar_frame)

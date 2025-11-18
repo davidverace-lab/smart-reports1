@@ -134,7 +134,7 @@ class VentanaPrincipalView:
         # Container principal
         self.main_container = ctk.CTkFrame(
             self.root,
-            fg_color=theme['background'],
+            fg_color=theme['colors']['background'],
             corner_radius=0
         )
         self.main_container.pack(fill='both', expand=True)
@@ -158,7 +158,7 @@ class VentanaPrincipalView:
         # === RIGHT FRAME (TopBar + Content) ===
         right_frame = ctk.CTkFrame(
             self.main_container,
-            fg_color=theme['background'],
+            fg_color=theme['colors']['background'],
             corner_radius=0
         )
         right_frame.pack(side='left', fill='both', expand=True)
@@ -174,7 +174,7 @@ class VentanaPrincipalView:
         # Content Area (Área de contenido principal)
         self.content_area = ctk.CTkFrame(
             right_frame,
-            fg_color=theme['background'],
+            fg_color=theme['colors']['background'],
             corner_radius=0
         )
         self.content_area.pack(side='top', fill='both', expand=True)
@@ -316,7 +316,7 @@ class VentanaPrincipalView:
             placeholder_frame,
             text=message,
             font=('Montserrat', 16),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         message_label.pack(expand=True)
 

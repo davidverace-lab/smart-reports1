@@ -24,7 +24,7 @@ class ModernSidebar(ctk.CTkFrame):
         theme = self.theme_manager.get_current_theme()
 
         # En modo claro, usar azul navy como fondo del sidebar
-        sidebar_bg = HUTCHISON_COLORS['primary'] if not self.theme_manager.is_dark_mode() else theme['surface']
+        sidebar_bg = HUTCHISON_COLORS['primary'] if not self.theme_manager.is_dark_mode() else theme['colors'].get('card_background', '#2d2d2d')
 
         super().__init__(
             parent,
@@ -59,9 +59,9 @@ class ModernSidebar(ctk.CTkFrame):
         is_dark = self.theme_manager.is_dark_mode()
 
         # En modo claro, todo es blanco sobre azul navy
-        text_color = '#FFFFFF' if not is_dark else theme['text']
-        text_secondary_color = '#E0E0E0' if not is_dark else theme['text_secondary']
-        border_color = '#4a5a8a' if not is_dark else theme['border']
+        text_color = '#FFFFFF' if not is_dark else theme['colors']['text']
+        text_secondary_color = '#E0E0E0' if not is_dark else theme['colors']['text_secondary']
+        border_color = '#4a5a8a' if not is_dark else theme['colors']['border']
 
         logo_frame = ctk.CTkFrame(self, fg_color='transparent', height=110)
         logo_frame.pack(fill='x', padx=20, pady=(20, 10))
@@ -97,8 +97,8 @@ class ModernSidebar(ctk.CTkFrame):
         is_dark = self.theme_manager.is_dark_mode()
 
         # En modo claro, texto blanco; en modo oscuro, texto normal
-        nav_text_color = '#FFFFFF' if not is_dark else theme['text_secondary']
-        hover_color = '#4a5a8a' if not is_dark else theme['surface_light']
+        nav_text_color = '#FFFFFF' if not is_dark else theme['colors']['text_secondary']
+        hover_color = '#4a5a8a' if not is_dark else theme['colors'].get('background_secondary', '#2b2b2b')
 
         nav_items = [
             ('📊', 'Dashboards Gerenciales', 'dashboard'),
@@ -131,8 +131,8 @@ class ModernSidebar(ctk.CTkFrame):
         is_dark = self.theme_manager.is_dark_mode()
 
         # En modo claro, texto y bordes blancos
-        text_color = '#FFFFFF' if not is_dark else theme['text_secondary']
-        border_color = '#4a5a8a' if not is_dark else theme['border']
+        text_color = '#FFFFFF' if not is_dark else theme['colors']['text_secondary']
+        border_color = '#4a5a8a' if not is_dark else theme['colors']['border']
 
         # Frame para el toggle
         toggle_frame = ctk.CTkFrame(self, fg_color='transparent', height=70)
@@ -164,9 +164,9 @@ class ModernSidebar(ctk.CTkFrame):
             width=50,
             height=24,
             progress_color=HUTCHISON_COLORS['primary'],
-            button_color='#4a5a8a' if not is_dark else theme['surface_light'],
-            button_hover_color='#6a7aa0' if not is_dark else theme['border'],
-            fg_color='#6a7aa0' if not is_dark else theme['border'],
+            button_color='#4a5a8a' if not is_dark else theme['colors'].get('background_secondary', '#2b2b2b'),
+            button_hover_color='#6a7aa0' if not is_dark else theme['colors']['border'],
+            fg_color='#6a7aa0' if not is_dark else theme['colors']['border'],
             command=self._on_theme_toggle
         )
         self.theme_switch.pack(side='right', padx=(0, 10))
@@ -187,8 +187,8 @@ class ModernSidebar(ctk.CTkFrame):
         is_dark = self.theme_manager.is_dark_mode()
 
         # En modo claro, texto blanco
-        text_color = '#E0E0E0' if not is_dark else theme['text_secondary']
-        border_color = '#4a5a8a' if not is_dark else theme['border']
+        text_color = '#E0E0E0' if not is_dark else theme['colors']['text_secondary']
+        border_color = '#4a5a8a' if not is_dark else theme['colors']['border']
 
         # Spacer para empujar footer al fondo
         spacer = ctk.CTkFrame(self, fg_color='transparent')
@@ -227,9 +227,9 @@ class ModernSidebar(ctk.CTkFrame):
         is_dark = self.theme_manager.is_dark_mode()
 
         # En modo claro, todo es blanco
-        active_bg = '#4a5a8a' if not is_dark else theme['surface_light']
-        active_text = '#FFFFFF' if not is_dark else theme['text']
-        inactive_text = '#E0E0E0' if not is_dark else theme['text_secondary']
+        active_bg = '#4a5a8a' if not is_dark else theme['colors'].get('background_secondary', '#2b2b2b')
+        active_text = '#FFFFFF' if not is_dark else theme['colors']['text']
+        inactive_text = '#E0E0E0' if not is_dark else theme['colors']['text_secondary']
 
         # Actualizar estilos de botones
         for btn_key, btn in self.nav_buttons:

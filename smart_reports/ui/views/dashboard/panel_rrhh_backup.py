@@ -62,7 +62,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
 
         header_frame = ctk.CTkFrame(
             self,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=2,
             border_color=HUTCHISON_COLORS['aqua_green']
@@ -85,7 +85,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             header_content,
             text="Análisis especializado de capacitación y desarrollo de talento",
             font=('Segoe UI', 14),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         ).pack(anchor='w')
 
     def _create_dashboards(self):

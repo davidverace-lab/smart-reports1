@@ -153,13 +153,13 @@ class PeriodReportPanel(ctk.CTkFrame):
             header_frame,
             text='Genera reportes PDF filtrados por módulo y rango de fechas',
             font=('Montserrat', 14),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         ).grid(row=1, column=0, sticky='w', columnspan=2, pady=(5, 0))
 
         # Sección de selección
         input_section = ctk.CTkFrame(
             scroll_frame,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15
         )
         input_section.grid(row=1, column=0, sticky='ew', pady=(0, 20))
@@ -177,7 +177,7 @@ class PeriodReportPanel(ctk.CTkFrame):
             input_content,
             text='Módulo:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=0, sticky='w', pady=10, padx=(0, 15))
 
         # Dropdown Módulo
@@ -198,7 +198,7 @@ class PeriodReportPanel(ctk.CTkFrame):
             input_content,
             text='Tipo de Búsqueda:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=2, sticky='w', pady=10, padx=(0, 15))
 
         # Dropdown Tipo de Fecha
@@ -220,7 +220,7 @@ class PeriodReportPanel(ctk.CTkFrame):
             input_content,
             text='Fecha Inicio:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         self.start_label.grid(row=1, column=0, sticky='w', pady=10, padx=(0, 15))
 
@@ -243,7 +243,7 @@ class PeriodReportPanel(ctk.CTkFrame):
             input_content,
             text='Fecha Fin:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         self.end_label.grid(row=1, column=2, sticky='w', pady=10, padx=(0, 15))
 
@@ -280,7 +280,7 @@ class PeriodReportPanel(ctk.CTkFrame):
         # Sección de vista previa
         preview_section = ctk.CTkFrame(
             scroll_frame,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15
         )
         preview_section.grid(row=2, column=0, sticky='nsew', pady=(0, 20))
@@ -296,7 +296,7 @@ class PeriodReportPanel(ctk.CTkFrame):
             preview_header,
             text='Vista Previa del Reporte',
             font=('Montserrat', 20, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=0, sticky='w')
 
         # Botón guardar

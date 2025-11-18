@@ -36,7 +36,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
         # Card contenedor
         self.card = ctk.CTkFrame(
             self,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12,
             border_width=2,
             border_color=HUTCHISON_COLORS['primary']
@@ -51,7 +51,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
             header,
             text="📊 Importando Datos...",
             font=('Segoe UI', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         self.titulo_label.pack(side='left')
 
@@ -59,7 +59,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
             header,
             text="Inicializando...",
             font=('Segoe UI', 11),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         self.estado_label.pack(side='right')
 
@@ -79,7 +79,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
             self.card,
             text="0%",
             font=('Segoe UI', 14, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         self.porcentaje_label.pack(pady=(0, 15))
 
@@ -130,7 +130,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
 
         card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface_light'],
+            fg_color=theme['colors'].get('background_secondary', '#2b2b2b'),
             corner_radius=8,
             height=60
         )
@@ -141,7 +141,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
             card,
             text=titulo,
             font=('Segoe UI', 10, 'bold'),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         title.pack(pady=(8, 2))
 

@@ -346,7 +346,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
 
         card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=2,
             border_color=color
@@ -369,7 +369,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             inner,
             text=value,
             font=('Segoe UI', 36, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         value_label.pack(anchor='center', pady=(0, 8))
 
@@ -378,7 +378,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             inner,
             text=title,
             font=('Segoe UI', 14, 'bold'),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         title_label.pack(anchor='center', pady=(0, 5))
 

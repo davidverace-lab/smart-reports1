@@ -74,7 +74,7 @@ class ModalFullscreenChart(ctk.CTkToplevel):
 
         # Estilo
         theme = self.theme_manager.get_current_theme()
-        self.configure(fg_color=theme['background'])
+        self.configure(fg_color=theme['colors']['background'])
 
         # Sin bordes de ventana
         self.overrideredirect(False)  # Mantener botones de ventana
@@ -176,8 +176,8 @@ class ModalFullscreenChart(ctk.CTkToplevel):
 
         # Obtener tema
         theme = self.theme_manager.get_current_theme()
-        bg_color = theme['background']
-        text_color = theme['text']
+        bg_color = theme['colors']['background']
+        text_color = theme['colors']['text']
 
         # Crear figura GIGANTE
         self.fig = Figure(figsize=(16, 10), dpi=100, facecolor=bg_color)

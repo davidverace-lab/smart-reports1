@@ -24,15 +24,15 @@ class MetricCard(ctk.CTkFrame):
 
         super().__init__(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=20,
             border_width=1,
-            border_color=theme['border'],
+            border_color=theme['colors']['border'],
             **kwargs
         )
 
         self.accent_color = color
-        self.default_border_color = theme['border']
+        self.default_border_color = theme['colors']['border']
 
         # Padding interno
         self.grid_columnconfigure(0, weight=1)
@@ -56,7 +56,7 @@ class MetricCard(ctk.CTkFrame):
             self,
             text=title,
             font=('Montserrat', 11),  # Reducido de 14 a 11
-            text_color=theme['text_secondary'],
+            text_color=theme['colors']['text_secondary'],
             anchor='w'
         )
         self.title_label.grid(row=row, column=0, padx=20, pady=(8 if icon else 15, 5), sticky='w')
@@ -67,7 +67,7 @@ class MetricCard(ctk.CTkFrame):
             self,
             text=str(value),
             font=('Montserrat', 28, 'bold'),  # Reducido de 48 a 28
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         self.value_label.grid(row=row, column=0, padx=20, pady=(0, 8), sticky='w')

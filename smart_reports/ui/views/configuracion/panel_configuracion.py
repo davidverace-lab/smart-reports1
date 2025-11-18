@@ -33,7 +33,7 @@ class ConfiguracionPanel(ctk.CTkFrame):
         theme = self.theme_manager.get_current_theme()
 
         # Configurar fondo explícitamente
-        super().__init__(parent, fg_color=theme['background'], **kwargs)
+        super().__init__(parent, fg_color=theme['colors']['background'], **kwargs)
 
         self.db = db_connection
         self.cursor = db_connection.cursor() if db_connection else None
@@ -135,9 +135,9 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 wrapper,
                 text="← Volver",
                 command=self.show_main_config_frame,
-                fg_color=theme['surface'],
+                fg_color=theme['colors'].get('card_background', '#2d2d2d'),
                 hover_color=theme['hover'],
-                text_color=theme['text'],
+                text_color=theme['colors']['text'],
                 font=('Segoe UI', 13, 'bold'),
                 height=40,
                 width=120

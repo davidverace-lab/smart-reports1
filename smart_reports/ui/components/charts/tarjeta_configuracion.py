@@ -24,10 +24,10 @@ class ConfigCard(ctk.CTkFrame):
 
         super().__init__(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border'],
+            border_color=theme['colors']['border'],
             **kwargs
         )
 
@@ -50,7 +50,7 @@ class ConfigCard(ctk.CTkFrame):
         - Modo oscuro: #009BDE (cyan - Hutchison Ports blue)
         """
         theme = self.theme_manager.get_current_theme()
-        if theme['background'] == '#1a1a1a':  # Dark theme
+        if theme['colors']['background'] == '#1a1a1a':  # Dark theme
             return '#009BDE'  # Cyan
         else:  # Light theme
             return '#002E6D'  # Navy blue
@@ -62,7 +62,7 @@ class ConfigCard(ctk.CTkFrame):
         - Modo oscuro: #FFFFFF (blanco para visibilidad)
         """
         theme = self.theme_manager.get_current_theme()
-        if theme['background'] == '#1a1a1a':  # Dark theme
+        if theme['colors']['background'] == '#1a1a1a':  # Dark theme
             return '#FFFFFF'  # Blanco para máxima visibilidad
         else:  # Light theme
             return '#002E6D'  # Navy blue
@@ -96,7 +96,7 @@ class ConfigCard(ctk.CTkFrame):
             main_container,
             text=self.title,
             font=('Montserrat', 22, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='center'
         )
         self.title_label.pack(pady=(0, 12))
@@ -107,7 +107,7 @@ class ConfigCard(ctk.CTkFrame):
                 main_container,
                 text=self.description,
                 font=('Montserrat', 13),
-                text_color=theme['text_secondary'],
+                text_color=theme['colors']['text_secondary'],
                 anchor='center',
                 wraplength=280,
                 justify='center'

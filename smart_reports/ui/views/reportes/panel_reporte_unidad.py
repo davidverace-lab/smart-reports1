@@ -136,13 +136,13 @@ class UnitReportPanel(ctk.CTkFrame):
             header_frame,
             text='Genera reportes PDF detallados del progreso por unidad de negocio',
             font=('Montserrat', 14),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         ).grid(row=1, column=0, sticky='w', columnspan=2, pady=(5, 0))
 
         # Sección de selección
         input_section = ctk.CTkFrame(
             scroll_frame,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15
         )
         input_section.grid(row=1, column=0, sticky='ew', pady=(0, 20))
@@ -158,7 +158,7 @@ class UnitReportPanel(ctk.CTkFrame):
             input_content,
             text='Unidad de Negocio:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=0, sticky='w', pady=10, padx=(0, 15))
 
         # Dropdown Unidad de Negocio
@@ -178,7 +178,7 @@ class UnitReportPanel(ctk.CTkFrame):
             input_content,
             text='Módulo:',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=2, sticky='w', pady=10, padx=(0, 15))
 
         # Dropdown Módulo
@@ -211,7 +211,7 @@ class UnitReportPanel(ctk.CTkFrame):
         # Sección de vista previa
         preview_section = ctk.CTkFrame(
             scroll_frame,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15
         )
         preview_section.grid(row=2, column=0, sticky='nsew', pady=(0, 20))
@@ -227,7 +227,7 @@ class UnitReportPanel(ctk.CTkFrame):
             preview_header,
             text='Vista Previa del Reporte',
             font=('Montserrat', 20, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=0, sticky='w')
 
         # Botón guardar (inicialmente deshabilitado)

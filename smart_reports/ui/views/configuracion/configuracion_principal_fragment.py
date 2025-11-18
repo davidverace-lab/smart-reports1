@@ -75,7 +75,7 @@ class ConfiguracionPrincipalFragment(ctk.CTkFrame):
             header,
             text='Gestiona las opciones del sistema',
             font=('Montserrat', 14),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         subtitle.pack(side='left', padx=(20, 0), pady=20)
 
