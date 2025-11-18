@@ -45,14 +45,15 @@ QUERY_PROGRESO_POR_UNIDAD = """
     ORDER BY porcentaje DESC
 """
 
-# Distribución por Departamentos
+# Distribución por Departamentos (CORREGIDO: usa instituto_Departamento)
 QUERY_DISTRIBUCION_DEPARTAMENTOS = """
     SELECT
-        COALESCE(u.Division, 'Sin División') as departamento,
+        COALESCE(d.NombreDepartamento, 'Sin Departamento') as departamento,
         COUNT(u.IdUsuario) as cantidad
     FROM instituto_Usuario u
+    LEFT JOIN instituto_Departamento d ON u.IdDepartamento = d.IdDepartamento
     WHERE u.UserStatus = 'Active'
-    GROUP BY u.Division
+    GROUP BY d.NombreDepartamento, d.IdDepartamento
     ORDER BY cantidad DESC
 """
 
@@ -60,14 +61,17 @@ QUERY_DISTRIBUCION_DEPARTAMENTOS = """
 # QUERIES PARA DASHBOARDS RRHH
 # ============================================
 
-# Personal por Departamento
+# Personal por Departamento (CORREGIDO: usa instituto_Departamento)
 QUERY_PERSONAL_POR_DEPARTAMENTO = """
     SELECT
-        COALESCE(u.Division, 'Sin División') as departamento,
+        COALESCE(d.NombreDepartamento, 'Sin Departamento') as departamento,
+        un.NombreUnidad as unidad,
         COUNT(*) as Total
     FROM instituto_Usuario u
+    LEFT JOIN instituto_Departamento d ON u.IdDepartamento = d.IdDepartamento
+    LEFT JOIN instituto_UnidadDeNegocio un ON d.IdUnidadDeNegocio = un.IdUnidadDeNegocio
     WHERE u.UserStatus = 'Active'
-    GROUP BY u.Division
+    GROUP BY d.NombreDepartamento, un.NombreUnidad, d.IdDepartamento
     ORDER BY Total DESC
 """
 
@@ -90,16 +94,21 @@ QUERY_ESTADO_CAPACITACION = """
         (SELECT COUNT(*) FROM instituto_ProgresoModulo) as Pendientes;
 """
 
-# Promedio de calificaciones por área
+# Promedio de calificaciones por área (CORREGIDO: usa instituto_Departamento)
 QUERY_CALIFICACIONES_POR_AREA = """
     SELECT
-        COALESCE(u.Division, 'Sin División') as area,
-        AVG(CAST(re.PuntajeObtenido AS FLOAT)) as PromedioCalif
+        COALESCE(d.NombreDepartamento, 'Sin Departamento') as area,
+        un.NombreUnidad as unidad,
+        AVG(CAST(re.PuntajeObtenido AS FLOAT)) as PromedioCalif,
+        COUNT(re.IdResultado) as TotalEvaluaciones
     FROM instituto_ResultadoEvaluacion re
     INNER JOIN instituto_ProgresoModulo pm ON re.IdInscripcion = pm.IdInscripcion
-    INNER JOIN instituto_Usuario u ON pm.UserId = u.UserId
+    INNER JOIN instituto_Usuario u ON pm.IdUsuario = u.IdUsuario
+    LEFT JOIN instituto_Departamento d ON u.IdDepartamento = d.IdDepartamento
+    LEFT JOIN instituto_UnidadDeNegocio un ON d.IdUnidadDeNegocio = un.IdUnidadDeNegocio
     WHERE re.Aprobado = 1 AND u.UserStatus = 'Active'
-    GROUP BY u.Division
+    GROUP BY d.NombreDepartamento, un.NombreUnidad, d.IdDepartamento
+    HAVING COUNT(re.IdResultado) > 0
     ORDER BY PromedioCalif DESC
 """
 
