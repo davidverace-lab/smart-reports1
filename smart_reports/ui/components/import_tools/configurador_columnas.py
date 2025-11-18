@@ -98,7 +98,7 @@ class ConfiguradorColumnas(ctk.CTkToplevel):
             self,
             text="Mapea las columnas de Excel a los campos de la base de datos:",
             font=('Segoe UI', 11),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         info.pack(padx=20, pady=(15, 10))
 
@@ -124,9 +124,9 @@ class ConfiguradorColumnas(ctk.CTkToplevel):
             buttons_frame,
             text="✖ Cancelar",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=theme['border'],
-            hover_color=theme['surface_light'],
-            text_color=theme['text'],
+            fg_color=theme['colors']['border'],
+            hover_color=theme['colors'].get('background_secondary', '#2b2b2b'),
+            text_color=theme['colors']['text'],
             width=120,
             command=self.destroy
         )
@@ -158,10 +158,10 @@ class ConfiguradorColumnas(ctk.CTkToplevel):
 
         row = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=8,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
 
         # Columna Excel (izquierda)
@@ -169,7 +169,7 @@ class ConfiguradorColumnas(ctk.CTkToplevel):
             row,
             text=f"📊 {columna_excel}",
             font=('Segoe UI', 11, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             width=250,
             anchor='w'
         )

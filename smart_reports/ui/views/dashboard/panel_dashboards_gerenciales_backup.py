@@ -345,7 +345,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         # ═══ FOOTER CON ESTADÍSTICAS ═══
         self.expanded_stats_frame = ctk.CTkFrame(
             self.expanded_view_frame,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             height=60,
             corner_radius=12
         )
@@ -356,7 +356,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             self.expanded_stats_frame,
             text="",
             font=('Segoe UI', 14, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         self.expanded_stats_label.pack(expand=True, pady=15)
 
@@ -519,13 +519,13 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
     def _create_metric_card(self, parent, icon, title, value, subtitle, color):
         """Crear tarjeta de métrica"""
         theme = self.theme_manager.get_current_theme()
-        card = ctk.CTkFrame(parent, fg_color=theme['surface'], corner_radius=16, border_width=2, border_color=color)
+        card = ctk.CTkFrame(parent, fg_color=theme['colors'].get('card_background', '#2d2d2d'), corner_radius=16, border_width=2, border_color=color)
         inner = ctk.CTkFrame(card, fg_color='transparent')
         inner.pack(fill='both', expand=True, padx=25, pady=25)
 
         ctk.CTkLabel(inner, text=icon, font=('Segoe UI', 44), text_color=color).pack(anchor='center', pady=(0, 15))
-        ctk.CTkLabel(inner, text=value, font=('Segoe UI', 38, 'bold'), text_color=theme['text']).pack(anchor='center', pady=(0, 8))
-        ctk.CTkLabel(inner, text=title, font=('Segoe UI', 14, 'bold'), text_color=theme['text_secondary']).pack(anchor='center', pady=(0, 5))
+        ctk.CTkLabel(inner, text=value, font=('Segoe UI', 38, 'bold'), text_color=theme['colors']['text']).pack(anchor='center', pady=(0, 8))
+        ctk.CTkLabel(inner, text=title, font=('Segoe UI', 14, 'bold'), text_color=theme['colors']['text_secondary']).pack(anchor='center', pady=(0, 5))
         ctk.CTkLabel(inner, text=subtitle, font=('Segoe UI', 11), text_color=theme['text_tertiary'], wraplength=200).pack(anchor='center')
 
         return card
@@ -533,13 +533,13 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
     def _create_metric_card_modulo(self, parent, icon, title, value, color):
         """Crear tarjeta especial para Módulo Actual"""
         theme = self.theme_manager.get_current_theme()
-        card = ctk.CTkFrame(parent, fg_color=theme['surface'], corner_radius=16, border_width=2, border_color=color)
+        card = ctk.CTkFrame(parent, fg_color=theme['colors'].get('card_background', '#2d2d2d'), corner_radius=16, border_width=2, border_color=color)
         inner = ctk.CTkFrame(card, fg_color='transparent')
         inner.pack(fill='both', expand=True, padx=25, pady=25)
 
         ctk.CTkLabel(inner, text=icon, font=('Segoe UI', 44), text_color=color).pack(anchor='center', pady=(0, 10))
-        ctk.CTkLabel(inner, text=title, font=('Segoe UI', 14, 'bold'), text_color=theme['text_secondary']).pack(anchor='center', pady=(0, 15))
-        ctk.CTkLabel(inner, text=value, font=('Segoe UI', 16, 'bold'), text_color=theme['text'], justify='center').pack(anchor='center')
+        ctk.CTkLabel(inner, text=title, font=('Segoe UI', 14, 'bold'), text_color=theme['colors']['text_secondary']).pack(anchor='center', pady=(0, 15))
+        ctk.CTkLabel(inner, text=value, font=('Segoe UI', 16, 'bold'), text_color=theme['colors']['text'], justify='center').pack(anchor='center')
 
         return card
 

@@ -31,6 +31,10 @@ class ThemeManager:
         """Retorna el modo actual ('dark' o 'light')"""
         return self._current_theme
 
+    def is_dark_mode(self):
+        """Retorna True si el tema actual es oscuro"""
+        return self._current_theme == 'dark'
+
     def set_theme(self, mode):
         """
         Establece el tema de la aplicación

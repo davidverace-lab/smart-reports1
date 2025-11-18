@@ -150,7 +150,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             header,
             text="📊 Dashboard de Recursos Humanos",
             font=('Montserrat', 24, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(side='left')
 
         # Container con scroll
@@ -219,10 +219,10 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
 
         card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
 
         if wide:
@@ -240,7 +240,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             header,
             text=title,
             font=('Montserrat', 13, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(side='left')
 
         # Botón expandir
@@ -261,7 +261,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         # Preview de la gráfica
         preview_frame = ctk.CTkFrame(
             card,
-            fg_color=theme['background'],
+            fg_color=theme['colors']['background'],
             corner_radius=8,
             height=200 if not wide else 250
         )
@@ -301,12 +301,12 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         """Crear vista EXPANDIDA con gráfica en pantalla completa"""
         theme = self.theme_manager.get_current_theme()
 
-        self.expanded_view = ctk.CTkFrame(self, fg_color=theme['background'])
+        self.expanded_view = ctk.CTkFrame(self, fg_color=theme['colors']['background'])
 
         # Header con botón volver
         header = ctk.CTkFrame(
             self.expanded_view,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             height=70
         )
         header.pack(fill='x')
@@ -335,7 +335,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             header_content,
             text="",
             font=('Montserrat', 20, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         self.expanded_title_label.pack(side='left', padx=25)
 
@@ -344,13 +344,13 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             header_content,
             text="🔍 Gráfica interactiva | Rueda del mouse para zoom",
             font=('Montserrat', 11),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         ).pack(side='right')
 
         # Container para la gráfica gigante
         self.expanded_chart_container = ctk.CTkFrame(
             self.expanded_view,
-            fg_color=theme['background']
+            fg_color=theme['colors']['background']
         )
         self.expanded_chart_container.pack(fill='both', expand=True, padx=20, pady=20)
 
@@ -370,7 +370,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         is_dark = self.theme_manager.is_dark_mode()
 
         # Crear figura grande
-        fig = Figure(figsize=(14, 8), dpi=100, facecolor=theme['background'])
+        fig = Figure(figsize=(14, 8), dpi=100, facecolor=theme['colors']['background'])
         ax = fig.add_subplot(111)
 
         # Renderizar según tipo
@@ -408,10 +408,10 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             ax.set_ylabel('Valor', fontsize=14)
 
         # Estilo
-        ax.set_facecolor(theme['background'])
-        ax.tick_params(colors=theme['text'], labelsize=11)
-        ax.spines['bottom'].set_color(theme['border'])
-        ax.spines['left'].set_color(theme['border'])
+        ax.set_facecolor(theme['colors']['background'])
+        ax.tick_params(colors=theme['colors']['text'], labelsize=11)
+        ax.spines['bottom'].set_color(theme['colors']['border'])
+        ax.spines['left'].set_color(theme['colors']['border'])
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
@@ -478,7 +478,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         fig.canvas.mpl_connect("motion_notify_event", hover)
 
         # Toolbar de navegación
-        toolbar_frame = ctk.CTkFrame(self.expanded_chart_container, fg_color=theme['surface'])
+        toolbar_frame = ctk.CTkFrame(self.expanded_chart_container, fg_color=theme['colors'].get('card_background', '#2d2d2d'))
         toolbar_frame.pack(fill='x', pady=(10, 0))
         toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
         toolbar.update()

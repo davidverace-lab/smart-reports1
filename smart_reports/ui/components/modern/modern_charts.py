@@ -39,7 +39,7 @@ class ModernPlotlyChart(ctk.CTkFrame):
 
         super().__init__(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             **kwargs
         )
@@ -63,7 +63,7 @@ class ModernPlotlyChart(ctk.CTkFrame):
             header,
             text=self.title,
             font=('Poppins', 15, 'bold'),
-            text_color=self.theme['text'],
+            text_color=self.theme['colors']['text'],
             anchor='w'
         ).pack(side='left')
 
@@ -87,7 +87,7 @@ class ModernPlotlyChart(ctk.CTkFrame):
         # Container para la gráfica
         self.chart_container = ctk.CTkFrame(
             self,
-            fg_color=self.theme['background'],
+            fg_color=self.theme['colors']['background'],
             corner_radius=12
         )
         self.chart_container.pack(fill='both', expand=True, padx=15, pady=(5, 15))
@@ -104,7 +104,7 @@ class ModernPlotlyChart(ctk.CTkFrame):
             paper_bgcolor='rgba(0,0,0,0)',
             font=dict(
                 family='Poppins',
-                color=self.theme['text'],
+                color=self.theme['colors']['text'],
                 size=12
             ),
             hoverlabel=dict(
@@ -121,19 +121,19 @@ class ModernPlotlyChart(ctk.CTkFrame):
                 xanchor='right',
                 x=1,
                 bgcolor='rgba(0,0,0,0)',
-                font=dict(color=self.theme['text'])
+                font=dict(color=self.theme['colors']['text'])
             ),
             margin=dict(l=40, r=20, t=20, b=40),
             xaxis=dict(
                 showgrid=False,
-                color=self.theme['text_secondary'],
-                linecolor=self.theme['border']
+                color=self.theme['colors']['text_secondary'],
+                linecolor=self.theme['colors']['border']
             ),
             yaxis=dict(
                 showgrid=True,
-                gridcolor=self.theme['border'],
-                color=self.theme['text_secondary'],
-                linecolor=self.theme['border']
+                gridcolor=self.theme['colors']['border'],
+                color=self.theme['colors']['text_secondary'],
+                linecolor=self.theme['colors']['border']
             )
         )
 
@@ -196,7 +196,7 @@ class ModernBarChart(ModernPlotlyChart):
                 ),
                 text=self.values,
                 textposition='outside',
-                textfont=dict(size=12, color=self.theme['text']),
+                textfont=dict(size=12, color=self.theme['colors']['text']),
                 hovertemplate='<b>%{x}</b><br>Valor: %{y:,}<extra></extra>'
             ))
         else:
@@ -213,7 +213,7 @@ class ModernBarChart(ModernPlotlyChart):
                 ),
                 text=self.values,
                 textposition='outside',
-                textfont=dict(size=12, color=self.theme['text']),
+                textfont=dict(size=12, color=self.theme['colors']['text']),
                 hovertemplate='<b>%{y}</b><br>Valor: %{x:,}<extra></extra>'
             ))
 
@@ -258,7 +258,7 @@ class ModernBarChart(ModernPlotlyChart):
                 self.chart_container,
                 text="📊 Gráfica generada\n\n⚠️ Instala tkinterweb para visualización embebida:\npip install tkinterweb",
                 font=('Poppins', 12),
-                text_color=self.theme['text_secondary'],
+                text_color=self.theme['colors']['text_secondary'],
                 justify='center'
             ).pack(expand=True)
 
@@ -323,11 +323,11 @@ class ModernDonutChart(ModernPlotlyChart):
             hole=0.6,
             marker=dict(
                 colors=self.colors[:len(self.labels)],
-                line=dict(color=self.theme['background'], width=3)
+                line=dict(color=self.theme['colors']['background'], width=3)
             ),
             textinfo='label+percent',
             textposition='outside',
-            textfont=dict(size=13, family='Poppins', color=self.theme['text']),
+            textfont=dict(size=13, family='Poppins', color=self.theme['colors']['text']),
             hovertemplate='<b>%{label}</b><br>%{value:,} (%{percent})<extra></extra>',
             pull=[0.1] + [0] * (len(self.labels) - 1),  # Separar primera sección
             rotation=45
@@ -338,7 +338,7 @@ class ModernDonutChart(ModernPlotlyChart):
         self.fig.add_annotation(
             text=f"<b>{total:,}</b><br>Total",
             x=0.5, y=0.5,
-            font=dict(size=28, family='Poppins', color=self.theme['text']),
+            font=dict(size=28, family='Poppins', color=self.theme['colors']['text']),
             showarrow=False
         )
 

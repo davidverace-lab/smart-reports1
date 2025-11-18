@@ -30,10 +30,10 @@ class MatplotlibChartCard(ctk.CTkFrame):
 
         super().__init__(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border'],
+            border_color=theme['colors']['border'],
             **kwargs
         )
 
@@ -67,7 +67,7 @@ class MatplotlibChartCard(ctk.CTkFrame):
             header,
             text=self._title,
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         title_label.pack(side='left', fill='x', expand=True)
@@ -127,7 +127,7 @@ class MatplotlibChartCard(ctk.CTkFrame):
 
         self.content_container = ctk.CTkFrame(
             self,
-            fg_color=theme['background'] if is_dark else '#f8f9fa',
+            fg_color=theme['colors']['background'] if is_dark else '#f8f9fa',
             corner_radius=10
         )
         self.content_container.pack(fill='both', expand=True, padx=15, pady=(0, 15))

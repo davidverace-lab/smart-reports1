@@ -109,10 +109,10 @@ class D3ChartCard(ctk.CTkFrame):
 
         super().__init__(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border'],
+            border_color=theme['colors']['border'],
             **kwargs
         )
 
@@ -149,7 +149,7 @@ class D3ChartCard(ctk.CTkFrame):
             header,
             text=self._title,
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         title_label.pack(side='left', fill='x', expand=True)
@@ -224,7 +224,7 @@ class D3ChartCard(ctk.CTkFrame):
 
         self.content_container = ctk.CTkFrame(
             self,
-            fg_color=theme['background'] if self.theme_manager.is_dark_mode() else '#f8f9fa',
+            fg_color=theme['colors']['background'] if self.theme_manager.is_dark_mode() else '#f8f9fa',
             corner_radius=10
         )
         self.content_container.pack(fill='both', expand=True, padx=15, pady=(0, 15))
@@ -350,7 +350,7 @@ class D3ChartCard(ctk.CTkFrame):
             center_frame,
             text='Gráfico D3.js Interactivo',
             font=('Montserrat', 16, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         title_label.pack(pady=(0, 8))
 
@@ -359,7 +359,7 @@ class D3ChartCard(ctk.CTkFrame):
             center_frame,
             text='Visualización interactiva con animaciones\ny funciones avanzadas de D3.js',
             font=('Montserrat', 11),
-            text_color=theme['text_secondary'],
+            text_color=theme['colors']['text_secondary'],
             justify='center'
         )
         desc_label.pack(pady=(0, 25))

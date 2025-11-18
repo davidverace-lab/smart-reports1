@@ -71,7 +71,7 @@ class MenuReportes:
             parent,
             text="Selecciona el tipo de reporte que deseas generar",
             font=('Montserrat', 14),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         )
         subtitle_label.pack(pady=(0, 30))
 
@@ -141,10 +141,10 @@ class MenuReportes:
 
         card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=2,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         card.grid(row=row, column=col, padx=15, pady=15, sticky='nsew')
 
@@ -157,7 +157,7 @@ class MenuReportes:
             content,
             text=f"{icon} {title}",
             font=('Montserrat', 20, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         header.pack(anchor='w', pady=(0, 10))
 
@@ -166,7 +166,7 @@ class MenuReportes:
             content,
             text=description,
             font=('Montserrat', 13),
-            text_color=theme['text_secondary'],
+            text_color=theme['colors']['text_secondary'],
             wraplength=300,
             justify='left'
         )

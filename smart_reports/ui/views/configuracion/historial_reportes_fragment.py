@@ -59,9 +59,9 @@ class HistorialReportesFragment(ctk.CTkFrame):
             header,
             text='← Volver',
             font=('Montserrat', 14, 'bold'),
-            fg_color=theme['surface'],
-            text_color=theme['text'],
-            hover_color=theme['surface_light'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
+            text_color=theme['colors']['text'],
+            hover_color=theme['colors'].get('background_secondary', '#2b2b2b'),
             corner_radius=10,
             width=120,
             height=40,
@@ -85,10 +85,10 @@ class HistorialReportesFragment(ctk.CTkFrame):
         """Card de historial de reportes"""
         history_card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         history_card.pack(fill='both', expand=True)
 
@@ -101,12 +101,12 @@ class HistorialReportesFragment(ctk.CTkFrame):
             history_content,
             text='📑 Reportes Generados',
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         table_title.pack(anchor='w', pady=(0, 20))
 
         # Container para tabla
-        table_container_bg = theme['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
+        table_container_bg = theme['colors']['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
         table_container = ctk.CTkFrame(history_content, fg_color=table_container_bg, corner_radius=10)
         table_container.pack(fill='both', expand=True)
 
@@ -126,15 +126,15 @@ class HistorialReportesFragment(ctk.CTkFrame):
 
         if self.theme_manager.is_dark_mode():
             style.configure('History.Treeview',
-                background=theme['background'],
-                foreground=theme['text'],
-                fieldbackground=theme['background'],
+                background=theme['colors']['background'],
+                foreground=theme['colors']['text'],
+                fieldbackground=theme['colors']['background'],
                 borderwidth=0,
                 font=('Montserrat', 11)
             )
             style.configure('History.Treeview.Heading',
-                background=theme['surface'],
-                foreground=theme['text'],
+                background=theme['colors'].get('card_background', '#2d2d2d'),
+                foreground=theme['colors']['text'],
                 borderwidth=1,
                 font=('Montserrat', 12, 'bold')
             )
@@ -145,14 +145,14 @@ class HistorialReportesFragment(ctk.CTkFrame):
         else:
             style.configure('History.Treeview',
                 background='#ffffff',
-                foreground=theme['text'],
+                foreground=theme['colors']['text'],
                 fieldbackground='#ffffff',
                 borderwidth=0,
                 font=('Montserrat', 11)
             )
             style.configure('History.Treeview.Heading',
                 background='#e8e8e8',
-                foreground=theme['text'],
+                foreground=theme['colors']['text'],
                 borderwidth=1,
                 font=('Montserrat', 12, 'bold')
             )
@@ -213,9 +213,9 @@ class HistorialReportesFragment(ctk.CTkFrame):
             button_frame,
             text='🔄 Actualizar Lista',
             font=('Montserrat', 14, 'bold'),
-            fg_color=theme['surface_light'],
-            text_color=theme['text'],
-            hover_color=theme['border'],
+            fg_color=theme['colors'].get('background_secondary', '#2b2b2b'),
+            text_color=theme['colors']['text'],
+            hover_color=theme['colors']['border'],
             corner_radius=10,
             height=45,
             width=180,

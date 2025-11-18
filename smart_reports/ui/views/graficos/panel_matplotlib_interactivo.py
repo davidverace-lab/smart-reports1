@@ -54,7 +54,7 @@ class MatplotlibInteractivePanel(ctk.CTkFrame):
             header,
             text='📊 Gráficos Interactivos D3.js',
             font=('Montserrat', 28, 'bold'),
-            text_color=theme['text'],
+            text_color=theme['colors']['text'],
             anchor='w'
         )
         title.pack(side='left', pady=20)
@@ -63,7 +63,7 @@ class MatplotlibInteractivePanel(ctk.CTkFrame):
             header,
             text='Gráficos D3.js embebidos directamente en la aplicación • 100% interactivos',
             font=('Montserrat', 13),
-            text_color=theme['text_secondary'],
+            text_color=theme['colors']['text_secondary'],
             anchor='w'
         )
         subtitle.pack(side='left', padx=(20, 0))

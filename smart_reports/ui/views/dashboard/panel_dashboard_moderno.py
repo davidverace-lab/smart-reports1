@@ -109,7 +109,7 @@ class PanelDashboardModerno(ctk.CTkFrame):
         """Crear header con gradiente"""
         header = ctk.CTkFrame(
             self,
-            fg_color=self.theme['surface'],
+            fg_color=self.theme['colors'].get('card_background', '#2d2d2d'),
             height=80,
             corner_radius=0
         )
@@ -127,7 +127,7 @@ class PanelDashboardModerno(ctk.CTkFrame):
             title_frame,
             text="📊 Dashboard Moderno",
             font=('Poppins', 28, 'bold'),
-            text_color=self.theme['text']
+            text_color=self.theme['colors']['text']
         ).pack(side='left')
 
         # Badge "NUEVO"
@@ -265,7 +265,7 @@ class PanelDashboardModerno(ctk.CTkFrame):
             section_title,
             text="📊 Progreso por Unidad de Negocio",
             font=('Poppins', 18, 'bold'),
-            text_color=self.theme['text'],
+            text_color=self.theme['colors']['text'],
             anchor='w'
         ).pack(side='left', padx=10)
 
@@ -398,7 +398,7 @@ class PanelDashboardModerno(ctk.CTkFrame):
             container,
             text="🎯 Indicadores de Rendimiento",
             font=('Poppins', 22, 'bold'),
-            text_color=self.theme['text']
+            text_color=self.theme['colors']['text']
         ).pack(anchor='w', padx=20, pady=(10, 25))
 
         # Grid de indicadores
@@ -486,7 +486,7 @@ class PanelDashboardModerno(ctk.CTkFrame):
             card,
             text=title,
             font=('Poppins', 15, 'bold'),
-            text_color=self.theme['text']
+            text_color=self.theme['colors']['text']
         ).pack(pady=(0, 5))
 
         # Descripción
@@ -494,7 +494,7 @@ class PanelDashboardModerno(ctk.CTkFrame):
             card,
             text=description,
             font=('Poppins', 11),
-            text_color=self.theme['text_secondary'],
+            text_color=self.theme['colors']['text_secondary'],
             wraplength=200
         ).pack(pady=(0, 20))
 
@@ -512,20 +512,20 @@ class PanelDashboardModerno(ctk.CTkFrame):
             header,
             text=title,
             font=('Poppins', 14, 'bold'),
-            text_color=self.theme['text']
+            text_color=self.theme['colors']['text']
         ).pack(side='left')
 
         # Chart container
         chart_frame = ctk.CTkFrame(
             parent,
-            fg_color=self.theme['background'],
+            fg_color=self.theme['colors']['background'],
             corner_radius=12,
             height=300
         )
         chart_frame.pack(fill='both', expand=True, padx=15, pady=(5, 15))
 
         # Crear figura
-        fig = Figure(figsize=(6, 4), dpi=90, facecolor=self.theme['background'])
+        fig = Figure(figsize=(6, 4), dpi=90, facecolor=self.theme['colors']['background'])
         ax = fig.add_subplot(111)
 
         labels = data['labels']
@@ -533,11 +533,11 @@ class PanelDashboardModerno(ctk.CTkFrame):
 
         if orientation == 'v':
             bars = ax.bar(labels, values, color='#667eea', alpha=0.9, edgecolor='white', linewidth=1.5)
-            ax.set_ylabel('Valor', fontsize=11, color=self.theme['text'])
+            ax.set_ylabel('Valor', fontsize=11, color=self.theme['colors']['text'])
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=9)
         else:
             bars = ax.barh(labels, values, color='#667eea', alpha=0.9, edgecolor='white', linewidth=1.5)
-            ax.set_xlabel('Valor', fontsize=11, color=self.theme['text'])
+            ax.set_xlabel('Valor', fontsize=11, color=self.theme['colors']['text'])
             ax.tick_params(axis='y', labelsize=9)
 
         # Etiquetas en barras
@@ -547,21 +547,21 @@ class PanelDashboardModerno(ctk.CTkFrame):
                 ax.text(bar.get_x() + bar.get_width()/2., height,
                        f'{int(height)}',
                        ha='center', va='bottom', fontsize=10, fontweight='bold',
-                       color=self.theme['text'])
+                       color=self.theme['colors']['text'])
             else:
                 width = bar.get_width()
                 ax.text(width, bar.get_y() + bar.get_height()/2.,
                        f' {int(width)}',
                        ha='left', va='center', fontsize=10, fontweight='bold',
-                       color=self.theme['text'])
+                       color=self.theme['colors']['text'])
 
         # Estilo
-        ax.set_facecolor(self.theme['background'])
-        ax.tick_params(colors=self.theme['text'], labelsize=9)
+        ax.set_facecolor(self.theme['colors']['background'])
+        ax.tick_params(colors=self.theme['colors']['text'], labelsize=9)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        ax.spines['bottom'].set_color(self.theme['border'])
-        ax.spines['left'].set_color(self.theme['border'])
+        ax.spines['bottom'].set_color(self.theme['colors']['border'])
+        ax.spines['left'].set_color(self.theme['colors']['border'])
 
         fig.tight_layout()
 
@@ -580,19 +580,19 @@ class PanelDashboardModerno(ctk.CTkFrame):
             header,
             text=title,
             font=('Poppins', 14, 'bold'),
-            text_color=self.theme['text']
+            text_color=self.theme['colors']['text']
         ).pack(side='left')
 
         # Chart
         chart_frame = ctk.CTkFrame(
             parent,
-            fg_color=self.theme['background'],
+            fg_color=self.theme['colors']['background'],
             corner_radius=12,
             height=300
         )
         chart_frame.pack(fill='both', expand=True, padx=15, pady=(5, 15))
 
-        fig = Figure(figsize=(6, 4), dpi=90, facecolor=self.theme['background'])
+        fig = Figure(figsize=(6, 4), dpi=90, facecolor=self.theme['colors']['background'])
         ax = fig.add_subplot(111)
 
         colors = ['#667eea', '#11998e', '#f093fb', '#4facfe', '#ffd43b']
@@ -603,7 +603,7 @@ class PanelDashboardModerno(ctk.CTkFrame):
             startangle=90,
             colors=colors[:len(data['values'])],
             wedgeprops=dict(edgecolor='white', linewidth=2),
-            textprops=dict(color=self.theme['text'], fontsize=10)
+            textprops=dict(color=self.theme['colors']['text'], fontsize=10)
         )
 
         for autotext in autotexts:
@@ -627,19 +627,19 @@ class PanelDashboardModerno(ctk.CTkFrame):
             header,
             text=title,
             font=('Poppins', 14, 'bold'),
-            text_color=self.theme['text']
+            text_color=self.theme['colors']['text']
         ).pack(side='left')
 
         # Chart
         chart_frame = ctk.CTkFrame(
             parent,
-            fg_color=self.theme['background'],
+            fg_color=self.theme['colors']['background'],
             corner_radius=12,
             height=300
         )
         chart_frame.pack(fill='both', expand=True, padx=15, pady=(5, 15))
 
-        fig = Figure(figsize=(6, 4), dpi=90, facecolor=self.theme['background'])
+        fig = Figure(figsize=(6, 4), dpi=90, facecolor=self.theme['colors']['background'])
         ax = fig.add_subplot(111)
 
         labels = data['labels']
@@ -652,15 +652,15 @@ class PanelDashboardModerno(ctk.CTkFrame):
         # Etiquetas
         for i, v in enumerate(values):
             ax.text(i, v, str(int(v)), ha='center', va='bottom',
-                   fontsize=10, fontweight='bold', color=self.theme['text'])
+                   fontsize=10, fontweight='bold', color=self.theme['colors']['text'])
 
-        ax.set_ylabel('Valor', fontsize=11, color=self.theme['text'])
-        ax.set_facecolor(self.theme['background'])
-        ax.tick_params(colors=self.theme['text'], labelsize=9)
+        ax.set_ylabel('Valor', fontsize=11, color=self.theme['colors']['text'])
+        ax.set_facecolor(self.theme['colors']['background'])
+        ax.tick_params(colors=self.theme['colors']['text'], labelsize=9)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        ax.spines['bottom'].set_color(self.theme['border'])
-        ax.spines['left'].set_color(self.theme['border'])
+        ax.spines['bottom'].set_color(self.theme['colors']['border'])
+        ax.spines['left'].set_color(self.theme['colors']['border'])
 
         fig.tight_layout()
 

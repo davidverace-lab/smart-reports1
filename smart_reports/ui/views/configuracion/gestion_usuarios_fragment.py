@@ -68,9 +68,9 @@ class GestionUsuariosFragment(ctk.CTkFrame):
             header,
             text='← Volver',
             font=('Montserrat', 14, 'bold'),
-            fg_color=theme['surface'],
-            text_color=theme['text'],
-            hover_color=theme['surface_light'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
+            text_color=theme['colors']['text'],
+            hover_color=theme['colors'].get('background_secondary', '#2b2b2b'),
             corner_radius=10,
             width=120,
             height=40,
@@ -94,10 +94,10 @@ class GestionUsuariosFragment(ctk.CTkFrame):
         """Card de búsqueda de usuarios"""
         search_card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         search_card.pack(fill='x', pady=(0, 15))
 
@@ -105,7 +105,7 @@ class GestionUsuariosFragment(ctk.CTkFrame):
             search_card,
             text='🔍 Buscar Usuario',
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         search_header.pack(padx=20, pady=(15, 10), anchor='w')
 
@@ -117,7 +117,7 @@ class GestionUsuariosFragment(ctk.CTkFrame):
             search_frame,
             text='User ID o Nombre:',
             font=('Montserrat', 14),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(side='left', padx=(0, 10))
 
         self.user_search_entry = ctk.CTkEntry(
@@ -149,10 +149,10 @@ class GestionUsuariosFragment(ctk.CTkFrame):
         """Card de formulario de edición/creación"""
         form_card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         form_card.pack(fill='x', pady=(0, 15))
 
@@ -160,7 +160,7 @@ class GestionUsuariosFragment(ctk.CTkFrame):
             form_card,
             text='✏️ Formulario de Usuario',
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         form_header.pack(padx=20, pady=(15, 10), anchor='w')
 
@@ -170,43 +170,43 @@ class GestionUsuariosFragment(ctk.CTkFrame):
         form_grid.grid_columnconfigure((0, 1), weight=1)
 
         # Row 0: User ID y Nombre Completo
-        ctk.CTkLabel(form_grid, text='User ID:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=0, column=0, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='User ID:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=0, column=0, sticky='w', padx=(0, 5), pady=5)
         self.form_userid = ctk.CTkEntry(form_grid, height=35, corner_radius=8, placeholder_text='E12345')
         self.form_userid.grid(row=0, column=0, sticky='ew', padx=(100, 10), pady=5)
 
-        ctk.CTkLabel(form_grid, text='Nombre Completo:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=0, column=1, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='Nombre Completo:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=0, column=1, sticky='w', padx=(0, 5), pady=5)
         self.form_nombre = ctk.CTkEntry(form_grid, height=35, corner_radius=8, placeholder_text='Juan Pérez')
         self.form_nombre.grid(row=0, column=1, sticky='ew', padx=(150, 10), pady=5)
 
         # Row 1: Email y Nivel
-        ctk.CTkLabel(form_grid, text='Email:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=1, column=0, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='Email:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=1, column=0, sticky='w', padx=(0, 5), pady=5)
         self.form_email = ctk.CTkEntry(form_grid, height=35, corner_radius=8, placeholder_text='usuario@empresa.com')
         self.form_email.grid(row=1, column=0, sticky='ew', padx=(100, 10), pady=5)
 
-        ctk.CTkLabel(form_grid, text='Nivel:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=1, column=1, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='Nivel:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=1, column=1, sticky='w', padx=(0, 5), pady=5)
         self.form_nivel = ctk.CTkEntry(form_grid, height=35, corner_radius=8, placeholder_text='L1, L2, L3...')
         self.form_nivel.grid(row=1, column=1, sticky='ew', padx=(150, 10), pady=5)
 
         # Row 2: División y Posición
-        ctk.CTkLabel(form_grid, text='División:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=2, column=0, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='División:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=2, column=0, sticky='w', padx=(0, 5), pady=5)
         self.form_division = ctk.CTkEntry(form_grid, height=35, corner_radius=8, placeholder_text='Operaciones')
         self.form_division.grid(row=2, column=0, sticky='ew', padx=(100, 10), pady=5)
 
-        ctk.CTkLabel(form_grid, text='Posición:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=2, column=1, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='Posición:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=2, column=1, sticky='w', padx=(0, 5), pady=5)
         self.form_cargo = ctk.CTkEntry(form_grid, height=35, corner_radius=8, placeholder_text='Gerente')
         self.form_cargo.grid(row=2, column=1, sticky='ew', padx=(150, 10), pady=5)
 
         # Row 3: Grupo y Ubicación
-        ctk.CTkLabel(form_grid, text='Grupo:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=3, column=0, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='Grupo:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=3, column=0, sticky='w', padx=(0, 5), pady=5)
         self.form_grupo = ctk.CTkEntry(form_grid, height=35, corner_radius=8, placeholder_text='Admin')
         self.form_grupo.grid(row=3, column=0, sticky='ew', padx=(100, 10), pady=5)
 
-        ctk.CTkLabel(form_grid, text='Ubicación:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=3, column=1, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='Ubicación:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=3, column=1, sticky='w', padx=(0, 5), pady=5)
         self.form_ubicacion = ctk.CTkEntry(form_grid, height=35, corner_radius=8, placeholder_text='México')
         self.form_ubicacion.grid(row=3, column=1, sticky='ew', padx=(150, 10), pady=5)
 
         # Row 4: UserStatus
-        ctk.CTkLabel(form_grid, text='Estado:', font=('Montserrat', 12, 'bold'), text_color=theme['text']).grid(row=4, column=0, sticky='w', padx=(0, 5), pady=5)
+        ctk.CTkLabel(form_grid, text='Estado:', font=('Montserrat', 12, 'bold'), text_color=theme['colors']['text']).grid(row=4, column=0, sticky='w', padx=(0, 5), pady=5)
         self.form_status = ctk.CTkOptionMenu(form_grid, values=['Activo', 'Inactivo'], height=35, corner_radius=8)
         self.form_status.grid(row=4, column=0, sticky='ew', padx=(100, 10), pady=5)
         self.form_status.set('Activo')
@@ -257,9 +257,9 @@ class GestionUsuariosFragment(ctk.CTkFrame):
             action_frame,
             text='🔄 Limpiar Formulario',
             font=('Montserrat', 14, 'bold'),
-            fg_color=theme['surface_light'],
-            text_color=theme['text'],
-            hover_color=theme['border'],
+            fg_color=theme['colors'].get('background_secondary', '#2b2b2b'),
+            text_color=theme['colors']['text'],
+            hover_color=theme['colors']['border'],
             corner_radius=10,
             height=45,
             width=180,
@@ -270,10 +270,10 @@ class GestionUsuariosFragment(ctk.CTkFrame):
         """Card de resultados con tabla"""
         results_card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         results_card.pack(fill='both', expand=True, pady=(0, 15))
 
@@ -281,12 +281,12 @@ class GestionUsuariosFragment(ctk.CTkFrame):
             results_card,
             text='📋 Resultados de Búsqueda',
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         results_header.pack(padx=20, pady=(15, 10), anchor='w')
 
         # Container para tabla
-        table_container_bg = theme['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
+        table_container_bg = theme['colors']['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
         table_container = ctk.CTkFrame(results_card, fg_color=table_container_bg, corner_radius=10)
         table_container.pack(fill='both', expand=True, padx=20, pady=(10, 20))
 
@@ -296,15 +296,15 @@ class GestionUsuariosFragment(ctk.CTkFrame):
 
         if self.theme_manager.is_dark_mode():
             style.configure('UserMgmt.Treeview',
-                background=theme['background'],
-                foreground=theme['text'],
-                fieldbackground=theme['background'],
+                background=theme['colors']['background'],
+                foreground=theme['colors']['text'],
+                fieldbackground=theme['colors']['background'],
                 borderwidth=0,
                 font=('Montserrat', 10)
             )
             style.configure('UserMgmt.Treeview.Heading',
-                background=theme['surface'],
-                foreground=theme['text'],
+                background=theme['colors'].get('card_background', '#2d2d2d'),
+                foreground=theme['colors']['text'],
                 borderwidth=1,
                 font=('Montserrat', 11, 'bold')
             )
@@ -315,14 +315,14 @@ class GestionUsuariosFragment(ctk.CTkFrame):
         else:
             style.configure('UserMgmt.Treeview',
                 background='#ffffff',
-                foreground=theme['text'],
+                foreground=theme['colors']['text'],
                 fieldbackground='#ffffff',
                 borderwidth=0,
                 font=('Montserrat', 10)
             )
             style.configure('UserMgmt.Treeview.Heading',
                 background='#e8e8e8',
-                foreground=theme['text'],
+                foreground=theme['colors']['text'],
                 borderwidth=1,
                 font=('Montserrat', 11, 'bold')
             )
@@ -378,10 +378,10 @@ class GestionUsuariosFragment(ctk.CTkFrame):
         """Card de historial de soportes del usuario"""
         support_history_card = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=1,
-            border_color=theme['border']
+            border_color=theme['colors']['border']
         )
         support_history_card.pack(fill='both', expand=True, pady=(0, 15))
 
@@ -389,12 +389,12 @@ class GestionUsuariosFragment(ctk.CTkFrame):
             support_history_card,
             text='📋 Historial de Soportes',
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         )
         support_history_header.pack(padx=20, pady=(15, 10), anchor='w')
 
         # Container para tabla de soportes
-        table_container_bg = theme['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
+        table_container_bg = theme['colors']['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
         support_table_container = ctk.CTkFrame(support_history_card, fg_color=table_container_bg, corner_radius=10)
         support_table_container.pack(fill='both', expand=True, padx=20, pady=(10, 20))
 

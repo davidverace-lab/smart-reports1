@@ -41,7 +41,7 @@ class ModernMetricCard(ctk.CTkFrame):
 
         super().__init__(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=20,
             **kwargs
         )
@@ -78,7 +78,7 @@ class ModernMetricCard(ctk.CTkFrame):
         # Canvas para gradiente de fondo
         self.bg_canvas = tk.Canvas(
             self,
-            bg=self.theme['surface'],
+            bg=self.theme['colors'].get('card_background', '#2d2d2d'),
             highlightthickness=0,
             height=200
         )
@@ -319,7 +319,7 @@ class CircularProgress(ctk.CTkFrame):
             self,
             width=size,
             height=size,
-            bg=theme['background'],
+            bg=theme['colors']['background'],
             highlightthickness=0
         )
         self.canvas.pack()
@@ -344,7 +344,7 @@ class CircularProgress(ctk.CTkFrame):
         self.canvas.create_oval(
             padding, padding,
             self.size - padding, self.size - padding,
-            outline=self.theme['border'],
+            outline=self.theme['colors']['border'],
             width=12,
             fill=''
         )
@@ -362,7 +362,7 @@ class CircularProgress(ctk.CTkFrame):
             self.size / 2, self.size / 2 + 20,
             text=self.label,
             font=('Poppins', 11),
-            fill=self.theme['text_secondary']
+            fill=self.theme['colors']['text_secondary']
         )
 
     def _draw_progress(self):
@@ -507,7 +507,7 @@ class GlassCard(ctk.CTkFrame):
 
         super().__init__(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=20,
             border_width=1,
             border_color='rgba(255,255,255,0.1)',

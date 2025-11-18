@@ -89,7 +89,7 @@ class PanelConsultas(ctk.CTkFrame):
 
         header_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=15,
             border_width=2,
             border_color=HUTCHISON_COLORS['primary']  # Navy para el borde
@@ -113,14 +113,14 @@ class PanelConsultas(ctk.CTkFrame):
             header_content,
             text="Búsquedas y filtros en la base de datos de capacitación",
             font=('Montserrat', 14),
-            text_color=theme['text_secondary']
+            text_color=theme['colors']['text_secondary']
         ).pack(anchor='w')
 
     def _create_predefined_queries_section(self, parent, theme):
         """Sección: Consultas Predefinidas Útiles"""
         section_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12,
             border_width=2,
             border_color=HUTCHISON_COLORS['primary']
@@ -210,7 +210,7 @@ class PanelConsultas(ctk.CTkFrame):
         """Sección: Buscar usuario por ID"""
         section_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12
         )
         section_frame.pack(fill='both', expand=True)
@@ -223,7 +223,7 @@ class PanelConsultas(ctk.CTkFrame):
             content,
             text="👤 Buscar Usuario por ID",
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 15))
 
         # Input frame
@@ -236,7 +236,7 @@ class PanelConsultas(ctk.CTkFrame):
             input_frame,
             text="ID Usuario:",
             font=('Montserrat', 13),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=0, sticky='w', padx=(0, 10))
 
         # Entry
@@ -266,7 +266,7 @@ class PanelConsultas(ctk.CTkFrame):
         """Sección: Buscar por unidad de negocio"""
         section_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12
         )
         section_frame.pack(fill='both', expand=True)
@@ -279,7 +279,7 @@ class PanelConsultas(ctk.CTkFrame):
             content,
             text="🏢 Consultar por Unidad de Negocio",
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 15))
 
         # Input frame
@@ -292,7 +292,7 @@ class PanelConsultas(ctk.CTkFrame):
             input_frame,
             text="Unidad:",
             font=('Montserrat', 13),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=0, sticky='w', padx=(0, 10))
 
         # ComboBox
@@ -322,7 +322,7 @@ class PanelConsultas(ctk.CTkFrame):
         """Sección: Usuarios nuevos"""
         section_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12
         )
         section_frame.pack(fill='both', expand=True)
@@ -335,7 +335,7 @@ class PanelConsultas(ctk.CTkFrame):
             content,
             text="🆕 Usuarios Recientes",
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 15))
 
         # Input frame
@@ -348,7 +348,7 @@ class PanelConsultas(ctk.CTkFrame):
             input_frame,
             text="Últimos días:",
             font=('Montserrat', 13),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).grid(row=0, column=0, sticky='w', padx=(0, 10))
 
         # Entry
@@ -380,7 +380,7 @@ class PanelConsultas(ctk.CTkFrame):
         """Sección: Estadísticas globales"""
         section_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12
         )
         section_frame.pack(fill='both', expand=True)
@@ -393,7 +393,7 @@ class PanelConsultas(ctk.CTkFrame):
             content,
             text="📊 Estadísticas del Sistema",
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 15))
 
         # Botón mostrar estadísticas
@@ -412,7 +412,7 @@ class PanelConsultas(ctk.CTkFrame):
         """Sección: Tabla de resultados (OPTIMIZADO CON PAGINACIÓN)"""
         results_frame = ctk.CTkFrame(
             parent,
-            fg_color=theme['surface'],
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12
         )
         results_frame.pack(fill='both', expand=True)
@@ -428,7 +428,7 @@ class PanelConsultas(ctk.CTkFrame):
             header,
             text="📋 Resultados",
             font=('Montserrat', 18, 'bold'),
-            text_color=theme['text']
+            text_color=theme['colors']['text']
         ).pack(side='left')
 
         # Botón exportar
