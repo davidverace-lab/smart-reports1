@@ -21,7 +21,7 @@ except ImportError:
     MySQLError = Exception
     MYSQL_AVAILABLE = False
 
-from src.main.res.config.database import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
+from smart_reports.config.database import DB_TYPE, SQLSERVER_CONFIG, MYSQL_CONFIG
 
 
 class DatabaseConnection:
