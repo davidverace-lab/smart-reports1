@@ -11,8 +11,8 @@ class NavigationController:
         self.current_view = None
         self.history = []
 
-    def navigate_to(self, view_name):
-        """Navega a una vista"""
+    def navigate_to(self, view_name, data=None):
+        """Navega a una vista con datos opcionales"""
         if self.current_view:
             self.history.append(self.current_view)
         self.current_view = view_name

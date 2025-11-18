@@ -10,13 +10,11 @@ import threading
 import pandas as pd
 from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
-from smart_reports.ui.components.import_tools import (
-    DialogoMatching,
-    BarraProgresoImportacion,
-    ExportadorLogs,
-    SistemaRollback,
-    ConfiguradorColumnas
-)
+from smart_reports.ui.components.import_tools.dialogo_matching import DialogoMatching
+from smart_reports.ui.components.import_tools.barra_progreso import BarraProgresoImportacion
+from smart_reports.ui.components.import_tools.exportador_logs import ExportadorLogs
+from smart_reports.ui.components.import_tools.sistema_rollback import SistemaRollback
+from smart_reports.ui.components.import_tools.configurador_columnas import ConfiguradorColumnas
 
 
 class PanelImportacionDatos(ctk.CTkFrame):
