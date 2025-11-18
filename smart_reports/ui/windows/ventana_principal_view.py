@@ -10,8 +10,9 @@ ARQUITECTURA LIMPIA:
 import customtkinter as ctk
 from tkinter import messagebox
 
-# Android Studio structure imports
-from smart_reports.config.themes import APP_CONFIG, HUTCHISON_COLORS
+# Configuración e imports
+from smart_reports.config.settings import UI_CONFIG, APP_NAME
+from smart_reports.config.themes import HUTCHISON_COLORS
 from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.database.repositories.persistence.mysql.connection import DatabaseConnection
 
@@ -25,14 +26,26 @@ from smart_reports.core.controllers.navigation_controller import NavigationContr
 from smart_reports.ui.components.navigation.barra_lateral import ModernSidebar
 from smart_reports.ui.components.navigation.barra_superior import TopBar
 
-# Menus (UI modular - Fragments en Android)
-from smart_reports.ui.fragments import (
-    show_dashboard_menu,
-    show_reportes_menu,
-    show_actualizar_menu,
-    show_configuracion_menu,
-    show_consultas_menu
-)
+# Menus (UI modular - Views/Fragments)
+try:
+    from smart_reports.ui.views.menu_dashboard import show_dashboard_menu
+    from smart_reports.ui.views.menu_reportes import show_reportes_menu
+    from smart_reports.ui.views.menu_configuracion import show_configuracion_menu
+    from smart_reports.ui.views.menu_consultas import show_consultas_menu
+    from smart_reports.ui.views.menu_actualizar import show_actualizar_menu
+except ImportError as e:
+    print(f"⚠️ Error importando menus: {e}")
+    # Fallback functions
+    def show_dashboard_menu(parent, *args, **kwargs):
+        pass
+    def show_reportes_menu(parent, *args, **kwargs):
+        pass
+    def show_configuracion_menu(parent, *args, **kwargs):
+        pass
+    def show_consultas_menu(parent, *args, **kwargs):
+        pass
+    def show_actualizar_menu(parent, *args, **kwargs):
+        pass
 
 
 class VentanaPrincipalView:
@@ -71,7 +84,7 @@ class VentanaPrincipalView:
         self.current_view = None
 
         # Configurar appearance de customtkinter
-        appearance = "dark" if self.theme_manager.is_dark_mode() else "light"
+        appearance = self.theme_manager.get_theme_mode()
         ctk.set_appearance_mode(appearance)
         ctk.set_default_color_theme("dark-blue")
 
