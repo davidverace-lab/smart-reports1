@@ -14,7 +14,7 @@ if str(BASE_DIR) not in sys.path:
 
 import customtkinter as ctk
 
-# Android Studio structure imports
+# Android Studio structure imports - Importaciones corregidas
 from src.main.res.config.settings import UI_CONFIG, APP_NAME
 from src.main.python.ui.activities.ventana_login import LoginWindow
 from src.main.python.ui.activities.ventana_principal_view import VentanaPrincipalView as MainWindow
