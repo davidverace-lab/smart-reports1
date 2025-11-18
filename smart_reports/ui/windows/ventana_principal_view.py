@@ -11,22 +11,22 @@ import customtkinter as ctk
 from tkinter import messagebox
 
 # Android Studio structure imports
-from src.main.res.config.themes import APP_CONFIG, HUTCHISON_COLORS
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.python.data.repositories.persistence.mysql.connection import DatabaseConnection
+from smart_reports.config.themes import APP_CONFIG, HUTCHISON_COLORS
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.database.repositories.persistence.mysql.connection import DatabaseConnection
 
 # Controllers (LÓGICA separada - ViewModels en Android)
-from src.main.python.viewmodels.database_query_controller import DatabaseQueryController
-from src.main.python.viewmodels.file_import_controller import FileImportController
-from src.main.python.viewmodels.reports_controller import ReportsController
-from src.main.python.viewmodels.navigation_controller import NavigationController
+from smart_reports.core.controllers.database_query_controller import DatabaseQueryController
+from smart_reports.core.controllers.file_import_controller import FileImportController
+from smart_reports.core.controllers.reports_controller import ReportsController
+from smart_reports.core.controllers.navigation_controller import NavigationController
 
 # Components (UI - Widgets/Custom Views en Android)
-from src.main.python.ui.widgets.navigation.barra_lateral import ModernSidebar
-from src.main.python.ui.widgets.navigation.barra_superior import TopBar
+from smart_reports.ui.components.navigation.barra_lateral import ModernSidebar
+from smart_reports.ui.components.navigation.barra_superior import TopBar
 
 # Menus (UI modular - Fragments en Android)
-from src.main.python.ui.fragments import (
+from smart_reports.ui.fragments import (
     show_dashboard_menu,
     show_reportes_menu,
     show_actualizar_menu,
@@ -213,7 +213,7 @@ class VentanaPrincipalView:
         self.nav_controller.navigate_to('importacion', None)
 
         # Importar PanelImportacionDatos
-        from src.main.python.ui.fragments.configuracion.panel_importacion_datos import PanelImportacionDatos
+        from smart_reports.ui.views.configuracion.panel_importacion_datos import PanelImportacionDatos
 
         # Crear panel de importación
         panel = PanelImportacionDatos(

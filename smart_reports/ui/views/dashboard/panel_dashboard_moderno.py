@@ -13,17 +13,17 @@ Features:
 - ✅ Tooltips mejorados
 """
 import customtkinter as ctk
-from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
-from src.main.python.ui.widgets.modern import (
+from smart_reports.ui.components.navigation.boton_pestana import CustomTabView
+from smart_reports.ui.components.modern import (
     ModernMetricCard,
     CircularProgress,
     ModernButton,
     GlassCard,
     ModernTooltip
 )
-from src.main.python.ui.widgets.animations import AnimationEngine, EasingFunctions
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.res.config.themes import HUTCHISON_COLORS
+from smart_reports.ui.components.animations import AnimationEngine, EasingFunctions
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.config.themes import HUTCHISON_COLORS
 
 # Matplotlib para fallback (si Plotly no está disponible)
 import matplotlib.pyplot as plt

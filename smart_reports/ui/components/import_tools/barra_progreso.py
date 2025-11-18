@@ -3,8 +3,8 @@ Barra de Progreso en Tiempo Real
 Muestra el progreso de importación con estadísticas actualizadas
 """
 import customtkinter as ctk
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.res.config.themes import HUTCHISON_COLORS
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.config.themes import HUTCHISON_COLORS
 
 
 class BarraProgresoImportacion(ctk.CTkFrame):

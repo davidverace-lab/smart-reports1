@@ -12,8 +12,8 @@ except ImportError:
     PLOTLY_AVAILABLE = False
     print("⚠️ Plotly no está instalado. Instala con: pip install plotly kaleido")
 
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.res.config.themes import HUTCHISON_COLORS
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.config.themes import HUTCHISON_COLORS
 import tkinter as tk
 from tkinter import ttk
 

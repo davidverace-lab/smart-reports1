@@ -2,7 +2,7 @@
 MenuConsultas - Módulo de interfaz para Consultas
 Separado de ventana principal para mejor organización
 """
-from src.main.python.ui.fragments.panel_consultas import PanelConsultas
+from smart_reports.ui.views.panel_consultas import PanelConsultas
 
 
 def show_consultas_menu(parent, db_connection):

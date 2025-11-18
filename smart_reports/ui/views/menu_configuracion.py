@@ -2,7 +2,7 @@
 MenuConfiguracion - Módulo de interfaz para Configuración
 Separado de ventana principal para mejor organización
 """
-from src.main.python.ui.fragments.configuracion.panel_configuracion import ConfiguracionPanel
+from smart_reports.ui.views.configuracion.panel_configuracion import ConfiguracionPanel
 
 
 def show_configuracion_menu(parent, db_connection, cursor, db_instance):

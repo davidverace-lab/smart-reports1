@@ -2,8 +2,8 @@
 Componente ModernSidebar - Barra lateral moderna con navegación
 """
 import customtkinter as ctk
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.res.config.themes import HUTCHISON_COLORS
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.config.themes import HUTCHISON_COLORS
 
 
 class ModernSidebar(ctk.CTkFrame):

@@ -7,9 +7,9 @@ import customtkinter as ctk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
-from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.res.config.themes import HUTCHISON_COLORS
+from smart_reports.ui.components.navigation.boton_pestana import CustomTabView
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.config.themes import HUTCHISON_COLORS
 
 
 # ═══════════════════════════════════════════════════════════════════

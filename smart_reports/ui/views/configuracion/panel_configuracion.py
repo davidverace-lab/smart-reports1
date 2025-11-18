@@ -3,12 +3,12 @@ Panel de Configuración - Coordinador de Fragments
 Modularizado según arquitectura Android Studio
 """
 import customtkinter as ctk
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.python.ui.fragments.configuracion.configuracion_principal_fragment import ConfiguracionPrincipalFragment
-from src.main.python.ui.fragments.configuracion.gestion_usuarios_fragment import GestionUsuariosFragment
-from src.main.python.ui.fragments.configuracion.soporte_tickets_fragment import SoporteTicketsFragment
-from src.main.python.ui.fragments.configuracion.historial_reportes_fragment import HistorialReportesFragment
-from src.main.python.ui.fragments.configuracion.panel_importacion_datos import PanelImportacionDatos
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.ui.views.configuracion.configuracion_principal_fragment import ConfiguracionPrincipalFragment
+from smart_reports.ui.views.configuracion.gestion_usuarios_fragment import GestionUsuariosFragment
+from smart_reports.ui.views.configuracion.soporte_tickets_fragment import SoporteTicketsFragment
+from smart_reports.ui.views.configuracion.historial_reportes_fragment import HistorialReportesFragment
+from smart_reports.ui.views.configuracion.panel_importacion_datos import PanelImportacionDatos
 
 
 class ConfiguracionPanel(ctk.CTkFrame):

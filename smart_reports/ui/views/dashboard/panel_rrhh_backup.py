@@ -4,11 +4,11 @@ Dashboards especializados para área de RRHH
 Adaptado al esquema REAL de base de datos Hutchison
 """
 import customtkinter as ctk
-from src.main.python.ui.widgets.navigation.boton_pestana import CustomTabView
-from src.main.python.ui.widgets.charts.grafica_expandible import GraficaExpandible
-from src.main.python.data.database.queries_hutchison import *
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.res.config.themes import HUTCHISON_COLORS
+from smart_reports.ui.components.navigation.boton_pestana import CustomTabView
+from smart_reports.ui.components.charts.grafica_expandible import GraficaExpandible
+from smart_reports.database.models.queries_hutchison import *
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.config.themes import HUTCHISON_COLORS
 
 
 class PanelDashboardsRRHH(ctk.CTkFrame):
@@ -215,7 +215,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         try:
             if self.db_connection:
                 # OPTIMIZACIÓN: Aplicar caché (5 minutos)
-                from src.main.python.utils.cache_manager import get_cache_manager
+                from smart_reports.utils.cache_manager import get_cache_manager
                 cache = get_cache_manager()
 
                 cache_key = "dashboard_rrhh_estado_capacitacion"

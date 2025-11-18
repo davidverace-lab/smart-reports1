@@ -4,9 +4,9 @@ Separado para mejor organización (Android Studio style)
 """
 import customtkinter as ctk
 from tkinter import messagebox, ttk
-from src.main.res.config.themes import HUTCHISON_COLORS
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.python.viewmodels.database_query_controller import DatabaseQueryController
+from smart_reports.config.themes import HUTCHISON_COLORS
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.core.controllers.database_query_controller import DatabaseQueryController
 
 
 class PanelConsultas(ctk.CTkFrame):
@@ -447,7 +447,7 @@ class PanelConsultas(ctk.CTkFrame):
         self.export_btn.pack(side='right')
 
         # OPTIMIZACIÓN: Treeview paginado (80x más rápido para grandes datasets)
-        from src.main.python.ui.widgets.paginacion_treeview import TreeviewPaginado
+        from smart_reports.ui.components.paginacion_treeview import TreeviewPaginado
 
         self.results_tree_paginado = TreeviewPaginado(
             content,
