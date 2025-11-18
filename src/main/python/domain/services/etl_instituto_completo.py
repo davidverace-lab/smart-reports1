@@ -1303,7 +1303,6 @@ class ETLInstitutoCompleto:
                 # Normalizar estado
                 estado_excel = row.get(col_estado, '') if col_estado else ''
                 estado = self._normalizar_estatus(estado_excel)
-                porcentaje = self._calcular_porcentaje_por_estado(estado)
 
                 # Verificar si existe progreso
                 key = (user_id, id_modulo)
@@ -1314,7 +1313,6 @@ class ETLInstitutoCompleto:
                         estado,
                         fecha_inicio or fecha_registro,
                         fecha_fin,
-                        porcentaje,
                         user_id,
                         id_modulo
                     ))
@@ -1326,7 +1324,6 @@ class ETLInstitutoCompleto:
                         estado,
                         fecha_inicio or fecha_registro or datetime.now(),
                         fecha_fin,
-                        porcentaje,
                         datetime.now()
                     ))
 
@@ -1341,8 +1338,7 @@ class ETLInstitutoCompleto:
                 UPDATE instituto_ProgresoModulo
                 SET EstatusModulo = ?,
                     FechaInicio = COALESCE(?, FechaInicio),
-                    FechaFinalizacion = ?,
-                    PorcentajeAvance = ?
+                    FechaFinalizacion = ?
                 WHERE UserId = ? AND IdModulo = ?
             """, batch_updates)
 
@@ -1353,9 +1349,8 @@ class ETLInstitutoCompleto:
         if batch_inserts:
             self.cursor.executemany("""
                 INSERT INTO instituto_ProgresoModulo
-                (UserId, IdModulo, EstatusModulo, FechaInicio, FechaFinalizacion,
-                 PorcentajeAvance, FechaAsignacion)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (UserId, IdModulo, EstatusModulo, FechaInicio, FechaFinalizacion, FechaAsignacion)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, batch_inserts)
 
             self.stats['progresos_insertados'] = len(batch_inserts)
@@ -1483,7 +1478,6 @@ class ETLInstitutoCompleto:
                     self.cursor.execute("""
                         UPDATE instituto_ProgresoModulo
                         SET EstatusModulo = 'Terminado',
-                            PorcentajeAvance = 100,
                             FechaFinalizacion = GETDATE()
                         WHERE IdInscripcion = ?
                     """, (id_inscripcion,))
