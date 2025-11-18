@@ -67,13 +67,13 @@ class LoginWindow:
             card_color = '#FFFFFF'  # Tarjeta blanca
             text_primary = '#002E6D'  # Texto principal oscuro
             text_secondary = '#666666'  # Texto secundario gris
-            border_color = HUTCHISON_COLORS['ports_sky_blue']
+            border_color = HUTCHISON_COLORS.get('primary', '#003087')
         else:  # dark
-            bg_color = DARK_THEME['background']
-            card_color = DARK_THEME['surface']
+            bg_color = DARK_THEME['colors']['background']
+            card_color = DARK_THEME['colors'].get('card_background', '#2d2d2d')
             text_primary = '#FFFFFF'
-            text_secondary = DARK_THEME['text_secondary']
-            border_color = HUTCHISON_COLORS['ports_sky_blue']
+            text_secondary = DARK_THEME['colors']['text_secondary']
+            border_color = HUTCHISON_COLORS.get('primary', '#003087')
 
         # Frame principal
         self.main_frame = ctk.CTkFrame(
@@ -193,8 +193,8 @@ class LoginWindow:
             entry_border = '#CCCCCC'
             entry_text = '#002E6D'
         else:
-            entry_fg = DARK_THEME['surface_light']
-            entry_border = DARK_THEME['border']
+            entry_fg = DARK_THEME['colors'].get('background_secondary', '#2b2b2b')
+            entry_border = DARK_THEME['colors']['border']
             entry_text = '#FFFFFF'
 
         self.username_entry = ctk.CTkEntry(

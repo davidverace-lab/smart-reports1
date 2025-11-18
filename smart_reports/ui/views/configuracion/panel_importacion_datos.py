@@ -10,7 +10,7 @@ import threading
 import pandas as pd
 from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
-from smart_reports.ui.components.importacion import (
+from smart_reports.ui.components.import_tools import (
     DialogoMatching,
     BarraProgresoImportacion,
     ExportadorLogs,
