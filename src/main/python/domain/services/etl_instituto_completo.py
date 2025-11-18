@@ -380,7 +380,7 @@ class ETLInstitutoCompleto:
         self._cache_unidades: Dict[str, int] = {}
         self._cache_departamentos: Dict[Tuple[int, str], int] = {}
         self._cache_usuarios: Dict[str, int] = {}
-        self._cache_progresos: Dict[Tuple[str, int], int] = {}
+        self._cache_progresos: Dict[Tuple[int, int], int] = {}  # (IdUsuario, IdModulo) → IdInscripcion
 
         # Estadísticas
         self.stats = {
@@ -796,16 +796,17 @@ class ETLInstitutoCompleto:
 
         placeholders = ','.join(['?'] * len(user_ids))
         query = f"""
-            SELECT UserId, IdModulo, IdInscripcion
-            FROM instituto_ProgresoModulo
-            WHERE UserId IN ({placeholders})
+            SELECT p.IdUsuario, p.IdModulo, p.IdInscripcion
+            FROM instituto_ProgresoModulo p
+            INNER JOIN instituto_Usuario u ON p.IdUsuario = u.IdUsuario
+            WHERE u.UserId IN ({placeholders})
         """
 
         self.cursor.execute(query, user_ids)
 
         for row in self.cursor.fetchall():
-            key = (row.UserId, row.IdModulo)
-            self._cache_progresos[key] = row.IdInscripcion
+            key = (row[0], row[1])  # (IdUsuario, IdModulo)
+            self._cache_progresos[key] = row[2]  # IdInscripcion
 
         logger.info(f"✅ Progresos existentes precargados: {len(self._cache_progresos)}")
 
@@ -1276,6 +1277,12 @@ class ETLInstitutoCompleto:
                 user_id = str(row[col_user_id]).strip()
                 titulo = row[col_titulo]
 
+                # Convertir UserId a IdUsuario
+                id_usuario = self._cache_usuarios.get(user_id)
+                if not id_usuario:
+                    logger.warning(f"⚠️  Usuario no encontrado en cache: {user_id}")
+                    continue
+
                 # Identificar módulo
                 num_modulo = self._extraer_numero_modulo(titulo)
 
@@ -1303,10 +1310,9 @@ class ETLInstitutoCompleto:
                 # Normalizar estado
                 estado_excel = row.get(col_estado, '') if col_estado else ''
                 estado = self._normalizar_estatus(estado_excel)
-                porcentaje = self._calcular_porcentaje_por_estado(estado)
 
-                # Verificar si existe progreso
-                key = (user_id, id_modulo)
+                # Verificar si existe progreso usando IdUsuario
+                key = (id_usuario, id_modulo)
 
                 if key in self._cache_progresos:
                     # UPDATE
@@ -1314,19 +1320,17 @@ class ETLInstitutoCompleto:
                         estado,
                         fecha_inicio or fecha_registro,
                         fecha_fin,
-                        porcentaje,
-                        user_id,
+                        id_usuario,
                         id_modulo
                     ))
                 else:
                     # INSERT
                     batch_inserts.append((
-                        user_id,
+                        id_usuario,
                         id_modulo,
                         estado,
                         fecha_inicio or fecha_registro or datetime.now(),
                         fecha_fin,
-                        porcentaje,
                         datetime.now()
                     ))
 
@@ -1341,9 +1345,8 @@ class ETLInstitutoCompleto:
                 UPDATE instituto_ProgresoModulo
                 SET EstatusModulo = ?,
                     FechaInicio = COALESCE(?, FechaInicio),
-                    FechaFinalizacion = ?,
-                    PorcentajeAvance = ?
-                WHERE UserId = ? AND IdModulo = ?
+                    FechaFinalizacion = ?
+                WHERE IdUsuario = ? AND IdModulo = ?
             """, batch_updates)
 
             self.stats['progresos_actualizados'] = len(batch_updates)
@@ -1353,9 +1356,8 @@ class ETLInstitutoCompleto:
         if batch_inserts:
             self.cursor.executemany("""
                 INSERT INTO instituto_ProgresoModulo
-                (UserId, IdModulo, EstatusModulo, FechaInicio, FechaFinalizacion,
-                 PorcentajeAvance, FechaAsignacion)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (IdUsuario, IdModulo, EstatusModulo, FechaInicio, FechaFinalizacion, FechaAsignacion)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, batch_inserts)
 
             self.stats['progresos_insertados'] = len(batch_inserts)
@@ -1483,7 +1485,6 @@ class ETLInstitutoCompleto:
                     self.cursor.execute("""
                         UPDATE instituto_ProgresoModulo
                         SET EstatusModulo = 'Terminado',
-                            PorcentajeAvance = 100,
                             FechaFinalizacion = GETDATE()
                         WHERE IdInscripcion = ?
                     """, (id_inscripcion,))

@@ -112,13 +112,13 @@ CSOD_Data_Source_for_Org_Planning_20251110_08_26_04_AM.xlsx
 
 | Columna Excel | Campo BD | Tabla BD | Tipo | Notas |
 |--------------|----------|----------|------|-------|
-| **Identificación de usuario** | `UserID` | `instituto_usuario` | VARCHAR(100) | ⚠️ **LLAVE MAESTRA** |
-| **Título de la capacitación** | `NombreModulo` | `instituto_modulo` | VARCHAR(255) | Se busca/crea en instituto_Modulo |
-| **Tipo de capacitación** | `TipoDeCapacitacion` | `instituto_modulo` | VARCHAR(50) | 'Curriculum' o 'Prueba' |
-| **Estado del expediente** | `EstatusModulo` | `instituto_progresomodulo` | VARCHAR(100) | Valores: Ver tabla de estados abajo |
-| **Fecha de registro de la transcripción** | `FechaAsignacion` | `instituto_progresomodulo` | DATETIME | Cuando se registró el módulo |
-| **Fecha de inicio de la capacitación** | `FechaInicio` | `instituto_progresomodulo` | DATETIME | Cuando el usuario comenzó |
-| **Fecha de finalización de expediente** | `FechaFinalizado` | `instituto_progresomodulo` | DATETIME | ⚠️ Solo si estado = "Terminado" |
+| **Identificación de usuario** | `UserID` | `instituto_Usuario` | VARCHAR(100) | ⚠️ **LLAVE MAESTRA** - Se convierte a IdUsuario INT en ProgresoModulo |
+| **Título de la capacitación** | `NombreModulo` | `instituto_Modulo` | VARCHAR(255) | Se busca/crea en instituto_Modulo |
+| **Tipo de capacitación** | `TipoDeCapacitacion` | `instituto_Modulo` | VARCHAR(50) | 'Curriculum' o 'Prueba' |
+| **Estado del expediente** | `EstatusModulo` | `instituto_ProgresoModulo` | VARCHAR(50) | Valores: Ver tabla de estados abajo |
+| **Fecha de registro de la transcripción** | `FechaAsignacion` | `instituto_ProgresoModulo` | DATETIME | Cuando se registró el módulo |
+| **Fecha de inicio de la capacitación** | `FechaInicio` | `instituto_ProgresoModulo` | DATETIME | Cuando el usuario comenzó |
+| **Fecha de finalización de expediente** | `FechaFinalizacion` | `instituto_ProgresoModulo` | DATETIME | ⚠️ Solo si estado = "Terminado" |
 
 #### 🎓 Lista de Módulos (Curriculums)
 
@@ -177,10 +177,10 @@ def detectar_modulo(titulo_capacitacion):
 
 | Columna Excel | Campo BD | Tabla BD | Tipo | Notas |
 |--------------|----------|----------|------|-------|
-| **Tipo de capacitación** | `TipoDeCapacitacion` | `instituto_modulo` | VARCHAR(50) | Valor = "Prueba" (para evaluaciones) |
-| **Título de la capacitación** | `NombreEvaluacion` | `instituto_evaluacion` | VARCHAR(255) | Nombre de la evaluación (sin "MÓDULO X.") |
-| **Puntuación de la transcripción** | `PuntajeObtenido` | `instituto_resultadoevaluacion` | DECIMAL(10,2) | Calificación 0-100 |
-| **Fecha de finalización de expediente** | `FechaRealizacion` | `instituto_resultadoevaluacion` | DATETIME | Cuando hizo la prueba |
+| **Tipo de capacitación** | `TipoDeCapacitacion` | `instituto_Modulo` | VARCHAR(50) | Valor = "Prueba" (para evaluaciones) |
+| **Título de la capacitación** | `NombreEvaluacion` | `instituto_Evaluacion` | VARCHAR(255) | Nombre de la evaluación (sin "MÓDULO X.") |
+| **Puntuación de la transcripción** | `PuntajeObtenido` | `instituto_ResultadoEvaluacion` | DECIMAL(5,2) | Calificación 0-100 |
+| **Fecha de finalización de expediente** | `FechaRealizacion` | `instituto_ResultadoEvaluacion` | DATETIME | Cuando hizo la prueba |
 
 #### 🎯 Lista de Pruebas/Evaluaciones
 
@@ -258,10 +258,10 @@ def detectar_prueba(titulo_prueba):
 
 | Columna Excel | Campo BD | Tabla BD | Tipo | Acción |
 |--------------|----------|----------|------|--------|
-| **Departamento** | `NombreDepartamento` → `IdDepartamento` | `instituto_departamento` → `instituto_usuario` | INT (FK) | Buscar/crear departamento, actualizar FK |
-| **Cargo** | `Position` | `instituto_usuario` | VARCHAR(255) | UPDATE directo |
+| **Departamento** | `NombreDepartamento` → `IdDepartamento` | `instituto_Departamento` → `instituto_Usuario` | INT (FK) | Buscar/crear departamento, actualizar FK |
+| **Cargo** | Se mapea a `IdPosicion` | `instituto_Posicion` → `instituto_Usuario` | INT (FK) | Buscar/crear posición |
 
-**⚠️ NOTA:** Si el `Departamento` en el Excel no existe en `instituto_departamento`, se debe crear automáticamente con una unidad de negocio por defecto (ej: TNG).
+**⚠️ NOTA:** Si el `Departamento` en el Excel no existe en `instituto_Departamento`, se debe crear automáticamente con una unidad de negocio por defecto (ej: TNG).
 
 ---
 
@@ -271,12 +271,13 @@ def detectar_prueba(titulo_prueba):
 
 | Columna Excel | Campo BD | Tabla BD | Tipo | Acción |
 |--------------|----------|----------|------|--------|
-| **Usuario - Identificación de usuario** | `UserID` | `instituto_usuario` | VARCHAR(100) | ⚠️ LLAVE MAESTRA |
-| **Usuario - Nombre completo del usuario** | `NombreCompleto` | `instituto_usuario` | VARCHAR(255) | INSERT/UPDATE |
-| **Usuario - Correo electrónico del usuario** | `UserEmail` | `instituto_usuario` | VARCHAR(255) | ⚠️ Detectar cambios |
-| **Usuario - Cargo** | `Position` | `instituto_usuario` | VARCHAR(255) | UPDATE |
-| **Usuario - Departamento** | `NombreDepartamento` → `IdDepartamento` | `instituto_departamento` | INT (FK) | Buscar/crear |
-| **Usuario - Ubicación** | `Ubicacion` | `instituto_usuario` | VARCHAR(255) | ⚠️ Sincronizar |
+| **Usuario - Identificación de usuario** | `UserId` | `instituto_Usuario` | VARCHAR(100) | ⚠️ LLAVE MAESTRA |
+| **Usuario - Nombre completo del usuario** | `NombreCompleto` | `instituto_Usuario` | VARCHAR(255) | INSERT/UPDATE |
+| **Usuario - Correo electrónico del usuario** | `UserEmail` | `instituto_Usuario` | VARCHAR(255) | ⚠️ Detectar cambios |
+| **Usuario - Cargo** | `IdPosicion` | `instituto_Posicion` → `instituto_Usuario` | INT (FK) | Buscar/crear posición |
+| **Usuario - Departamento** | `NombreDepartamento` → `IdDepartamento` | `instituto_Departamento` | INT (FK) | Buscar/crear |
+| **Usuario - Ubicación** | `Ubicacion` | `instituto_Usuario` | VARCHAR(255) | ⚠️ Sincronizar |
+| **Usuario - Nivel** | `Nivel` | `instituto_Usuario` | INT | Nivel jerárquico (1-10) |
 
 ### Columnas No Mapeadas (pero disponibles):
 
@@ -517,22 +518,21 @@ def procesar_training_report(df_training_report, conexion_bd):
 CREATE OR ALTER PROCEDURE sp_UpsertProgresoModulo
     @UserID VARCHAR(100),
     @NumeroModulo INT,
-    @EstatusModulo VARCHAR(100),
+    @EstatusModulo VARCHAR(50),
     @FechaAsignacion DATETIME,
     @FechaInicio DATETIME = NULL,
-    @FechaFinalizado DATETIME = NULL
+    @FechaFinalizacion DATETIME = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
     DECLARE @IdUsuario INT;
     DECLARE @IdModulo INT;
-    DECLARE @PorcentajeAvance DECIMAL(5,2);
 
     -- 1. Obtener IdUsuario
     SELECT @IdUsuario = IdUsuario
-    FROM instituto_usuario
-    WHERE UserID = @UserID;
+    FROM instituto_Usuario
+    WHERE UserId = @UserID;
 
     IF @IdUsuario IS NULL
     BEGIN
@@ -542,7 +542,7 @@ BEGIN
 
     -- 2. Obtener IdModulo
     SELECT @IdModulo = IdModulo
-    FROM instituto_modulo
+    FROM instituto_Modulo
     WHERE NombreModulo LIKE '%MÓDULO ' + CAST(@NumeroModulo AS VARCHAR) + '%'
       AND Activo = 1;
 
@@ -552,55 +552,41 @@ BEGIN
         RETURN;
     END
 
-    -- 3. Calcular porcentaje según estatus
-    SET @PorcentajeAvance = CASE @EstatusModulo
-        WHEN 'Terminado' THEN 100.00
-        WHEN 'Completado' THEN 100.00
-        WHEN 'En progreso' THEN 50.00
-        WHEN 'En progreso / Vencido' THEN 50.00
-        WHEN 'Registrado' THEN 0.00
-        WHEN 'Registrado / Vencido' THEN 0.00
-        ELSE 0.00
-    END;
-
-    -- 4. INSERT o UPDATE
+    -- 3. INSERT o UPDATE
     IF EXISTS (
-        SELECT 1 FROM instituto_progresomodulo
+        SELECT 1 FROM instituto_ProgresoModulo
         WHERE IdUsuario = @IdUsuario AND IdModulo = @IdModulo
     )
     BEGIN
         -- UPDATE
-        UPDATE instituto_progresomodulo
+        UPDATE instituto_ProgresoModulo
         SET
             EstatusModulo = @EstatusModulo,
-            PorcentajeAvance = @PorcentajeAvance,
             FechaInicio = COALESCE(@FechaInicio, FechaInicio),
-            FechaFinalizado = CASE
-                WHEN @EstatusModulo IN ('Terminado', 'Completado') THEN @FechaFinalizado
-                ELSE FechaFinalizado
+            FechaFinalizacion = CASE
+                WHEN @EstatusModulo IN ('Terminado', 'Completado') THEN @FechaFinalizacion
+                ELSE FechaFinalizacion
             END
         WHERE IdUsuario = @IdUsuario AND IdModulo = @IdModulo;
     END
     ELSE
     BEGIN
         -- INSERT
-        INSERT INTO instituto_progresomodulo (
+        INSERT INTO instituto_ProgresoModulo (
             IdUsuario,
             IdModulo,
             EstatusModulo,
-            PorcentajeAvance,
             FechaAsignacion,
             FechaInicio,
-            FechaFinalizado
+            FechaFinalizacion
         )
         VALUES (
             @IdUsuario,
             @IdModulo,
             @EstatusModulo,
-            @PorcentajeAvance,
             @FechaAsignacion,
             @FechaInicio,
-            CASE WHEN @EstatusModulo IN ('Terminado', 'Completado') THEN @FechaFinalizado ELSE NULL END
+            CASE WHEN @EstatusModulo IN ('Terminado', 'Completado') THEN @FechaFinalizacion ELSE NULL END
         );
     END
 
@@ -615,19 +601,19 @@ GO
 
 ### Tabla de Mapeo de Estados
 
-| Estado en Excel | Estado Normalizado BD | PorcentajeAvance | FechaFinalizado | Descripción |
-|----------------|----------------------|------------------|-----------------|-------------|
-| **Terminado** | Terminado | 100.00 | ✅ Registrada | Usuario completó el módulo exitosamente |
-| **Completado** | Terminado | 100.00 | ✅ Registrada | Sinónimo de "Terminado" |
-| **Completed** | Terminado | 100.00 | ✅ Registrada | Versión en inglés |
-| **En progreso** | En progreso | 50.00 | ❌ NULL | Usuario está cursando activamente |
-| **En progreso / Vencido** | En progreso | 50.00 | ❌ NULL | Usuario está cursando pero pasó la fecha límite |
-| **In Progress** | En progreso | 50.00 | ❌ NULL | Versión en inglés |
-| **Registrado** | Registrado | 0.00 | ❌ NULL | Usuario asignado pero no ha iniciado |
-| **Registrado / Vencido** | Registrado | 0.00 | ❌ NULL | Usuario asignado, no inició, fecha pasada |
-| **Registered** | Registrado | 0.00 | ❌ NULL | Versión en inglés |
-| **No iniciado** | No iniciado | 0.00 | ❌ NULL | Usuario no ha comenzado |
-| **Not Started** | No iniciado | 0.00 | ❌ NULL | Versión en inglés |
+| Estado en Excel | Estado Normalizado BD | FechaFinalizacion | Descripción |
+|----------------|----------------------|------------------|-------------|
+| **Terminado** | Terminado | ✅ Registrada | Usuario completó el módulo exitosamente |
+| **Completado** | Terminado | ✅ Registrada | Sinónimo de "Terminado" |
+| **Completed** | Terminado | ✅ Registrada | Versión en inglés |
+| **En progreso** | En progreso | ❌ NULL | Usuario está cursando activamente |
+| **En progreso / Vencido** | En progreso | ❌ NULL | Usuario está cursando pero pasó la fecha límite |
+| **In Progress** | En progreso | ❌ NULL | Versión en inglés |
+| **Registrado** | Registrado | ❌ NULL | Usuario asignado pero no ha iniciado |
+| **Registrado / Vencido** | Registrado | ❌ NULL | Usuario asignado, no inició, fecha pasada |
+| **Registered** | Registrado | ❌ NULL | Versión en inglés |
+| **No iniciado** | No iniciado | ❌ NULL | Usuario no ha comenzado |
+| **Not Started** | No iniciado | ❌ NULL | Versión en inglés |
 
 ### 🔍 Lógica de Relleno de Campos Vacíos
 
@@ -916,10 +902,10 @@ def validar_fecha(fecha, nombre_campo):
 
 | Validación | Regla | Acción en Error |
 |-----------|-------|-----------------|
-| Usuario existe | `UserID` debe estar en `instituto_usuario` | SKIP fila, registrar error |
-| Módulo existe | `IdModulo` debe existir en `instituto_modulo` | SKIP fila, registrar módulo faltante |
-| Fechas consistentes | `FechaInicio <= FechaFinalizado` | Ajustar o registrar advertencia |
-| Porcentaje válido | `0 <= PorcentajeAvance <= 100` | Ajustar a rango válido |
+| Usuario existe | `UserId` debe estar en `instituto_Usuario` | SKIP fila, registrar error |
+| Módulo existe | `IdModulo` debe existir en `instituto_Modulo` | SKIP fila, registrar módulo faltante |
+| Fechas consistentes | `FechaInicio <= FechaFinalizacion` | Ajustar o registrar advertencia |
+| Estatus válido | Debe estar en lista de estados permitidos | Normalizar o registrar advertencia |
 
 ---
 

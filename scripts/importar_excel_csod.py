@@ -3,6 +3,8 @@
 Script de Importación de Excel CSOD
 Smart Reports - Instituto Hutchison Ports
 
+ACTUALIZADO: Ahora usa el nuevo sistema ETL completo (etl_instituto_completo.py)
+
 USO:
     # Training Report (Progreso y Calificaciones)
     python scripts/importar_excel_csod.py training data/training_report.xlsx
@@ -11,9 +13,10 @@ USO:
     python scripts/importar_excel_csod.py usuarios data/org_planning.xlsx
 
 REQUIERE:
-    - Base de datos tngcore creada
+    - SQL Server con base de datos InstitutoHutchison
     - Tablas instituto_* creadas
     - Archivo Excel en formato CSOD
+    - pyodbc instalado
 """
 import sys
 import os
@@ -22,11 +25,10 @@ from pathlib import Path
 # Agregar src al path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.main.python.data.repositories.persistence.mysql.repositories.database_manager_instituto import (
-    DatabaseConfig,
-    InstitutoSmartReportsDB
+from src.main.python.domain.services.etl_instituto_completo import (
+    ETLInstitutoCompleto,
+    ETLConfig
 )
-from src.main.python.domain.services.excel_importer_instituto import ExcelImporterInstituto
 
 import logging
 
@@ -76,24 +78,23 @@ def validar_archivo(archivo_excel: str) -> bool:
     return True
 
 
-def importar_training_report(archivo_excel: str, db_system: InstitutoSmartReportsDB):
+def importar_training_report(archivo_excel: str, config: ETLConfig):
     """
-    Importa Training Report
+    Importa Training Report usando el nuevo ETL
 
     Args:
         archivo_excel: Ruta al Excel
-        db_system: Sistema de base de datos
+        config: Configuración del ETL
     """
     logger.info("="*70)
     logger.info("📊 IMPORTANDO TRAINING REPORT")
     logger.info("="*70)
 
     try:
-        # Crear importador
-        importador = ExcelImporterInstituto(db_system)
-
-        # Importar
-        stats = importador.importar_training_report(archivo_excel)
+        # Crear importador ETL
+        with ETLInstitutoCompleto(config) as etl:
+            # Importar
+            stats = etl.importar_training_report(archivo_excel)
 
         logger.info("\n✅ IMPORTACIÓN EXITOSA")
         return stats
@@ -105,24 +106,23 @@ def importar_training_report(archivo_excel: str, db_system: InstitutoSmartReport
         return None
 
 
-def importar_org_planning(archivo_excel: str, db_system: InstitutoSmartReportsDB):
+def importar_org_planning(archivo_excel: str, config: ETLConfig):
     """
-    Importa Org Planning (Usuarios)
+    Importa Org Planning (Usuarios) usando el nuevo ETL
 
     Args:
         archivo_excel: Ruta al Excel
-        db_system: Sistema de base de datos
+        config: Configuración del ETL
     """
     logger.info("="*70)
     logger.info("👥 IMPORTANDO ORG PLANNING (USUARIOS)")
     logger.info("="*70)
 
     try:
-        # Crear importador
-        importador = ExcelImporterInstituto(db_system)
-
-        # Importar
-        stats = importador.importar_org_planning(archivo_excel)
+        # Crear importador ETL
+        with ETLInstitutoCompleto(config) as etl:
+            # Importar
+            stats = etl.importar_org_planning(archivo_excel)
 
         logger.info("\n✅ IMPORTACIÓN EXITOSA")
         return stats
@@ -155,27 +155,28 @@ def main():
     if not validar_archivo(archivo_excel):
         return 1
 
-    # Configurar conexión a MySQL
-    logger.info("\n🔌 Conectando a base de datos...")
+    # Configurar conexión a SQL Server
+    logger.info("\n🔌 Configurando conexión a SQL Server...")
 
-    config = DatabaseConfig(
-        host='localhost',
-        database='tngcore',
-        user='root',
-        password='Xbox360xd',  # ⚠️ CAMBIAR según tu configuración
-        port=3306
+    config = ETLConfig(
+        server="localhost",                   # ⚠️ CAMBIAR según tu servidor
+        database="InstitutoHutchison",
+        username=None,                        # None = Windows Authentication
+        password=None,                        # O especificar credenciales SQL Server
+        driver="ODBC Driver 17 for SQL Server",
+        batch_size=1000,
+        enable_validation=True,
+        auto_create_modules=True
     )
 
     try:
-        # Conectar
-        db_system = InstitutoSmartReportsDB(config)
-        logger.info("✅ Conexión exitosa a tngcore")
+        logger.info("✅ Configuración lista")
 
         # Importar según tipo
         if tipo == 'training':
-            stats = importar_training_report(archivo_excel, db_system)
+            stats = importar_training_report(archivo_excel, config)
         elif tipo == 'usuarios':
-            stats = importar_org_planning(archivo_excel, db_system)
+            stats = importar_org_planning(archivo_excel, config)
         else:
             logger.error(f"❌ Tipo desconocido: {tipo}")
             return 1
@@ -198,12 +199,6 @@ def main():
         import traceback
         traceback.print_exc()
         return 1
-
-    finally:
-        # Cerrar conexión
-        if 'db_system' in locals():
-            db_system.close()
-            logger.info("✅ Conexión cerrada")
 
 
 if __name__ == "__main__":

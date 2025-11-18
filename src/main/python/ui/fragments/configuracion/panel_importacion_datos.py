@@ -1,6 +1,8 @@
 """
 Panel de Importación y Cruce de Datos - Sistema de Capacitación
 Sistema mejorado con validación, preview, matching, rollback y export
+
+ACTUALIZADO: Ahora usa el nuevo sistema ETL completo (etl_instituto_completo.py)
 """
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
@@ -8,7 +10,6 @@ import threading
 import pandas as pd
 from src.main.res.config.gestor_temas import get_theme_manager
 from src.main.res.config.themes import HUTCHISON_COLORS
-from src.main.python.domain.services.importador_capacitacion import ImportadorCapacitacion
 from src.main.python.ui.widgets.importacion import (
     DialogoMatching,
     BarraProgresoImportacion,
@@ -918,13 +919,24 @@ class PanelImportacionDatos(ctk.CTkFrame):
             self.barra_progreso = None
 
     def _proceso_importacion(self, importar_training, importar_org):
-        """Proceso de importación (thread separado) - OPTIMIZADO"""
+        """Proceso de importación (thread separado) - Usando nuevo sistema ETL completo"""
         try:
-            # Crear importador OPTIMIZADO (15x más rápido: 45s → 3s)
-            from src.main.python.domain.services.importador_capacitacion_optimizado import ImportadorCapacitacionOptimizado
+            # Importar el nuevo sistema ETL completo
+            from src.main.python.domain.services.etl_instituto_completo import (
+                ETLInstitutoCompleto,
+                ETLConfig
+            )
 
-            cursor = self.db_connection.cursor() if hasattr(self.db_connection, 'cursor') else None
-            importador = ImportadorCapacitacionOptimizado(self.db_connection, cursor)
+            # Configurar ETL (adaptar según configuración)
+            config = ETLConfig(
+                server="localhost",
+                database="InstitutoHutchison",
+                username=None,  # None = Windows Authentication
+                password=None,
+                batch_size=1000,
+                enable_validation=True,
+                auto_create_modules=True
+            )
 
             # Contar registros totales para la barra de progreso
             total_registros = 0
@@ -946,39 +958,59 @@ class PanelImportacionDatos(ctk.CTkFrame):
                 self.after(0, lambda: self.barra_progreso.iniciar(total_registros, titulo))
 
             procesados = 0
+            stats_final = {
+                'usuarios_nuevos': 0,
+                'usuarios_actualizados': 0,
+                'progresos_insertados': 0,
+                'progresos_actualizados': 0,
+                'calificaciones_registradas': 0,
+                'modulos_creados': 0
+            }
 
-            # Importar Training Report
-            if importar_training:
-                self.log_thread("\n📊 Importando Training Report...")
-                if self.barra_progreso:
-                    self.after(0, lambda: self.barra_progreso.actualizar(estado="Procesando Training Report..."))
+            # Crear instancia del ETL (context manager)
+            with ETLInstitutoCompleto(config) as etl:
+                # Importar Training Report
+                if importar_training:
+                    self.log_thread("\n📊 Importando Training Report...")
+                    if self.barra_progreso:
+                        self.after(0, lambda: self.barra_progreso.actualizar(estado="Procesando Training Report..."))
 
-                stats_training = importador.importar_training_report(self.archivo_training)
+                    stats_training = etl.importar_training_report(self.archivo_training)
 
-                df_train = pd.read_excel(self.archivo_training)
-                procesados += len(df_train)
-                if self.barra_progreso:
-                    self.after(0, lambda p=procesados: self.barra_progreso.actualizar(procesados=p))
+                    # Acumular estadísticas
+                    stats_final['progresos_insertados'] += stats_training.get('progresos_insertados', 0)
+                    stats_final['progresos_actualizados'] += stats_training.get('progresos_actualizados', 0)
+                    stats_final['calificaciones_registradas'] += stats_training.get('calificaciones_registradas', 0)
+                    stats_final['modulos_creados'] += stats_training.get('modulos_creados', 0)
 
-            # Importar Org Planning
-            if importar_org:
-                self.log_thread("\n👥 Importando Org Planning...")
-                if self.barra_progreso:
-                    self.after(0, lambda: self.barra_progreso.actualizar(estado="Procesando Org Planning..."))
+                    df_train = pd.read_excel(self.archivo_training)
+                    procesados += len(df_train)
+                    if self.barra_progreso:
+                        self.after(0, lambda p=procesados: self.barra_progreso.actualizar(procesados=p))
 
-                stats_org = importador.importar_org_planning(self.archivo_org_planning)
+                # Importar Org Planning
+                if importar_org:
+                    self.log_thread("\n👥 Importando Org Planning...")
+                    if self.barra_progreso:
+                        self.after(0, lambda: self.barra_progreso.actualizar(estado="Procesando Org Planning..."))
 
-                df_org = pd.read_excel(self.archivo_org_planning)
-                procesados += len(df_org)
-                if self.barra_progreso:
-                    self.after(0, lambda p=procesados: self.barra_progreso.actualizar(procesados=p))
+                    stats_org = etl.importar_org_planning(self.archivo_org_planning)
+
+                    # Acumular estadísticas
+                    stats_final['usuarios_nuevos'] += stats_org.get('usuarios_nuevos', 0)
+                    stats_final['usuarios_actualizados'] += stats_org.get('usuarios_actualizados', 0)
+
+                    df_org = pd.read_excel(self.archivo_org_planning)
+                    procesados += len(df_org)
+                    if self.barra_progreso:
+                        self.after(0, lambda p=procesados: self.barra_progreso.actualizar(procesados=p))
 
             # Finalizar progreso
             if self.barra_progreso:
                 self.after(0, lambda: self.barra_progreso.finalizar(exito=True, mensaje="Todos los datos importados correctamente"))
 
             # Reporte final
-            reporte = importador.generar_reporte()
+            reporte = self._generar_reporte_final(stats_final)
             self.log_thread("\n" + reporte)
 
             # Notificar éxito
@@ -1263,6 +1295,54 @@ class PanelImportacionDatos(ctk.CTkFrame):
             command=lambda: self._eliminar_backup(backup['id'], ventana_padre)
         )
         btn_eliminar.pack(side='left', padx=3)
+
+    def _generar_reporte_final(self, stats):
+        """
+        Genera reporte final de estadísticas de importación
+
+        Args:
+            stats: Diccionario con estadísticas
+
+        Returns:
+            str: Reporte formateado
+        """
+        reporte = []
+        reporte.append("="*70)
+        reporte.append("📊 REPORTE FINAL DE IMPORTACIÓN")
+        reporte.append("="*70)
+
+        if stats.get('usuarios_nuevos', 0) > 0 or stats.get('usuarios_actualizados', 0) > 0:
+            reporte.append("\n👥 USUARIOS:")
+            reporte.append(f"  • Nuevos:       {stats.get('usuarios_nuevos', 0):,}")
+            reporte.append(f"  • Actualizados: {stats.get('usuarios_actualizados', 0):,}")
+
+        if stats.get('progresos_insertados', 0) > 0 or stats.get('progresos_actualizados', 0) > 0:
+            reporte.append("\n📋 PROGRESOS DE MÓDULOS:")
+            reporte.append(f"  • Insertados:   {stats.get('progresos_insertados', 0):,}")
+            reporte.append(f"  • Actualizados: {stats.get('progresos_actualizados', 0):,}")
+
+        if stats.get('calificaciones_registradas', 0) > 0:
+            reporte.append("\n📝 EVALUACIONES:")
+            reporte.append(f"  • Calificaciones: {stats.get('calificaciones_registradas', 0):,}")
+
+        if stats.get('modulos_creados', 0) > 0:
+            reporte.append("\n🆕 MÓDULOS CREADOS:")
+            reporte.append(f"  • Total:        {stats.get('modulos_creados', 0):,}")
+
+        total = sum([
+            stats.get('usuarios_nuevos', 0),
+            stats.get('usuarios_actualizados', 0),
+            stats.get('progresos_insertados', 0),
+            stats.get('progresos_actualizados', 0),
+            stats.get('calificaciones_registradas', 0)
+        ])
+
+        reporte.append(f"\n📊 TOTAL DE REGISTROS PROCESADOS: {total:,}")
+        reporte.append("="*70)
+        reporte.append("✅ IMPORTACIÓN COMPLETADA EXITOSAMENTE")
+        reporte.append("="*70)
+
+        return '\n'.join(reporte)
 
     def _restaurar_backup(self, backup_id, ventana):
         """Restaurar un backup"""
