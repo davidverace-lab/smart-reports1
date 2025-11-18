@@ -248,7 +248,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             header,
             text="⛶ Ver Grande",
             font=('Montserrat', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             text_color='white',
             corner_radius=8,
@@ -320,7 +320,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             header_content,
             text="← Volver",
             font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             text_color='white',
             corner_radius=10,
@@ -378,7 +378,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         values = self.current_chart_data.get('values', [])
 
         if self.current_chart_type == 'barras':
-            bars = ax.bar(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            bars = ax.bar(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
             # Etiquetas en barras
             for bar in bars:
                 height = bar.get_height()
@@ -389,8 +389,8 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=12)
 
         elif self.current_chart_type == 'dona':
-            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['ports_sea_blue'],
-                     HUTCHISON_COLORS['ports_sky_blue'], '#FFC107', '#FF5722']
+            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['primary'],
+                     HUTCHISON_COLORS['primary'], '#FFC107', '#FF5722']
             wedges, texts, autotexts = ax.pie(
                 values, labels=labels, autopct='%1.1f%%', startangle=90,
                 colors=colors[:len(values)], textprops={'fontsize': 12, 'fontweight': 'bold'}
@@ -400,10 +400,10 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             ax.axis('equal')
 
         elif self.current_chart_type == 'linea':
-            ax.plot(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'],
+            ax.plot(labels, values, color=HUTCHISON_COLORS['primary'],
                    linewidth=3, marker='o', markersize=8)
             ax.fill_between(range(len(labels)), values, alpha=0.3,
-                           color=HUTCHISON_COLORS['ports_sky_blue'])
+                           color=HUTCHISON_COLORS['primary'])
             ax.set_xlabel('Tiempo', fontsize=14)
             ax.set_ylabel('Valor', fontsize=14)
 
@@ -425,7 +425,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
         # === TOOLTIPS INTERACTIVOS (HOVER) ===
         # Crear anotación que se mostrará al hacer hover
         annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
-                           bbox=dict(boxstyle="round,pad=0.8", fc=HUTCHISON_COLORS['ports_sea_blue'],
+                           bbox=dict(boxstyle="round,pad=0.8", fc=HUTCHISON_COLORS['primary'],
                                     ec='white', lw=2, alpha=0.95),
                            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0.3",
                                           color='white', lw=2),

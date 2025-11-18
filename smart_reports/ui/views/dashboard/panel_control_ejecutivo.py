@@ -238,7 +238,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             title="Total de Usuarios",
             value="1,525",
             subtitle="Usuarios activos en el sistema",
-            color=HUTCHISON_COLORS['ports_sky_blue']
+            color=HUTCHISON_COLORS['primary']
         ).grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
         # Card 2: Módulo Actual
@@ -296,7 +296,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             container,
             text="📊 Dashboards Interactivos - Sistema Ejecutivo",
             font=('Montserrat', 20, 'bold'),
-            text_color=HUTCHISON_COLORS['ports_sea_blue']
+            text_color=HUTCHISON_COLORS['primary']
         ).pack(anchor='w', padx=20, pady=(10, 20))
 
         # Grid 2x3
@@ -386,7 +386,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             header,
             text="⛶ Ver Grande",
             font=('Montserrat', 10, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             text_color='white',
             corner_radius=8,
@@ -433,22 +433,22 @@ class PanelControlEjecutivo(ctk.CTkFrame):
 
         # Renderizar según tipo
         if chart_type == 'barras':
-            ax.bar(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            ax.bar(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=7)
 
         elif chart_type == 'barras_h':
-            ax.barh(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            ax.barh(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
             ax.tick_params(axis='y', labelsize=7)
 
         elif chart_type == 'dona':
-            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['ports_sea_blue'],
-                     HUTCHISON_COLORS['ports_sky_blue'], '#FFC107', '#FF5722']
+            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['primary'],
+                     HUTCHISON_COLORS['primary'], '#FFC107', '#FF5722']
             ax.pie(values, labels=None, colors=colors[:len(values)], startangle=90)
             ax.axis('equal')
 
         elif chart_type == 'linea':
-            ax.plot(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], linewidth=2, marker='o')
-            ax.fill_between(range(len(labels)), values, alpha=0.3, color=HUTCHISON_COLORS['ports_sky_blue'])
+            ax.plot(labels, values, color=HUTCHISON_COLORS['primary'], linewidth=2, marker='o')
+            ax.fill_between(range(len(labels)), values, alpha=0.3, color=HUTCHISON_COLORS['primary'])
             plt.setp(ax.xaxis.get_majorticklabels(), fontsize=7)
 
         # Estilo minimalista
@@ -491,7 +491,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             header_content,
             text="← Volver",
             font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             text_color='white',
             corner_radius=10,
@@ -548,7 +548,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         values = self.current_chart_data.get('values', [])
 
         if self.current_chart_type == 'barras':
-            bars = ax.bar(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            bars = ax.bar(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
             # Etiquetas en barras
             for bar in bars:
                 height = bar.get_height()
@@ -559,7 +559,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=12)
 
         elif self.current_chart_type == 'barras_h':
-            bars = ax.barh(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'], alpha=0.8)
+            bars = ax.barh(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
             # Etiquetas en barras
             for bar in bars:
                 width = bar.get_width()
@@ -570,8 +570,8 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             ax.tick_params(axis='y', labelsize=11)
 
         elif self.current_chart_type == 'dona':
-            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['ports_sea_blue'],
-                     HUTCHISON_COLORS['ports_sky_blue'], '#FFC107', '#FF5722']
+            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['primary'],
+                     HUTCHISON_COLORS['primary'], '#FFC107', '#FF5722']
             wedges, texts, autotexts = ax.pie(
                 values, labels=labels, autopct='%1.1f%%', startangle=90,
                 colors=colors[:len(values)], textprops={'fontsize': 12, 'fontweight': 'bold'}
@@ -581,10 +581,10 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             ax.axis('equal')
 
         elif self.current_chart_type == 'linea':
-            ax.plot(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'],
+            ax.plot(labels, values, color=HUTCHISON_COLORS['primary'],
                    linewidth=3, marker='o', markersize=10)
             ax.fill_between(range(len(labels)), values, alpha=0.3,
-                           color=HUTCHISON_COLORS['ports_sky_blue'])
+                           color=HUTCHISON_COLORS['primary'])
             # Etiquetas en puntos
             for i, v in enumerate(values):
                 ax.text(i, v, str(int(v)), ha='center', va='bottom', fontsize=11, fontweight='bold')
@@ -610,7 +610,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         # === TOOLTIPS INTERACTIVOS (HOVER) ===
         # Crear anotación que se mostrará al hacer hover
         annot = ax.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
-                           bbox=dict(boxstyle="round,pad=0.8", fc=HUTCHISON_COLORS['ports_sea_blue'],
+                           bbox=dict(boxstyle="round,pad=0.8", fc=HUTCHISON_COLORS['primary'],
                                     ec='white', lw=2, alpha=0.95),
                            arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0.3",
                                           color='white', lw=2),

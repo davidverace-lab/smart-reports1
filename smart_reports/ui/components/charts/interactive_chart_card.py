@@ -118,7 +118,7 @@ class InteractiveChartCard(ctk.CTkFrame):
                 height=32,
                 font=('Segoe UI', 16, 'bold'),
                 fg_color=HUTCHISON_COLORS['aqua_green'],
-                hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+                hover_color=HUTCHISON_COLORS['primary'],
                 command=lambda: self.on_fullscreen_callback(self)
             )
             fullscreen_btn.pack(side='left', padx=2)
@@ -130,8 +130,8 @@ class InteractiveChartCard(ctk.CTkFrame):
             width=70,
             height=30,
             font=('Segoe UI', 11),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
+            hover_color=HUTCHISON_COLORS['primary'],
             command=self._toggle_sort
         )
         self.sort_btn.pack(side='left', padx=5)
@@ -313,7 +313,7 @@ class InteractiveChartCard(ctk.CTkFrame):
                 va='center',
                 fontsize=11,
                 fontweight='bold',
-                color=HUTCHISON_COLORS['ports_sea_blue']
+                color=HUTCHISON_COLORS['primary']
             )
 
         # Establecer límites para padding
@@ -391,7 +391,7 @@ class InteractiveChartCard(ctk.CTkFrame):
             ha='center', va='center',
             fontsize=22,
             fontweight='bold',
-            color=HUTCHISON_COLORS['ports_sky_blue']
+            color=HUTCHISON_COLORS['primary']
         )
         self.ax.text(
             0, -0.15,
@@ -580,14 +580,14 @@ class InteractiveChartCard(ctk.CTkFrame):
                 bbox=dict(
                     boxstyle="round,pad=0.8",
                     fc='#1a1d2e',
-                    ec=HUTCHISON_COLORS['ports_sky_blue'],
+                    ec=HUTCHISON_COLORS['primary'],
                     alpha=0.98,
                     linewidth=2.5
                 ),
                 arrowprops=dict(
                     arrowstyle='->',
                     connectionstyle='arc3,rad=0.3',
-                    color=HUTCHISON_COLORS['ports_sky_blue'],
+                    color=HUTCHISON_COLORS['primary'],
                     lw=2.5
                 ),
                 fontsize=10,

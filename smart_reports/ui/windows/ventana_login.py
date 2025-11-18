@@ -112,7 +112,7 @@ class LoginWindow:
             content_frame,
             text="ACCESO AL SISTEMA",
             font=('Montserrat', 16, 'bold'),
-            text_color=HUTCHISON_COLORS['ports_sky_blue']
+            text_color=HUTCHISON_COLORS['primary']
         )
         access_label.pack(pady=(0, 20))
 
@@ -155,7 +155,7 @@ class LoginWindow:
                 content_frame,
                 text="⚓",  # Icono de ancla para tema portuario
                 font=('Montserrat', 64),
-                text_color=HUTCHISON_COLORS['ports_sky_blue']
+                text_color=HUTCHISON_COLORS['primary']
             )
             icon_label.pack(pady=(0, 20))
 
@@ -244,8 +244,8 @@ class LoginWindow:
             content_frame,
             text="Acceder",
             font=('Montserrat', 16, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
+            hover_color=HUTCHISON_COLORS['primary'],
             text_color='white',
             height=50,
             width=350,

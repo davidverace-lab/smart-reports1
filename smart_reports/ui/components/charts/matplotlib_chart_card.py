@@ -110,7 +110,7 @@ class MatplotlibChartCard(ctk.CTkFrame):
             badge_frame,
             text='🌐',
             font=('Montserrat', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#001a3d',
             text_color='white',
             corner_radius=6,
@@ -196,7 +196,7 @@ class MatplotlibChartCard(ctk.CTkFrame):
         values = datos.get('values', [])
 
         # Crear barras con color Hutchison
-        bars = ax.barh(labels, values, color=HUTCHISON_COLORS['ports_sea_blue'])
+        bars = ax.barh(labels, values, color=HUTCHISON_COLORS['primary'])
 
         # Agregar valores en las barras
         for i, (bar, value) in enumerate(zip(bars, values)):
@@ -221,10 +221,10 @@ class MatplotlibChartCard(ctk.CTkFrame):
 
         # Colores Hutchison
         colors = [
-            HUTCHISON_COLORS['ports_sea_blue'],
-            HUTCHISON_COLORS['ports_sky_blue'],
+            HUTCHISON_COLORS['primary'],
+            HUTCHISON_COLORS['primary'],
             HUTCHISON_COLORS['aqua_green'],
-            HUTCHISON_COLORS['ports_horizon_blue'],
+            HUTCHISON_COLORS['info'],
             '#ffa94d',
             '#51cf66'
         ]
@@ -255,9 +255,9 @@ class MatplotlibChartCard(ctk.CTkFrame):
 
         # Crear línea
         x = np.arange(len(labels))
-        ax.plot(x, values, color=HUTCHISON_COLORS['ports_sky_blue'],
+        ax.plot(x, values, color=HUTCHISON_COLORS['primary'],
                linewidth=2.5, marker='o', markersize=6,
-               markerfacecolor=HUTCHISON_COLORS['ports_sea_blue'],
+               markerfacecolor=HUTCHISON_COLORS['primary'],
                markeredgecolor='white', markeredgewidth=1.5)
 
         # Etiquetas
@@ -282,10 +282,10 @@ class MatplotlibChartCard(ctk.CTkFrame):
 
         # Crear área
         x = np.arange(len(labels))
-        ax.fill_between(x, values, alpha=0.4, color=HUTCHISON_COLORS['ports_sky_blue'])
-        ax.plot(x, values, color=HUTCHISON_COLORS['ports_sea_blue'],
+        ax.fill_between(x, values, alpha=0.4, color=HUTCHISON_COLORS['primary'])
+        ax.plot(x, values, color=HUTCHISON_COLORS['primary'],
                linewidth=2.5, marker='o', markersize=6,
-               markerfacecolor=HUTCHISON_COLORS['ports_sea_blue'],
+               markerfacecolor=HUTCHISON_COLORS['primary'],
                markeredgecolor='white', markeredgewidth=1.5)
 
         # Etiquetas

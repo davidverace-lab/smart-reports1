@@ -104,13 +104,13 @@ class GraficaExpandible(ctk.CTkFrame):
             text="⛶ Expandir",
             font=('Montserrat', 11, 'bold'),
             fg_color='transparent',
-            text_color=HUTCHISON_COLORS['ports_sea_blue'],
+            text_color=HUTCHISON_COLORS['primary'],
             hover_color=theme['surface_light'],
             corner_radius=8,
             height=28,
             width=100,
             border_width=1,
-            border_color=HUTCHISON_COLORS['ports_sea_blue'],
+            border_color=HUTCHISON_COLORS['primary'],
             command=self._expand_chart
         )
         expand_btn.pack(side='right')
@@ -162,7 +162,7 @@ class GraficaExpandible(ctk.CTkFrame):
             header_content,
             text="← Volver",
             font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             text_color='white',
             corner_radius=10,
@@ -322,7 +322,7 @@ class GraficaExpandible(ctk.CTkFrame):
 
         self.ax.plot(
             x, y,
-            color=HUTCHISON_COLORS['ports_sea_blue'],
+            color=HUTCHISON_COLORS['primary'],
             linewidth=2.5,
             marker='o',
             markersize=6,
@@ -332,7 +332,7 @@ class GraficaExpandible(ctk.CTkFrame):
         )
 
         # Área bajo la curva
-        self.ax.fill_between(x, y, alpha=0.2, color=HUTCHISON_COLORS['ports_sea_blue'])
+        self.ax.fill_between(x, y, alpha=0.2, color=HUTCHISON_COLORS['primary'])
 
         self.ax.set_xlabel('Tiempo', fontsize=10)
         self.ax.set_ylabel('Valor', fontsize=10)
@@ -348,8 +348,8 @@ class GraficaExpandible(ctk.CTkFrame):
         # Paleta de colores Hutchison
         colors = [
             HUTCHISON_COLORS['aqua_green'],
-            HUTCHISON_COLORS['ports_sea_blue'],
-            HUTCHISON_COLORS['ports_sky_blue'],
+            HUTCHISON_COLORS['primary'],
+            HUTCHISON_COLORS['primary'],
             '#FFC107',
             '#FF5722'
         ]
@@ -380,8 +380,8 @@ class GraficaExpandible(ctk.CTkFrame):
         self.ax.fill_between(
             x, y,
             alpha=0.5,
-            color=HUTCHISON_COLORS['ports_sky_blue'],
-            edgecolor=HUTCHISON_COLORS['ports_sea_blue'],
+            color=HUTCHISON_COLORS['primary'],
+            edgecolor=HUTCHISON_COLORS['primary'],
             linewidth=2
         )
 

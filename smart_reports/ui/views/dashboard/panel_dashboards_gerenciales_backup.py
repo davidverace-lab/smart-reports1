@@ -152,7 +152,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         self._create_metric_card(
             metrics_frame, "👥", "Total de Usuarios", "1,525",
-            "Usuarios activos en el sistema", HUTCHISON_COLORS['ports_sky_blue']
+            "Usuarios activos en el sistema", HUTCHISON_COLORS['primary']
         ).grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
         self._create_metric_card_modulo(
@@ -222,7 +222,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         # Título
         title = ctk.CTkLabel(
             container, text="📊 Dashboards Interactivos - Sistema Ejecutivo",
-            font=('Segoe UI', 24, 'bold'), text_color=HUTCHISON_COLORS['ports_sea_blue']
+            font=('Segoe UI', 24, 'bold'), text_color=HUTCHISON_COLORS['primary']
         )
         title.pack(anchor='w', padx=20, pady=(10, 20))
 
@@ -305,7 +305,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         # ═══ HEADER CON BOTÓN "← REGRESAR" ═══
         header = ctk.CTkFrame(
             self.expanded_view_frame,
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             height=80
         )
         header.pack(fill='x', side='top')

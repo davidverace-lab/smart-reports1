@@ -85,7 +85,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             header,
             text="✨ Smart Import",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             text_color='white',
             corner_radius=6,
             padx=12,
@@ -211,8 +211,8 @@ class PanelImportacionDatos(ctk.CTkFrame):
             header,
             text="📁 Seleccionar",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
+            hover_color=HUTCHISON_COLORS['primary'],
             command=button_command,
             width=120,
             height=32
@@ -263,7 +263,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             buttons_frame,
             text="📊 Training Report",
             font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#001a3d',
             text_color='white',
             height=42,
@@ -277,7 +277,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             buttons_frame,
             text="👥 Org Planning",
             font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#001a3d',
             text_color='white',
             height=42,
@@ -291,7 +291,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             buttons_frame,
             text="✅ Validación",
             font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#001a3d',
             text_color='white',
             height=42,
@@ -394,7 +394,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="🔍 Validar Datos",
             font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
             height=45,
@@ -408,7 +408,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="🚀 Importar Todo",
             font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
             height=45,
@@ -422,7 +422,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="📊 Solo Training",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
             height=45,
@@ -436,7 +436,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="👥 Solo Org",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
             height=45,
@@ -459,7 +459,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             tools_grid,
             text="⚙ Configurar Columnas",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
             border_width=0,
@@ -474,7 +474,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             tools_grid,
             text="💾 Exportar Log",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
             border_width=0,
@@ -489,7 +489,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             tools_grid,
             text="🔄 Ver Backups",
             font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],  # Azul navy
+            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
             border_width=0,
@@ -1183,7 +1183,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
         ventana.geometry(f"700x500+{x}+{y}")
 
         # Header
-        header = ctk.CTkFrame(ventana, fg_color=HUTCHISON_COLORS['ports_sea_blue'], height=60)
+        header = ctk.CTkFrame(ventana, fg_color=HUTCHISON_COLORS['primary'], height=60)
         header.pack(fill='x')
         header.pack_propagate(False)
 

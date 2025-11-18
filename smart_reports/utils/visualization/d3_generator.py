@@ -185,7 +185,7 @@ class MotorTemplatesD3:
         }}
 
         .btn {{
-            background: {HUTCHISON_COLORS['ports_sky_blue']};
+            background: {HUTCHISON_COLORS['primary']};
             color: white;
             border: none;
             padding: 10px 20px;
@@ -199,7 +199,7 @@ class MotorTemplatesD3:
         }}
 
         .btn:hover {{
-            background: {HUTCHISON_COLORS['ports_horizon_blue']};
+            background: {HUTCHISON_COLORS['info']};
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 155, 222, 0.4);
         }}
@@ -422,7 +422,7 @@ class MotorTemplatesD3:
                 .append("text")
                 .attr("class", "value-label")
                 .attr("text-anchor", "middle")
-                .attr("fill", "{HUTCHISON_COLORS['ports_sky_blue']}")
+                .attr("fill", "{HUTCHISON_COLORS['primary']}")
                 .attr("font-weight", "600")
                 .attr("font-size", "13px")
                 .attr("y", height);
@@ -605,7 +605,7 @@ class MotorTemplatesD3:
             .attr("text-anchor", "middle")
             .attr("font-size", "32px")
             .attr("font-weight", "800")
-            .attr("fill", "{HUTCHISON_COLORS['ports_sky_blue']}")
+            .attr("fill", "{HUTCHISON_COLORS['primary']}")
             .attr("y", -10)
             .style("opacity", 0)
             .text(d3.sum(values).toLocaleString())

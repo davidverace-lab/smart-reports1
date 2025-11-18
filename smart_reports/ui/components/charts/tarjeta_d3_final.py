@@ -173,7 +173,7 @@ class D3ChartCard(ctk.CTkFrame):
 
         # Badge embebido/navegador
         mode_text = 'Embebido' if TKINTERWEB_AVAILABLE else 'Navegador'
-        mode_color = HUTCHISON_COLORS['ports_sky_blue'] if TKINTERWEB_AVAILABLE else '#ffa94d'
+        mode_color = HUTCHISON_COLORS['primary'] if TKINTERWEB_AVAILABLE else '#ffa94d'
 
         mode_badge = ctk.CTkLabel(
             badge_frame,
@@ -208,7 +208,7 @@ class D3ChartCard(ctk.CTkFrame):
             badge_frame,
             text='🌐',
             font=('Montserrat', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#001a3d',  # Versión más oscura de ports_sea_blue
             text_color='white',
             corner_radius=6,
@@ -369,8 +369,8 @@ class D3ChartCard(ctk.CTkFrame):
             center_frame,
             text='🚀 Abrir Gráfico Interactivo',
             font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['ports_sky_blue'],
-            hover_color=HUTCHISON_COLORS['ports_sea_blue'],
+            fg_color=HUTCHISON_COLORS['primary'],
+            hover_color=HUTCHISON_COLORS['primary'],
             text_color='white',
             corner_radius=12,
             height=50,

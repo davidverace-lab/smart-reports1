@@ -87,7 +87,7 @@ class WebViewWindow:
 
     def _create_header(self):
         """Crear header con botón cerrar"""
-        header = Frame(self.window, bg=HUTCHISON_COLORS['ports_sea_blue'], height=60)
+        header = Frame(self.window, bg=HUTCHISON_COLORS['primary'], height=60)
         header.pack(fill='x', padx=20, pady=(20, 10))
         header.pack_propagate(False)
 
@@ -96,7 +96,7 @@ class WebViewWindow:
             header,
             text=f"📊 {self.title}",
             font=('Montserrat', 18, 'bold'),
-            bg=HUTCHISON_COLORS['ports_sea_blue'],
+            bg=HUTCHISON_COLORS['primary'],
             fg='white'
         )
         title_label.pack(side='left', padx=20)
