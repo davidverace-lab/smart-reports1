@@ -7,8 +7,8 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
-from src.main.res.config.themes import EXECUTIVE_CHART_COLORS, HUTCHISON_COLORS
-from src.main.python.ui.widgets.charts.grafico_interactivo_plotly import PlotlyInteractiveChart
+from smart_reports.config.themes import EXECUTIVE_CHART_COLORS, HUTCHISON_COLORS
+from smart_reports.ui.components.charts.grafico_interactivo_plotly import PlotlyInteractiveChart
 
 
 class InteractiveChartsPanel(ctk.CTkFrame):

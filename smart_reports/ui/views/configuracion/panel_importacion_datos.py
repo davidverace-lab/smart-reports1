@@ -8,9 +8,9 @@ import customtkinter as ctk
 from tkinter import filedialog, messagebox
 import threading
 import pandas as pd
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.res.config.themes import HUTCHISON_COLORS
-from src.main.python.ui.widgets.importacion import (
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.config.themes import HUTCHISON_COLORS
+from smart_reports.ui.components.importacion import (
     DialogoMatching,
     BarraProgresoImportacion,
     ExportadorLogs,
@@ -922,7 +922,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
         """Proceso de importación (thread separado) - Usando nuevo sistema ETL completo"""
         try:
             # Importar el nuevo sistema ETL completo
-            from src.main.python.domain.services.etl_instituto_completo import (
+            from smart_reports.core.services.etl_instituto_completo import (
                 ETLInstitutoCompleto,
                 ETLConfig
             )

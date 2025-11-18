@@ -5,8 +5,8 @@ Sistema de UI moderno para dashboards
 import customtkinter as ctk
 import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.python.ui.widgets.animations import AnimationEngine, EasingFunctions, create_gradient_colors
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.ui.components.animations import AnimationEngine, EasingFunctions, create_gradient_colors
 import math
 
 

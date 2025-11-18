@@ -23,8 +23,8 @@ except ImportError:
     REPORTLAB_AVAILABLE = False
     print("ReportLab no está instalado. Instala con: pip install reportlab")
 
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.python.ui.widgets.charts.previsualizador_reporte import PrevisualizadorReporte
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.ui.components.charts.previsualizador_reporte import PrevisualizadorReporte
 
 
 class UserReportPanel(ctk.CTkFrame):

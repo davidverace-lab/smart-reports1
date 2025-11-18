@@ -2,7 +2,7 @@
 Componente TopBar - Barra superior con bienvenida y branding
 """
 import customtkinter as ctk
-from src.main.res.config.gestor_temas import get_theme_manager
+from smart_reports.config.gestor_temas import get_theme_manager
 
 
 class TopBar(ctk.CTkFrame):

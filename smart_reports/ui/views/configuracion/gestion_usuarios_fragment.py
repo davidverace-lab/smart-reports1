@@ -5,7 +5,7 @@ Separado según arquitectura Android Studio
 import customtkinter as ctk
 from tkinter import messagebox
 import tkinter.ttk as ttk
-from src.main.res.config.gestor_temas import get_theme_manager
+from smart_reports.config.gestor_temas import get_theme_manager
 
 
 class GestionUsuariosFragment(ctk.CTkFrame):

@@ -4,8 +4,8 @@ Separado según arquitectura Android Studio
 """
 import customtkinter as ctk
 from tkinter import messagebox
-from src.main.res.config.gestor_temas import get_theme_manager
-from src.main.python.ui.widgets.charts.tarjeta_configuracion import ConfigCard
+from smart_reports.config.gestor_temas import get_theme_manager
+from smart_reports.ui.components.charts.tarjeta_configuracion import ConfigCard
 
 
 class ConfiguracionPrincipalFragment(ctk.CTkFrame):

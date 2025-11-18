@@ -9,7 +9,7 @@ import os
 from PIL import Image
 
 # Android Studio structure imports
-from src.main.res.config.themes import HUTCHISON_COLORS, DARK_THEME
+from smart_reports.config.themes import HUTCHISON_COLORS, DARK_THEME
 
 
 class LoginWindow:

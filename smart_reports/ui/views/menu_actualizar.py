@@ -2,7 +2,7 @@
 MenuActualizar - Módulo de interfaz para Actualización/Importación
 Separado de ventana principal para mejor organización
 """
-from src.main.python.ui.fragments.configuracion.panel_importacion_datos import PanelImportacionDatos
+from smart_reports.ui.views.configuracion.panel_importacion_datos import PanelImportacionDatos
 
 
 def show_actualizar_menu(parent, db_connection, file_controller):

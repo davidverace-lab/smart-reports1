@@ -4,7 +4,7 @@ Separado según arquitectura Android Studio
 """
 import customtkinter as ctk
 from tkinter import messagebox
-from src.main.res.config.gestor_temas import get_theme_manager
+from smart_reports.config.gestor_temas import get_theme_manager
 
 
 class SoporteTicketsFragment(ctk.CTkFrame):
@@ -219,7 +219,7 @@ class SoporteTicketsFragment(ctk.CTkFrame):
 
         try:
             # Detectar tipo de base de datos
-            from src.main.res.config.database import DB_TYPE
+            from smart_reports.config.database import DB_TYPE
             is_mysql = DB_TYPE == 'mysql'
             placeholder = '%s' if is_mysql else '?'
 

@@ -3,15 +3,15 @@ MenuReportes - Módulo de interfaz para Reportes
 Separado de ventana principal para mejor organización
 """
 import customtkinter as ctk
-from src.main.res.config.themes import HUTCHISON_COLORS
-from src.main.res.config.gestor_temas import get_theme_manager
+from smart_reports.config.themes import HUTCHISON_COLORS
+from smart_reports.config.gestor_temas import get_theme_manager
 
 # Paneles de reportes
-from src.main.python.ui.fragments.reportes.panel_reporte_usuario import UserReportPanel
-from src.main.python.ui.fragments.reportes.panel_reporte_unidad import UnitReportPanel
-from src.main.python.ui.fragments.reportes.panel_reporte_periodo import PeriodReportPanel
-from src.main.python.ui.fragments.reportes.panel_reporte_global import GlobalReportPanel
-from src.main.python.ui.fragments.reportes.panel_niveles_mando import ManagementLevelsPanel
+from smart_reports.ui.views.reportes.panel_reporte_usuario import UserReportPanel
+from smart_reports.ui.views.reportes.panel_reporte_unidad import UnitReportPanel
+from smart_reports.ui.views.reportes.panel_reporte_periodo import PeriodReportPanel
+from smart_reports.ui.views.reportes.panel_reporte_global import GlobalReportPanel
+from smart_reports.ui.views.reportes.panel_niveles_mando import ManagementLevelsPanel
 
 
 class MenuReportes:
