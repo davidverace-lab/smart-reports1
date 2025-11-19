@@ -380,11 +380,10 @@ class VentanaPrincipalView:
         )
         message_label.pack(expand=True)
 
-    def _handle_theme_change(self, theme=None):
+    def _handle_theme_change(self):
         """Manejar cambio de tema"""
         # El theme manager ya maneja la propagación
         # Solo necesitamos refrescar la interfaz
-        # El parámetro theme es opcional y viene de barra_lateral
         pass
 
     def _on_theme_changed(self, theme_mode):
