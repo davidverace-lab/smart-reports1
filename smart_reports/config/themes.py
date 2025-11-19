@@ -110,10 +110,10 @@ LIGHT_THEME = {
         'background_secondary': '#e8e8e8',
         'card_background': HUTCHISON_COLORS['bg_card_light'],
 
-        # Textos
-        'text': HUTCHISON_COLORS['text_dark'],
-        'text_secondary': '#4a4a4a',
-        'text_tertiary': '#757575',  # Texto terciario más apagado
+        # Textos - NAVY EN VEZ DE NEGRO
+        'text': HUTCHISON_COLORS['primary'],  # NAVY #003087 en vez de negro
+        'text_secondary': '#4a5c8a',  # Navy más claro
+        'text_tertiary': '#6b7aa0',  # Navy aún más claro
         'text_muted': HUTCHISON_COLORS['text_muted'],
 
         # Elementos UI
@@ -121,9 +121,9 @@ LIGHT_THEME = {
         'secondary': HUTCHISON_COLORS['secondary'],
         'accent': HUTCHISON_COLORS['accent'],
 
-        # Bordes y divisores
-        'border': HUTCHISON_COLORS['border_light'],
-        'divider': '#d0d0d0',
+        # Bordes y divisores - NAVY
+        'border': HUTCHISON_COLORS['primary'],  # Navy en vez de gris claro
+        'divider': '#bac8e0',  # Navy muy claro
 
         # Estados
         'hover': HUTCHISON_COLORS['hover_light'],

@@ -238,7 +238,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             title="Total de Usuarios",
             value="1,525",
             subtitle="Usuarios activos en el sistema",
-            color=HUTCHISON_COLORS['primary']
+            color=HUTCHISON_COLORS['primary']  # Navy
         ).grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
         # Card 2: Módulo Actual
@@ -247,7 +247,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             icon="📄",
             title="Módulo Actual",
             value="Módulo 8 - Procesos de\nRecursos Humanos",
-            color=HUTCHISON_COLORS['aqua_green']
+            color=HUTCHISON_COLORS['primary']  # Navy
         ).grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
         # Card 3: Tasa de Completado
@@ -257,7 +257,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             title="Tasa de Completado",
             value="70.0%",
             subtitle="Progreso general del instituto",
-            color=HUTCHISON_COLORS['success']
+            color=HUTCHISON_COLORS['primary']  # Navy
         ).grid(row=0, column=2, padx=10, pady=10, sticky='nsew')
 
         # ═══ GRÁFICAS PRINCIPALES ═══
@@ -362,8 +362,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             parent,
             fg_color=theme['colors'].get('card_background', '#2d2d2d'),
             corner_radius=12,
-            border_width=1,
-            border_color=theme['colors']['border']
+            border_width=2,  # Borde más grueso
+            border_color=HUTCHISON_COLORS['primary']  # Navy siempre
         )
         card.grid(row=row, column=column, padx=10, pady=10, sticky='nsew')
 
