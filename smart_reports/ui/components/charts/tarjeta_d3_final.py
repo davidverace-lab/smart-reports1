@@ -384,7 +384,7 @@ class D3ChartCard(ctk.CTkFrame):
             center_frame,
             text='Se abrirá en tu navegador predeterminado',
             font=('Montserrat', 9, 'italic'),
-            text_color=theme['text_tertiary']
+            text_color=theme['colors']['text_tertiary']
         )
         note_label.pack(pady=(5, 10))
 

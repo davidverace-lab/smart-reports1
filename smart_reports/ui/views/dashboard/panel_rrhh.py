@@ -273,7 +273,7 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
             preview_frame,
             text="📊",
             font=('Segoe UI', 48),
-            text_color=theme['text_tertiary']
+            text_color=theme['colors']['text_tertiary']
         ).place(relx=0.5, rely=0.5, anchor='center')
 
         # Guardar referencia

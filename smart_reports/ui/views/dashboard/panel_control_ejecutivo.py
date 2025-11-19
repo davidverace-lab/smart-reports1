@@ -420,7 +420,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
                 container,
                 text="📊",
                 font=('Segoe UI', 36),
-                text_color=theme['text_tertiary']
+                text_color=theme['colors']['text_tertiary']
             ).place(relx=0.5, rely=0.5, anchor='center')
             return
 
@@ -719,7 +719,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             inner,
             text=subtitle,
             font=('Segoe UI', 11),
-            text_color=theme['text_tertiary'],
+            text_color=theme['colors']['text_tertiary'],
             wraplength=200
         ).pack(anchor='center')
 

@@ -120,7 +120,7 @@ class BarraProgresoImportacion(ctk.CTkFrame):
             self.card,
             text="⏱ Tiempo estimado: Calculando...",
             font=('Segoe UI', 10),
-            text_color=theme['text_tertiary']
+            text_color=theme['colors']['text_tertiary']
         )
         self.tiempo_label.pack(pady=(0, 15))
 

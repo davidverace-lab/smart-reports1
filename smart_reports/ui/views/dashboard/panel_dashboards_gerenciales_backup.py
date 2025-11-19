@@ -526,7 +526,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         ctk.CTkLabel(inner, text=icon, font=('Segoe UI', 44), text_color=color).pack(anchor='center', pady=(0, 15))
         ctk.CTkLabel(inner, text=value, font=('Segoe UI', 38, 'bold'), text_color=theme['colors']['text']).pack(anchor='center', pady=(0, 8))
         ctk.CTkLabel(inner, text=title, font=('Segoe UI', 14, 'bold'), text_color=theme['colors']['text_secondary']).pack(anchor='center', pady=(0, 5))
-        ctk.CTkLabel(inner, text=subtitle, font=('Segoe UI', 11), text_color=theme['text_tertiary'], wraplength=200).pack(anchor='center')
+        ctk.CTkLabel(inner, text=subtitle, font=('Segoe UI', 11), text_color=theme['colors']['text_tertiary'], wraplength=200).pack(anchor='center')
 
         return card
 
