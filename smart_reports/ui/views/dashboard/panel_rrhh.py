@@ -2,6 +2,7 @@
 Panel de Dashboards de Recursos Humanos - HUTCHISON PORTS
 Dashboards especializados para área de RRHH
 Sistema de navegación: GRID ↔ EXPANDIDA (pantalla completa)
+CON D3.JS INTERACTIVO AL EXPANDIR
 """
 import customtkinter as ctk
 import matplotlib.pyplot as plt
@@ -11,6 +12,14 @@ from smart_reports.ui.components.navigation.boton_pestana import CustomTabView
 from smart_reports.database.models.queries_hutchison import *
 from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
+
+# Importar modal D3.js
+try:
+    from smart_reports.ui.components.charts.modal_d3_fullscreen import ModalD3Fullscreen, TKINTERWEB_AVAILABLE
+except ImportError:
+    TKINTERWEB_AVAILABLE = False
+    ModalD3Fullscreen = None
+    print("⚠️ Modal D3.js no disponible - usando vista expandida Matplotlib")
 
 
 class PanelDashboardsRRHH(ctk.CTkFrame):
@@ -110,13 +119,44 @@ class PanelDashboardsRRHH(ctk.CTkFrame):
 
     def show_expanded_view(self, title, data, chart_type='barras'):
         """
-        Mostrar vista EXPANDIDA con una gráfica en pantalla completa
+        Mostrar vista EXPANDIDA con gráfica D3.js interactiva
 
         Args:
             title: Título de la gráfica
             data: Datos de la gráfica {'labels': [...], 'values': [...]}
             chart_type: 'barras', 'dona', 'linea', 'area'
         """
+        # Mapear tipo de gráfico a formato D3.js
+        chart_type_map = {
+            'barras': 'bar',
+            'barras_h': 'horizontal_bar',
+            'dona': 'donut',
+            'linea': 'line',
+            'area': 'area'
+        }
+        d3_chart_type = chart_type_map.get(chart_type, 'bar')
+
+        # Intentar abrir modal D3.js (preferido)
+        if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
+            try:
+                print(f"  ⛶ Abriendo modal D3.js para: {title}")
+                modal = ModalD3Fullscreen(
+                    parent=self.winfo_toplevel(),
+                    title=title,
+                    chart_type=d3_chart_type,
+                    chart_data=data
+                )
+                modal.focus()
+                modal.grab_set()
+                return
+            except Exception as e:
+                print(f"⚠️ Error abriendo modal D3.js: {e}")
+                import traceback
+                traceback.print_exc()
+                # Continuar con fallback
+
+        # Fallback: Usar vista expandida Matplotlib tradicional
+        print(f"  ⚠️ Usando vista expandida Matplotlib (fallback)")
         self.current_chart_title = title
         self.current_chart_data = data
         self.current_chart_type = chart_type
