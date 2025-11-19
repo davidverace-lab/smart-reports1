@@ -70,6 +70,7 @@ DARK_THEME = {
         # Textos
         'text': HUTCHISON_COLORS['text_primary'],
         'text_secondary': HUTCHISON_COLORS['text_secondary'],
+        'text_tertiary': '#888888',  # Texto terciario más apagado
         'text_muted': HUTCHISON_COLORS['text_muted'],
 
         # Elementos UI
@@ -110,6 +111,7 @@ LIGHT_THEME = {
         # Textos
         'text': HUTCHISON_COLORS['text_dark'],
         'text_secondary': '#4a4a4a',
+        'text_tertiary': '#757575',  # Texto terciario más apagado
         'text_muted': HUTCHISON_COLORS['text_muted'],
 
         # Elementos UI

@@ -18,11 +18,7 @@ def show_configuracion_menu(parent, db_connection, cursor, db_instance):
     Returns:
         Panel de configuración creado
     """
-    if not db_connection:
-        from .menu_dashboard import _show_error
-        return _show_error(parent, "No hay conexión a la base de datos")
-
-    # Crear panel de configuración (solo necesita db_connection)
+    # Crear panel de configuración (funciona con o sin BD)
     panel = ConfiguracionPanel(
         parent,
         db_connection=db_connection

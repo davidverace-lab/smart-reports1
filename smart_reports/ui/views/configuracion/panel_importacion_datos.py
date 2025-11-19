@@ -222,7 +222,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             card,
             text="⚠ No seleccionado",
             font=('Segoe UI', 9),
-            text_color=theme['text_tertiary'],
+            text_color=theme['colors']['text_tertiary'],
             anchor='w'
         )
         file_label.pack(anchor='w', padx=15, pady=(0, 12))
@@ -707,7 +707,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
                 scroll_frame,
                 text=f"💡 Mostrando 5 de {len(df.columns)} columnas totales",
                 font=('Segoe UI', 9, 'italic'),
-                text_color=theme['text_tertiary'],
+                text_color=theme['colors']['text_tertiary'],
                 anchor='w'
             )
             note.pack(anchor='w', pady=(5, 0))
@@ -1263,7 +1263,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             info_frame,
             text=f"📋 {backup['descripcion']}",
             font=('Segoe UI', 9),
-            text_color=theme['text_tertiary'],
+            text_color=theme['colors']['text_tertiary'],
             anchor='w'
         )
         desc_label.pack(anchor='w')
