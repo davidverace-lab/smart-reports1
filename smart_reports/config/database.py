@@ -27,7 +27,7 @@ except ImportError:
 # TIPO DE BASE DE DATOS
 # ============================================================================
 # 🔧 CAMBIA AQUÍ EL TIPO DE BD (mysql o sqlserver)
-DB_TYPE = os.getenv('DB_TYPE', 'sqlserver')  # 👈 Cambiar aquí o en .env
+DB_TYPE = os.getenv('DB_TYPE', 'mysql')  # 👈 Cambiar aquí o en .env (ahora por defecto MySQL)
 
 
 # ============================================================================
@@ -50,9 +50,9 @@ SQLSERVER_CONFIG = {
 MYSQL_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'port': int(os.getenv('DB_PORT', '3306')),
-    'database': os.getenv('DB_NAME', 'tngcore'),
+    'database': os.getenv('DB_NAME', 'InstitutoHutchison'),
     'user': os.getenv('DB_USER', 'root'),
-    'password': os.getenv('DB_PASSWORD', ''),
+    'password': os.getenv('DB_PASSWORD', 'Xbox360xd'),  # Contraseña por defecto
     'charset': 'utf8mb4'
 }
 

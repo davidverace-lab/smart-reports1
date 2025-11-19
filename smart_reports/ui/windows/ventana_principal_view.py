@@ -121,11 +121,15 @@ class VentanaPrincipalView:
         self.reports_controller = ReportsController(self.conn, self.cursor) if self.conn else None
         self.nav_controller = NavigationController()
 
-        # Verificar base de datos
+        # Verificar base de datos (sin bloquear si falla)
         if self.db_controller:
-            success, message = self.db_controller.verify_database_tables()
-            if not success:
-                messagebox.showwarning("Advertencia de BD", message)
+            try:
+                success, message = self.db_controller.verify_database_tables()
+                if not success:
+                    print(f"⚠ Advertencia BD: {message}")
+                    # NO mostrar messagebox que bloquea la UI
+            except Exception as e:
+                print(f"⚠ No se pudo verificar BD: {e}")
 
     def _create_interface(self):
         """Crear interfaz de usuario (SOLO UI)"""
