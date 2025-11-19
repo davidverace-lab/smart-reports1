@@ -117,7 +117,7 @@ class PanelConsultas(ctk.CTkFrame):
         ).pack(anchor='w')
 
     def _create_predefined_queries_section(self, parent, theme):
-        """Sección: Consultas Predefinidas Útiles - FORMATO COMPACTO"""
+        """Sección: Consultas Predefinidas Útiles - FORMATO MEJORADO CON DESCRIPCIONES"""
         section_frame = ctk.CTkFrame(
             parent,
             fg_color=theme['colors'].get('card_background', '#2d2d2d'),
@@ -128,55 +128,67 @@ class PanelConsultas(ctk.CTkFrame):
         section_frame.pack(fill='x', pady=(0, 15))
 
         content = ctk.CTkFrame(section_frame, fg_color='transparent')
-        content.pack(fill='x', padx=20, pady=12)
+        content.pack(fill='x', padx=20, pady=15)
 
         # Header con título
         header = ctk.CTkFrame(content, fg_color='transparent')
-        header.pack(fill='x', pady=(0, 10))
+        header.pack(fill='x', pady=(0, 12))
 
         ctk.CTkLabel(
             header,
-            text="⚡ Consultas Predefinidas",
-            font=('Montserrat', 16, 'bold'),
+            text="⚡ Consultas Rápidas Predefinidas",
+            font=('Montserrat', 18, 'bold'),
             text_color=theme['colors']['text']
         ).pack(side='left')
 
-        # Grid compacto de 3 columnas
+        # Grid de categorías (3x3)
         buttons_grid = ctk.CTkFrame(content, fg_color='transparent')
         buttons_grid.pack(fill='x')
         buttons_grid.grid_columnconfigure((0, 1, 2), weight=1)
 
-        # Consultas en formato compacto (altura reducida a 32px)
+        # Categorías de consultas con mejor descripción
         consultas = [
-            # Fila 1
-            ("🏆 Top 10", self._query_top_performers),
-            ("📚 Sin Completar", self._query_no_completion),
-            ("⭐ >90", self._query_high_scores),
-            # Fila 2
-            ("📊 Módulos Pop.", self._query_popular_modules),
-            ("⚠️ Rezagados", self._query_lagging_modules),
-            ("🔔 Por Vencer", self._query_due_soon),
-            # Fila 3
-            ("🏢 Ranking", self._query_unit_ranking),
-            ("👥 Depto.", self._query_by_department),
-            ("📅 Nuevos", self._query_recent_users)
+            # Fila 1: Desempeño Individual
+            ("🏆 Top 10 Mejores", "Usuarios con mejor progreso", self._query_top_performers),
+            ("📚 Sin Completar", "Sin módulos finalizados", self._query_no_completion),
+            ("⭐ Calificación >90", "Excelencia académica", self._query_high_scores),
+            # Fila 2: Análisis de Módulos
+            ("📊 Módulos Populares", "Más completados", self._query_popular_modules),
+            ("⚠️ Módulos Rezagados", "Menor avance", self._query_lagging_modules),
+            ("🔔 Próximos a Vencer", "Vencen en 7 días", self._query_due_soon),
+            # Fila 3: Análisis Organizacional
+            ("🏢 Ranking por Unidad", "Desempeño por área", self._query_unit_ranking),
+            ("👥 Por Departamento", "Agrupados por depto", self._query_by_department),
+            ("📅 Usuarios Nuevos", "Últimos 30 días", self._query_recent_users)
         ]
 
-        for idx, (text, command) in enumerate(consultas):
+        for idx, (text, subtitle, command) in enumerate(consultas):
             row = idx // 3
             col = idx % 3
-            btn = ctk.CTkButton(
+
+            # Card container
+            card = ctk.CTkFrame(
                 buttons_grid,
-                text=text,
+                fg_color=theme['colors'].get('background_secondary', '#252525'),
+                corner_radius=10,
+                border_width=1,
+                border_color=HUTCHISON_COLORS['primary']
+            )
+            card.grid(row=row, column=col, padx=6, pady=6, sticky='ew')
+
+            # Botón dentro del card con texto en dos líneas
+            btn = ctk.CTkButton(
+                card,
+                text=f"{text}\n{subtitle}",
                 font=('Montserrat', 11, 'bold'),
                 fg_color=HUTCHISON_COLORS['primary'],
                 hover_color='#003D8F',
                 text_color='white',
                 corner_radius=8,
-                height=32,
+                height=52,
                 command=command
             )
-            btn.grid(row=row, column=col, padx=5, pady=3, sticky='ew')
+            btn.pack(fill='both', expand=True, padx=3, pady=3)
 
     def _create_search_by_id_section(self, parent, theme):
         """Sección: Buscar usuario por ID"""

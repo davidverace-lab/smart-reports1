@@ -13,6 +13,22 @@ from smart_reports.config.themes import HUTCHISON_COLORS
 
 
 # ═══════════════════════════════════════════════════════════════════
+#  PALETA DE COLORES AZULES - ESCALA PARA GRÁFICAS
+# ═══════════════════════════════════════════════════════════════════
+BLUE_SCALE = [
+    '#003087',  # Navy oscuro (Hutchison primary)
+    '#004BA0',  # Azul medio-oscuro
+    '#1976D2',  # Azul medio
+    '#42A5F5',  # Azul medio-claro
+    '#64B5F6',  # Azul claro
+    '#90CAF9',  # Azul muy claro
+    '#BBDEFB',  # Azul pastel
+    '#2196F3',  # Azul brillante
+    '#0D47A1',  # Azul muy oscuro
+    '#1565C0',  # Azul oscuro-medio
+]
+
+# ═══════════════════════════════════════════════════════════════════
 #  DATOS ESTÁTICOS - DASHBOARDS GERENCIALES
 # ═══════════════════════════════════════════════════════════════════
 
@@ -231,8 +247,11 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         metrics_frame.pack(fill='x', pady=(0, 20))
         metrics_frame.columnconfigure((0, 1, 2), weight=1)
 
-        # Determinar color según tema - Navy en light mode, white en dark mode
+        # Determinar color según tema
         is_dark = theme['colors']['background'] == '#1a1a1a'
+        # En dark mode: borde navy, ícono blanco
+        # En light mode: borde navy, ícono navy
+        border_color = HUTCHISON_COLORS['primary']  # Navy siempre
         icon_color = '#ffffff' if is_dark else HUTCHISON_COLORS['primary']
 
         # Card 1: Total de Usuarios
@@ -242,7 +261,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             title="Total de Usuarios",
             value="1,525",
             subtitle="Usuarios activos en el sistema",
-            color=icon_color
+            color=border_color,
+            icon_color=icon_color
         ).grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
         # Card 2: Módulo Actual
@@ -251,7 +271,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             icon="📄",
             title="Módulo Actual",
             value="Módulo 8 - Procesos de\nRecursos Humanos",
-            color=icon_color
+            color=border_color,
+            icon_color=icon_color
         ).grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
         # Card 3: Tasa de Completado
@@ -261,7 +282,8 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             title="Tasa de Completado",
             value="70.0%",
             subtitle="Progreso general del instituto",
-            color=icon_color
+            color=border_color,
+            icon_color=icon_color
         ).grid(row=0, column=2, padx=10, pady=10, sticky='nsew')
 
         # ═══ GRÁFICAS PRINCIPALES ═══
@@ -436,24 +458,28 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         labels = data.get('labels', [])
         values = data.get('values', [])
 
-        # Renderizar según tipo
+        # Renderizar según tipo con escala de azules
         if chart_type == 'barras':
-            ax.bar(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
+            # Usar diferentes tonos de azul para cada barra
+            colors_to_use = [BLUE_SCALE[i % len(BLUE_SCALE)] for i in range(len(values))]
+            ax.bar(labels, values, color=colors_to_use, alpha=0.9)
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=7)
 
         elif chart_type == 'barras_h':
-            ax.barh(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
+            # Usar diferentes tonos de azul para cada barra
+            colors_to_use = [BLUE_SCALE[i % len(BLUE_SCALE)] for i in range(len(values))]
+            ax.barh(labels, values, color=colors_to_use, alpha=0.9)
             ax.tick_params(axis='y', labelsize=7)
 
         elif chart_type == 'dona':
-            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['primary'],
-                     HUTCHISON_COLORS['primary'], '#FFC107', '#FF5722']
-            ax.pie(values, labels=None, colors=colors[:len(values)], startangle=90)
+            # Usar escala de azules para dona
+            colors_to_use = [BLUE_SCALE[i % len(BLUE_SCALE)] for i in range(len(values))]
+            ax.pie(values, labels=None, colors=colors_to_use, startangle=90)
             ax.axis('equal')
 
         elif chart_type == 'linea':
-            ax.plot(labels, values, color=HUTCHISON_COLORS['primary'], linewidth=2, marker='o')
-            ax.fill_between(range(len(labels)), values, alpha=0.3, color=HUTCHISON_COLORS['primary'])
+            ax.plot(labels, values, color=BLUE_SCALE[0], linewidth=2, marker='o')
+            ax.fill_between(range(len(labels)), values, alpha=0.3, color=BLUE_SCALE[1])
             plt.setp(ax.xaxis.get_majorticklabels(), fontsize=7)
 
         # Estilo minimalista
@@ -553,7 +579,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         values = self.current_chart_data.get('values', [])
 
         if self.current_chart_type == 'barras':
-            bars = ax.bar(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
+            # Usar diferentes tonos de azul para cada barra
+            colors_to_use = [BLUE_SCALE[i % len(BLUE_SCALE)] for i in range(len(values))]
+            bars = ax.bar(labels, values, color=colors_to_use, alpha=0.9)
             # Etiquetas en barras
             for bar in bars:
                 height = bar.get_height()
@@ -564,7 +592,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=12)
 
         elif self.current_chart_type == 'barras_h':
-            bars = ax.barh(labels, values, color=HUTCHISON_COLORS['primary'], alpha=0.8)
+            # Usar diferentes tonos de azul para cada barra
+            colors_to_use = [BLUE_SCALE[i % len(BLUE_SCALE)] for i in range(len(values))]
+            bars = ax.barh(labels, values, color=colors_to_use, alpha=0.9)
             # Etiquetas en barras
             for bar in bars:
                 width = bar.get_width()
@@ -575,21 +605,21 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             ax.tick_params(axis='y', labelsize=11)
 
         elif self.current_chart_type == 'dona':
-            colors = [HUTCHISON_COLORS['aqua_green'], HUTCHISON_COLORS['primary'],
-                     HUTCHISON_COLORS['primary'], '#FFC107', '#FF5722']
+            # Usar escala de azules para dona
+            colors_to_use = [BLUE_SCALE[i % len(BLUE_SCALE)] for i in range(len(values))]
             wedges, texts, autotexts = ax.pie(
                 values, labels=labels, autopct='%1.1f%%', startangle=90,
-                colors=colors[:len(values)], textprops={'fontsize': 12, 'fontweight': 'bold'}
+                colors=colors_to_use, textprops={'fontsize': 12, 'fontweight': 'bold'}
             )
             for autotext in autotexts:
                 autotext.set_color('white')
             ax.axis('equal')
 
         elif self.current_chart_type == 'linea':
-            ax.plot(labels, values, color=HUTCHISON_COLORS['primary'],
+            ax.plot(labels, values, color=BLUE_SCALE[0],
                    linewidth=3, marker='o', markersize=10)
             ax.fill_between(range(len(labels)), values, alpha=0.3,
-                           color=HUTCHISON_COLORS['primary'])
+                           color=BLUE_SCALE[1])
             # Etiquetas en puntos
             for i, v in enumerate(values):
                 ax.text(i, v, str(int(v)), ha='center', va='bottom', fontsize=11, fontweight='bold')
@@ -680,9 +710,11 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
     # ==================== COMPONENTES AUXILIARES ====================
 
-    def _create_metric_card(self, parent, icon, title, value, subtitle, color):
+    def _create_metric_card(self, parent, icon, title, value, subtitle, color, icon_color=None):
         """Crear tarjeta de métrica"""
         theme = self.theme_manager.get_current_theme()
+        if icon_color is None:
+            icon_color = color
 
         card = ctk.CTkFrame(
             parent,
@@ -700,7 +732,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             inner,
             text=icon,
             font=('Segoe UI', 42),
-            text_color=color
+            text_color=icon_color
         ).pack(anchor='center', pady=(0, 15))
 
         # Valor
@@ -730,9 +762,11 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         return card
 
-    def _create_metric_card_modulo(self, parent, icon, title, value, color):
+    def _create_metric_card_modulo(self, parent, icon, title, value, color, icon_color=None):
         """Crear tarjeta especial para Módulo Actual"""
         theme = self.theme_manager.get_current_theme()
+        if icon_color is None:
+            icon_color = color
 
         card = ctk.CTkFrame(
             parent,
@@ -750,7 +784,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             inner,
             text=icon,
             font=('Segoe UI', 42),
-            text_color=color
+            text_color=icon_color
         ).pack(anchor='center', pady=(0, 10))
 
         # Título

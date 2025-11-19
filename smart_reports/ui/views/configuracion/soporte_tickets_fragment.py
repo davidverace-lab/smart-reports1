@@ -300,13 +300,15 @@ class SoporteTicketsFragment(ctk.CTkFrame):
     # ==================== UTILIDADES ====================
 
     def _get_button_color(self):
-        """Obtener color de botón según tema"""
-        is_dark = self.theme_manager.is_dark_mode()
-        return '#6c63ff' if is_dark else '#002E6D'
+        """Obtener color de botón según tema - Siempre Hutchison Navy"""
+        from smart_reports.config.themes import HUTCHISON_COLORS
+        return HUTCHISON_COLORS['primary']  # #003087 - Navy en ambos modos
 
     def _get_button_hover_color(self, base_color):
         """Obtener color hover"""
-        if base_color == '#6c63ff':
+        if base_color == '#003087':  # Hutchison navy
+            return '#003D8F'  # Más claro
+        elif base_color == '#6c63ff':
             return '#5a52d5'
         elif base_color == '#002E6D':
             return '#00509E'
