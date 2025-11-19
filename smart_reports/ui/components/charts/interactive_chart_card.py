@@ -9,6 +9,7 @@ InteractiveChartCard PRO - Gráfico Matplotlib PREMIUM con máxima interactivida
 - Indicador visual de elementos ocultos
 - Gradientes profesionales
 - Sombras y efectos 3D
+- Fullscreen con D3.js interactivo embebido
 """
 import customtkinter as ctk
 import tkinter as tk
@@ -20,6 +21,13 @@ from matplotlib.colors import LinearSegmentedColormap
 from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
 import numpy as np
+
+# Importar modal D3.js (con fallback si no está disponible)
+try:
+    from smart_reports.ui.components.charts.modal_d3_fullscreen import ModalD3Fullscreen, TKINTERWEB_AVAILABLE
+except ImportError:
+    TKINTERWEB_AVAILABLE = False
+    ModalD3Fullscreen = None
 
 
 class InteractiveChartCard(ctk.CTkFrame):
@@ -110,7 +118,8 @@ class InteractiveChartCard(ctk.CTkFrame):
         export_btn.pack(side='left', padx=5)
 
         # Botón ampliar (si hay callback)
-        if self.on_fullscreen_callback:
+        # Botón fullscreen (siempre visible si D3.js disponible o hay callback)
+        if TKINTERWEB_AVAILABLE or self.on_fullscreen_callback:
             fullscreen_btn = ctk.CTkButton(
                 controls,
                 text="↗",
@@ -119,7 +128,7 @@ class InteractiveChartCard(ctk.CTkFrame):
                 font=('Segoe UI', 16, 'bold'),
                 fg_color=HUTCHISON_COLORS['aqua_green'],
                 hover_color=HUTCHISON_COLORS['primary'],
-                command=lambda: self.on_fullscreen_callback(self)
+                command=self._trigger_fullscreen
             )
             fullscreen_btn.pack(side='left', padx=2)
 
@@ -715,3 +724,33 @@ class InteractiveChartCard(ctk.CTkFrame):
             print(f"❌ Error exportando gráfico: {e}")
             import traceback
             traceback.print_exc()
+
+    def _trigger_fullscreen(self):
+        """Activar modo fullscreen con D3.js interactivo embebido"""
+        if not self.chart_type or not self.chart_data:
+            print("⚠️ No hay datos de gráfico para mostrar en fullscreen")
+            return
+
+        # Intentar abrir modal D3.js embebido (preferido)
+        if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
+            try:
+                print(f"  ⛶ Abriendo modal D3.js interactivo para: {self.title_text}")
+                modal = ModalD3Fullscreen(
+                    parent=self.winfo_toplevel(),
+                    title=self.title_text,
+                    chart_type=self.chart_type,
+                    chart_data=self.chart_data
+                )
+                modal.focus()
+                modal.grab_set()
+                return
+            except Exception as e:
+                print(f"⚠️ Error abriendo modal D3.js: {e}")
+                # Continuar con fallback
+
+        # Fallback: usar callback externo si está definido
+        if self.on_fullscreen_callback:
+            self.on_fullscreen_callback(self)
+            print(f"  ⛶ Usando callback fullscreen externo para: {self.title_text}")
+        else:
+            print("⚠️ tkinterweb no disponible y no hay callback fullscreen definido")
