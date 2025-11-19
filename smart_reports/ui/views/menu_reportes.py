@@ -192,7 +192,8 @@ class MenuReportes:
         panel = UserReportPanel(
             self.parent,
             db=self.conn,
-            cursor=self.cursor
+            cursor=self.cursor,
+            on_back=self._go_back_to_menu
         )
         panel.pack(fill='both', expand=True)
 
@@ -202,7 +203,8 @@ class MenuReportes:
         panel = UnitReportPanel(
             self.parent,
             db=self.conn,
-            cursor=self.cursor
+            cursor=self.cursor,
+            on_back=self._go_back_to_menu
         )
         panel.pack(fill='both', expand=True)
 
@@ -212,7 +214,8 @@ class MenuReportes:
         panel = PeriodReportPanel(
             self.parent,
             db=self.conn,
-            cursor=self.cursor
+            cursor=self.cursor,
+            on_back=self._go_back_to_menu
         )
         panel.pack(fill='both', expand=True)
 
@@ -222,7 +225,8 @@ class MenuReportes:
         panel = GlobalReportPanel(
             self.parent,
             db=self.conn,
-            cursor=self.cursor
+            cursor=self.cursor,
+            on_back=self._go_back_to_menu
         )
         panel.pack(fill='both', expand=True)
 
@@ -232,9 +236,15 @@ class MenuReportes:
         panel = ManagementLevelsPanel(
             self.parent,
             db=self.conn,
-            cursor=self.cursor
+            cursor=self.cursor,
+            on_back=self._go_back_to_menu
         )
         panel.pack(fill='both', expand=True)
+
+    def _go_back_to_menu(self):
+        """Regresar al menú principal de reportes"""
+        self._clear_parent()
+        self.show_selection_panel()
 
     # ==================== HELPERS ====================
 

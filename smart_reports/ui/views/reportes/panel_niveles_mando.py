@@ -30,12 +30,13 @@ from smart_reports.ui.components.charts.previsualizador_reporte import Previsual
 class ManagementLevelsPanel(ctk.CTkFrame):
     """Panel para generar reportes PDF por niveles de mando con vista previa"""
 
-    def __init__(self, parent, db=None, cursor=None, theme_manager=None):
+    def __init__(self, parent, db=None, cursor=None, theme_manager=None, on_back=None):
         super().__init__(parent, fg_color='transparent')
 
         self.db = db
         self.cursor = cursor
         self.theme_manager = theme_manager or get_theme_manager()
+        self.on_back = on_back
 
         # Variables para el reporte
         self.current_pdf_buffer = None

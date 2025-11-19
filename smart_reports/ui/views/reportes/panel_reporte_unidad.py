@@ -30,12 +30,13 @@ from smart_reports.ui.components.charts.previsualizador_reporte import Previsual
 class UnitReportPanel(ctk.CTkFrame):
     """Panel para generar reportes PDF por unidad de negocio con vista previa"""
 
-    def __init__(self, parent, db=None, cursor=None, theme_manager=None):
+    def __init__(self, parent, db=None, cursor=None, theme_manager=None, on_back=None):
         super().__init__(parent, fg_color='transparent')
 
         self.db = db
         self.cursor = cursor
         self.theme_manager = theme_manager or get_theme_manager()
+        self.on_back = on_back
 
         # Variables para el reporte
         self.current_pdf_buffer = None
@@ -121,23 +122,41 @@ class UnitReportPanel(ctk.CTkFrame):
         header_frame.grid(row=0, column=0, sticky='ew', pady=(0, 20))
         header_frame.grid_columnconfigure(1, weight=1)
 
+        # Botón volver (si hay callback)
+        if self.on_back:
+            from smart_reports.config.themes import HUTCHISON_COLORS
+            back_btn = ctk.CTkButton(
+                header_frame,
+                text="← Volver",
+                font=('Montserrat', 13, 'bold'),
+                fg_color=HUTCHISON_COLORS['primary'],
+                hover_color='#003D8F',
+                text_color='white',
+                corner_radius=10,
+                height=40,
+                width=120,
+                command=self.on_back
+            )
+            back_btn.grid(row=0, column=0, sticky='w', padx=(0, 20), rowspan=2)
+
         # Título
         is_dark = self.theme_manager.is_dark_mode()
         title_color = '#FFFFFF' if is_dark else '#002E6D'
 
+        title_col = 1 if self.on_back else 0
         ctk.CTkLabel(
             header_frame,
             text='🏢 Generación de Reportes por Unidad de Negocio',
             font=('Montserrat', 28, 'bold'),
             text_color=title_color
-        ).grid(row=0, column=0, sticky='w', columnspan=2)
+        ).grid(row=0, column=title_col, sticky='w')
 
         ctk.CTkLabel(
             header_frame,
             text='Genera reportes PDF detallados del progreso por unidad de negocio',
             font=('Montserrat', 14),
             text_color=theme['colors']['text_secondary']
-        ).grid(row=1, column=0, sticky='w', columnspan=2, pady=(5, 0))
+        ).grid(row=1, column=title_col, sticky='w', pady=(5, 0))
 
         # Sección de selección
         input_section = ctk.CTkFrame(
