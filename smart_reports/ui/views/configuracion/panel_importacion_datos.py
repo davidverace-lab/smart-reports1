@@ -542,7 +542,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
 
         # Log inicial
         self.log("✓ Sistema de importación inicializado correctamente")
-        if not db_connection:
+        if not self.db_connection:
             self.log("⚠ MODO SIN BASE DE DATOS - Solo preview y validación disponibles")
             self.log("📌 Puedes seleccionar archivos Excel para ver preview y validar estructura")
         else:

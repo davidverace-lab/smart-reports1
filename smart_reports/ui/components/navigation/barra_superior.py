@@ -116,8 +116,12 @@ class TopBar(ctk.CTkFrame):
         if hasattr(self, 'greeting_label'):
             self.greeting_label.configure(text=f"¡Bienvenido, {username}!")
 
-    def _on_theme_changed(self, theme_colors: dict):
+    def _on_theme_changed(self, theme_mode: str):
         """Actualizar colores cuando cambia el tema - RECREA TODO"""
+        # Obtener los colores del tema actual
+        theme = self.theme_manager.get_current_theme()
+        theme_colors = theme['colors']
+
         # Recrear todo el contenido para que use los colores correctos
-        self.configure(fg_color=theme_colors['surface'], border_color=theme_colors['border'])
+        self.configure(fg_color=theme_colors.get('card_background', '#2d2d2d'), border_color=theme_colors['border'])
         self._create_content()
