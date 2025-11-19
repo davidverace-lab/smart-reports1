@@ -258,21 +258,28 @@ class ModernSidebar(ctk.CTkFrame):
         self.theme_manager.toggle_theme()
         # El callback _on_theme_changed se llamará automáticamente
 
-        # Notificar a la ventana principal
+        # Notificar a la ventana principal (sin parámetros - el callback se llama desde theme_manager)
         if self.theme_change_callback:
-            self.theme_change_callback(self.theme_manager.get_current_theme())
+            try:
+                self.theme_change_callback()
+            except Exception as e:
+                print(f"Error en callback de tema: {e}")
 
-    def _on_theme_changed(self, theme_colors: dict):
+    def _on_theme_changed(self, theme_mode: str):
         """Actualizar colores del sidebar cuando cambia el tema"""
         is_dark = self.theme_manager.is_dark_mode()
 
+        # Obtener colores del tema actual
+        theme = self.theme_manager.get_current_theme()
+        theme_colors = theme['colors']
+
         # En modo claro, fondo azul navy; en modo oscuro, fondo del tema
-        sidebar_bg = HUTCHISON_COLORS['primary'] if not is_dark else theme_colors['surface']
+        sidebar_bg = HUTCHISON_COLORS['primary'] if not is_dark else theme_colors.get('card_background', '#2d2d2d')
         text_color = '#FFFFFF' if not is_dark else theme_colors['text']
         text_secondary_color = '#E0E0E0' if not is_dark else theme_colors['text_secondary']
         border_color = '#4a5a8a' if not is_dark else theme_colors['border']
-        hover_color = '#4a5a8a' if not is_dark else theme_colors['surface_light']
-        active_bg = '#4a5a8a' if not is_dark else theme_colors['surface_light']
+        hover_color = '#4a5a8a' if not is_dark else theme_colors.get('background_secondary', '#2b2b2b')
+        active_bg = '#4a5a8a' if not is_dark else theme_colors.get('background_secondary', '#2b2b2b')
 
         # Actualizar fondo del sidebar
         self.configure(fg_color=sidebar_bg)

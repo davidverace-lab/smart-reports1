@@ -222,7 +222,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             card,
             text="⚠ No seleccionado",
             font=('Segoe UI', 9),
-            text_color=theme['colors']['text_tertiary'],
+            text_color=theme['colors'].get('text_tertiary', theme['colors']['text_secondary']),
             anchor='w'
         )
         file_label.pack(anchor='w', padx=15, pady=(0, 12))
@@ -542,7 +542,11 @@ class PanelImportacionDatos(ctk.CTkFrame):
 
         # Log inicial
         self.log("✓ Sistema de importación inicializado correctamente")
-        self.log("📌 Selecciona archivos Excel para comenzar")
+        if not db_connection:
+            self.log("⚠ MODO SIN BASE DE DATOS - Solo preview y validación disponibles")
+            self.log("📌 Puedes seleccionar archivos Excel para ver preview y validar estructura")
+        else:
+            self.log("📌 Selecciona archivos Excel para comenzar")
 
     # ========== MÉTODOS DE SELECCIÓN DE ARCHIVOS ==========
 
@@ -707,7 +711,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
                 scroll_frame,
                 text=f"💡 Mostrando 5 de {len(df.columns)} columnas totales",
                 font=('Segoe UI', 9, 'italic'),
-                text_color=theme['colors']['text_tertiary'],
+                text_color=theme['colors'].get('text_tertiary', theme['colors']['text_secondary']),
                 anchor='w'
             )
             note.pack(anchor='w', pady=(5, 0))
@@ -809,6 +813,15 @@ class PanelImportacionDatos(ctk.CTkFrame):
 
     def _importar_todo(self):
         """Importar ambos archivos"""
+        if not self.db_connection:
+            messagebox.showwarning(
+                "Sin conexión a Base de Datos",
+                "No hay conexión a la base de datos.\n\n"
+                "Puedes usar las funciones de preview y validación,\n"
+                "pero no se puede importar sin conexión a BD."
+            )
+            return
+
         if not self.archivo_training or not self.archivo_org_planning:
             messagebox.showwarning(
                 "Archivos faltantes",
@@ -837,6 +850,15 @@ class PanelImportacionDatos(ctk.CTkFrame):
 
     def _importar_training(self):
         """Importar solo Training Report"""
+        if not self.db_connection:
+            messagebox.showwarning(
+                "Sin conexión a Base de Datos",
+                "No hay conexión a la base de datos.\n\n"
+                "Puedes usar las funciones de preview y validación,\n"
+                "pero no se puede importar sin conexión a BD."
+            )
+            return
+
         if not self.archivo_training:
             messagebox.showwarning(
                 "Archivo faltante",
@@ -851,6 +873,15 @@ class PanelImportacionDatos(ctk.CTkFrame):
 
     def _importar_org(self):
         """Importar solo Org Planning"""
+        if not self.db_connection:
+            messagebox.showwarning(
+                "Sin conexión a Base de Datos",
+                "No hay conexión a la base de datos.\n\n"
+                "Puedes usar las funciones de preview y validación,\n"
+                "pero no se puede importar sin conexión a BD."
+            )
+            return
+
         if not self.archivo_org_planning:
             messagebox.showwarning(
                 "Archivo faltante",
@@ -1263,7 +1294,7 @@ class PanelImportacionDatos(ctk.CTkFrame):
             info_frame,
             text=f"📋 {backup['descripcion']}",
             font=('Segoe UI', 9),
-            text_color=theme['colors']['text_tertiary'],
+            text_color=theme['colors'].get('text_tertiary', theme['colors']['text_secondary']),
             anchor='w'
         )
         desc_label.pack(anchor='w')

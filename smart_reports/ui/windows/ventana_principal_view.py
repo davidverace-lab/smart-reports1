@@ -197,7 +197,12 @@ class VentanaPrincipalView:
         self.nav_controller.navigate_to('dashboard', None)
 
         try:
-            print("📊 Cargando Dashboard...")
+            print("\n" + "="*60)
+            print("📊 CARGANDO DASHBOARD")
+            print("="*60)
+            print(f"Content area: {self.content_area}")
+            print(f"Tema actual: {self.theme_manager.get_theme_mode()}")
+
             # Usar módulo de menú (lógica separada)
             panel = show_dashboard_menu(
                 self.content_area,
@@ -205,14 +210,20 @@ class VentanaPrincipalView:
                 self.username,
                 self.user_role
             )
+
+            print(f"Panel creado: {panel}")
+            print(f"Panel type: {type(panel)}")
+
             if panel:
-                panel.pack(fill='both', expand=True)
-                print("✅ Dashboard cargado exitosamente")
+                panel.pack(fill='both', expand=True, padx=0, pady=0)
+                print(f"Panel empaquetado: {panel.winfo_ismapped()}")
+                print(f"Panel size: {panel.winfo_width()}x{panel.winfo_height()}")
+                print("✅ Dashboard cargado y empaquetado exitosamente")
             else:
                 print("❌ Panel de dashboard es None")
                 self._show_placeholder("Dashboard", "Error al cargar dashboard")
         except Exception as e:
-            print(f"❌ Error cargando dashboard: {e}")
+            print(f"❌ ERROR CARGANDO DASHBOARD: {e}")
             import traceback
             traceback.print_exc()
             self._show_placeholder("Error en Dashboard", str(e))
@@ -266,20 +277,26 @@ class VentanaPrincipalView:
         self.nav_controller.navigate_to('consultas', None)
 
         try:
-            print("🔍 Cargando Consultas...")
+            print("\n" + "="*60)
+            print("🔍 CARGANDO CONSULTAS")
+            print("="*60)
+
             # Usar módulo de menú (lógica separada)
             panel = show_consultas_menu(
                 self.content_area,
                 self.conn
             )
+
+            print(f"Panel creado: {panel}")
+
             if panel:
-                panel.pack(fill='both', expand=True)
-                print("✅ Consultas cargadas exitosamente")
+                panel.pack(fill='both', expand=True, padx=0, pady=0)
+                print("✅ Consultas cargadas y empaquetadas exitosamente")
             else:
                 print("❌ Panel de consultas es None")
                 self._show_placeholder("Consultas", "Error al cargar consultas")
         except Exception as e:
-            print(f"❌ Error cargando consultas: {e}")
+            print(f"❌ ERROR CARGANDO CONSULTAS: {e}")
             import traceback
             traceback.print_exc()
             self._show_placeholder("Error en Consultas", str(e))
@@ -291,20 +308,26 @@ class VentanaPrincipalView:
         self.nav_controller.navigate_to('reportes', None)
 
         try:
-            print("📄 Cargando Reportes...")
+            print("\n" + "="*60)
+            print("📄 CARGANDO REPORTES")
+            print("="*60)
+
             # Usar módulo de menú (lógica separada)
             menu = show_reportes_menu(
                 self.content_area,
                 self.conn,
                 self.cursor
             )
+
+            print(f"Menú creado: {menu}")
+
             if menu:
                 print("✅ Reportes cargados exitosamente")
             else:
                 print("❌ Menú de reportes es None")
                 self._show_placeholder("Reportes", "Error al cargar reportes")
         except Exception as e:
-            print(f"❌ Error cargando reportes: {e}")
+            print(f"❌ ERROR CARGANDO REPORTES: {e}")
             import traceback
             traceback.print_exc()
             self._show_placeholder("Error en Reportes", str(e))
@@ -316,7 +339,10 @@ class VentanaPrincipalView:
         self.nav_controller.navigate_to('configuracion', None)
 
         try:
-            print("⚙️ Cargando Configuración...")
+            print("\n" + "="*60)
+            print("⚙️ CARGANDO CONFIGURACIÓN")
+            print("="*60)
+
             # Usar módulo de menú (lógica separada)
             panel = show_configuracion_menu(
                 self.content_area,
@@ -324,14 +350,17 @@ class VentanaPrincipalView:
                 self.cursor,
                 self.db
             )
+
+            print(f"Panel creado: {panel}")
+
             if panel:
-                panel.pack(fill='both', expand=True)
-                print("✅ Configuración cargada exitosamente")
+                panel.pack(fill='both', expand=True, padx=0, pady=0)
+                print("✅ Configuración cargada y empaquetada exitosamente")
             else:
                 print("❌ Panel de configuración es None")
                 self._show_placeholder("Configuración", "Error al cargar configuración")
         except Exception as e:
-            print(f"❌ Error cargando configuración: {e}")
+            print(f"❌ ERROR CARGANDO CONFIGURACIÓN: {e}")
             import traceback
             traceback.print_exc()
             self._show_placeholder("Error en Configuración", str(e))
@@ -380,11 +409,10 @@ class VentanaPrincipalView:
         )
         message_label.pack(expand=True)
 
-    def _handle_theme_change(self, theme=None):
+    def _handle_theme_change(self):
         """Manejar cambio de tema"""
         # El theme manager ya maneja la propagación
         # Solo necesitamos refrescar la interfaz
-        # El parámetro theme es opcional y viene de barra_lateral
         pass
 
     def _on_theme_changed(self, theme_mode):
