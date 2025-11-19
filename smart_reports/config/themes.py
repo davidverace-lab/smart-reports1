@@ -14,6 +14,7 @@ HUTCHISON_COLORS = {
     'primary': '#003087',        # Azul corporativo Hutchison
     'secondary': '#00A651',      # Verde corporativo
     'accent': '#FFB81C',         # Amarillo/Naranja de acento
+    'aqua_green': '#00A651',     # Verde agua (alias de secondary)
 
     # Colores de fondo
     'bg_dark': '#1a1a1a',        # Fondo oscuro principal
@@ -32,6 +33,7 @@ HUTCHISON_COLORS = {
     'success': '#00A651',        # Verde éxito
     'warning': '#FFB81C',        # Amarillo advertencia
     'error': '#D32F2F',          # Rojo error
+    'danger': '#D32F2F',         # Rojo peligro (alias de error)
     'info': '#2196F3',           # Azul información
 
     # Colores de gráficos
