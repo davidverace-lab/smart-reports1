@@ -20,15 +20,15 @@ class PanelConsultas(ctk.CTkFrame):
     - Visualización de resultados en tabla
     """
 
-    def __init__(self, parent, db_connection, cursor, **kwargs):
+    def __init__(self, parent, db_connection=None, cursor=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
 
         self.theme_manager = get_theme_manager()
         self.db_connection = db_connection
         self.cursor = cursor
 
-        # ViewModel para lógica de consultas
-        self.db_controller = DatabaseQueryController(db_connection, cursor)
+        # ViewModel para lógica de consultas (solo si hay conexión)
+        self.db_controller = DatabaseQueryController(db_connection, cursor) if db_connection else None
 
         # Variables
         self.current_results = []
@@ -478,6 +478,11 @@ class PanelConsultas(ctk.CTkFrame):
             messagebox.showerror("Error", "El ID debe ser numérico")
             return
 
+        # Verificar conexión a BD
+        if not self.db_controller:
+            messagebox.showinfo("Sin Conexión", "No hay conexión a la base de datos.\n\nConecte la base de datos para realizar consultas.")
+            return
+
         try:
             # Usar ViewModel
             user_data = self.db_controller.search_user_by_id(int(user_id))
@@ -510,6 +515,11 @@ class PanelConsultas(ctk.CTkFrame):
             messagebox.showwarning("Advertencia", "Seleccione una unidad válida")
             return
 
+        # Verificar conexión a BD
+        if not self.db_controller:
+            messagebox.showinfo("Sin Conexión", "No hay conexión a la base de datos.\n\nConecte la base de datos para realizar consultas.")
+            return
+
         try:
             # Usar ViewModel
             columns, results = self.db_controller.query_business_unit(unit_name)
@@ -539,6 +549,11 @@ class PanelConsultas(ctk.CTkFrame):
 
         days = int(days_str)
 
+        # Verificar conexión a BD
+        if not self.db_controller:
+            messagebox.showinfo("Sin Conexión", "No hay conexión a la base de datos.\n\nConecte la base de datos para realizar consultas.")
+            return
+
         try:
             # Usar ViewModel
             columns, results = self.db_controller.query_new_users(days)
@@ -557,6 +572,23 @@ class PanelConsultas(ctk.CTkFrame):
 
     def show_global_stats(self):
         """Mostrar estadísticas globales"""
+        # Verificar conexión a BD
+        if not self.db_controller:
+            # Mostrar datos estáticos de ejemplo
+            message = """
+📊 Estadísticas del Sistema (Modo Demo)
+
+👥 Total Usuarios Activos: 1,525
+📚 Total Módulos: 8
+✅ Módulos Completados: 4,250
+⏳ Módulos en Progreso: 1,180
+📈 Tasa de Completitud: 72.50%
+
+⚠️ Conecte la base de datos para ver datos reales
+            """
+            messagebox.showinfo("Estadísticas Globales - Demo", message)
+            return
+
         try:
             # Usar ViewModel
             stats = self.db_controller.get_progress_statistics()

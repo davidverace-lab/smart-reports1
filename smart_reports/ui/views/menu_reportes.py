@@ -17,14 +17,14 @@ from smart_reports.ui.views.reportes.panel_niveles_mando import ManagementLevels
 class MenuReportes:
     """Clase para manejar el menú de reportes"""
 
-    def __init__(self, parent, db_connection, cursor):
+    def __init__(self, parent, db_connection=None, cursor=None):
         """
         Inicializar menú de reportes
 
         Args:
             parent: Widget padre
-            db_connection: Conexión a base de datos
-            cursor: Cursor de base de datos
+            db_connection: Conexión a base de datos (opcional)
+            cursor: Cursor de base de datos (opcional)
         """
         self.parent = parent
         self.conn = db_connection
@@ -33,8 +33,7 @@ class MenuReportes:
 
     def show_selection_panel(self):
         """Mostrar panel de selección de reportes"""
-        if not self.conn:
-            return self._show_error("No hay conexión a la base de datos")
+        # Eliminar bloqueo - permitir ver interfaz sin BD
 
         # Container
         container = ctk.CTkScrollableFrame(

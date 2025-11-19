@@ -196,14 +196,26 @@ class VentanaPrincipalView:
         self.current_view = 'dashboard'
         self.nav_controller.navigate_to('dashboard', None)
 
-        # Usar módulo de menú (lógica separada)
-        panel = show_dashboard_menu(
-            self.content_area,
-            self.conn,
-            self.username,
-            self.user_role
-        )
-        panel.pack(fill='both', expand=True)
+        try:
+            print("📊 Cargando Dashboard...")
+            # Usar módulo de menú (lógica separada)
+            panel = show_dashboard_menu(
+                self.content_area,
+                self.conn,
+                self.username,
+                self.user_role
+            )
+            if panel:
+                panel.pack(fill='both', expand=True)
+                print("✅ Dashboard cargado exitosamente")
+            else:
+                print("❌ Panel de dashboard es None")
+                self._show_placeholder("Dashboard", "Error al cargar dashboard")
+        except Exception as e:
+            print(f"❌ Error cargando dashboard: {e}")
+            import traceback
+            traceback.print_exc()
+            self._show_placeholder("Error en Dashboard", str(e))
 
     def show_actualizar(self):
         """Mostrar panel de Actualización/Cruce de Datos"""
@@ -225,15 +237,27 @@ class VentanaPrincipalView:
         self.current_view = 'importacion'
         self.nav_controller.navigate_to('importacion', None)
 
-        # Importar PanelImportacionDatos
-        from smart_reports.ui.views.configuracion.panel_importacion_datos import PanelImportacionDatos
+        try:
+            print("📥 Cargando Importación...")
+            # Importar PanelImportacionDatos
+            from smart_reports.ui.views.configuracion.panel_importacion_datos import PanelImportacionDatos
 
-        # Crear panel de importación
-        panel = PanelImportacionDatos(
-            self.content_area,
-            db_connection=self.conn
-        )
-        panel.pack(fill='both', expand=True)
+            # Crear panel de importación
+            panel = PanelImportacionDatos(
+                self.content_area,
+                db_connection=self.conn
+            )
+            if panel:
+                panel.pack(fill='both', expand=True)
+                print("✅ Importación cargada exitosamente")
+            else:
+                print("❌ Panel de importación es None")
+                self._show_placeholder("Importación", "Error al cargar importación")
+        except Exception as e:
+            print(f"❌ Error cargando importación: {e}")
+            import traceback
+            traceback.print_exc()
+            self._show_placeholder("Error en Importación", str(e))
 
     def show_consultas(self):
         """Mostrar panel de Consultas"""
@@ -241,12 +265,24 @@ class VentanaPrincipalView:
         self.current_view = 'consultas'
         self.nav_controller.navigate_to('consultas', None)
 
-        # Usar módulo de menú (lógica separada)
-        panel = show_consultas_menu(
-            self.content_area,
-            self.conn
-        )
-        panel.pack(fill='both', expand=True)
+        try:
+            print("🔍 Cargando Consultas...")
+            # Usar módulo de menú (lógica separada)
+            panel = show_consultas_menu(
+                self.content_area,
+                self.conn
+            )
+            if panel:
+                panel.pack(fill='both', expand=True)
+                print("✅ Consultas cargadas exitosamente")
+            else:
+                print("❌ Panel de consultas es None")
+                self._show_placeholder("Consultas", "Error al cargar consultas")
+        except Exception as e:
+            print(f"❌ Error cargando consultas: {e}")
+            import traceback
+            traceback.print_exc()
+            self._show_placeholder("Error en Consultas", str(e))
 
     def show_reportes(self):
         """Mostrar panel de Reportes"""
@@ -254,12 +290,24 @@ class VentanaPrincipalView:
         self.current_view = 'reportes'
         self.nav_controller.navigate_to('reportes', None)
 
-        # Usar módulo de menú (lógica separada)
-        show_reportes_menu(
-            self.content_area,
-            self.conn,
-            self.cursor
-        )
+        try:
+            print("📄 Cargando Reportes...")
+            # Usar módulo de menú (lógica separada)
+            menu = show_reportes_menu(
+                self.content_area,
+                self.conn,
+                self.cursor
+            )
+            if menu:
+                print("✅ Reportes cargados exitosamente")
+            else:
+                print("❌ Menú de reportes es None")
+                self._show_placeholder("Reportes", "Error al cargar reportes")
+        except Exception as e:
+            print(f"❌ Error cargando reportes: {e}")
+            import traceback
+            traceback.print_exc()
+            self._show_placeholder("Error en Reportes", str(e))
 
     def show_configuracion(self):
         """Mostrar panel de Configuración"""
@@ -267,14 +315,26 @@ class VentanaPrincipalView:
         self.current_view = 'configuracion'
         self.nav_controller.navigate_to('configuracion', None)
 
-        # Usar módulo de menú (lógica separada)
-        panel = show_configuracion_menu(
-            self.content_area,
-            self.conn,
-            self.cursor,
-            self.db
-        )
-        panel.pack(fill='both', expand=True)
+        try:
+            print("⚙️ Cargando Configuración...")
+            # Usar módulo de menú (lógica separada)
+            panel = show_configuracion_menu(
+                self.content_area,
+                self.conn,
+                self.cursor,
+                self.db
+            )
+            if panel:
+                panel.pack(fill='both', expand=True)
+                print("✅ Configuración cargada exitosamente")
+            else:
+                print("❌ Panel de configuración es None")
+                self._show_placeholder("Configuración", "Error al cargar configuración")
+        except Exception as e:
+            print(f"❌ Error cargando configuración: {e}")
+            import traceback
+            traceback.print_exc()
+            self._show_placeholder("Error en Configuración", str(e))
 
     # ==================== HELPERS ====================
     # (Código de reportes movido a src/interfaces/ui/views/menus/menu_reportes.py)
