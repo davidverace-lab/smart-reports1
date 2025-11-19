@@ -46,26 +46,25 @@ class ConfigCard(ctk.CTkFrame):
     def _get_button_color(self):
         """
         Obtener color de botones según el tema actual
-        - Modo claro: #002E6D (navy blue de sidebar)
-        - Modo oscuro: #009BDE (cyan - Hutchison Ports blue)
+        - Modo claro: #003087 (Hutchison Ports navy blue)
+        - Modo oscuro: #003087 (same navy - always Hutchison corporate color)
         """
-        theme = self.theme_manager.get_current_theme()
-        if theme['colors']['background'] == '#1a1a1a':  # Dark theme
-            return '#009BDE'  # Cyan
-        else:  # Light theme
-            return '#002E6D'  # Navy blue
+        from smart_reports.config.themes import HUTCHISON_COLORS
+        # Siempre usar navy corporativo con texto blanco
+        return HUTCHISON_COLORS['primary']  # #003087
 
     def _get_icon_color(self):
         """
         Obtener color del icono según el tema actual
-        - Modo claro: #002E6D (navy blue)
+        - Modo claro: #003087 (Hutchison Ports navy blue)
         - Modo oscuro: #FFFFFF (blanco para visibilidad)
         """
+        from smart_reports.config.themes import HUTCHISON_COLORS
         theme = self.theme_manager.get_current_theme()
         if theme['colors']['background'] == '#1a1a1a':  # Dark theme
             return '#FFFFFF'  # Blanco para máxima visibilidad
         else:  # Light theme
-            return '#002E6D'  # Navy blue
+            return HUTCHISON_COLORS['primary']  # Hutchison navy blue
 
     def _create_content(self):
         """Crear contenido del card con colores dinámicos"""
@@ -143,7 +142,9 @@ class ConfigCard(ctk.CTkFrame):
 
     def _get_hover_color(self, base_color):
         """Generar color hover más claro/oscuro que el color base"""
-        if base_color == '#002E6D':  # Navy blue
+        if base_color == '#003087':  # Hutchison navy
+            return '#003D8F'  # Más claro
+        elif base_color == '#002E6D':  # Old navy blue (fallback)
             return '#003D8F'  # Más claro
         elif base_color == '#009BDE':  # Cyan
             return '#00B5FF'  # Más claro
