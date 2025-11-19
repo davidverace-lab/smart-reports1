@@ -17,15 +17,10 @@ def show_actualizar_menu(parent, db_connection, file_controller):
     Returns:
         Panel de importación creado
     """
-    if not db_connection:
-        from .menu_dashboard import _show_error
-        return _show_error(parent, "No hay conexión a la base de datos")
-
-    # Crear panel de importación
+    # Crear panel de importación (funciona con o sin BD)
     panel = PanelImportacionDatos(
         parent,
-        db_connection=db_connection,
-        file_controller=file_controller
+        db_connection=db_connection
     )
 
     return panel

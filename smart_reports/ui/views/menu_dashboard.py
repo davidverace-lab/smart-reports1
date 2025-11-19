@@ -19,16 +19,13 @@ def show_dashboard_menu(parent, db_connection, username, user_role):
     Returns:
         Panel de dashboard creado
     """
-    if not db_connection:
-        return _show_error(parent, "No hay conexión a la base de datos")
-
     # Información del usuario
     usuario_info = {
         "nombre": username,
         "rol": user_role
     }
 
-    # Crear panel de dashboards gerenciales
+    # Crear panel de dashboards gerenciales (funciona con o sin BD)
     panel = DashboardsGerencialesPanel(
         parent,
         db_connection=db_connection,

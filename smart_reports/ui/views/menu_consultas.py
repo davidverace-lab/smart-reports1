@@ -16,14 +16,10 @@ def show_consultas_menu(parent, db_connection):
     Returns:
         Panel de consultas completo con todas las funcionalidades
     """
-    if not db_connection:
-        from .menu_dashboard import _show_error
-        return _show_error(parent, "No hay conexión a la base de datos")
-
-    # Crear cursor si no existe
+    # Crear cursor si existe conexión
     cursor = db_connection.cursor() if db_connection else None
 
-    # Crear panel de consultas completo
+    # Crear panel de consultas completo (funciona con o sin BD)
     panel = PanelConsultas(
         parent,
         db_connection=db_connection,
