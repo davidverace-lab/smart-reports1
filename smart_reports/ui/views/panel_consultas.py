@@ -85,7 +85,7 @@ class PanelConsultas(ctk.CTkFrame):
     def _create_header(self, parent, theme):
         """Crear header del panel"""
         # Determinar si es tema oscuro
-        is_dark = theme.get('background') == '#1a1d2e'
+        is_dark = theme['colors']['background'] == '#1a1a1a'
 
         header_frame = ctk.CTkFrame(
             parent,
@@ -99,8 +99,8 @@ class PanelConsultas(ctk.CTkFrame):
         header_content = ctk.CTkFrame(header_frame, fg_color='transparent')
         header_content.pack(fill='x', padx=30, pady=20)
 
-        # Título - Blanco en oscuro, Navy en claro
-        title_color = 'white' if is_dark else HUTCHISON_COLORS['primary']
+        # Título - Blanco en dark mode, Navy en light mode
+        title_color = '#ffffff' if is_dark else HUTCHISON_COLORS['primary']
         ctk.CTkLabel(
             header_content,
             text="🔍 Panel de Consultas",
@@ -117,7 +117,7 @@ class PanelConsultas(ctk.CTkFrame):
         ).pack(anchor='w')
 
     def _create_predefined_queries_section(self, parent, theme):
-        """Sección: Consultas Predefinidas Útiles"""
+        """Sección: Consultas Predefinidas Útiles - FORMATO COMPACTO"""
         section_frame = ctk.CTkFrame(
             parent,
             fg_color=theme['colors'].get('card_background', '#2d2d2d'),
@@ -125,86 +125,58 @@ class PanelConsultas(ctk.CTkFrame):
             border_width=2,
             border_color=HUTCHISON_COLORS['primary']
         )
-        section_frame.pack(fill='x', pady=(0, 20))
+        section_frame.pack(fill='x', pady=(0, 15))
 
         content = ctk.CTkFrame(section_frame, fg_color='transparent')
-        content.pack(fill='x', padx=20, pady=15)
+        content.pack(fill='x', padx=20, pady=12)
 
-        # Título
+        # Header con título
+        header = ctk.CTkFrame(content, fg_color='transparent')
+        header.pack(fill='x', pady=(0, 10))
+
         ctk.CTkLabel(
-            content,
+            header,
             text="⚡ Consultas Predefinidas",
-            font=('Montserrat', 18, 'bold'),
-            text_color=HUTCHISON_COLORS['primary']
-        ).pack(anchor='w', pady=(0, 15))
+            font=('Montserrat', 16, 'bold'),
+            text_color=theme['colors']['text']
+        ).pack(side='left')
 
-        # Grid de botones de consultas (3 columnas)
+        # Grid compacto de 3 columnas
         buttons_grid = ctk.CTkFrame(content, fg_color='transparent')
         buttons_grid.pack(fill='x')
         buttons_grid.grid_columnconfigure((0, 1, 2), weight=1)
 
-        # Fila 1: Consultas de desempeño
-        consultas_row1 = [
-            ("🏆 Top 10 Mejores", self._query_top_performers, "Usuarios con mejor progreso"),
-            ("📚 Sin Completar", self._query_no_completion, "Usuarios sin módulos completados"),
-            ("⭐ Calificación >90", self._query_high_scores, "Usuarios con excelencia académica")
+        # Consultas en formato compacto (altura reducida a 32px)
+        consultas = [
+            # Fila 1
+            ("🏆 Top 10", self._query_top_performers),
+            ("📚 Sin Completar", self._query_no_completion),
+            ("⭐ >90", self._query_high_scores),
+            # Fila 2
+            ("📊 Módulos Pop.", self._query_popular_modules),
+            ("⚠️ Rezagados", self._query_lagging_modules),
+            ("🔔 Por Vencer", self._query_due_soon),
+            # Fila 3
+            ("🏢 Ranking", self._query_unit_ranking),
+            ("👥 Depto.", self._query_by_department),
+            ("📅 Nuevos", self._query_recent_users)
         ]
 
-        for i, (text, command, tooltip) in enumerate(consultas_row1):
+        for idx, (text, command) in enumerate(consultas):
+            row = idx // 3
+            col = idx % 3
             btn = ctk.CTkButton(
                 buttons_grid,
                 text=text,
-                font=('Montserrat', 12, 'bold'),
+                font=('Montserrat', 11, 'bold'),
                 fg_color=HUTCHISON_COLORS['primary'],
                 hover_color='#003D8F',
                 text_color='white',
-                corner_radius=10,
-                height=45,
+                corner_radius=8,
+                height=32,
                 command=command
             )
-            btn.grid(row=0, column=i, padx=8, pady=5, sticky='ew')
-
-        # Fila 2: Consultas de módulos
-        consultas_row2 = [
-            ("📊 Módulos Populares", self._query_popular_modules, "Módulos más completados"),
-            ("⚠️ Módulos Rezagados", self._query_lagging_modules, "Módulos con menor avance"),
-            ("🔔 Próximos a Vencer", self._query_due_soon, "Usuarios con plazo próximo (7 días)")
-        ]
-
-        for i, (text, command, tooltip) in enumerate(consultas_row2):
-            btn = ctk.CTkButton(
-                buttons_grid,
-                text=text,
-                font=('Montserrat', 12, 'bold'),
-                fg_color=HUTCHISON_COLORS['primary'],
-                hover_color='#003D8F',
-                text_color='white',
-                corner_radius=10,
-                height=45,
-                command=command
-            )
-            btn.grid(row=1, column=i, padx=8, pady=5, sticky='ew')
-
-        # Fila 3: Consultas organizacionales
-        consultas_row3 = [
-            ("🏢 Ranking Unidades", self._query_unit_ranking, "Unidades de negocio ordenadas por desempeño"),
-            ("👥 Por Departamento", self._query_by_department, "Empleados agrupados por departamento"),
-            ("📅 Usuarios Nuevos", self._query_recent_users, "Usuarios registrados últimos 30 días")
-        ]
-
-        for i, (text, command, tooltip) in enumerate(consultas_row3):
-            btn = ctk.CTkButton(
-                buttons_grid,
-                text=text,
-                font=('Montserrat', 12, 'bold'),
-                fg_color=HUTCHISON_COLORS['primary'],
-                hover_color='#003D8F',
-                text_color='white',
-                corner_radius=10,
-                height=45,
-                command=command
-            )
-            btn.grid(row=2, column=i, padx=8, pady=5, sticky='ew')
+            btn.grid(row=row, column=col, padx=5, pady=3, sticky='ew')
 
     def _create_search_by_id_section(self, parent, theme):
         """Sección: Buscar usuario por ID"""
@@ -319,7 +291,7 @@ class PanelConsultas(ctk.CTkFrame):
         ).grid(row=0, column=2)
 
     def _create_new_users_section(self, parent, theme):
-        """Sección: Usuarios nuevos"""
+        """Sección: Usuarios Faltantes por Módulo"""
         section_frame = ctk.CTkFrame(
             parent,
             fg_color=theme['colors'].get('card_background', '#2d2d2d'),
@@ -333,51 +305,67 @@ class PanelConsultas(ctk.CTkFrame):
         # Título
         ctk.CTkLabel(
             content,
-            text="🆕 Usuarios Recientes",
+            text="❓ Usuarios Faltantes por Módulo",
             font=('Montserrat', 18, 'bold'),
             text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 15))
 
-        # Input frame
-        input_frame = ctk.CTkFrame(content, fg_color='transparent')
-        input_frame.pack(fill='x')
-        input_frame.grid_columnconfigure(1, weight=1)
+        # Grid de filtros (2 filas)
+        filters_grid = ctk.CTkFrame(content, fg_color='transparent')
+        filters_grid.pack(fill='x')
+        filters_grid.grid_columnconfigure(1, weight=1)
 
-        # Label
+        # Fila 1: Estado
         ctk.CTkLabel(
-            input_frame,
-            text="Últimos días:",
+            filters_grid,
+            text="Estado:",
             font=('Montserrat', 13),
             text_color=theme['colors']['text']
-        ).grid(row=0, column=0, sticky='w', padx=(0, 10))
+        ).grid(row=0, column=0, sticky='w', padx=(0, 10), pady=(0, 10))
 
-        # Entry
-        self.days_entry = ctk.CTkEntry(
-            input_frame,
-            placeholder_text="30",
+        self.status_combo = ctk.CTkComboBox(
+            filters_grid,
+            values=["Todos", "Completado", "En Progreso", "No Iniciado", "Pendiente"],
             font=('Montserrat', 13),
             height=40,
             border_width=2,
-            width=100
+            state='readonly'
         )
-        self.days_entry.grid(row=0, column=1, sticky='w', padx=(0, 10))
-        self.days_entry.insert(0, "30")
-        self.days_entry.bind('<Return>', lambda e: self.query_new_users())
+        self.status_combo.grid(row=0, column=1, sticky='ew', padx=(0, 10), pady=(0, 10))
+        self.status_combo.set("Todos")
+
+        # Fila 2: Módulo
+        ctk.CTkLabel(
+            filters_grid,
+            text="Módulo:",
+            font=('Montserrat', 13),
+            text_color=theme['colors']['text']
+        ).grid(row=1, column=0, sticky='w', padx=(0, 10))
+
+        self.module_combo = ctk.CTkComboBox(
+            filters_grid,
+            values=self._load_modules(),
+            font=('Montserrat', 13),
+            height=40,
+            border_width=2,
+            state='readonly'
+        )
+        self.module_combo.grid(row=1, column=1, sticky='ew', padx=(0, 10))
 
         # Botón consultar
         ctk.CTkButton(
-            input_frame,
-            text="🔍 Consultar",
+            filters_grid,
+            text="🔍 Buscar",
             font=('Montserrat', 13, 'bold'),
             fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#003D8F',
             height=40,
             width=120,
-            command=self.query_new_users
-        ).grid(row=0, column=2)
+            command=self.query_missing_users_by_module
+        ).grid(row=1, column=2)
 
     def _create_stats_section(self, parent, theme):
-        """Sección: Estadísticas globales"""
+        """Sección: Filtros por Generación y Posición"""
         section_frame = ctk.CTkFrame(
             parent,
             fg_color=theme['colors'].get('card_background', '#2d2d2d'),
@@ -391,22 +379,65 @@ class PanelConsultas(ctk.CTkFrame):
         # Título
         ctk.CTkLabel(
             content,
-            text="📊 Estadísticas del Sistema",
+            text="🎯 Filtros por Generación y Posición",
             font=('Montserrat', 18, 'bold'),
             text_color=theme['colors']['text']
         ).pack(anchor='w', pady=(0, 15))
 
-        # Botón mostrar estadísticas
+        # Grid de filtros (2 filas)
+        filters_grid = ctk.CTkFrame(content, fg_color='transparent')
+        filters_grid.pack(fill='x')
+        filters_grid.grid_columnconfigure(1, weight=1)
+
+        # Fila 1: Generación
+        ctk.CTkLabel(
+            filters_grid,
+            text="Generación:",
+            font=('Montserrat', 13),
+            text_color=theme['colors']['text']
+        ).grid(row=0, column=0, sticky='w', padx=(0, 10), pady=(0, 10))
+
+        self.generation_combo = ctk.CTkComboBox(
+            filters_grid,
+            values=["Todas", "2024", "2023", "2022", "2021", "2020"],
+            font=('Montserrat', 13),
+            height=40,
+            border_width=2,
+            state='readonly'
+        )
+        self.generation_combo.grid(row=0, column=1, sticky='ew', padx=(0, 10), pady=(0, 10))
+        self.generation_combo.set("Todas")
+
+        # Fila 2: Posición
+        ctk.CTkLabel(
+            filters_grid,
+            text="Posición:",
+            font=('Montserrat', 13),
+            text_color=theme['colors']['text']
+        ).grid(row=1, column=0, sticky='w', padx=(0, 10))
+
+        self.position_combo = ctk.CTkComboBox(
+            filters_grid,
+            values=["Todas", "Gerente", "Supervisor", "Operador", "Analista", "Coordinador"],
+            font=('Montserrat', 13),
+            height=40,
+            border_width=2,
+            state='readonly'
+        )
+        self.position_combo.grid(row=1, column=1, sticky='ew', padx=(0, 10))
+        self.position_combo.set("Todas")
+
+        # Botón consultar
         ctk.CTkButton(
-            content,
-            text="📈 Ver Estadísticas Globales",
-            font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['aqua_green'],
-            hover_color='#0ac5a8',
-            height=45,
-            width=250,
-            command=self.show_global_stats
-        ).pack(anchor='w')
+            filters_grid,
+            text="🔍 Filtrar",
+            font=('Montserrat', 13, 'bold'),
+            fg_color=HUTCHISON_COLORS['primary'],
+            hover_color='#003D8F',
+            height=40,
+            width=120,
+            command=self.query_by_generation_position
+        ).grid(row=1, column=2)
 
     def _create_results_section(self, parent, theme):
         """Sección: Tabla de resultados (OPTIMIZADO CON PAGINACIÓN)"""
@@ -465,6 +496,19 @@ class PanelConsultas(ctk.CTkFrame):
 
         units = self.db_controller.load_business_units()
         return units if units else ["Sin unidades disponibles"]
+
+    def _load_modules(self):
+        """Cargar lista de módulos"""
+        if not self.db_controller:
+            return ["No hay conexión"]
+
+        try:
+            query = "SELECT NombreModulo FROM instituto_modulo WHERE Activo = 1 ORDER BY NombreModulo"
+            self.cursor.execute(query)
+            modules = [row[0] for row in self.cursor.fetchall()]
+            return modules if modules else ["Sin módulos disponibles"]
+        except:
+            return ["Todos los Módulos"]
 
     def search_user_by_id(self):
         """Buscar usuario por ID"""
@@ -610,6 +654,110 @@ class PanelConsultas(ctk.CTkFrame):
 
         except Exception as e:
             messagebox.showerror("Error", f"Error obteniendo estadísticas:\n{str(e)}")
+
+    def query_missing_users_by_module(self):
+        """Consultar usuarios faltantes por módulo y estado"""
+        if not self.db_controller:
+            messagebox.showinfo("Sin Conexión", "No hay conexión a la base de datos.")
+            return
+
+        status = self.status_combo.get()
+        module = self.module_combo.get()
+
+        try:
+            # Construir consulta dinámica
+            query = """
+            SELECT
+                u.UserID as 'ID Empleado',
+                u.NombreCompleto as 'Nombre',
+                u.UserEmail as 'Email',
+                un.NombreUnidad as 'Unidad',
+                m.NombreModulo as 'Módulo',
+                pm.EstatusModulo as 'Estado',
+                pm.FechaVencimiento as 'Fecha Límite'
+            FROM instituto_usuario u
+            LEFT JOIN instituto_unidaddenegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+            LEFT JOIN instituto_progresomodulo pm ON u.IdUsuario = pm.IdUsuario
+            LEFT JOIN instituto_modulo m ON pm.IdModulo = m.IdModulo
+            WHERE u.Activo = 1
+            """
+
+            # Filtro por módulo
+            if module and module not in ["No hay conexión", "Sin módulos disponibles"]:
+                query += f" AND m.NombreModulo = '{module}'"
+
+            # Filtro por estado
+            if status and status != "Todos":
+                query += f" AND pm.EstatusModulo = '{status}'"
+
+            query += " ORDER BY un.NombreUnidad, u.NombreCompleto"
+
+            self.cursor.execute(query)
+            results = self.cursor.fetchall()
+            columns = [desc[0] for desc in self.cursor.description]
+
+            if results:
+                self._display_results(columns, results)
+                messagebox.showinfo("Consulta Exitosa",
+                                  f"Se encontraron {len(results)} usuarios")
+            else:
+                messagebox.showinfo("Sin Resultados", "No se encontraron usuarios con los filtros seleccionados")
+                self._clear_results()
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error en consulta:\n{str(e)}")
+
+    def query_by_generation_position(self):
+        """Consultar por generación y posición"""
+        if not self.db_controller:
+            messagebox.showinfo("Sin Conexión", "No hay conexión a la base de datos.")
+            return
+
+        generation = self.generation_combo.get()
+        position = self.position_combo.get()
+
+        try:
+            # Construir consulta dinámica
+            query = """
+            SELECT
+                u.UserID as 'ID Empleado',
+                u.NombreCompleto as 'Nombre',
+                u.UserEmail as 'Email',
+                u.Posicion as 'Posición',
+                un.NombreUnidad as 'Unidad',
+                YEAR(u.FechaCreacion) as 'Generación',
+                COUNT(pm.IdModulo) as 'Módulos Asignados',
+                SUM(CASE WHEN pm.EstatusModulo = 'Completado' THEN 1 ELSE 0 END) as 'Completados'
+            FROM instituto_usuario u
+            LEFT JOIN instituto_unidaddenegocio un ON u.IdUnidadDeNegocio = un.IdUnidadDeNegocio
+            LEFT JOIN instituto_progresomodulo pm ON u.IdUsuario = pm.IdUsuario
+            WHERE u.Activo = 1
+            """
+
+            # Filtro por generación
+            if generation and generation != "Todas":
+                query += f" AND YEAR(u.FechaCreacion) = {generation}"
+
+            # Filtro por posición
+            if position and position != "Todas":
+                query += f" AND u.Posicion = '{position}'"
+
+            query += " GROUP BY u.IdUsuario ORDER BY un.NombreUnidad, u.NombreCompleto"
+
+            self.cursor.execute(query)
+            results = self.cursor.fetchall()
+            columns = [desc[0] for desc in self.cursor.description]
+
+            if results:
+                self._display_results(columns, results)
+                messagebox.showinfo("Consulta Exitosa",
+                                  f"Se encontraron {len(results)} usuarios")
+            else:
+                messagebox.showinfo("Sin Resultados", "No se encontraron usuarios con los filtros seleccionados")
+                self._clear_results()
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error en consulta:\n{str(e)}")
 
     def export_results(self):
         """Exportar resultados a Excel"""
