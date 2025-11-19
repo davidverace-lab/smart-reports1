@@ -1,6 +1,7 @@
 """
 MatplotlibChartCard - Preview estático para dashboards
 Usa Matplotlib embebido en tkinter - 100% confiable
+Al hacer clic en expandir, se abre modal D3.js interactivo
 """
 import customtkinter as ctk
 from tkinter import Frame
@@ -11,6 +12,13 @@ import numpy as np
 
 from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
+
+# Importar modal D3.js (con fallback si no está disponible)
+try:
+    from smart_reports.ui.components.charts.modal_d3_fullscreen import ModalD3Fullscreen, TKINTERWEB_AVAILABLE
+except ImportError:
+    TKINTERWEB_AVAILABLE = False
+    ModalD3Fullscreen = None
 
 
 class MatplotlibChartCard(ctk.CTkFrame):
@@ -304,7 +312,29 @@ class MatplotlibChartCard(ctk.CTkFrame):
         ax.spines['bottom'].set_color(text_color)
 
     def _trigger_fullscreen(self):
-        """Activar modo fullscreen con D3.js interactivo"""
+        """Activar modo fullscreen con D3.js interactivo embebido"""
+        if not self.chart_type or not self.chart_data:
+            print("⚠️ No hay datos de gráfico para mostrar en fullscreen")
+            return
+
+        # Intentar abrir modal D3.js embebido (preferido)
+        if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
+            try:
+                print(f"  ⛶ Abriendo modal D3.js interactivo para: {self._title}")
+                modal = ModalD3Fullscreen(
+                    parent=self.winfo_toplevel(),
+                    title=self._title,
+                    chart_type=self.chart_type,
+                    chart_data=self.chart_data
+                )
+                modal.focus()
+                modal.grab_set()
+                return
+            except Exception as e:
+                print(f"⚠️ Error abriendo modal D3.js: {e}")
+                # Continuar con fallback
+
+        # Fallback: usar callback externo si está definido
         if self.on_fullscreen and self.chart_url:
             self.on_fullscreen(
                 title=self._title,
@@ -313,7 +343,9 @@ class MatplotlibChartCard(ctk.CTkFrame):
                 subtitle=self.chart_subtitle,
                 url=self.chart_url
             )
-            print(f"  ⛶ Activando fullscreen CEF para: {self._title}")
+            print(f"  ⛶ Usando callback fullscreen externo para: {self._title}")
+        else:
+            print("⚠️ tkinterweb no disponible y no hay callback fullscreen definido")
 
     def _open_in_browser(self):
         """Abrir gráfico D3.js en navegador"""

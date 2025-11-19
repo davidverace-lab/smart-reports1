@@ -794,3 +794,270 @@ class MotorTemplatesD3:
 
         return html
 
+    @staticmethod
+    def generar_grafico_area(
+        titulo: str,
+        datos: Dict[str, Any],
+        subtitulo: str = "",
+        tema: str = 'dark'
+    ) -> str:
+        """
+        Generar gráfico de área con D3.js
+        Similar al gráfico de líneas pero con área rellenada
+        """
+
+        # Aceptar tanto 'labels'/'values' como 'categorias'/'valores'
+        labels = datos.get('labels') or datos.get('categorias', [])
+        values = datos.get('values') or datos.get('valores', [])
+
+        # Soporte para múltiples series
+        labels_json = json.dumps(labels)
+        series_json = json.dumps(datos.get('series', [{'name': 'Serie 1', 'values': values}]))
+        colores_json = json.dumps(MotorTemplatesD3.PALETA_COLORES)
+
+        html = MotorTemplatesD3._generar_head(titulo, tema)
+
+        html += f"""
+<body>
+    <div class="container">
+        <div class="chart-card">
+            <h1 class="chart-title">{titulo}</h1>
+            {f'<p class="chart-subtitle">{subtitulo}</p>' if subtitulo else ''}
+
+            <div class="controls">
+                <button class="btn" onclick="enableZoom()">🔍 Activar Zoom</button>
+                <button class="btn" onclick="resetZoom()">🔄 Restablecer Zoom</button>
+            </div>
+
+            <div id="chart-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos
+        const labels = {labels_json};
+        const series = {series_json};
+        const colors = {colores_json};
+
+        // Configuración
+        const margin = {{top: 40, right: 120, bottom: 60, left: 80}};
+        const container = document.getElementById('chart-container');
+        const width = container.clientWidth - margin.left - margin.right;
+        const height = container.clientHeight - margin.top - margin.bottom;
+
+        // Crear SVG
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
+
+        const g = svg.append("g")
+            .attr("transform", `translate(${{margin.left}},${{margin.top}})`);
+
+        // Escalas
+        const x = d3.scalePoint()
+            .domain(labels)
+            .range([0, width]);
+
+        const allValues = series.flatMap(s => s.values);
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(allValues) * 1.1])
+            .range([height, 0]);
+
+        // Grid
+        g.append("g")
+            .attr("class", "grid")
+            .call(d3.axisLeft(y)
+                .tickSize(-width)
+                .tickFormat("")
+            );
+
+        // Ejes
+        const xAxis = g.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${{height}})`)
+            .call(d3.axisBottom(x));
+
+        const yAxis = g.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y));
+
+        // Área generator
+        const area = d3.area()
+            .x((d, i) => x(labels[i]))
+            .y0(height)
+            .y1(d => y(d))
+            .curve(d3.curveMonotoneX);
+
+        // Línea generator
+        const line = d3.line()
+            .x((d, i) => x(labels[i]))
+            .y(d => y(d))
+            .curve(d3.curveMonotoneX);
+
+        // Tooltip
+        const tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "d3-tooltip");
+
+        // Dibujar áreas y líneas
+        series.forEach((serie, serieIndex) => {{
+            const color = colors[serieIndex % colors.length];
+
+            // Área rellenada con gradiente
+            const gradient = svg.append("defs")
+                .append("linearGradient")
+                .attr("id", `gradient-${{serieIndex}}`)
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "0%")
+                .attr("y2", "100%");
+
+            gradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", color)
+                .attr("stop-opacity", 0.8);
+
+            gradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", color)
+                .attr("stop-opacity", 0.1);
+
+            // Área
+            const areaPath = g.append("path")
+                .datum(serie.values)
+                .attr("fill", `url(#gradient-${{serieIndex}})`)
+                .attr("d", area);
+
+            // Animación del área
+            const areaLength = areaPath.node().getTotalLength();
+            areaPath.attr("stroke-dasharray", areaLength + " " + areaLength)
+                .attr("stroke-dashoffset", areaLength)
+                .attr("stroke", "none")
+                .transition()
+                .duration(1500)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0);
+
+            // Línea
+            const linePath = g.append("path")
+                .datum(serie.values)
+                .attr("fill", "none")
+                .attr("stroke", color)
+                .attr("stroke-width", 3)
+                .attr("d", line);
+
+            // Animación de la línea
+            const lineLength = linePath.node().getTotalLength();
+            linePath.attr("stroke-dasharray", lineLength + " " + lineLength)
+                .attr("stroke-dashoffset", lineLength)
+                .transition()
+                .duration(1500)
+                .ease(d3.easeLinear)
+                .attr("stroke-dashoffset", 0);
+
+            // Puntos interactivos
+            g.selectAll(`.dot-${{serieIndex}}`)
+                .data(serie.values)
+                .enter()
+                .append("circle")
+                .attr("class", `dot-${{serieIndex}}`)
+                .attr("cx", (d, i) => x(labels[i]))
+                .attr("cy", d => y(d))
+                .attr("r", 0)
+                .attr("fill", color)
+                .attr("stroke", "white")
+                .attr("stroke-width", 2)
+                .style("cursor", "pointer")
+                .on("mouseover", function(event, d) {{
+                    const i = serie.values.indexOf(d);
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr("r", 8);
+
+                    tooltip.html(`
+                        <div class="d3-tooltip-title">${{serie.name}} - ${{labels[i]}}</div>
+                        <div class="d3-tooltip-value">${{d.toLocaleString()}}</div>
+                    `)
+                    .style("left", (event.pageX + 15) + "px")
+                    .style("top", (event.pageY - 28) + "px")
+                    .classed("show", true);
+                }})
+                .on("mouseout", function() {{
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr("r", 5);
+
+                    tooltip.classed("show", false);
+                }})
+                .transition()
+                .delay((d, i) => i * 100 + 1500)
+                .duration(300)
+                .attr("r", 5);
+        }});
+
+        // Leyenda
+        const legend = g.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(${{width + 20}}, 0)`);
+
+        series.forEach((serie, i) => {{
+            const legendRow = legend.append("g")
+                .attr("transform", `translate(0, ${{i * 30}})`);
+
+            legendRow.append("rect")
+                .attr("width", 20)
+                .attr("height", 20)
+                .attr("rx", 4)
+                .attr("fill", colors[i % colors.length]);
+
+            legendRow.append("text")
+                .attr("x", 30)
+                .attr("y", 15)
+                .attr("font-size", "13px")
+                .attr("fill", "{'#ffffff' if tema == 'dark' else '#2b2d42'}")
+                .text(serie.name);
+        }});
+
+        // ===== ZOOM Y PAN =====
+        let zoomEnabled = false;
+        const zoom = d3.zoom()
+            .scaleExtent([1, 10])
+            .translateExtent([[0, 0], [width, height]])
+            .extent([[0, 0], [width, height]])
+            .on("zoom", zoomed);
+
+        function enableZoom() {{
+            if (!zoomEnabled) {{
+                svg.call(zoom);
+                zoomEnabled = true;
+                alert("✅ Zoom activado! Usa la rueda del mouse para hacer zoom y arrastra para mover.");
+            }}
+        }}
+
+        function resetZoom() {{
+            svg.transition()
+                .duration(750)
+                .call(zoom.transform, d3.zoomIdentity);
+        }}
+
+        function zoomed(event) {{
+            const newX = event.transform.rescaleX(x);
+            const newY = event.transform.rescaleY(y);
+
+            // Actualizar ejes
+            xAxis.call(d3.axisBottom(newX));
+            yAxis.call(d3.axisLeft(newY));
+
+            // Actualizar elementos (se necesitaría regenerar paths con nuevas escalas)
+            // Por simplicidad, solo actualizamos ejes en esta versión
+        }}
+    </script>
+</body>
+</html>
+"""
+
+        return html
+
