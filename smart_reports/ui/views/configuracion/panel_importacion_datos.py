@@ -380,122 +380,40 @@ class PanelImportacionDatos(ctk.CTkFrame):
         self.validation_text.configure(state='disabled')
 
     def _create_actions_section(self, parent, theme):
-        """Sección de botones de acción"""
+        """Sección de botones de acción - SIMPLIFICADO"""
 
-        # Grid para botones principales
+        # Grid para botones principales (solo 2 botones)
         actions_grid = ctk.CTkFrame(parent, fg_color='transparent')
         actions_grid.pack(fill='x', pady=5)
-        actions_grid.columnconfigure((0, 1, 2, 3), weight=1)
+        actions_grid.columnconfigure((0, 1), weight=1)
 
         # Botón Validar
         self.btn_validar = ctk.CTkButton(
             actions_grid,
             text="🔍 Validar Datos",
-            font=('Segoe UI', 12, 'bold'),
+            font=('Segoe UI', 14, 'bold'),
             fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
             hover_color='#001a3d',
             text_color='white',
-            height=45,
+            height=55,
             corner_radius=10,
             command=self._validar_datos
         )
-        self.btn_validar.grid(row=0, column=0, padx=4, sticky='ew')
+        self.btn_validar.grid(row=0, column=0, padx=6, sticky='ew')
 
         # Botón Importar Todo
         self.btn_importar_todo = ctk.CTkButton(
             actions_grid,
             text="🚀 Importar Todo",
-            font=('Segoe UI', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
-            hover_color='#001a3d',
+            font=('Segoe UI', 14, 'bold'),
+            fg_color='#16a34a',  # Verde para acción principal
+            hover_color='#15803d',
             text_color='white',
-            height=45,
+            height=55,
             corner_radius=10,
             command=self._importar_todo
         )
-        self.btn_importar_todo.grid(row=0, column=1, padx=4, sticky='ew')
-
-        # Botón Solo Training
-        self.btn_importar_training = ctk.CTkButton(
-            actions_grid,
-            text="📊 Solo Training",
-            font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
-            hover_color='#001a3d',
-            text_color='white',
-            height=45,
-            corner_radius=10,
-            command=self._importar_training
-        )
-        self.btn_importar_training.grid(row=0, column=2, padx=4, sticky='ew')
-
-        # Botón Solo Org
-        self.btn_importar_org = ctk.CTkButton(
-            actions_grid,
-            text="👥 Solo Org",
-            font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
-            hover_color='#001a3d',
-            text_color='white',
-            height=45,
-            corner_radius=10,
-            command=self._importar_org
-        )
-        self.btn_importar_org.grid(row=0, column=3, padx=4, sticky='ew')
-
-        # Separador pequeño
-        sep_small = ctk.CTkFrame(parent, fg_color='transparent', height=10)
-        sep_small.pack(fill='x')
-
-        # Grid para herramientas avanzadas
-        tools_grid = ctk.CTkFrame(parent, fg_color='transparent')
-        tools_grid.pack(fill='x', pady=5)
-        tools_grid.columnconfigure((0, 1, 2), weight=1)
-
-        # Botón Configurar Columnas
-        self.btn_configurar_columnas = ctk.CTkButton(
-            tools_grid,
-            text="⚙ Configurar Columnas",
-            font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
-            hover_color='#001a3d',
-            text_color='white',
-            border_width=0,
-            height=38,
-            corner_radius=8,
-            command=self._configurar_columnas
-        )
-        self.btn_configurar_columnas.grid(row=0, column=0, padx=4, sticky='ew')
-
-        # Botón Exportar Log
-        self.btn_exportar_log = ctk.CTkButton(
-            tools_grid,
-            text="💾 Exportar Log",
-            font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
-            hover_color='#001a3d',
-            text_color='white',
-            border_width=0,
-            height=38,
-            corner_radius=8,
-            command=self._exportar_log
-        )
-        self.btn_exportar_log.grid(row=0, column=1, padx=4, sticky='ew')
-
-        # Botón Ver Backups
-        self.btn_ver_backups = ctk.CTkButton(
-            tools_grid,
-            text="🔄 Ver Backups",
-            font=('Segoe UI', 11, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy
-            hover_color='#001a3d',
-            text_color='white',
-            border_width=0,
-            height=38,
-            corner_radius=8,
-            command=self._ver_backups
-        )
-        self.btn_ver_backups.grid(row=0, column=2, padx=4, sticky='ew')
+        self.btn_importar_todo.grid(row=0, column=1, padx=6, sticky='ew')
 
     def _create_log_section(self, parent, theme):
         """Sección de log"""
@@ -1083,21 +1001,11 @@ class PanelImportacionDatos(ctk.CTkFrame):
         """Deshabilitar botones durante importación"""
         self.btn_validar.configure(state='disabled')
         self.btn_importar_todo.configure(state='disabled')
-        self.btn_importar_training.configure(state='disabled')
-        self.btn_importar_org.configure(state='disabled')
-        self.btn_configurar_columnas.configure(state='disabled')
-        self.btn_exportar_log.configure(state='disabled')
-        self.btn_ver_backups.configure(state='disabled')
 
     def _habilitar_botones(self):
         """Habilitar botones después de importación"""
         self.btn_validar.configure(state='normal')
         self.btn_importar_todo.configure(state='normal')
-        self.btn_importar_training.configure(state='normal')
-        self.btn_importar_org.configure(state='normal')
-        self.btn_configurar_columnas.configure(state='normal')
-        self.btn_exportar_log.configure(state='normal')
-        self.btn_ver_backups.configure(state='normal')
 
     # ========== MÉTODOS DE COMPONENTES AVANZADOS ==========
 

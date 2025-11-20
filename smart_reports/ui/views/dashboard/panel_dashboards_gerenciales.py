@@ -187,7 +187,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
     def show_expanded_view(self, chart_id, title, chart_type='barras'):
         """
-        Mostrar vista EXPANDIDA con gráfica D3.js interactiva
+        Mostrar vista EXPANDIDA con gráfica en la misma página
 
         Args:
             chart_id: ID de la gráfica
@@ -197,37 +197,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         # Obtener datos
         chart_data = self.datos_graficas.get(chart_id, {'labels': [], 'values': []})
 
-        # Mapear tipo de gráfico a formato D3.js
-        chart_type_map = {
-            'barras': 'bar',
-            'barras_h': 'horizontal_bar',
-            'dona': 'donut',
-            'linea': 'line',
-            'area': 'area'
-        }
-        d3_chart_type = chart_type_map.get(chart_type, 'bar')
+        print(f"📊 Expandiendo gráfica: {title}")
 
-        # Intentar abrir modal D3.js (preferido)
-        if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
-            try:
-                print(f"  ⛶ Abriendo modal D3.js para: {title}")
-                modal = ModalD3Fullscreen(
-                    parent=self.winfo_toplevel(),
-                    title=title,
-                    chart_type=d3_chart_type,
-                    chart_data=chart_data
-                )
-                modal.focus()
-                modal.grab_set()
-                return
-            except Exception as e:
-                print(f"⚠️ Error abriendo modal D3.js: {e}")
-                import traceback
-                traceback.print_exc()
-                # Continuar con fallback
-
-        # Fallback: Usar vista expandida Matplotlib tradicional
-        print(f"  ⚠️ Usando vista expandida Matplotlib (fallback)")
+        # Configurar vista expandida
         self.current_view = 'expanded'
         self.current_chart_id = chart_id
         self.current_chart_title = title
