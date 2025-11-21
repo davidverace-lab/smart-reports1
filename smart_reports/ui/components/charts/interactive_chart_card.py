@@ -51,6 +51,7 @@ class InteractiveChartCard(ctk.CTkFrame):
         self.original_data = None  # Backup de datos originales
         self.hidden_items = set()  # Items ocultos por usuario
         self.sort_order = 'desc'  # 'asc' o 'desc'
+        self.is_expanded = False  # Estado de expansión
 
         # Referencias
         self.canvas = None
@@ -60,6 +61,7 @@ class InteractiveChartCard(ctk.CTkFrame):
         self.annotation = None  # Tooltip flotante
         self.hover_index = -1  # Índice de barra bajo hover
         self.hidden_indicator = None  # Label indicador de elementos ocultos
+        self.html_frame = None  # Frame para gráfico D3/NVD3 expandido
 
         # Animación
         self.is_animating = False
@@ -727,33 +729,144 @@ class InteractiveChartCard(ctk.CTkFrame):
             traceback.print_exc()
 
     def _trigger_fullscreen(self):
-        """Activar modo fullscreen con D3.js/NVD3.js interactivo embebido"""
+        """Expandir/contraer gráfico D3.js/NVD3.js in-place"""
         if not self.chart_type or not self.chart_data:
-            print("⚠️ No hay datos de gráfico para mostrar en fullscreen")
+            print("⚠️ No hay datos de gráfico para expandir")
             return
 
-        # Intentar abrir modal D3.js/NVD3.js embebido (preferido)
-        if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
-            try:
-                engine_name = "NVD3.js" if self.chart_engine == 'nvd3' else "D3.js"
-                print(f"  ⛶ Abriendo modal {engine_name} interactivo para: {self.title_text}")
-                modal = ModalD3Fullscreen(
-                    parent=self.winfo_toplevel(),
-                    title=self.title_text,
-                    chart_type=self.chart_type,
-                    chart_data=self.chart_data,
-                    engine=self.chart_engine  # ← Pasar motor seleccionado
-                )
-                modal.focus()
-                modal.grab_set()
-                return
-            except Exception as e:
-                print(f"⚠️ Error abriendo modal D3.js/NVD3.js: {e}")
-                # Continuar con fallback
+        if not TKINTERWEB_AVAILABLE:
+            print("⚠️ tkinterweb no disponible - no se puede expandir a D3/NVD3")
+            if self.on_fullscreen_callback:
+                self.on_fullscreen_callback(self)
+            return
 
-        # Fallback: usar callback externo si está definido
-        if self.on_fullscreen_callback:
-            self.on_fullscreen_callback(self)
-            print(f"  ⛶ Usando callback fullscreen externo para: {self.title_text}")
+        # Toggle entre estado expandido y compacto
+        if self.is_expanded:
+            self._collapse_chart()
         else:
-            print("⚠️ tkinterweb no disponible y no hay callback fullscreen definido")
+            self._expand_chart()
+
+    def _expand_chart(self):
+        """Expandir gráfico a vista interactiva D3/NVD3"""
+        try:
+            engine_name = "NVD3.js" if self.chart_engine == 'nvd3' else "D3.js"
+            print(f"  📊 Expandiendo a {engine_name} interactivo: {self.title_text}")
+
+            # Ocultar canvas de matplotlib
+            if self.canvas:
+                self.canvas.get_tk_widget().pack_forget()
+
+            # Generar HTML con el motor seleccionado
+            from smart_reports.utils.visualization.d3_generator import MotorTemplatesD3
+            from smart_reports.utils.visualization.nvd3_generator import MotorTemplatesNVD3
+
+            Motor = MotorTemplatesNVD3 if self.chart_engine == 'nvd3' else MotorTemplatesD3
+            theme = self.theme_manager.get_current_theme()
+            chart_theme = 'dark' if theme['name'] == 'dark' else 'light'
+
+            # Generar HTML según tipo de gráfico
+            if self.chart_type in ['bar', 'horizontal_bar']:
+                html = Motor.generar_grafico_barras(
+                    titulo="",  # Sin título (ya lo tiene el card)
+                    datos=self.chart_data,
+                    subtitulo="",
+                    tema=chart_theme,
+                    interactivo=True if self.chart_engine == 'd3' else None
+                )
+            elif self.chart_type == 'donut':
+                html = Motor.generar_grafico_donut(
+                    titulo="",
+                    datos=self.chart_data,
+                    subtitulo="",
+                    tema=chart_theme
+                )
+            elif self.chart_type == 'line':
+                html = Motor.generar_grafico_lineas(
+                    titulo="",
+                    datos=self.chart_data,
+                    subtitulo="",
+                    tema=chart_theme
+                )
+            elif self.chart_type == 'area':
+                html = Motor.generar_grafico_area(
+                    titulo="",
+                    datos=self.chart_data,
+                    subtitulo="",
+                    tema=chart_theme
+                )
+            else:
+                html = Motor.generar_grafico_barras(
+                    titulo="",
+                    datos=self.chart_data,
+                    tema=chart_theme
+                )
+
+            # Crear HtmlFrame si no existe
+            from tkinterweb import HtmlFrame
+
+            if self.html_frame is None:
+                self.html_frame = HtmlFrame(
+                    self.content_container,
+                    messages_enabled=False
+                )
+
+            # Cargar HTML
+            self.html_frame.load_html(html)
+            self.html_frame.pack(fill='both', expand=True)
+
+            # Actualizar estado
+            self.is_expanded = True
+
+            # Cambiar texto del botón a "Volver"
+            self._update_expand_button_text("↙ Volver")
+
+            print(f"  ✅ Expandido a vista {engine_name} interactiva")
+
+        except Exception as e:
+            print(f"❌ Error expandiendo gráfico: {e}")
+            import traceback
+            traceback.print_exc()
+            # Restaurar canvas si falla
+            if self.canvas:
+                self.canvas.get_tk_widget().pack(fill='both', expand=True)
+
+    def _collapse_chart(self):
+        """Colapsar gráfico a vista compacta Matplotlib"""
+        try:
+            print(f"  📉 Colapsando a vista compacta: {self.title_text}")
+
+            # Ocultar HtmlFrame
+            if self.html_frame:
+                self.html_frame.pack_forget()
+
+            # Mostrar canvas de matplotlib
+            if self.canvas:
+                self.canvas.get_tk_widget().pack(fill='both', expand=True)
+
+            # Actualizar estado
+            self.is_expanded = False
+
+            # Cambiar texto del botón a "Expandir"
+            self._update_expand_button_text("↗")
+
+            print(f"  ✅ Colapsado a vista Matplotlib")
+
+        except Exception as e:
+            print(f"❌ Error colapsando gráfico: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _update_expand_button_text(self, text):
+        """Actualizar texto del botón de expandir"""
+        # Buscar el botón fullscreen en los controles
+        try:
+            for child in self.winfo_children():
+                if isinstance(child, ctk.CTkFrame):
+                    for grandchild in child.winfo_children():
+                        if isinstance(grandchild, ctk.CTkFrame):
+                            for button in grandchild.winfo_children():
+                                if isinstance(button, ctk.CTkButton) and (button.cget("text") in ["↗", "↙ Volver"]):
+                                    button.configure(text=text)
+                                    return
+        except Exception as e:
+            pass  # Ignorar errores al actualizar botón
