@@ -1,17 +1,19 @@
 """
-Modal Fullscreen D3.js - Gráficos Interactivos Embebidos
+Modal Fullscreen D3.js/NVD3.js - Gráficos Interactivos Embebidos
 ✨ CARACTERÍSTICAS:
-- Ventana modal con gráficos D3.js interactivos
+- Ventana modal con gráficos D3.js/NVD3.js interactivos
 - Embebido dentro de la aplicación (NO navegador externo)
 - Animación de entrada deslizante desde abajo
 - Botón cerrar elegante (X) + tecla ESC
 - Zoom, pan, tooltips, filtros interactivos
 - Soporte para: bar, donut, line, area, horizontal_bar
+- Motor dual: D3.js puro o NVD3.js (componentes reutilizables)
 """
 import customtkinter as ctk
 from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
 from smart_reports.utils.visualization.d3_generator import MotorTemplatesD3
+from smart_reports.utils.visualization.nvd3_generator import MotorTemplatesNVD3
 import os
 import tempfile
 
@@ -24,9 +26,17 @@ except ImportError:
 
 
 class ModalD3Fullscreen(ctk.CTkToplevel):
-    """Modal fullscreen para mostrar gráficos D3.js interactivos embebidos"""
+    """Modal fullscreen para mostrar gráficos D3.js/NVD3.js interactivos embebidos"""
 
-    def __init__(self, parent, title, chart_type, chart_data, **kwargs):
+    def __init__(self, parent, title, chart_type, chart_data, engine='nvd3', **kwargs):
+        """
+        Args:
+            parent: Widget padre
+            title: Título del gráfico
+            chart_type: Tipo de gráfico ('bar', 'donut', 'line', 'area')
+            chart_data: Datos del gráfico {'labels': [...], 'values': [...]}
+            engine: Motor de renderizado - 'nvd3' (default) o 'd3'
+        """
         super().__init__(parent, **kwargs)
 
         if not TKINTERWEB_AVAILABLE:
@@ -37,6 +47,7 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
         self.title_text = title
         self.chart_type = chart_type
         self.chart_data = chart_data
+        self.engine = engine  # 'nvd3' o 'd3'
 
         # Referencias
         self.html_frame = None
@@ -113,10 +124,11 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
         )
         title_label.pack(side='left', expand=True, pady=10)
 
-        # Badge "D3.js Interactive"
+        # Badge "NVD3.js Interactive" o "D3.js Interactive"
+        badge_text = "NVD3.js Interactive" if self.engine == 'nvd3' else "D3.js Interactive"
         badge = ctk.CTkLabel(
             header,
-            text="D3.js Interactive",
+            text=badge_text,
             font=("Montserrat", 11, "bold"),
             text_color="white",
             fg_color=HUTCHISON_COLORS['aqua_green'],
@@ -180,48 +192,66 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
             error_label.pack(expand=True, padx=20, pady=20)
 
     def _generate_d3_html(self) -> str:
-        """Generar HTML con D3.js según el tipo de gráfico"""
+        """Generar HTML con D3.js o NVD3.js según el tipo de gráfico"""
         # Determinar tema
         theme = self.theme_manager.get_current_theme()
-        d3_theme = 'dark' if theme['name'] == 'dark' else 'light'
+        chart_theme = 'dark' if theme['name'] == 'dark' else 'light'
+
+        # Seleccionar motor de templates
+        Motor = MotorTemplatesNVD3 if self.engine == 'nvd3' else MotorTemplatesD3
+
+        # Mensajes según motor
+        if self.engine == 'nvd3':
+            subtitulos = {
+                'bar': "Gráfico interactivo con NVD3.js - Componentes reutilizables sobre D3.js",
+                'donut': "Gráfico de dona con NVD3.js - Pasa el mouse sobre las secciones",
+                'line': "Gráfico de líneas con NVD3.js - Interfaz interactiva avanzada",
+                'area': "Gráfico de área con NVD3.js - Cambia el estilo con los botones"
+            }
+        else:
+            subtitulos = {
+                'bar': "Gráfico interactivo con D3.js - Puedes hacer clic en los botones para ordenar",
+                'donut': "Pasa el mouse sobre las secciones para ver detalles",
+                'line': "Pasa el mouse sobre los puntos para ver valores",
+                'area': "Gráfico de área con D3.js"
+            }
 
         # Generar HTML según tipo de gráfico
         if self.chart_type in ['bar', 'horizontal_bar']:
-            html = MotorTemplatesD3.generar_grafico_barras(
+            html = Motor.generar_grafico_barras(
                 titulo=self.title_text,
                 datos=self.chart_data,
-                subtitulo="Gráfico interactivo con D3.js - Puedes hacer clic en los botones para ordenar",
-                tema=d3_theme,
-                interactivo=True
+                subtitulo=subtitulos.get('bar', ''),
+                tema=chart_theme,
+                interactivo=True if self.engine == 'd3' else None
             )
         elif self.chart_type == 'donut':
-            html = MotorTemplatesD3.generar_grafico_donut(
+            html = Motor.generar_grafico_donut(
                 titulo=self.title_text,
                 datos=self.chart_data,
-                subtitulo="Pasa el mouse sobre las secciones para ver detalles",
-                tema=d3_theme
+                subtitulo=subtitulos.get('donut', ''),
+                tema=chart_theme
             )
         elif self.chart_type == 'line':
-            html = MotorTemplatesD3.generar_grafico_lineas(
+            html = Motor.generar_grafico_lineas(
                 titulo=self.title_text,
                 datos=self.chart_data,
-                subtitulo="Pasa el mouse sobre los puntos para ver valores",
-                tema=d3_theme
+                subtitulo=subtitulos.get('line', ''),
+                tema=chart_theme
             )
         elif self.chart_type == 'area':
-            # Generar como gráfico de líneas (el generador puede extenderse para area)
-            html = MotorTemplatesD3.generar_grafico_lineas(
+            html = Motor.generar_grafico_area(
                 titulo=self.title_text,
                 datos=self.chart_data,
-                subtitulo="Gráfico de área con D3.js",
-                tema=d3_theme
+                subtitulo=subtitulos.get('area', ''),
+                tema=chart_theme
             )
         else:
             # Tipo desconocido, usar barras por defecto
-            html = MotorTemplatesD3.generar_grafico_barras(
+            html = Motor.generar_grafico_barras(
                 titulo=self.title_text,
                 datos=self.chart_data,
-                tema=d3_theme
+                tema=chart_theme
             )
 
         return html
@@ -293,28 +323,40 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
 # FUNCIÓN DE CONVENIENCIA
 # ============================================================================
 
-def show_d3_chart(parent, title: str, chart_type: str, chart_data: dict):
+def show_d3_chart(parent, title: str, chart_type: str, chart_data: dict, engine: str = 'nvd3'):
     """
-    Mostrar gráfico D3.js en modal fullscreen
+    Mostrar gráfico D3.js/NVD3.js en modal fullscreen
 
     Args:
         parent: Widget padre (ventana principal)
         title: Título del gráfico
         chart_type: Tipo de gráfico ('bar', 'donut', 'line', 'area', 'horizontal_bar')
         chart_data: Datos del gráfico {'labels': [...], 'values': [...]}
+        engine: Motor de renderizado - 'nvd3' (default) o 'd3'
 
     Example:
+        # Usando NVD3.js (componentes reutilizables)
         show_d3_chart(
             parent=self.master,
             title="Ventas por Producto",
             chart_type="bar",
-            chart_data={'labels': ['A', 'B', 'C'], 'values': [10, 20, 30]}
+            chart_data={'labels': ['A', 'B', 'C'], 'values': [10, 20, 30]},
+            engine='nvd3'
+        )
+
+        # Usando D3.js puro (máxima personalización)
+        show_d3_chart(
+            parent=self.master,
+            title="Ventas por Producto",
+            chart_type="bar",
+            chart_data={'labels': ['A', 'B', 'C'], 'values': [10, 20, 30]},
+            engine='d3'
         )
     """
     if not TKINTERWEB_AVAILABLE:
         print("⚠️ tkinterweb no está disponible - No se puede mostrar modal D3.js")
         return
 
-    modal = ModalD3Fullscreen(parent, title, chart_type, chart_data)
+    modal = ModalD3Fullscreen(parent, title, chart_type, chart_data, engine=engine)
     modal.focus()
     modal.grab_set()  # Modal verdadero (bloquea ventana padre)
