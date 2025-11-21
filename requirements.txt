@@ -21,7 +21,9 @@ tkinterdnd2-universal>=1.7.3
 pillow>=10.0.0
 tkhtmlview>=0.1.1
 
-# HTML embebido dentro de la app (para D3.js fullscreen)
+# HTML embebido dentro de la app (para D3.js/NVD3.js fullscreen)
+# Permite renderizar gráficos interactivos D3.js y NVD3.js dentro de la aplicación
+# NVD3.js se usa vía CDN (no requiere python-nvd3 que tiene problemas de instalación)
 tkinterweb>=3.23.0
 
 # Graficos y visualizacion

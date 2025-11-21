@@ -33,7 +33,7 @@ except ImportError:
 class InteractiveChartCard(ctk.CTkFrame):
     """Tarjeta con gráfico Matplotlib TOTALMENTE interactivo"""
 
-    def __init__(self, parent, title='', width=500, height=400, **kwargs):
+    def __init__(self, parent, title='', width=500, height=400, chart_engine='nvd3', **kwargs):
         # Extract custom parameters that CTkFrame doesn't support
         self.on_fullscreen_callback = kwargs.pop('on_fullscreen', None)
 
@@ -43,6 +43,7 @@ class InteractiveChartCard(ctk.CTkFrame):
         self._width = width
         self._height = height
         self.title_text = title
+        self.chart_engine = chart_engine  # 'nvd3' (default) o 'd3'
 
         # Estado del gráfico
         self.chart_type = None
@@ -726,26 +727,28 @@ class InteractiveChartCard(ctk.CTkFrame):
             traceback.print_exc()
 
     def _trigger_fullscreen(self):
-        """Activar modo fullscreen con D3.js interactivo embebido"""
+        """Activar modo fullscreen con D3.js/NVD3.js interactivo embebido"""
         if not self.chart_type or not self.chart_data:
             print("⚠️ No hay datos de gráfico para mostrar en fullscreen")
             return
 
-        # Intentar abrir modal D3.js embebido (preferido)
+        # Intentar abrir modal D3.js/NVD3.js embebido (preferido)
         if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
             try:
-                print(f"  ⛶ Abriendo modal D3.js interactivo para: {self.title_text}")
+                engine_name = "NVD3.js" if self.chart_engine == 'nvd3' else "D3.js"
+                print(f"  ⛶ Abriendo modal {engine_name} interactivo para: {self.title_text}")
                 modal = ModalD3Fullscreen(
                     parent=self.winfo_toplevel(),
                     title=self.title_text,
                     chart_type=self.chart_type,
-                    chart_data=self.chart_data
+                    chart_data=self.chart_data,
+                    engine=self.chart_engine  # ← Pasar motor seleccionado
                 )
                 modal.focus()
                 modal.grab_set()
                 return
             except Exception as e:
-                print(f"⚠️ Error abriendo modal D3.js: {e}")
+                print(f"⚠️ Error abriendo modal D3.js/NVD3.js: {e}")
                 # Continuar con fallback
 
         # Fallback: usar callback externo si está definido

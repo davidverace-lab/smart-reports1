@@ -64,8 +64,8 @@ try:
     checks = {
         'D3.js CDN': 'd3.v7.min.js' in html,
         'Chart container': 'chart-container' in html,
-        'Datos JSON': '"labels"' in html and '"values"' in html,
-        'Script D3': 'const data' in html,
+        'Datos JSON': 'labels:' in html and 'values:' in html,
+        'Script D3': 'const rawData' in html or 'let data' in html,
         'Botones': 'sortAscending' in html
     }
 
