@@ -210,21 +210,22 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         d3_chart_type = chart_type_map.get(chart_type, 'bar')
 
-        # Intentar abrir modal D3.js interactivo
+        # Intentar abrir modal D3.js/NVD3.js interactivo
         if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
             try:
-                print(f"  ⛶ Abriendo modal D3.js interactivo: {title}")
+                print(f"  ⛶ Abriendo modal NVD3.js interactivo: {title}")
                 modal = ModalD3Fullscreen(
                     parent=self.winfo_toplevel(),
                     title=title,
                     chart_type=d3_chart_type,
-                    chart_data=chart_data
+                    chart_data=chart_data,
+                    engine='nvd3'  # ← Usar NVD3.js por default (componentes reutilizables)
                 )
                 modal.focus()
                 modal.grab_set()
                 return
             except Exception as e:
-                print(f"⚠️ Error abriendo modal D3.js: {e}")
+                print(f"⚠️ Error abriendo modal D3.js/NVD3.js: {e}")
                 import traceback
                 traceback.print_exc()
                 # Continuar con vista expandida Matplotlib como fallback
