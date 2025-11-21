@@ -136,29 +136,48 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
     def _render_d3_chart(self):
         """Renderizar gráfico D3.js usando tkinterweb"""
         try:
+            print(f"  🔧 Generando HTML D3.js para tipo: {self.chart_type}")
+
             # Generar HTML con D3.js
             html_content = self._generate_d3_html()
 
+            print(f"  ✅ HTML generado: {len(html_content)} caracteres")
+
+            # Verificar que el HTML contiene elementos clave
+            if 'd3.v7.min.js' not in html_content:
+                raise ValueError("HTML no contiene referencia a D3.js")
+
+            if 'chart-container' not in html_content:
+                raise ValueError("HTML no contiene chart-container")
+
             # Crear HtmlFrame
+            print("  🔧 Creando HtmlFrame...")
             self.html_frame = HtmlFrame(
                 self.main_container,
                 messages_enabled=False
             )
             self.html_frame.pack(fill='both', expand=True)
 
+            print("  🔧 Cargando HTML en HtmlFrame...")
             # Cargar HTML (load_html renderiza directamente el string)
             self.html_frame.load_html(html_content)
 
+            print("  ✅ Gráfico D3.js renderizado exitosamente")
+
         except Exception as e:
             print(f"❌ Error renderizando D3.js: {e}")
-            # Mostrar mensaje de error
+            import traceback
+            traceback.print_exc()
+
+            # Mostrar mensaje de error detallado
             error_label = ctk.CTkLabel(
                 self.main_container,
-                text=f"⚠️ Error al cargar gráfico D3.js:\n{str(e)}",
-                font=("Montserrat", 14),
-                text_color="red"
+                text=f"⚠️ Error al cargar gráfico D3.js:\n{str(e)}\n\nVerifica:\n1. tkinterweb instalado (pip install tkinterweb>=3.23.0)\n2. Conexión a internet (para cargar D3.js desde CDN)\n3. Datos del gráfico válidos",
+                font=("Montserrat", 12),
+                text_color="red",
+                justify="left"
             )
-            error_label.pack(expand=True)
+            error_label.pack(expand=True, padx=20, pady=20)
 
     def _generate_d3_html(self) -> str:
         """Generar HTML con D3.js según el tipo de gráfico"""
