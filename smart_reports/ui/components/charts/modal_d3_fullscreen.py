@@ -1,13 +1,13 @@
 """
-Modal Fullscreen D3.js/NVD3.js - Gráficos Interactivos Embebidos
+Modal Fullscreen D3.js/NVD3.js - Gráficos Interactivos Embebidos con PyWebView
 ✨ CARACTERÍSTICAS:
 - Ventana modal con gráficos D3.js/NVD3.js interactivos
-- Embebido dentro de la aplicación (NO navegador externo)
-- Animación de entrada deslizante desde abajo
+- Embebido dentro de la aplicación usando PyWebView (motor nativo del sistema)
 - Botón cerrar elegante (X) + tecla ESC
 - Zoom, pan, tooltips, filtros interactivos
 - Soporte para: bar, donut, line, area, horizontal_bar
 - Motor dual: D3.js puro o NVD3.js (componentes reutilizables)
+- Renderizado completo de JavaScript moderno (D3.js v7, NVD3.js v1.8.6)
 """
 import customtkinter as ctk
 from smart_reports.config.gestor_temas import get_theme_manager
@@ -16,13 +16,17 @@ from smart_reports.utils.visualization.d3_generator import MotorTemplatesD3
 from smart_reports.utils.visualization.nvd3_generator import MotorTemplatesNVD3
 import os
 import tempfile
+import threading
 
 try:
-    from tkinterweb import HtmlFrame
-    TKINTERWEB_AVAILABLE = True
+    import webview
+    PYWEBVIEW_AVAILABLE = True
 except ImportError:
-    TKINTERWEB_AVAILABLE = False
-    print("⚠️ tkinterweb no disponible - Modal D3.js deshabilitado")
+    PYWEBVIEW_AVAILABLE = False
+    print("⚠️ pywebview no disponible - Modal D3.js deshabilitado. Instala con: pip install pywebview")
+
+# Alias para compatibilidad con código existente (deprecated)
+TKINTERWEB_AVAILABLE = PYWEBVIEW_AVAILABLE
 
 
 class ModalD3Fullscreen(ctk.CTkToplevel):
@@ -40,9 +44,9 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
         """
         super().__init__(parent, **kwargs)
 
-        if not TKINTERWEB_AVAILABLE:
+        if not PYWEBVIEW_AVAILABLE:
             self.destroy()
-            raise ImportError("tkinterweb no está instalado. Instala con: pip install tkinterweb")
+            raise ImportError("pywebview no está instalado. Instala con: pip install pywebview")
 
         self.theme_manager = get_theme_manager()
         self.title_text = title
@@ -51,18 +55,22 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
         self.engine = engine  # 'nvd3' o 'd3'
         self.data_source = data_source or self._get_default_data_source()
 
-        # Referencias
-        self.html_frame = None
+        # Referencias para pywebview
+        self.webview_window = None
+        self.webview_thread = None
         self.temp_file = None
+        self._is_closing = False
 
         # Configurar ventana modal
         self._setup_window()
         self._create_ui()
         self._render_d3_chart()
-        self._animate_entrance()
 
         # Capturar tecla ESC
         self.bind('<Escape>', lambda e: self._close_modal())
+
+        # Manejar cierre de ventana
+        self.protocol("WM_DELETE_WINDOW", self._close_modal)
 
     def _get_default_data_source(self):
         """Generar información por defecto del origen de datos"""
@@ -179,7 +187,7 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
         info_label.pack(expand=True, pady=12)
 
     def _render_d3_chart(self):
-        """Renderizar gráfico D3.js usando tkinterweb"""
+        """Renderizar gráfico D3.js usando pywebview (motor nativo del navegador)"""
         try:
             print(f"  🔧 Generando HTML D3.js para tipo: {self.chart_type}")
 
@@ -189,25 +197,36 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
             print(f"  ✅ HTML generado: {len(html_content)} caracteres")
 
             # Verificar que el HTML contiene elementos clave
-            if 'd3.v7.min.js' not in html_content:
-                raise ValueError("HTML no contiene referencia a D3.js")
+            if 'd3.v7.min.js' not in html_content and 'nv.d3' not in html_content:
+                raise ValueError("HTML no contiene referencia a D3.js/NVD3.js")
 
             if 'chart-container' not in html_content:
                 raise ValueError("HTML no contiene chart-container")
 
-            # Crear HtmlFrame
-            print("  🔧 Creando HtmlFrame...")
-            self.html_frame = HtmlFrame(
+            # Guardar HTML en archivo temporal
+            self.temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8')
+            self.temp_file.write(html_content)
+            self.temp_file.close()
+
+            print(f"  💾 HTML guardado en: {self.temp_file.name}")
+
+            # Crear etiqueta de placeholder mientras carga webview
+            loading_label = ctk.CTkLabel(
                 self.main_container,
-                messages_enabled=False
+                text="🔄 Cargando gráfico interactivo D3.js...",
+                font=("Montserrat", 14),
+                text_color=self.theme_manager.get_current_theme()['colors']['text_secondary']
             )
-            self.html_frame.pack(fill='both', expand=True)
+            loading_label.pack(expand=True)
 
-            print("  🔧 Cargando HTML en HtmlFrame...")
-            # Cargar HTML (load_html renderiza directamente el string)
-            self.html_frame.load_html(html_content)
+            # Iniciar pywebview en thread separado
+            self.webview_thread = threading.Thread(target=self._start_webview, daemon=True)
+            self.webview_thread.start()
 
-            print("  ✅ Gráfico D3.js renderizado exitosamente")
+            # Ocultar loading label después de un momento
+            self.after(1000, lambda: loading_label.pack_forget() if loading_label.winfo_exists() else None)
+
+            print("  ✅ Gráfico D3.js renderizado con PyWebView")
 
         except Exception as e:
             print(f"❌ Error renderizando D3.js: {e}")
@@ -217,12 +236,52 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
             # Mostrar mensaje de error detallado
             error_label = ctk.CTkLabel(
                 self.main_container,
-                text=f"⚠️ Error al cargar gráfico D3.js:\n{str(e)}\n\nVerifica:\n1. tkinterweb instalado (pip install tkinterweb>=3.23.0)\n2. Conexión a internet (para cargar D3.js desde CDN)\n3. Datos del gráfico válidos",
+                text=f"⚠️ Error al cargar gráfico D3.js:\n{str(e)}\n\nVerifica:\n1. pywebview instalado (pip install pywebview>=4.0.0)\n2. Conexión a internet (para cargar D3.js desde CDN)\n3. Datos del gráfico válidos",
                 font=("Montserrat", 12),
                 text_color="red",
                 justify="left"
             )
             error_label.pack(expand=True, padx=20, pady=20)
+
+    def _start_webview(self):
+        """Iniciar ventana pywebview (ejecuta en thread separado)"""
+        try:
+            # Calcular dimensiones y posición para el webview
+            self.update_idletasks()
+
+            # Obtener geometría del contenedor
+            container_width = self.main_container.winfo_width()
+            container_height = self.main_container.winfo_height()
+
+            # Ajustar si las dimensiones son muy pequeñas (aún no renderizado)
+            if container_width < 100:
+                container_width = 1200
+            if container_height < 100:
+                container_height = 700
+
+            print(f"  🌐 Creando ventana PyWebView ({container_width}x{container_height})...")
+
+            # Crear ventana pywebview
+            self.webview_window = webview.create_window(
+                title=f"📊 {self.title_text}",
+                url=self.temp_file.name,
+                width=container_width,
+                height=container_height,
+                resizable=True,
+                fullscreen=False,
+                min_size=(800, 600),
+                confirm_close=False
+            )
+
+            # Iniciar webview (bloquea hasta que se cierra la ventana)
+            webview.start(debug=False)
+
+            print("  ✅ Ventana PyWebView cerrada")
+
+        except Exception as e:
+            print(f"❌ Error iniciando PyWebView: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _generate_d3_html(self) -> str:
         """Generar HTML con D3.js o NVD3.js según el tipo de gráfico"""
@@ -289,65 +348,34 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
 
         return html
 
-    def _animate_entrance(self):
-        """Animar entrada del modal deslizando desde abajo"""
-        # Guardar posición final
-        final_geometry = self.geometry()
-
-        # Posición inicial (fuera de pantalla, abajo)
-        screen_height = self.winfo_screenheight()
-        self.geometry(f"{self.winfo_width()}x{self.winfo_height()}+{self.winfo_x()}+{screen_height}")
-
-        # Actualizar para que se dibuje
-        self.update()
-
-        # Animar deslizamiento hacia arriba
-        self._animate_slide_up(final_geometry)
-
-    def _animate_slide_up(self, final_geometry, steps=20, delay=10):
-        """Animar deslizamiento hacia arriba"""
-        # Extraer posición final
-        parts = final_geometry.split('+')
-        final_y = int(parts[-1])
-
-        # Posición actual
-        current_y = self.winfo_y()
-
-        # Calcular paso
-        step = (current_y - final_y) // steps
-
-        def animate(current_step=0):
-            if current_step >= steps:
-                # Establecer posición final exacta
-                self.geometry(final_geometry)
-                return
-
-            # Calcular nueva posición
-            new_y = current_y - (step * (current_step + 1))
-            self.geometry(f"{self.winfo_width()}x{self.winfo_height()}+{self.winfo_x()}+{new_y}")
-
-            # Siguiente paso
-            self.after(delay, lambda: animate(current_step + 1))
-
-        animate()
-
     def _close_modal(self):
-        """Cerrar modal con animación de salida"""
-        # Animación de desvanecimiento
-        self.attributes('-alpha', 0.8)
-        self.after(50, lambda: self.attributes('-alpha', 0.6))
-        self.after(100, lambda: self.attributes('-alpha', 0.4))
-        self.after(150, lambda: self.attributes('-alpha', 0.2))
-        self.after(200, lambda: self._destroy_modal())
+        """Cerrar modal y ventana pywebview"""
+        if self._is_closing:
+            return
+
+        self._is_closing = True
+
+        # Cerrar ventana pywebview si existe
+        if self.webview_window:
+            try:
+                self.webview_window.destroy()
+            except:
+                pass
+
+        # Destruir modal
+        self._destroy_modal()
 
     def _destroy_modal(self):
         """Destruir modal y limpiar recursos"""
         # Limpiar archivo temporal si existe
-        if self.temp_file and os.path.exists(self.temp_file):
-            try:
-                os.remove(self.temp_file)
-            except:
-                pass
+        if self.temp_file:
+            temp_path = self.temp_file.name if hasattr(self.temp_file, 'name') else self.temp_file
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                    print(f"  🗑️ Archivo temporal eliminado: {temp_path}")
+                except Exception as e:
+                    print(f"  ⚠️ No se pudo eliminar archivo temporal: {e}")
 
         self.destroy()
 
@@ -358,7 +386,10 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
 
 def show_d3_chart(parent, title: str, chart_type: str, chart_data: dict, engine: str = 'nvd3', data_source: dict = None):
     """
-    Mostrar gráfico D3.js/NVD3.js en modal fullscreen con información de origen de datos
+    Mostrar gráfico D3.js/NVD3.js usando PyWebView (motor nativo del navegador) con información de origen de datos
+
+    PyWebView utiliza el motor del navegador nativo del sistema (Edge/Chrome en Windows, Safari en macOS,
+    WebKit en Linux), proporcionando soporte completo para JavaScript moderno (ES6+) y D3.js v7/NVD3.js v1.8.6.
 
     Args:
         parent: Widget padre (ventana principal)
@@ -399,10 +430,11 @@ def show_d3_chart(parent, title: str, chart_type: str, chart_data: dict, engine:
             engine='d3'
         )
     """
-    if not TKINTERWEB_AVAILABLE:
-        print("⚠️ tkinterweb no está disponible - No se puede mostrar modal D3.js")
+    if not PYWEBVIEW_AVAILABLE:
+        print("⚠️ pywebview no está disponible - No se puede mostrar modal D3.js")
+        print("   Instala con: pip install pywebview>=4.0.0")
         return
 
     modal = ModalD3Fullscreen(parent, title, chart_type, chart_data, engine=engine, data_source=data_source)
     modal.focus()
-    modal.grab_set()  # Modal verdadero (bloquea ventana padre)
+    # Nota: No usamos grab_set() porque pywebview crea su propia ventana independiente
