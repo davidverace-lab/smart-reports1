@@ -26,9 +26,9 @@ except ImportError:
 
 
 class ModalD3Fullscreen(ctk.CTkToplevel):
-    """Modal fullscreen para mostrar gráficos D3.js/NVD3.js interactivos embebidos"""
+    """Modal fullscreen para mostrar gráficos D3.js/NVD3.js interactivos embebidos - CON INFORMACIÓN DE ORIGEN"""
 
-    def __init__(self, parent, title, chart_type, chart_data, engine='nvd3', **kwargs):
+    def __init__(self, parent, title, chart_type, chart_data, engine='nvd3', data_source=None, **kwargs):
         """
         Args:
             parent: Widget padre
@@ -36,6 +36,7 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
             chart_type: Tipo de gráfico ('bar', 'donut', 'line', 'area')
             chart_data: Datos del gráfico {'labels': [...], 'values': [...]}
             engine: Motor de renderizado - 'nvd3' (default) o 'd3'
+            data_source: Información del origen de datos (opcional)
         """
         super().__init__(parent, **kwargs)
 
@@ -48,6 +49,7 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
         self.chart_type = chart_type
         self.chart_data = chart_data
         self.engine = engine  # 'nvd3' o 'd3'
+        self.data_source = data_source or self._get_default_data_source()
 
         # Referencias
         self.html_frame = None
@@ -61,6 +63,16 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
 
         # Capturar tecla ESC
         self.bind('<Escape>', lambda e: self._close_modal())
+
+    def _get_default_data_source(self):
+        """Generar información por defecto del origen de datos"""
+        from datetime import datetime
+        return {
+            'database': 'MySQL - Instituto Hutchison Ports',
+            'table': 'instituto_progresomodulo',
+            'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'records_count': len(self.chart_data.get('values', []))
+        }
 
     def _setup_window(self):
         """Configurar ventana modal"""
@@ -143,7 +155,28 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
             self,
             fg_color="transparent"
         )
-        self.main_container.pack(fill='both', expand=True, padx=20, pady=20)
+        self.main_container.pack(fill='both', expand=True, padx=20, pady=(20, 5))
+
+        # === FOOTER CON INFORMACIÓN DE ORIGEN DE DATOS ===
+        footer = ctk.CTkFrame(
+            self,
+            fg_color=theme['colors'].get('background_secondary', '#252525'),
+            height=50,
+            corner_radius=10
+        )
+        footer.pack(fill='x', side='bottom', padx=20, pady=(5, 20))
+        footer.pack_propagate(False)
+
+        # Información del origen de datos
+        data_info_text = f"📊 Origen: {self.data_source['database']} | 📋 Tabla: {self.data_source['table']} | 🕐 Actualizado: {self.data_source['last_update']} | 📈 Registros: {self.data_source['records_count']}"
+
+        info_label = ctk.CTkLabel(
+            footer,
+            text=data_info_text,
+            font=("Montserrat", 11),
+            text_color=theme['colors']['text_secondary']
+        )
+        info_label.pack(expand=True, pady=12)
 
     def _render_d3_chart(self):
         """Renderizar gráfico D3.js usando tkinterweb"""
@@ -323,9 +356,9 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
 # FUNCIÓN DE CONVENIENCIA
 # ============================================================================
 
-def show_d3_chart(parent, title: str, chart_type: str, chart_data: dict, engine: str = 'nvd3'):
+def show_d3_chart(parent, title: str, chart_type: str, chart_data: dict, engine: str = 'nvd3', data_source: dict = None):
     """
-    Mostrar gráfico D3.js/NVD3.js en modal fullscreen
+    Mostrar gráfico D3.js/NVD3.js en modal fullscreen con información de origen de datos
 
     Args:
         parent: Widget padre (ventana principal)
@@ -333,15 +366,28 @@ def show_d3_chart(parent, title: str, chart_type: str, chart_data: dict, engine:
         chart_type: Tipo de gráfico ('bar', 'donut', 'line', 'area', 'horizontal_bar')
         chart_data: Datos del gráfico {'labels': [...], 'values': [...]}
         engine: Motor de renderizado - 'nvd3' (default) o 'd3'
+        data_source: Información del origen de datos (opcional)
+            Ejemplo: {
+                'database': 'MySQL - Instituto Hutchison Ports',
+                'table': 'instituto_progresomodulo',
+                'last_update': '2024-01-15 10:30:00',
+                'records_count': 150
+            }
 
     Example:
-        # Usando NVD3.js (componentes reutilizables)
+        # Usando NVD3.js con información de origen
         show_d3_chart(
             parent=self.master,
             title="Ventas por Producto",
             chart_type="bar",
             chart_data={'labels': ['A', 'B', 'C'], 'values': [10, 20, 30]},
-            engine='nvd3'
+            engine='nvd3',
+            data_source={
+                'database': 'MySQL - Ventas',
+                'table': 'ventas_productos',
+                'last_update': '2024-01-15 10:30:00',
+                'records_count': 3
+            }
         )
 
         # Usando D3.js puro (máxima personalización)
@@ -357,6 +403,6 @@ def show_d3_chart(parent, title: str, chart_type: str, chart_data: dict, engine:
         print("⚠️ tkinterweb no está disponible - No se puede mostrar modal D3.js")
         return
 
-    modal = ModalD3Fullscreen(parent, title, chart_type, chart_data, engine=engine)
+    modal = ModalD3Fullscreen(parent, title, chart_type, chart_data, engine=engine, data_source=data_source)
     modal.focus()
     modal.grab_set()  # Modal verdadero (bloquea ventana padre)

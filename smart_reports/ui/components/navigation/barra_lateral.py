@@ -7,7 +7,7 @@ from smart_reports.config.themes import HUTCHISON_COLORS
 
 
 class ModernSidebar(ctk.CTkFrame):
-    """Sidebar moderna con logo, navegación y footer"""
+    """Sidebar moderna con logo, navegación y footer - COLAPSABLE"""
 
     def __init__(self, parent, navigation_callbacks, theme_change_callback=None, **kwargs):
         """
@@ -20,6 +20,11 @@ class ModernSidebar(ctk.CTkFrame):
         self.theme_manager = get_theme_manager()
         self.theme_change_callback = theme_change_callback
 
+        # Estado de colapso
+        self.is_collapsed = False
+        self.expanded_width = 240
+        self.collapsed_width = 70
+
         # Colores según tema actual
         theme = self.theme_manager.get_current_theme()
 
@@ -28,7 +33,7 @@ class ModernSidebar(ctk.CTkFrame):
 
         super().__init__(
             parent,
-            width=240,  # Aumentado de 220 a 240
+            width=self.expanded_width,
             fg_color=sidebar_bg,
             corner_radius=0,
             **kwargs
@@ -38,7 +43,7 @@ class ModernSidebar(ctk.CTkFrame):
         self.nav_buttons = []
         self.active_button = None
 
-        # Logo/Header
+        # Logo/Header con botón de colapso
         self._create_header()
 
         # Navegación
@@ -54,7 +59,7 @@ class ModernSidebar(ctk.CTkFrame):
         self.theme_manager.register_callback(self._on_theme_changed)
 
     def _create_header(self):
-        """Crear header con logo y título"""
+        """Crear header con logo, título y botón de colapso"""
         theme = self.theme_manager.get_current_theme()
         is_dark = self.theme_manager.is_dark_mode()
 
@@ -62,14 +67,34 @@ class ModernSidebar(ctk.CTkFrame):
         text_color = '#FFFFFF' if not is_dark else theme['colors']['text']
         text_secondary_color = '#E0E0E0' if not is_dark else theme['colors']['text_secondary']
         border_color = '#4a5a8a' if not is_dark else theme['colors']['border']
+        hover_color = '#4a5a8a' if not is_dark else theme['colors'].get('background_secondary', '#2b2b2b')
 
-        logo_frame = ctk.CTkFrame(self, fg_color='transparent', height=110)
-        logo_frame.pack(fill='x', padx=20, pady=(20, 10))
-        logo_frame.pack_propagate(False)
+        # Frame principal del header
+        header_container = ctk.CTkFrame(self, fg_color='transparent')
+        header_container.pack(fill='x', padx=10, pady=(15, 10))
+
+        # Botón de hamburger menu (3 rayas)
+        self.collapse_btn = ctk.CTkButton(
+            header_container,
+            text='☰',
+            font=('Montserrat', 24, 'bold'),
+            width=50,
+            height=40,
+            fg_color='transparent',
+            hover_color=hover_color,
+            text_color=text_color,
+            command=self._toggle_collapse
+        )
+        self.collapse_btn.pack(side='top', pady=(0, 10))
+
+        # Frame del logo (colapsable)
+        self.logo_frame = ctk.CTkFrame(self, fg_color='transparent', height=90)
+        self.logo_frame.pack(fill='x', padx=20, pady=(0, 10))
+        self.logo_frame.pack_propagate(False)
 
         # Título principal (perfectamente centrado)
         self.logo_label = ctk.CTkLabel(
-            logo_frame,
+            self.logo_frame,
             text='SMART\nREPORTS',
             font=('Montserrat', 26, 'bold'),
             text_color=text_color,
@@ -79,7 +104,7 @@ class ModernSidebar(ctk.CTkFrame):
 
         # Subtítulo (perfectamente centrado y alineado)
         self.subtitle = ctk.CTkLabel(
-            logo_frame,
+            self.logo_frame,
             text='Instituto Hutchison Ports',
             font=('Montserrat', 10),
             text_color=text_secondary_color,
@@ -252,6 +277,70 @@ class ModernSidebar(ctk.CTkFrame):
     def set_active(self, key):
         """Establecer botón activo programáticamente"""
         self._on_nav_click(key)
+
+    def _toggle_collapse(self):
+        """Toggle colapso del sidebar"""
+        self.is_collapsed = not self.is_collapsed
+
+        if self.is_collapsed:
+            # Colapsar
+            self.configure(width=self.collapsed_width)
+            self.logo_frame.pack_forget()
+            self.header_separator.pack_forget()
+
+            # Actualizar botones de navegación para mostrar solo iconos
+            for key, btn in self.nav_buttons:
+                # Extraer solo el icono del texto
+                full_text = btn.cget('text')
+                icon = full_text.split()[0] if full_text else '•'
+                btn.configure(text=icon, width=50)
+
+            # Actualizar toggle de tema
+            self.theme_label.pack_forget()
+            self.theme_separator_top.pack_forget()
+            self.theme_separator_bottom.pack_forget()
+
+            # Actualizar footer
+            self.version_label.pack_forget()
+            self.copyright_label.pack_forget()
+            self.footer_separator.pack_forget()
+
+        else:
+            # Expandir
+            self.configure(width=self.expanded_width)
+
+            # Restaurar logo
+            self.logo_frame.pack(fill='x', padx=20, pady=(0, 10))
+            self.header_separator.pack(fill='x', padx=20, pady=(10, 20))
+
+            # Restaurar texto completo en botones
+            nav_items_full = [
+                ('📊', 'Dashboards Gerenciales', 'dashboard'),
+                ('🔍', 'Consulta de Empleados', 'consultas'),
+                ('📥', 'Importación de Datos', 'importacion'),
+                ('📄', 'Generar Reportes', 'reportes'),
+                ('⚙️', 'Configuración', 'configuracion'),
+            ]
+
+            for (key, btn), (icon, text, _) in zip(self.nav_buttons, nav_items_full):
+                btn.configure(text=f'{icon}  {text}', width=220)
+
+            # Restaurar toggle de tema
+            theme = self.theme_manager.get_current_theme()
+            is_dark = self.theme_manager.is_dark_mode()
+            border_color = '#4a5a8a' if not is_dark else theme['colors']['border']
+
+            # Obtener el frame padre del theme_label
+            toggle_frame = self.theme_label.master
+            self.theme_separator_top.pack(fill='x', pady=(0, 10))
+            self.theme_label.pack(side='left', padx=(10, 0))
+            self.theme_separator_bottom.pack(fill='x', pady=(10, 0))
+
+            # Restaurar footer
+            footer = self.version_label.master
+            self.footer_separator.pack(fill='x', pady=(0, 10))
+            self.version_label.pack()
+            self.copyright_label.pack()
 
     def _on_theme_toggle(self):
         """Manejar cambio de tema"""
