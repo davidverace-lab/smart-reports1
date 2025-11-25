@@ -14,6 +14,7 @@ from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
 from smart_reports.utils.visualization.d3_generator import MotorTemplatesD3
 from smart_reports.utils.visualization.nvd3_generator import MotorTemplatesNVD3
+from smart_reports.utils.visualization.nvd3_generator_interactive import MotorTemplatesNVD3Interactive
 import os
 import tempfile
 import threading
@@ -284,67 +285,102 @@ class ModalD3Fullscreen(ctk.CTkToplevel):
             traceback.print_exc()
 
     def _generate_d3_html(self) -> str:
-        """Generar HTML con D3.js o NVD3.js según el tipo de gráfico"""
+        """Generar HTML con D3.js o NVD3.js INTERACTIVO según el tipo de gráfico"""
         # Determinar tema
         theme = self.theme_manager.get_current_theme()
         chart_theme = 'dark' if theme['name'] == 'dark' else 'light'
 
         # Seleccionar motor de templates
-        Motor = MotorTemplatesNVD3 if self.engine == 'nvd3' else MotorTemplatesD3
-
-        # Mensajes según motor
+        # Priorizar generador interactivo para NVD3
         if self.engine == 'nvd3':
-            subtitulos = {
-                'bar': "Gráfico interactivo con NVD3.js - Componentes reutilizables sobre D3.js",
-                'donut': "Gráfico de dona con NVD3.js - Pasa el mouse sobre las secciones",
-                'line': "Gráfico de líneas con NVD3.js - Interfaz interactiva avanzada",
-                'area': "Gráfico de área con NVD3.js - Cambia el estilo con los botones"
-            }
+            Motor = MotorTemplatesNVD3Interactive
+            usar_interactivo = True
         else:
-            subtitulos = {
-                'bar': "Gráfico interactivo con D3.js - Puedes hacer clic en los botones para ordenar",
-                'donut': "Pasa el mouse sobre las secciones para ver detalles",
-                'line': "Pasa el mouse sobre los puntos para ver valores",
-                'area': "Gráfico de área con D3.js"
-            }
+            Motor = MotorTemplatesD3
+            usar_interactivo = False
+
+        # Subtítulos con instrucciones de interacción
+        subtitulos = {
+            'bar': "Pasa el mouse sobre las barras para estadísticas • Haz clic para ver origen de datos",
+            'donut': "Pasa el mouse sobre las secciones • Haz clic para ver origen de datos",
+            'line': "Pasa el mouse sobre los puntos • Haz clic para ver origen de datos",
+            'area': "Pasa el mouse sobre el área • Haz clic para ver origen de datos"
+        }
 
         # Generar HTML según tipo de gráfico
         if self.chart_type in ['bar', 'horizontal_bar']:
-            html = Motor.generar_grafico_barras(
-                titulo=self.title_text,
-                datos=self.chart_data,
-                subtitulo=subtitulos.get('bar', ''),
-                tema=chart_theme,
-                interactivo=True if self.engine == 'd3' else None
-            )
+            if usar_interactivo:
+                html = Motor.generar_grafico_barras_interactivo(
+                    titulo=self.title_text,
+                    datos=self.chart_data,
+                    subtitulo=subtitulos.get('bar', ''),
+                    tema=chart_theme,
+                    data_source=self.data_source
+                )
+            else:
+                html = Motor.generar_grafico_barras(
+                    titulo=self.title_text,
+                    datos=self.chart_data,
+                    subtitulo=subtitulos.get('bar', ''),
+                    tema=chart_theme,
+                    interactivo=True
+                )
         elif self.chart_type == 'donut':
-            html = Motor.generar_grafico_donut(
-                titulo=self.title_text,
-                datos=self.chart_data,
-                subtitulo=subtitulos.get('donut', ''),
-                tema=chart_theme
-            )
+            if usar_interactivo:
+                html = Motor.generar_grafico_donut_interactivo(
+                    titulo=self.title_text,
+                    datos=self.chart_data,
+                    subtitulo=subtitulos.get('donut', ''),
+                    tema=chart_theme,
+                    data_source=self.data_source
+                )
+            else:
+                html = Motor.generar_grafico_donut(
+                    titulo=self.title_text,
+                    datos=self.chart_data,
+                    subtitulo=subtitulos.get('donut', ''),
+                    tema=chart_theme
+                )
         elif self.chart_type == 'line':
-            html = Motor.generar_grafico_lineas(
-                titulo=self.title_text,
-                datos=self.chart_data,
-                subtitulo=subtitulos.get('line', ''),
-                tema=chart_theme
-            )
+            if usar_interactivo:
+                html = Motor.generar_grafico_lineas_interactivo(
+                    titulo=self.title_text,
+                    datos=self.chart_data,
+                    subtitulo=subtitulos.get('line', ''),
+                    tema=chart_theme,
+                    data_source=self.data_source
+                )
+            else:
+                html = Motor.generar_grafico_lineas(
+                    titulo=self.title_text,
+                    datos=self.chart_data,
+                    subtitulo=subtitulos.get('line', ''),
+                    tema=chart_theme
+                )
         elif self.chart_type == 'area':
-            html = Motor.generar_grafico_area(
+            # Area no tiene versión interactiva aún, usar normal
+            html = MotorTemplatesNVD3.generar_grafico_area(
                 titulo=self.title_text,
                 datos=self.chart_data,
                 subtitulo=subtitulos.get('area', ''),
                 tema=chart_theme
             )
         else:
-            # Tipo desconocido, usar barras por defecto
-            html = Motor.generar_grafico_barras(
-                titulo=self.title_text,
-                datos=self.chart_data,
-                tema=chart_theme
-            )
+            # Tipo desconocido, usar barras interactivas por defecto
+            if usar_interactivo:
+                html = Motor.generar_grafico_barras_interactivo(
+                    titulo=self.title_text,
+                    datos=self.chart_data,
+                    tema=chart_theme,
+                    data_source=self.data_source
+                )
+            else:
+                html = Motor.generar_grafico_barras(
+                    titulo=self.title_text,
+                    datos=self.chart_data,
+                    tema=chart_theme,
+                    interactivo=True
+                )
 
         return html
 
