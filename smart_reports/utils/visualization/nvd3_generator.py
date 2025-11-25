@@ -217,10 +217,45 @@ class MotorTemplatesNVD3:
         labels = datos.get('labels') or datos.get('categorias', [])
         values = datos.get('values') or datos.get('valores', [])
 
+        # DEBUG: Imprimir datos recibidos
+        print(f"🔍 [DEBUG] generar_grafico_barras - Título: {titulo}")
+        print(f"🔍 [DEBUG] Labels: {labels}")
+        print(f"🔍 [DEBUG] Values: {values}")
+
+        # VALIDACIÓN: Verificar que haya datos
+        if not labels or not values:
+            print(f"⚠️ [WARNING] No hay datos para generar el gráfico de barras")
+            # Retornar HTML con mensaje de error
+            html = MotorTemplatesNVD3._generar_head(titulo, tema)
+            html += f"""
+<body>
+    <div class="container">
+        <div class="chart-card">
+            <h1 class="chart-title">{titulo}</h1>
+            <div style="text-align: center; padding: 100px; color: #ff6b6b;">
+                <h2>⚠️ No hay datos disponibles</h2>
+                <p>No se encontraron datos para mostrar en este gráfico.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+            return html
+
+        # VALIDACIÓN: Verificar que ambas listas tengan la misma longitud
+        min_len = min(len(labels), len(values))
+        if len(labels) != len(values):
+            print(f"⚠️ [WARNING] Labels y values tienen longitudes diferentes. Usando {min_len} elementos.")
+            labels = labels[:min_len]
+            values = values[:min_len]
+
         # NVD3 usa formato [{ x: label, y: value}, ...]
-        chart_data = [{"x": labels[i], "y": values[i]} for i in range(len(labels))]
+        chart_data = [{"x": str(labels[i]), "y": float(values[i])} for i in range(len(labels))]
         chart_data_json = json.dumps([{"key": "Valores", "values": chart_data}])
         colors_json = json.dumps(MotorTemplatesNVD3.PALETA_COLORES)
+
+        print(f"✅ [DEBUG] Datos transformados correctamente: {len(chart_data)} puntos")
 
         html = MotorTemplatesNVD3._generar_head(titulo, tema)
 
@@ -280,10 +315,44 @@ class MotorTemplatesNVD3:
         labels = datos.get('labels') or datos.get('categorias', [])
         values = datos.get('values') or datos.get('valores', [])
 
+        # DEBUG: Imprimir datos recibidos
+        print(f"🔍 [DEBUG] generar_grafico_donut - Título: {titulo}")
+        print(f"🔍 [DEBUG] Labels: {labels}")
+        print(f"🔍 [DEBUG] Values: {values}")
+
+        # VALIDACIÓN: Verificar que haya datos
+        if not labels or not values:
+            print(f"⚠️ [WARNING] No hay datos para generar el gráfico de dona")
+            html = MotorTemplatesNVD3._generar_head(titulo, tema)
+            html += f"""
+<body>
+    <div class="container">
+        <div class="chart-card">
+            <h1 class="chart-title">{titulo}</h1>
+            <div style="text-align: center; padding: 100px; color: #ff6b6b;">
+                <h2>⚠️ No hay datos disponibles</h2>
+                <p>No se encontraron datos para mostrar en este gráfico.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+            return html
+
+        # VALIDACIÓN: Verificar que ambas listas tengan la misma longitud
+        min_len = min(len(labels), len(values))
+        if len(labels) != len(values):
+            print(f"⚠️ [WARNING] Labels y values tienen longitudes diferentes. Usando {min_len} elementos.")
+            labels = labels[:min_len]
+            values = values[:min_len]
+
         # NVD3 pie chart formato
-        chart_data = [{"label": labels[i], "value": values[i]} for i in range(len(labels))]
+        chart_data = [{"label": str(labels[i]), "value": float(values[i])} for i in range(len(labels))]
         chart_data_json = json.dumps(chart_data)
         colors_json = json.dumps(MotorTemplatesNVD3.PALETA_COLORES)
+
+        print(f"✅ [DEBUG] Datos transformados correctamente: {len(chart_data)} puntos")
 
         html = MotorTemplatesNVD3._generar_head(titulo, tema)
 
@@ -344,17 +413,45 @@ class MotorTemplatesNVD3:
 
         labels = datos.get('labels') or datos.get('categorias', [])
         values = datos.get('values') or datos.get('valores', [])
-        series = datos.get('series', [{'name': 'Serie 1', 'values': values}])
+        series = datos.get('series', [{'name': 'Serie 1', 'values': values}]) if values else []
+
+        # DEBUG: Imprimir datos recibidos
+        print(f"🔍 [DEBUG] generar_grafico_lineas - Título: {titulo}")
+        print(f"🔍 [DEBUG] Labels: {labels}")
+        print(f"🔍 [DEBUG] Values/Series: {values if not series else 'multiple series'}")
+
+        # VALIDACIÓN: Verificar que haya datos
+        if not labels or (not values and not series):
+            print(f"⚠️ [WARNING] No hay datos para generar el gráfico de líneas")
+            html = MotorTemplatesNVD3._generar_head(titulo, tema)
+            html += f"""
+<body>
+    <div class="container">
+        <div class="chart-card">
+            <h1 class="chart-title">{titulo}</h1>
+            <div style="text-align: center; padding: 100px; color: #ff6b6b;">
+                <h2>⚠️ No hay datos disponibles</h2>
+                <p>No se encontraron datos para mostrar en este gráfico.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+            return html
 
         # Convertir a formato NVD3
         nvd3_data = []
         for serie in series:
             serie_name = serie.get('name', 'Serie')
             serie_values = serie.get('values', [])
-            nvd3_data.append({
-                "key": serie_name,
-                "values": [{"x": i, "y": serie_values[i]} for i in range(len(serie_values))]
-            })
+            if serie_values:  # Solo agregar si tiene valores
+                nvd3_data.append({
+                    "key": serie_name,
+                    "values": [{"x": i, "y": float(serie_values[i])} for i in range(len(serie_values))]
+                })
+
+        print(f"✅ [DEBUG] Datos transformados correctamente: {len(nvd3_data)} series")
 
         chart_data_json = json.dumps(nvd3_data)
         labels_json = json.dumps(labels)

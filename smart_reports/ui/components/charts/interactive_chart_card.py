@@ -22,12 +22,19 @@ from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
 import numpy as np
 
-# Importar modal D3.js (con fallback si no está disponible)
+# Importar modal D3.js con PyWebView (con fallback si no está disponible)
 try:
-    from smart_reports.ui.components.charts.modal_d3_fullscreen import ModalD3Fullscreen, TKINTERWEB_AVAILABLE
+    from smart_reports.ui.components.charts.modal_d3_fullscreen import ModalD3Fullscreen, PYWEBVIEW_AVAILABLE as D3_MODAL_AVAILABLE
+except ImportError:
+    D3_MODAL_AVAILABLE = False
+    ModalD3Fullscreen = None
+
+# Verificar si tkinterweb está disponible para embedding in-place
+try:
+    from tkinterweb import HtmlFrame
+    TKINTERWEB_AVAILABLE = True
 except ImportError:
     TKINTERWEB_AVAILABLE = False
-    ModalD3Fullscreen = None
 
 
 class InteractiveChartCard(ctk.CTkFrame):
@@ -121,8 +128,8 @@ class InteractiveChartCard(ctk.CTkFrame):
         export_btn.pack(side='left', padx=5)
 
         # Botón ampliar (si hay callback)
-        # Botón fullscreen (siempre visible si D3.js disponible o hay callback)
-        if TKINTERWEB_AVAILABLE or self.on_fullscreen_callback:
+        # Botón fullscreen (siempre visible si D3.js modal disponible o hay callback)
+        if D3_MODAL_AVAILABLE or TKINTERWEB_AVAILABLE or self.on_fullscreen_callback:
             fullscreen_btn = ctk.CTkButton(
                 controls,
                 text="↗",
@@ -729,22 +736,51 @@ class InteractiveChartCard(ctk.CTkFrame):
             traceback.print_exc()
 
     def _trigger_fullscreen(self):
-        """Expandir/contraer gráfico D3.js/NVD3.js in-place"""
+        """Expandir/contraer gráfico D3.js/NVD3.js (in-place o modal PyWebView)"""
         if not self.chart_type or not self.chart_data:
             print("⚠️ No hay datos de gráfico para expandir")
             return
 
-        if not TKINTERWEB_AVAILABLE:
-            print("⚠️ tkinterweb no disponible - no se puede expandir a D3/NVD3")
-            if self.on_fullscreen_callback:
-                self.on_fullscreen_callback(self)
+        # Prioridad 1: Modal PyWebView fullscreen (mejor experiencia)
+        if D3_MODAL_AVAILABLE and ModalD3Fullscreen:
+            try:
+                from datetime import datetime
+                data_source = {
+                    'database': 'MySQL - Instituto Hutchison Ports',
+                    'table': 'Data Visualization',
+                    'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'records_count': len(self.chart_data.get('values', []))
+                }
+
+                ModalD3Fullscreen(
+                    parent=self.winfo_toplevel(),
+                    title=self.title_text,
+                    chart_type=self.chart_type,
+                    chart_data=self.chart_data,
+                    engine=self.chart_engine,
+                    data_source=data_source
+                )
+                print(f"✅ Modal PyWebView D3.js abierto: {self.title_text}")
+                return
+            except Exception as e:
+                print(f"⚠️ Error abriendo modal PyWebView: {e}")
+                # Continuar con fallbacks
+
+        # Prioridad 2: Expansión in-place con tkinterweb
+        if TKINTERWEB_AVAILABLE:
+            # Toggle entre estado expandido y compacto
+            if self.is_expanded:
+                self._collapse_chart()
+            else:
+                self._expand_chart()
             return
 
-        # Toggle entre estado expandido y compacto
-        if self.is_expanded:
-            self._collapse_chart()
-        else:
-            self._expand_chart()
+        # Prioridad 3: Callback personalizado
+        if self.on_fullscreen_callback:
+            self.on_fullscreen_callback(self)
+            return
+
+        print("⚠️ No hay método de expansión disponible (instala pywebview o tkinterweb)")
 
     def _expand_chart(self):
         """Expandir gráfico a vista interactiva D3/NVD3"""

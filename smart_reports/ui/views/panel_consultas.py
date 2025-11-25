@@ -136,71 +136,91 @@ class PanelConsultas(ctk.CTkFrame):
 
         ctk.CTkLabel(
             header,
-            text="⚡ Consultas Rápidas Predefinadas",
+            text="⚡ Consultas Rápidas Predefinidas",
             font=('Montserrat', 18, 'bold'),
             text_color=theme['colors']['text']
         ).pack(side='left')
 
-        # Organizar consultas por categorías en lista compacta
-        categorias = {
-            "👤 Desempeño Individual": [
-                ("🏆 Top 10 Mejores", self._query_top_performers),
-                ("📚 Sin Completar", self._query_no_completion),
-                ("⭐ Calificación >90", self._query_high_scores),
-            ],
-            "📊 Análisis de Módulos": [
-                ("📊 Populares", self._query_popular_modules),
-                ("⚠️ Rezagados", self._query_lagging_modules),
-                ("🔔 Por Vencer", self._query_due_soon),
-            ],
-            "🏢 Análisis Organizacional": [
-                ("🏢 Ranking Unidades", self._query_unit_ranking),
-                ("👥 Por Departamento", self._query_by_department),
-                ("📅 Usuarios Nuevos", self._query_recent_users),
-            ]
-        }
+        ctk.CTkLabel(
+            header,
+            text="Selecciona una consulta de la lista",
+            font=('Montserrat', 11),
+            text_color=theme['colors']['text_secondary']
+        ).pack(side='left', padx=(15, 0))
 
-        # Crear diseño compacto con 3 columnas de categorías
-        categories_grid = ctk.CTkFrame(content, fg_color='transparent')
-        categories_grid.pack(fill='x')
-        categories_grid.grid_columnconfigure((0, 1, 2), weight=1)
+        # Organizar consultas en lista vertical limpia
+        consultas = [
+            ("👤 DESEMPEÑO INDIVIDUAL", None, True),  # Título de categoría
+            ("  🏆 Top 10 Mejores Empleados", self._query_top_performers, False),
+            ("  📚 Empleados Sin Completar Módulos", self._query_no_completion, False),
+            ("  ⭐ Evaluaciones con Calificación >90", self._query_high_scores, False),
 
-        for col, (categoria, consultas) in enumerate(categorias.items()):
-            # Card de categoría
-            cat_card = ctk.CTkFrame(
-                categories_grid,
-                fg_color=theme['colors'].get('background_secondary', '#252525'),
-                corner_radius=10,
-                border_width=1,
-                border_color=HUTCHISON_COLORS['primary']
-            )
-            cat_card.grid(row=0, column=col, padx=5, pady=5, sticky='nsew')
+            ("📊 ANÁLISIS DE MÓDULOS", None, True),  # Título de categoría
+            ("  📊 Módulos Más Populares", self._query_popular_modules, False),
+            ("  ⚠️ Módulos Rezagados (Requieren Atención)", self._query_lagging_modules, False),
+            ("  🔔 Módulos Próximos a Vencer (7 días)", self._query_due_soon, False),
 
-            # Título de categoría
-            ctk.CTkLabel(
-                cat_card,
-                text=categoria,
-                font=('Montserrat', 13, 'bold'),
-                text_color=theme['colors']['text']
-            ).pack(pady=(12, 8))
+            ("🏢 ANÁLISIS ORGANIZACIONAL", None, True),  # Título de categoría
+            ("  🏢 Ranking de Unidades de Negocio", self._query_unit_ranking, False),
+            ("  👥 Análisis por Departamento", self._query_by_department, False),
+            ("  📅 Usuarios Nuevos (Últimos 30 días)", self._query_recent_users, False),
+        ]
 
-            # Lista de consultas como botones compactos
-            for text, command in consultas:
-                btn = ctk.CTkButton(
-                    cat_card,
-                    text=text,
-                    font=('Montserrat', 10, 'bold'),
+        # Crear lista de consultas con diseño limpio
+        list_container = ctk.CTkFrame(
+            content,
+            fg_color=theme['colors'].get('background_secondary', '#252525'),
+            corner_radius=8
+        )
+        list_container.pack(fill='x')
+
+        for text, command, is_category in consultas:
+            if is_category:
+                # Título de categoría
+                category_frame = ctk.CTkFrame(
+                    list_container,
                     fg_color=HUTCHISON_COLORS['primary'],
-                    hover_color='#003D8F',
-                    text_color='white',
-                    corner_radius=6,
-                    height=36,
-                    command=command
+                    corner_radius=0,
+                    height=35
                 )
-                btn.pack(fill='x', padx=10, pady=3)
+                category_frame.pack(fill='x', pady=(8 if text != consultas[0][0] else 0, 0))
+                category_frame.pack_propagate(False)
 
-            # Padding bottom para la última consulta
-            ctk.CTkFrame(cat_card, fg_color='transparent', height=8).pack()
+                ctk.CTkLabel(
+                    category_frame,
+                    text=text,
+                    font=('Montserrat', 12, 'bold'),
+                    text_color='white',
+                    anchor='w'
+                ).pack(side='left', padx=15, pady=8)
+            else:
+                # Item de consulta
+                item_frame = ctk.CTkFrame(
+                    list_container,
+                    fg_color='transparent',
+                    height=40
+                )
+                item_frame.pack(fill='x', padx=5, pady=2)
+                item_frame.pack_propagate(False)
+
+                # Botón de consulta con estilo de lista
+                query_btn = ctk.CTkButton(
+                    item_frame,
+                    text=text,
+                    font=('Montserrat', 11),
+                    fg_color='transparent',
+                    hover_color=HUTCHISON_COLORS['primary'],
+                    text_color=theme['colors']['text'],
+                    anchor='w',
+                    corner_radius=6,
+                    command=command,
+                    border_width=1,
+                    border_color=theme['colors'].get('border', '#3a3a3a')
+                )
+                query_btn.pack(fill='both', expand=True, padx=5, pady=2)
+
+        # Padding bottom
+        ctk.CTkFrame(list_container, fg_color='transparent', height=8).pack()
 
     def _create_search_by_id_section(self, parent, theme):
         """Sección: Buscar usuario por ID"""

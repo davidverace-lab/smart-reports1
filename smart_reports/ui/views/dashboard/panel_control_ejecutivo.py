@@ -259,7 +259,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         self._create_general_tab_content()
 
         # Tab 2: Dashboards
-        self.tab_dashboards = self.tab_view.add("Dashboards Gerenciales", "📈")
+        self.tab_dashboards = self.tab_view.add("Dashboards", "📈")
         self._create_dashboards_tab_content()
 
     def _create_general_tab_content(self):
@@ -337,7 +337,7 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         # Título
         ctk.CTkLabel(
             container,
-            text="📊 Dashboards Interactivos - Sistema Ejecutivo",
+            text="📊 Dashboards Interactivos",
             font=('Montserrat', 20, 'bold'),
             text_color=HUTCHISON_COLORS['primary']
         ).pack(anchor='w', padx=20, pady=(10, 20))
