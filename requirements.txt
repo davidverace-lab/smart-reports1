@@ -26,6 +26,10 @@ tkhtmlview>=0.1.1
 # NVD3.js se usa vía CDN (no requiere python-nvd3 que tiene problemas de instalación)
 tkinterweb>=3.23.0
 
+# Navegador web embebido (opcional, fallback alternativo)
+# Permite abrir gráficos en ventanas de navegador embebidas
+pywebview>=4.0.0
+
 # Graficos y visualizacion
 matplotlib>=3.7.0
 plotly>=5.18.0
