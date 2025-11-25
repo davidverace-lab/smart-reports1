@@ -195,7 +195,7 @@ class VentanaPrincipalView:
             widget.destroy()
 
     def show_dashboard(self):
-        """Mostrar panel de Dashboards Gerenciales"""
+        """Mostrar panel de Dashboards"""
         self._clear_content()
         self.current_view = 'dashboard'
         self.nav_controller.navigate_to('dashboard', None)

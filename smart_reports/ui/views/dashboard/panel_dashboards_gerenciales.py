@@ -1,5 +1,5 @@
 """
-Panel de Dashboards Gerenciales - HUTCHISON PORTS
+Panel de Dashboards - HUTCHISON PORTS
 Sistema de navegación: GRID ↔ EXPANDIDA (pantalla completa)
 Dashboards gerenciales con gráficas interactivas expandibles
 CON D3.JS INTERACTIVO AL EXPANDIR
@@ -80,7 +80,7 @@ MODULOS_MENOR_AVANCE_DATA = {
 
 class DashboardsGerencialesPanel(ctk.CTkFrame):
     """
-    Panel de Dashboards Gerenciales con navegación expandible
+    Panel de Dashboards con navegación expandible
 
     Sistema de navegación:
     GRID VIEW → Todas las gráficas en miniatura
@@ -90,7 +90,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
     def __init__(self, parent, db_connection=None, usuario_actual=None, **kwargs):
         super().__init__(parent, fg_color='transparent', **kwargs)
 
-        print("🚀 Inicializando Panel de Dashboards Gerenciales con navegación expandible...")
+        print("🚀 Inicializando Panel de Dashboards con navegación expandible...")
 
         self.theme_manager = get_theme_manager()
         self.db_connection = db_connection
@@ -127,7 +127,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
             # Mostrar grid por defecto
             self.show_grid_view()
 
-            print("✅ Panel de Dashboards Gerenciales inicializado correctamente")
+            print("✅ Panel de Dashboards inicializado correctamente")
 
         except Exception as e:
             print(f"❌ Error inicializando panel: {e}")
@@ -266,7 +266,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         # Título
         ctk.CTkLabel(
             header,
-            text="📊 Dashboards Gerenciales",
+            text="📊 Dashboards",
             font=('Montserrat', 24, 'bold'),
             text_color=theme['colors']['text']
         ).pack(side='left')
@@ -280,7 +280,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         self._create_general_tab_content()
 
         # Tab 2: Dashboards
-        self.tab_dashboards = self.tab_view.add("Dashboards Gerenciales", "📈")
+        self.tab_dashboards = self.tab_view.add("Dashboards", "📈")
         self._create_dashboards_tab_content()
 
     def _create_general_tab_content(self):
@@ -868,7 +868,7 @@ if __name__ == "__main__":
 
     # Crear ventana
     root = ctk.CTk()
-    root.title("Dashboards Gerenciales - HUTCHISON PORTS")
+    root.title("Dashboards - HUTCHISON PORTS")
     root.geometry("1400x900")
 
     # Crear panel

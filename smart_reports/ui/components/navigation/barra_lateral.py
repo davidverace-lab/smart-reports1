@@ -126,7 +126,7 @@ class ModernSidebar(ctk.CTkFrame):
         hover_color = '#4a5a8a' if not is_dark else theme['colors'].get('background_secondary', '#2b2b2b')
 
         nav_items = [
-            ('📊', 'Dashboards Gerenciales', 'dashboard'),
+            ('📊', 'Dashboards', 'dashboard'),
             ('🔍', 'Consulta de Empleados', 'consultas'),
             ('📥', 'Importación de Datos', 'importacion'),
             ('📄', 'Generar Reportes', 'reportes'),
@@ -315,7 +315,7 @@ class ModernSidebar(ctk.CTkFrame):
 
             # Restaurar texto completo en botones
             nav_items_full = [
-                ('📊', 'Dashboards Gerenciales', 'dashboard'),
+                ('📊', 'Dashboards', 'dashboard'),
                 ('🔍', 'Consulta de Empleados', 'consultas'),
                 ('📥', 'Importación de Datos', 'importacion'),
                 ('📄', 'Generar Reportes', 'reportes'),
