@@ -94,16 +94,23 @@ _D3_SERVER = D3HttpServer()
 
 class D3ChartCard(ctk.CTkFrame):
     """
-    Tarjeta con gráficos D3.js - SOLUCIÓN DEFINITIVA
+    Tarjeta con gráficos D3.js/NVD3.js - CON EXPANSIÓN IN-PLACE
 
-    Modos de funcionamiento:
-    1. Si tkinterweb está disponible → Embebido directo en la app
-    2. Si no está disponible → Botón para abrir en navegador
+    Características:
+    ✅ Usa D3.js/NVD3.js SIEMPRE (no Matplotlib)
+    ✅ Expansión in-place (compacto ↔ expandido)
+    ✅ Motor dual: D3.js puro o NVD3.js (componentes)
+    ✅ Si tkinterweb disponible → Embebido
+    ✅ Si no disponible → Botón para navegador
 
-    Los gráficos SIEMPRE se generan correctamente y se ven hermosos.
+    Flujo:
+    1. Vista compacta con D3/NVD3 embebido
+    2. Clic en ↗ → Expande in-place (regenera HTML más grande)
+    3. Clic en ↙ → Colapsa a vista compacta
+    4. Botón 🌐 → Abre en navegador en cualquier momento
     """
 
-    def __init__(self, parent, title='', width=500, height=400, on_fullscreen=None, **kwargs):
+    def __init__(self, parent, title='', width=500, height=400, on_fullscreen=None, engine='nvd3', **kwargs):
         self.theme_manager = get_theme_manager()
         theme = self.theme_manager.get_current_theme()
 
@@ -119,7 +126,10 @@ class D3ChartCard(ctk.CTkFrame):
         self._title = title
         self._width = width
         self._height = height
+        self._compact_height = height  # Altura compacta original
+        self._expanded_height = height * 2  # Altura expandida (2x)
         self.motor_d3 = MotorTemplatesD3()
+        self.chart_engine = engine  # 'nvd3' (default) o 'd3'
         self.on_fullscreen = on_fullscreen  # Callback para modo fullscreen
 
         # Estado
@@ -129,6 +139,10 @@ class D3ChartCard(ctk.CTkFrame):
         self.chart_type = None
         self.chart_data = None
         self.chart_subtitle = None
+        self.is_expanded = False  # Estado de expansión
+
+        # Referencias a widgets
+        self.expand_btn = None  # Botón de expandir/colapsar
 
         # Crear UI
         self._create_header()
@@ -158,10 +172,11 @@ class D3ChartCard(ctk.CTkFrame):
         badge_frame = ctk.CTkFrame(header, fg_color='transparent')
         badge_frame.pack(side='right')
 
-        # Badge D3.js
+        # Badge D3.js o NVD3.js
+        badge_text = 'NVD3 ⚡' if self.chart_engine == 'nvd3' else 'D3.js ⚡'
         d3_badge = ctk.CTkLabel(
             badge_frame,
-            text='D3.js ⚡',
+            text=badge_text,
             font=('Montserrat', 10, 'bold'),
             fg_color=HUTCHISON_COLORS['success'],
             text_color='white',
@@ -187,21 +202,20 @@ class D3ChartCard(ctk.CTkFrame):
         )
         mode_badge.pack(side='left', padx=5)
 
-        # Botón fullscreen (si hay callback)
-        if self.on_fullscreen:
-            fullscreen_btn = ctk.CTkButton(
-                badge_frame,
-                text='⛶',
-                font=('Montserrat', 14, 'bold'),
-                fg_color=HUTCHISON_COLORS['aqua_green'],
-                hover_color='#00b386',
-                text_color='white',
-                corner_radius=6,
-                width=35,
-                height=28,
-                command=self._trigger_fullscreen
-            )
-            fullscreen_btn.pack(side='left', padx=5)
+        # Botón expandir/colapsar
+        self.expand_btn = ctk.CTkButton(
+            badge_frame,
+            text='↗',  # Cambiar a ↙ cuando esté expandido
+            font=('Montserrat', 14, 'bold'),
+            fg_color=HUTCHISON_COLORS['aqua_green'],
+            hover_color='#00b386',
+            text_color='white',
+            corner_radius=6,
+            width=35,
+            height=28,
+            command=self._toggle_expansion
+        )
+        self.expand_btn.pack(side='left', padx=5)
 
         # Botón navegador
         browser_btn = ctk.CTkButton(
@@ -267,32 +281,40 @@ class D3ChartCard(ctk.CTkFrame):
         print(f"✅ D3.js {chart_type}: {self.chart_url}")
 
     def _generate_d3_html(self, chart_type, datos, subtitulo, tema):
-        """Generar HTML D3.js según el tipo"""
+        """Generar HTML D3.js o NVD3.js según el motor configurado"""
+        # Seleccionar motor de templates
+        if self.chart_engine == 'nvd3':
+            from smart_reports.utils.visualization.nvd3_generator import MotorTemplatesNVD3
+            Motor = MotorTemplatesNVD3
+        else:
+            Motor = MotorTemplatesD3
+
+        # Generar HTML según tipo
         if chart_type == 'bar':
-            return self.motor_d3.generar_grafico_barras(
-                titulo=self._title,
+            return Motor.generar_grafico_barras(
+                titulo=self._title if not self.is_expanded else "",  # Sin título duplicado en expandido
                 datos=datos,
                 subtitulo=subtitulo,
                 tema=tema,
-                interactivo=True
+                interactivo=True if self.chart_engine == 'd3' else None
             )
         elif chart_type == 'donut':
-            return self.motor_d3.generar_grafico_donut(
-                titulo=self._title,
+            return Motor.generar_grafico_donut(
+                titulo=self._title if not self.is_expanded else "",
                 datos=datos,
                 subtitulo=subtitulo,
                 tema=tema
             )
         elif chart_type == 'line':
-            return self.motor_d3.generar_grafico_lineas(
-                titulo=self._title,
+            return Motor.generar_grafico_lineas(
+                titulo=self._title if not self.is_expanded else "",
                 datos=datos,
                 subtitulo=subtitulo,
                 tema=tema
             )
         elif chart_type == 'area':
-            return self.motor_d3.generar_grafico_area(
-                titulo=self._title,
+            return Motor.generar_grafico_area(
+                titulo=self._title if not self.is_expanded else "",
                 datos=datos,
                 subtitulo=subtitulo,
                 tema=tema
@@ -399,18 +421,73 @@ class D3ChartCard(ctk.CTkFrame):
         except Exception as e:
             print(f"  ❌ Error abriendo navegador: {e}")
 
-    def _trigger_fullscreen(self):
-        """Activar modo fullscreen (llamar al callback)"""
-        if self.on_fullscreen and self.chart_url:
-            # Pasar todos los datos necesarios para recrear el chart en fullscreen
-            self.on_fullscreen(
-                title=self._title,
-                chart_type=self.chart_type,
-                data=self.chart_data,
-                subtitle=self.chart_subtitle,
-                url=self.chart_url
+    def _toggle_expansion(self):
+        """Toggle entre vista compacta y expandida"""
+        if self.is_expanded:
+            self._collapse_chart()
+        else:
+            self._expand_chart()
+
+    def _expand_chart(self):
+        """Expandir gráfico D3/NVD3 in-place (regenerar HTML con mayor tamaño)"""
+        if not self.chart_type or not self.chart_data:
+            return
+
+        try:
+            print(f"  📊 Expandiendo D3/NVD3: {self._title}")
+
+            # Cambiar estado
+            self.is_expanded = True
+
+            # Actualizar botón
+            self.expand_btn.configure(text="↙")
+
+            # Cambiar altura del contenedor
+            self._height = self._expanded_height
+
+            # Regenerar gráfico con nuevo tamaño
+            self.set_chart(
+                self.chart_type,
+                self.chart_data,
+                self.chart_subtitle or ''
             )
-            print(f"  ⛶ Activando fullscreen para: {self._title}")
+
+            print(f"  ✅ Expandido exitosamente")
+
+        except Exception as e:
+            print(f"❌ Error expandiendo: {e}")
+            import traceback
+            traceback.print_exc()
+            self.is_expanded = False
+            self.expand_btn.configure(text="↗")
+
+    def _collapse_chart(self):
+        """Colapsar gráfico D3/NVD3 in-place (regenerar HTML con tamaño compacto)"""
+        try:
+            print(f"  📉 Colapsando D3/NVD3: {self._title}")
+
+            # Cambiar estado
+            self.is_expanded = False
+
+            # Actualizar botón
+            self.expand_btn.configure(text="↗")
+
+            # Cambiar altura del contenedor
+            self._height = self._compact_height
+
+            # Regenerar gráfico con tamaño compacto
+            self.set_chart(
+                self.chart_type,
+                self.chart_data,
+                self.chart_subtitle or ''
+            )
+
+            print(f"  ✅ Colapsado exitosamente")
+
+        except Exception as e:
+            print(f"❌ Error colapsando: {e}")
+            import traceback
+            traceback.print_exc()
 
     def clear(self):
         """Limpiar gráfico"""
