@@ -13,6 +13,7 @@ import socketserver
 from smart_reports.config.gestor_temas import get_theme_manager
 from smart_reports.config.themes import HUTCHISON_COLORS
 from smart_reports.utils.visualization.d3_generator import MotorTemplatesD3
+from smart_reports.ui.components.charts.chart_options_menu import ChartOptionsMenu
 
 # Intentar importar tkinterweb
 try:
@@ -232,6 +233,16 @@ class D3ChartCard(ctk.CTkFrame):
         )
         browser_btn.pack(side='left', padx=5)
 
+        # Menú de opciones (⋮)
+        self.options_menu = ChartOptionsMenu(
+            badge_frame,
+            chart_title=self._title,
+            chart_data=None,  # Se actualizará en set_chart
+            chart_type=None,
+            html_content=None
+        )
+        self.options_menu.pack(side='left', padx=5)
+
     def _create_content_area(self):
         """Crear área de contenido"""
         theme = self.theme_manager.get_current_theme()
@@ -277,6 +288,13 @@ class D3ChartCard(ctk.CTkFrame):
             self._render_embedded()
         else:
             self._render_button_view()
+
+        # Actualizar menú de opciones con los datos actuales
+        if hasattr(self, 'options_menu'):
+            self.options_menu.chart_data = datos
+            self.options_menu.chart_type = chart_type
+            self.options_menu.html_content = self.html_content
+            self.options_menu.chart_title = self._title
 
         print(f"✅ D3.js {chart_type}: {self.chart_url}")
 
