@@ -3,13 +3,13 @@ Menú de Opciones para Gráficas - SMART REPORTS
 Componente reutilizable con funcionalidades avanzadas
 
 Opciones incluidas:
+✅ Actualizar datos (refresh con timestamp)
 ✅ Ver datos en tabla (modal)
 ✅ Exportar a CSV
 ✅ Exportar gráfica como PNG
 ✅ Exportar tabla como PDF
 ✅ Copiar datos al portapapeles
 ✅ Ver estadísticas
-✅ Filtrar/ordenar datos
 """
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
@@ -36,7 +36,7 @@ class ChartOptionsMenu(ctk.CTkFrame):
     """
 
     def __init__(self, parent, chart_title='', chart_data=None, chart_type='bar',
-                 chart_figure=None, html_content=None, **kwargs):
+                 chart_figure=None, html_content=None, on_refresh=None, **kwargs):
         self.theme_manager = get_theme_manager()
         theme = self.theme_manager.get_current_theme()
 
@@ -51,7 +51,9 @@ class ChartOptionsMenu(ctk.CTkFrame):
         self.chart_type = chart_type
         self.chart_figure = chart_figure
         self.html_content = html_content
+        self.on_refresh = on_refresh  # Callback para actualizar datos
         self.menu_visible = False
+        self.last_update = None  # Timestamp de última actualización
 
         # Crear botón de 3 puntitos
         self._create_menu_button()
@@ -94,13 +96,13 @@ class ChartOptionsMenu(ctk.CTkFrame):
 
         # Opciones del menú
         options = [
+            ("🔄 Actualizar Datos", self._refresh_data, '#10b981'),
             ("📊 Ver Tabla de Datos", self._show_data_table, HUTCHISON_COLORS['primary']),
             ("📥 Exportar CSV", self._export_csv, '#22c55e'),
             ("🖼️ Exportar PNG", self._export_png, '#3b82f6'),
             ("📄 Exportar Tabla PDF", self._export_table_pdf, '#ef4444'),
             ("📋 Copiar al Portapapeles", self._copy_to_clipboard, '#f59e0b'),
             ("📈 Ver Estadísticas", self._show_statistics, '#8b5cf6'),
-            ("🔍 Filtrar Datos", self._filter_data, '#06b6d4'),
         ]
 
         for i, (text, command, color) in enumerate(options):
@@ -464,14 +466,57 @@ class ChartOptionsMenu(ctk.CTkFrame):
             messagebox.showerror("Error", f"Error al calcular estadísticas:\n{str(e)}")
             print(f"❌ Error en estadísticas: {e}")
 
-    def _filter_data(self):
-        """Filtrar/ordenar datos"""
-        messagebox.showinfo(
-            "Filtrar Datos",
-            "Funcionalidad de filtrado próximamente:\n\n"
-            "- Filtrar por rango de valores\n"
-            "- Ordenar ascendente/descendente\n"
-            "- Buscar categorías específicas\n"
-            "- Excluir valores atípicos\n\n"
-            "Por ahora, usa el botón de ordenar (↑↓) en la gráfica"
-        )
+    def _refresh_data(self):
+        """Actualizar datos del gráfico"""
+        if not self.on_refresh:
+            # Si no hay callback, mostrar info de última actualización
+            if self.last_update:
+                from datetime import datetime
+                time_diff = datetime.now() - self.last_update
+
+                if time_diff.seconds < 60:
+                    time_str = f"{time_diff.seconds} segundos"
+                elif time_diff.seconds < 3600:
+                    time_str = f"{time_diff.seconds // 60} minutos"
+                else:
+                    time_str = f"{time_diff.seconds // 3600} horas"
+
+                last_update_str = self.last_update.strftime("%d/%m/%Y %H:%M:%S")
+                messagebox.showinfo(
+                    "Actualizar Datos",
+                    f"Última actualización:\n{last_update_str}\n\n"
+                    f"Hace {time_str}\n\n"
+                    "No hay función de actualización configurada."
+                )
+            else:
+                messagebox.showinfo(
+                    "Actualizar Datos",
+                    "No hay función de actualización configurada.\n\n"
+                    "Para habilitar actualización automática, configura\n"
+                    "el callback 'on_refresh' en el ChartOptionsMenu."
+                )
+            return
+
+        try:
+            print(f"🔄 Actualizando datos: {self.chart_title}")
+
+            # Llamar al callback de actualización
+            self.on_refresh()
+
+            # Actualizar timestamp
+            from datetime import datetime
+            self.last_update = datetime.now()
+
+            messagebox.showinfo(
+                "Datos Actualizados",
+                f"Gráfico actualizado exitosamente\n\n"
+                f"Hora: {self.last_update.strftime('%H:%M:%S')}"
+            )
+
+            print(f"✅ Datos actualizados: {self.chart_title}")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al actualizar datos:\n{str(e)}")
+            print(f"❌ Error actualizando datos: {e}")
+            import traceback
+            traceback.print_exc()

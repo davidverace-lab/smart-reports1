@@ -95,12 +95,14 @@ _D3_SERVER = D3HttpServer()
 
 class D3ChartCard(ctk.CTkFrame):
     """
-    Tarjeta con gráficos D3.js/NVD3.js - CON EXPANSIÓN IN-PLACE
+    Tarjeta con gráficos D3.js/NVD3.js - CON EXPANSIÓN IN-PLACE Y MENÚ DE OPCIONES
 
     Características:
     ✅ Usa D3.js/NVD3.js SIEMPRE (no Matplotlib)
     ✅ Expansión in-place (compacto ↔ expandido)
     ✅ Motor dual: D3.js puro o NVD3.js (componentes)
+    ✅ Menú de opciones (⋮) con 7 funciones
+    ✅ Actualizar datos con timestamp
     ✅ Si tkinterweb disponible → Embebido
     ✅ Si no disponible → Botón para navegador
 
@@ -109,9 +111,15 @@ class D3ChartCard(ctk.CTkFrame):
     2. Clic en ↗ → Expande in-place (regenera HTML más grande)
     3. Clic en ↙ → Colapsa a vista compacta
     4. Botón 🌐 → Abre en navegador en cualquier momento
+    5. Botón ⋮ → Menú con opciones (ver tabla, exportar, stats, etc.)
+
+    Parámetros:
+        on_data_refresh: Callback opcional para actualizar datos (sin parámetros)
+                        Se llama cuando el usuario hace clic en "Actualizar Datos"
     """
 
-    def __init__(self, parent, title='', width=500, height=400, on_fullscreen=None, engine='nvd3', **kwargs):
+    def __init__(self, parent, title='', width=500, height=400, on_fullscreen=None,
+                 on_data_refresh=None, engine='nvd3', **kwargs):
         self.theme_manager = get_theme_manager()
         theme = self.theme_manager.get_current_theme()
 
@@ -132,6 +140,7 @@ class D3ChartCard(ctk.CTkFrame):
         self.motor_d3 = MotorTemplatesD3()
         self.chart_engine = engine  # 'nvd3' (default) o 'd3'
         self.on_fullscreen = on_fullscreen  # Callback para modo fullscreen
+        self.on_data_refresh = on_data_refresh  # Callback para actualizar datos
 
         # Estado
         self.chart_url = None
@@ -239,7 +248,8 @@ class D3ChartCard(ctk.CTkFrame):
             chart_title=self._title,
             chart_data=None,  # Se actualizará en set_chart
             chart_type=None,
-            html_content=None
+            html_content=None,
+            on_refresh=self.on_data_refresh  # Callback para actualizar datos
         )
         self.options_menu.pack(side='left', padx=5)
 
@@ -295,6 +305,10 @@ class D3ChartCard(ctk.CTkFrame):
             self.options_menu.chart_type = chart_type
             self.options_menu.html_content = self.html_content
             self.options_menu.chart_title = self._title
+
+            # Actualizar timestamp de última actualización
+            from datetime import datetime
+            self.options_menu.last_update = datetime.now()
 
         print(f"✅ D3.js {chart_type}: {self.chart_url}")
 
