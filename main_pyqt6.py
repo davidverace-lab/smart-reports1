@@ -17,6 +17,15 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
+# CRÍTICO: Importar QtWebEngineWidgets ANTES de crear QApplication
+# Esto es necesario para que QWebEngineView funcione correctamente
+try:
+    from PyQt6.QtWebEngineWidgets import QWebEngineView
+    print("✅ QtWebEngineWidgets importado correctamente")
+except ImportError as e:
+    print(f"⚠️ Error importando QtWebEngineWidgets: {e}")
+    print("   Instalar con: pip install PyQt6-WebEngine")
+
 # Importar configuración
 from smart_reports_pyqt6.config.themes import ThemeManager
 from smart_reports_pyqt6.ui.windows.login_window import LoginWindow
@@ -24,6 +33,9 @@ from smart_reports_pyqt6.ui.windows.login_window import LoginWindow
 
 def main():
     """Función principal de la aplicación PyQt6"""
+
+    # Establecer atributo para OpenGL (requerido por QtWebEngine)
+    QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
 
     # Crear aplicación Qt
     app = QApplication(sys.argv)
