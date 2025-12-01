@@ -169,15 +169,58 @@ class MainWindow(QMainWindow):
         # Stacked widget para cambiar entre paneles
         self.panel_stack = QStackedWidget()
 
-        # Crear paneles (placeholders por ahora)
+        # Crear paneles REALES (migrados desde CustomTkinter)
         self.panels = {}
 
-        panel_names = ["dashboard", "graficos", "consultas", "reportes", "config"]
+        # Importar paneles
+        from smart_reports_pyqt6.ui.views.panel_dashboard import DashboardPanel
+        from smart_reports_pyqt6.ui.views.panel_graficos import GraficosPanel
+        from smart_reports_pyqt6.ui.views.panel_consultas import ConsultasPanel
+        from smart_reports_pyqt6.ui.views.panel_reportes import ReportesPanel
+        from smart_reports_pyqt6.ui.views.panel_configuracion import ConfiguracionPanel
 
-        for panel_name in panel_names:
-            panel = self._create_placeholder_panel(panel_name)
-            self.panels[panel_name] = panel
-            self.panel_stack.addWidget(panel)
+        try:
+            # Dashboard
+            dashboard_panel = DashboardPanel(parent=self, theme_manager=self.theme_manager)
+            self.panels['dashboard'] = dashboard_panel
+            self.panel_stack.addWidget(dashboard_panel)
+            print("✅ Panel Dashboard cargado")
+
+            # Gráficos
+            graficos_panel = GraficosPanel(parent=self, theme_manager=self.theme_manager)
+            self.panels['graficos'] = graficos_panel
+            self.panel_stack.addWidget(graficos_panel)
+            print("✅ Panel Gráficos cargado")
+
+            # Consultas
+            consultas_panel = ConsultasPanel(parent=self, theme_manager=self.theme_manager)
+            self.panels['consultas'] = consultas_panel
+            self.panel_stack.addWidget(consultas_panel)
+            print("✅ Panel Consultas cargado")
+
+            # Reportes
+            reportes_panel = ReportesPanel(parent=self, theme_manager=self.theme_manager)
+            self.panels['reportes'] = reportes_panel
+            self.panel_stack.addWidget(reportes_panel)
+            print("✅ Panel Reportes cargado")
+
+            # Configuración
+            config_panel = ConfiguracionPanel(parent=self, theme_manager=self.theme_manager)
+            self.panels['config'] = config_panel
+            self.panel_stack.addWidget(config_panel)
+            print("✅ Panel Configuración cargado")
+
+        except Exception as e:
+            print(f"❌ Error cargando paneles: {e}")
+            import traceback
+            traceback.print_exc()
+
+            # Fallback a placeholder si hay error
+            for panel_name in ["dashboard", "graficos", "consultas", "reportes", "config"]:
+                if panel_name not in self.panels:
+                    panel = self._create_placeholder_panel(panel_name)
+                    self.panels[panel_name] = panel
+                    self.panel_stack.addWidget(panel)
 
         scroll.setWidget(self.panel_stack)
 
