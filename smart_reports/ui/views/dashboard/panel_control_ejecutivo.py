@@ -191,26 +191,12 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         }
         d3_chart_type = chart_type_map.get(chart_type, 'bar')
 
-        # Intentar abrir modal D3.js (preferido)
-        if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
-            try:
-                print(f"  ⛶ Abriendo modal D3.js para: {title}")
-                modal = ModalD3Fullscreen(
-                    parent=self.winfo_toplevel(),
-                    title=title,
-                    chart_type=d3_chart_type,
-                    chart_data=chart_data
-                )
-                modal.focus()
-                modal.grab_set()
-                return
-            except Exception as e:
-                print(f"⚠️ Error abriendo modal D3.js: {e}")
-                import traceback
-                traceback.print_exc()
-                # Continuar con fallback
+        # DESHABILITADO: Modal D3.js (causa error de thread)
+        # Los gráficos ahora se expanden in-place directamente
+        print(f"ℹ️ Expansión in-place para: {title}")
+        # No usar modal - los gráficos ya tienen su propio botón de expansión
 
-        # Fallback: Usar vista expandida Matplotlib tradicional
+        # Usar vista expandida Matplotlib tradicional como única opción
         print(f"  ⚠️ Usando vista expandida Matplotlib (fallback)")
         self.current_view = 'expanded'
         self.current_chart_id = chart_id

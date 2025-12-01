@@ -187,68 +187,14 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
     def show_expanded_view(self, chart_id, title, chart_type='barras'):
         """
-        Mostrar gráfico D3.js interactivo en modal fullscreen
+        DEPRECADO: Los gráficos ahora se expanden in-place con el botón ↗
+        Este método se mantiene por compatibilidad pero no hace nada.
 
-        Args:
-            chart_id: ID de la gráfica
-            title: Título de la gráfica
-            chart_type: 'barras', 'barras_h', 'dona', 'linea'
+        La expansión se maneja directamente en cada tarjeta de gráfico.
         """
-        # Obtener datos
-        chart_data = self.datos_graficas.get(chart_id, {'labels': [], 'values': []})
-
-        print(f"📊 Expandiendo gráfica con D3.js: {title}")
-
-        # Mapear tipos de gráfico al formato D3.js
-        chart_type_map = {
-            'barras': 'bar',
-            'barras_h': 'horizontal_bar',
-            'dona': 'donut',
-            'linea': 'line',
-            'area': 'area'
-        }
-
-        d3_chart_type = chart_type_map.get(chart_type, 'bar')
-
-        # Intentar abrir modal D3.js/NVD3.js interactivo
-        if TKINTERWEB_AVAILABLE and ModalD3Fullscreen:
-            try:
-                print(f"  ⛶ Abriendo modal NVD3.js interactivo: {title}")
-                modal = ModalD3Fullscreen(
-                    parent=self.winfo_toplevel(),
-                    title=title,
-                    chart_type=d3_chart_type,
-                    chart_data=chart_data,
-                    engine='nvd3'  # ← Usar NVD3.js por default (componentes reutilizables)
-                )
-                modal.focus()
-                modal.grab_set()
-                return
-            except Exception as e:
-                print(f"⚠️ Error abriendo modal D3.js/NVD3.js: {e}")
-                import traceback
-                traceback.print_exc()
-                # Continuar con vista expandida Matplotlib como fallback
-
-        print(f"⚠️ tkinterweb no disponible - usando vista expandida Matplotlib como fallback")
-
-        # Configurar vista expandida
-        self.current_view = 'expanded'
-        self.current_chart_id = chart_id
-        self.current_chart_title = title
-        self.current_chart_type = chart_type
-        self.current_chart_data = chart_data
-
-        # Ocultar grid y mostrar expandida
-        if self.grid_view:
-            self.grid_view.pack_forget()
-
-        # Renderizar gráfica expandida
-        self._render_expanded_chart()
-
-        if self.expanded_view:
-            # Iniciar animación de entrada
-            self._animate_expanded_view()
+        print(f"ℹ️ show_expanded_view llamado para {title} - Los gráficos ahora usan expansión in-place (↗/↙)")
+        # No hacer nada - la expansión se maneja en cada tarjeta individual
+        return
 
     # ==================== CREAR VISTA GRID ====================
 
@@ -258,20 +204,7 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         self.grid_view = ctk.CTkFrame(self, fg_color='transparent')
 
-        # Header
-        header = ctk.CTkFrame(self.grid_view, fg_color='transparent', height=60)
-        header.pack(fill='x', padx=20, pady=(15, 10))
-        header.pack_propagate(False)
-
-        # Título
-        ctk.CTkLabel(
-            header,
-            text="📊 Dashboards",
-            font=('Montserrat', 24, 'bold'),
-            text_color=theme['colors']['text']
-        ).pack(side='left')
-
-        # Tabs
+        # Tabs - Sin header fijo para permitir scroll completo
         self.tab_view = CustomTabView(self.grid_view)
         self.tab_view.pack(fill='both', expand=True, padx=10, pady=10)
 
@@ -431,58 +364,36 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         )
 
     def _create_mini_chart(self, parent, title, chart_id, chart_type, row, column):
-        """Crear tarjeta de gráfica miniatura con botón expandir"""
-        theme = self.theme_manager.get_current_theme()
+        """Crear tarjeta de gráfica con D3.js y expansión in-place"""
+        # Importar componente D3 interactivo
+        from smart_reports.ui.components.charts.d3_interactive_chart_card import D3InteractiveChartCard
 
-        card = ctk.CTkFrame(
+        # Mapear tipos de gráfico al formato D3.js
+        chart_type_map = {
+            'barras': 'bar',
+            'barras_h': 'horizontal_bar',
+            'dona': 'donut',
+            'linea': 'line',
+            'area': 'area'
+        }
+
+        d3_chart_type = chart_type_map.get(chart_type, 'bar')
+
+        # Obtener datos
+        data = self.datos_graficas.get(chart_id, {'labels': [], 'values': []})
+
+        # Crear tarjeta D3.js con expansión in-place
+        card = D3InteractiveChartCard(
             parent,
-            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
-            corner_radius=12,
-            border_width=2,  # Borde más grueso
-            border_color=HUTCHISON_COLORS['primary']  # Navy siempre
+            title=title,
+            width=400,
+            height=280,  # Altura compacta para el grid
+            chart_engine='nvd3'
         )
         card.grid(row=row, column=column, padx=10, pady=10, sticky='nsew')
 
-        # Header con título y botón expandir
-        header = ctk.CTkFrame(card, fg_color='transparent', height=40)
-        header.pack(fill='x', padx=15, pady=(10, 5))
-        header.pack_propagate(False)
-
-        # Título
-        ctk.CTkLabel(
-            header,
-            text=title,
-            font=('Montserrat', 12, 'bold'),
-            text_color=theme['colors']['text']
-        ).pack(side='left')
-
-        # Botón expandir - NAVY BLUE
-        expand_btn = ctk.CTkButton(
-            header,
-            text="⛶ Ver Grande",
-            font=('Montserrat', 10, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],
-            hover_color='#003D8F',
-            text_color='white',
-            corner_radius=8,
-            height=26,
-            width=100,
-            command=lambda: self.show_expanded_view(chart_id, title, chart_type)
-        )
-        expand_btn.pack(side='right')
-
-        # Preview de la gráfica
-        preview_frame = ctk.CTkFrame(
-            card,
-            fg_color=theme['colors']['background'],
-            corner_radius=8,
-            height=200
-        )
-        preview_frame.pack(fill='both', expand=True, padx=15, pady=(5, 15))
-        preview_frame.pack_propagate(False)
-
-        # Renderizar preview
-        self._render_chart_preview(preview_frame, chart_id, chart_type)
+        # Establecer datos del gráfico
+        card.set_chart(d3_chart_type, data, subtitulo='')
 
     def _render_chart_preview(self, container, chart_id, chart_type):
         """Renderizar preview pequeño de la gráfica"""

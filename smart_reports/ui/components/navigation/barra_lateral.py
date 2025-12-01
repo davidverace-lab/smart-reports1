@@ -285,6 +285,7 @@ class ModernSidebar(ctk.CTkFrame):
         if self.is_collapsed:
             # Colapsar
             self.configure(width=self.collapsed_width)
+            self.pack_propagate(False)  # Evitar que se redimensione automáticamente
             self.logo_frame.pack_forget()
             self.header_separator.pack_forget()
 
@@ -293,7 +294,7 @@ class ModernSidebar(ctk.CTkFrame):
                 # Extraer solo el icono del texto
                 full_text = btn.cget('text')
                 icon = full_text.split()[0] if full_text else '•'
-                btn.configure(text=icon, width=50)
+                btn.configure(text=icon, width=50, anchor='center')
 
             # Actualizar toggle de tema
             self.theme_label.pack_forget()
@@ -308,10 +309,13 @@ class ModernSidebar(ctk.CTkFrame):
         else:
             # Expandir
             self.configure(width=self.expanded_width)
+            self.pack_propagate(True)
 
-            # Restaurar logo
-            self.logo_frame.pack(fill='x', padx=20, pady=(0, 10))
-            self.header_separator.pack(fill='x', padx=20, pady=(10, 20))
+            # Restaurar logo (verificar el orden correcto en el pack)
+            # Primero obtenemos el header_container y lo buscamos
+            # Necesitamos insertar después del collapse_btn
+            self.logo_frame.pack(after=self.collapse_btn.master, fill='x', padx=20, pady=(0, 10))
+            self.header_separator.pack(after=self.logo_frame, fill='x', padx=20, pady=(10, 20))
 
             # Restaurar texto completo en botones
             nav_items_full = [
@@ -323,7 +327,7 @@ class ModernSidebar(ctk.CTkFrame):
             ]
 
             for (key, btn), (icon, text, _) in zip(self.nav_buttons, nav_items_full):
-                btn.configure(text=f'{icon}  {text}', width=220)
+                btn.configure(text=f'{icon}  {text}', width=220, anchor='w')
 
             # Restaurar toggle de tema
             theme = self.theme_manager.get_current_theme()
@@ -341,6 +345,9 @@ class ModernSidebar(ctk.CTkFrame):
             self.footer_separator.pack(fill='x', pady=(0, 10))
             self.version_label.pack()
             self.copyright_label.pack()
+
+        # Forzar actualización de la UI
+        self.update_idletasks()
 
     def _on_theme_toggle(self):
         """Manejar cambio de tema"""

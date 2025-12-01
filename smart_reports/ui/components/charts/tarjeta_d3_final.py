@@ -153,10 +153,14 @@ class D3ChartCard(ctk.CTkFrame):
 
         # Referencias a widgets
         self.expand_btn = None  # Botón de expandir/colapsar
+        self.title_label = None
 
         # Crear UI
         self._create_header()
         self._create_content_area()
+
+        # Registrar callback para cambios de tema
+        self.theme_manager.register_callback(self._on_theme_changed)
 
     def _create_header(self):
         """Crear header del card"""
@@ -169,82 +173,37 @@ class D3ChartCard(ctk.CTkFrame):
         header.pack(fill='x', padx=20, pady=(15, 10))
 
         # Título
-        title_label = ctk.CTkLabel(
+        self.title_label = ctk.CTkLabel(
             header,
             text=self._title,
             font=('Montserrat', 16, 'bold'),
             text_color=theme['colors']['text'],
             anchor='w'
         )
-        title_label.pack(side='left', fill='x', expand=True)
+        self.title_label.pack(side='left', fill='x', expand=True)
 
-        # Badges
-        badge_frame = ctk.CTkFrame(header, fg_color='transparent')
-        badge_frame.pack(side='right')
+        # Controles (sin badges)
+        controls_frame = ctk.CTkFrame(header, fg_color='transparent')
+        controls_frame.pack(side='right')
 
-        # Badge D3.js o NVD3.js
-        badge_text = 'NVD3 ⚡' if self.chart_engine == 'nvd3' else 'D3.js ⚡'
-        d3_badge = ctk.CTkLabel(
-            badge_frame,
-            text=badge_text,
-            font=('Montserrat', 10, 'bold'),
-            fg_color=HUTCHISON_COLORS['success'],
-            text_color='white',
-            corner_radius=6,
-            width=70,
-            height=24
-        )
-        d3_badge.pack(side='left', padx=5)
-
-        # Badge embebido/navegador
-        mode_text = 'Embebido' if TKINTERWEB_AVAILABLE else 'Navegador'
-        mode_color = HUTCHISON_COLORS['primary'] if TKINTERWEB_AVAILABLE else '#ffa94d'
-
-        mode_badge = ctk.CTkLabel(
-            badge_frame,
-            text=mode_text,
-            font=('Montserrat', 10, 'bold'),
-            fg_color=mode_color,
-            text_color='white',
-            corner_radius=6,
-            width=90,
-            height=24
-        )
-        mode_badge.pack(side='left', padx=5)
-
-        # Botón expandir/colapsar
+        # Botón "Ver Grande" para expansión in-place
         self.expand_btn = ctk.CTkButton(
-            badge_frame,
-            text='↗',  # Cambiar a ↙ cuando esté expandido
-            font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['aqua_green'],
-            hover_color='#00b386',
+            controls_frame,
+            text='⛶ Ver Grande',
+            font=('Montserrat', 11, 'bold'),
+            fg_color=HUTCHISON_COLORS['primary'],
+            hover_color='#001a3d',
             text_color='white',
             corner_radius=6,
-            width=35,
+            width=110,
             height=28,
             command=self._toggle_expansion
         )
         self.expand_btn.pack(side='left', padx=5)
 
-        # Botón navegador
-        browser_btn = ctk.CTkButton(
-            badge_frame,
-            text='🌐',
-            font=('Montserrat', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],
-            hover_color='#001a3d',  # Versión más oscura de ports_sea_blue
-            text_color='white',
-            corner_radius=6,
-            width=35,
-            height=28,
-            command=self._open_in_browser
-        )
-        browser_btn.pack(side='left', padx=5)
-
         # Menú de opciones (⋮)
         self.options_menu = ChartOptionsMenu(
-            badge_frame,
+            controls_frame,
             chart_title=self._title,
             chart_data=None,  # Se actualizará en set_chart
             chart_type=None,
@@ -472,7 +431,7 @@ class D3ChartCard(ctk.CTkFrame):
             self.is_expanded = True
 
             # Actualizar botón
-            self.expand_btn.configure(text="↙")
+            self.expand_btn.configure(text="↙ Ver Pequeño")
 
             # Cambiar altura del contenedor
             self._height = self._expanded_height
@@ -491,7 +450,7 @@ class D3ChartCard(ctk.CTkFrame):
             import traceback
             traceback.print_exc()
             self.is_expanded = False
-            self.expand_btn.configure(text="↗")
+            self.expand_btn.configure(text="⛶ Ver Grande")
 
     def _collapse_chart(self):
         """Colapsar gráfico D3/NVD3 in-place (regenerar HTML con tamaño compacto)"""
@@ -502,7 +461,7 @@ class D3ChartCard(ctk.CTkFrame):
             self.is_expanded = False
 
             # Actualizar botón
-            self.expand_btn.configure(text="↗")
+            self.expand_btn.configure(text="⛶ Ver Grande")
 
             # Cambiar altura del contenedor
             self._height = self._compact_height
@@ -528,3 +487,27 @@ class D3ChartCard(ctk.CTkFrame):
 
         self.chart_url = None
         self.html_content = None
+
+    def _on_theme_changed(self, theme_mode: str):
+        """Actualizar colores de la tarjeta cuando cambia el tema"""
+        theme = self.theme_manager.get_current_theme()
+
+        # Actualizar colores del frame principal
+        self.configure(
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
+            border_color=theme['colors']['border']
+        )
+
+        # Actualizar título
+        if self.title_label:
+            self.title_label.configure(text_color=theme['colors']['text'])
+
+        # Actualizar contenedor de contenido
+        if hasattr(self, 'content_container'):
+            self.content_container.configure(
+                fg_color=theme['colors']['background'] if self.theme_manager.is_dark_mode() else '#f8f9fa'
+            )
+
+        # Regenerar el gráfico con el nuevo tema si hay datos
+        if self.chart_type and self.chart_data:
+            self.set_chart(self.chart_type, self.chart_data, self.chart_subtitle or '')

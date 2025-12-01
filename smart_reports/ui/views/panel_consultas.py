@@ -51,8 +51,8 @@ class PanelConsultas(ctk.CTkFrame):
         # === HEADER ===
         self._create_header(main_container, theme)
 
-        # === SECCIÓN: CONSULTAS PREDEFINIDAS ===
-        self._create_predefined_queries_section(main_container, theme)
+        # === SECCIÓN: CONSULTAS PREDEFINIDAS === (OCULTO TEMPORALMENTE)
+        # self._create_predefined_queries_section(main_container, theme)
 
         # === GRID DE BÚSQUEDAS (2x2) ===
         searches_grid = ctk.CTkFrame(main_container, fg_color='transparent')
@@ -506,20 +506,20 @@ class PanelConsultas(ctk.CTkFrame):
             text_color=theme['colors']['text']
         ).pack(side='left')
 
-        # Botón exportar
-        self.export_btn = ctk.CTkButton(
-            header,
-            text="📥 Exportar Excel",
-            font=('Montserrat', 12, 'bold'),
-            fg_color='#22d3ee',
-            hover_color='#06b6d4',
-            text_color='#1a1d2e',
-            height=35,
-            width=140,
-            command=self.export_results,
-            state='disabled'
-        )
-        self.export_btn.pack(side='right')
+        # Botón exportar (OCULTO TEMPORALMENTE)
+        # self.export_btn = ctk.CTkButton(
+        #     header,
+        #     text="📥 Exportar Excel",
+        #     font=('Montserrat', 12, 'bold'),
+        #     fg_color='#22d3ee',
+        #     hover_color='#06b6d4',
+        #     text_color='#1a1d2e',
+        #     height=35,
+        #     width=140,
+        #     command=self.export_results,
+        #     state='disabled'
+        # )
+        # self.export_btn.pack(side='right')
 
         # OPTIMIZACIÓN: Treeview paginado (80x más rápido para grandes datasets)
         from smart_reports.ui.components.paginacion_treeview import TreeviewPaginado
@@ -1182,11 +1182,11 @@ class PanelConsultas(ctk.CTkFrame):
         self.results_tree_paginado.set_data(results)  # Cargar datos (automáticamente paginado)
 
         # Habilitar exportación
-        self.export_btn.configure(state='normal')
+        # self.export_btn.configure(state='normal')  # Botón exportar oculto
 
     def _clear_results(self):
         """Limpiar resultados"""
         self.results_tree_paginado.clear()
         self.current_columns = []
         self.current_results = []
-        self.export_btn.configure(state='disabled')
+        # self.export_btn.configure(state='disabled')  # Botón exportar oculto

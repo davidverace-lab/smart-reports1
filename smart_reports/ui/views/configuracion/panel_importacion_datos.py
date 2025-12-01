@@ -406,8 +406,8 @@ class PanelImportacionDatos(ctk.CTkFrame):
             actions_grid,
             text="🚀 Importar Todo",
             font=('Segoe UI', 14, 'bold'),
-            fg_color='#16a34a',  # Verde para acción principal
-            hover_color='#15803d',
+            fg_color=HUTCHISON_COLORS['primary'],  # Navy Hutchison (cambiado de verde)
+            hover_color='#001a3d',  # Navy más oscuro
             text_color='white',
             height=55,
             corner_radius=10,

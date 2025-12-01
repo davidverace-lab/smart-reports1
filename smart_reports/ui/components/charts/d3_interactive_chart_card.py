@@ -1,11 +1,12 @@
 """
-D3InteractiveChartCard - Gráfico D3.js/NVD3.js 100% Interactivo desde el inicio
+D3InteractiveChartCard - Gráfico D3.js/NVD3.js 100% Interactivo con Expansión In-Place
 ✨ CARACTERÍSTICAS PREMIUM:
 - D3.js/NVD3.js desde el inicio (NO Matplotlib)
 - Tooltips detallados con estadísticas automáticas
 - Animación de "alzado" con hover effect (3D elevation)
 - Click en elementos para ver data source (base de datos, tabla, etc.)
-- Botón fullscreen para expandir con pywebview
+- ✅ Expansión IN-PLACE (↗/↙) - NO modal fullscreen
+- ✅ Menú de opciones (⋮) con 7 funciones
 - Servidor HTTP local para correcto renderizado JavaScript
 - Funciona con tkinterweb (embedding) o navegador (fallback)
 """
@@ -31,13 +32,13 @@ except Exception as e:
     TKINTERWEB_AVAILABLE = False
     print(f"⚠️ tkinterweb no disponible ({e}) - D3.js se abrirá en navegador")
 
-# Importar modal pywebview para fullscreen
-try:
-    from smart_reports.ui.components.charts.modal_d3_fullscreen import ModalD3Fullscreen, PYWEBVIEW_AVAILABLE
-except ImportError:
-    PYWEBVIEW_AVAILABLE = False
-    ModalD3Fullscreen = None
-    print("⚠️ PyWebView modal no disponible")
+# Ya no se usa modal fullscreen - ahora expansión in-place
+# (Este código se mantiene comentado para referencia)
+# try:
+#     from smart_reports.ui.components.charts.modal_d3_fullscreen import ModalD3Fullscreen, PYWEBVIEW_AVAILABLE
+# except ImportError:
+#     PYWEBVIEW_AVAILABLE = False
+#     ModalD3Fullscreen = None
 
 
 # ============================================================================
@@ -136,6 +137,8 @@ class D3InteractiveChartCard(ctk.CTkFrame):
         self._title = title
         self._width = width
         self._height = height
+        self._compact_height = height  # Altura compacta original
+        self._expanded_height = height * 2.5  # Altura expandida (2.5x para mejor visualización)
         self.chart_engine = chart_engine  # 'nvd3' (default) o 'd3'
         self.motor_nvd3 = MotorTemplatesNVD3Interactive()
 
@@ -149,6 +152,13 @@ class D3InteractiveChartCard(ctk.CTkFrame):
         self.chart_type = None
         self.chart_data = None
         self.chart_subtitle = None
+        self.is_expanded = False  # Estado de expansión
+
+        # Referencias a widgets
+        self.expand_btn = None
+        self.options_menu = None
+        self.data_table_widget = None  # Widget de tabla expandible
+        self.table_visible = False  # Estado de visibilidad de tabla
 
         # Crear UI
         self._create_header()
@@ -164,85 +174,59 @@ class D3InteractiveChartCard(ctk.CTkFrame):
         }
 
     def _create_header(self):
-        """Crear header del card"""
+        """Crear header del card RESPONSIVE"""
         if not self._title:
             return
 
         theme = self.theme_manager.get_current_theme()
 
         header = ctk.CTkFrame(self, fg_color='transparent')
-        header.pack(fill='x', padx=20, pady=(15, 10))
+        header.pack(fill='x', padx=15, pady=(15, 10))
+        header.grid_columnconfigure(0, weight=1)  # El título se expande
+        header.grid_columnconfigure(1, weight=0)  # Los controles NO se expanden
 
         # Título
         title_label = ctk.CTkLabel(
             header,
             text=self._title,
-            font=('Montserrat', 16, 'bold'),
+            font=('Montserrat', 14, 'bold'),
             text_color=theme['colors']['text'],
             anchor='w'
         )
-        title_label.pack(side='left', fill='x', expand=True)
+        title_label.grid(row=0, column=0, sticky='w', padx=(5, 10))
 
-        # Badges y controles
-        badge_frame = ctk.CTkFrame(header, fg_color='transparent')
-        badge_frame.pack(side='right')
+        # Controles (botones en fila)
+        controls_frame = ctk.CTkFrame(header, fg_color='transparent')
+        controls_frame.grid(row=0, column=1, sticky='e')
 
-        # Badge D3.js
-        d3_badge = ctk.CTkLabel(
-            badge_frame,
-            text='D3.js ⚡',
-            font=('Montserrat', 10, 'bold'),
-            fg_color=HUTCHISON_COLORS['success'],
-            text_color='white',
-            corner_radius=6,
-            width=70,
-            height=24
-        )
-        d3_badge.pack(side='left', padx=5)
-
-        # Badge Interactivo
-        interactive_badge = ctk.CTkLabel(
-            badge_frame,
-            text='✨ Interactivo',
-            font=('Montserrat', 10, 'bold'),
-            fg_color=HUTCHISON_COLORS['aqua_green'],
-            text_color='white',
-            corner_radius=6,
-            width=100,
-            height=24
-        )
-        interactive_badge.pack(side='left', padx=5)
-
-        # Botón fullscreen (si pywebview disponible)
-        if PYWEBVIEW_AVAILABLE and ModalD3Fullscreen:
-            fullscreen_btn = ctk.CTkButton(
-                badge_frame,
-                text='⛶',
-                font=('Montserrat', 14, 'bold'),
-                fg_color=HUTCHISON_COLORS['primary'],
-                hover_color='#001a3d',
-                text_color='white',
-                corner_radius=6,
-                width=35,
-                height=28,
-                command=self._trigger_fullscreen
-            )
-            fullscreen_btn.pack(side='left', padx=5)
-
-        # Botón navegador (siempre disponible como fallback)
-        browser_btn = ctk.CTkButton(
-            badge_frame,
-            text='🌐',
-            font=('Montserrat', 12, 'bold'),
-            fg_color=HUTCHISON_COLORS['info'],
-            hover_color='#0077cc',
+        # Botón "Ver Grande" para expansión in-place (más compacto)
+        self.expand_btn = ctk.CTkButton(
+            controls_frame,
+            text='⛶',
+            font=('Montserrat', 14, 'bold'),
+            fg_color=HUTCHISON_COLORS['primary'],
+            hover_color='#001a3d',
             text_color='white',
             corner_radius=6,
             width=35,
             height=28,
-            command=self._open_in_browser
+            command=self._toggle_expansion
         )
-        browser_btn.pack(side='left', padx=5)
+        self.expand_btn.pack(side='left', padx=(0, 5))
+
+        # Menú de opciones (⋮)
+        from smart_reports.ui.components.charts.chart_options_menu import ChartOptionsMenu
+
+        self.options_menu = ChartOptionsMenu(
+            controls_frame,
+            chart_title=self._title,
+            chart_data=None,  # Se actualizará en set_chart
+            chart_type=None,
+            html_content=None,
+            on_refresh=None,  # Callback opcional para actualizar datos
+            on_show_table=self._toggle_data_table  # Callback para mostrar tabla
+        )
+        self.options_menu.pack(side='left')
 
     def _create_content_area(self):
         """Crear área de contenido"""
@@ -265,6 +249,12 @@ class D3InteractiveChartCard(ctk.CTkFrame):
             subtitulo: Subtítulo opcional
             data_source: Dict con info de origen de datos (opcional)
         """
+        print(f"\n📊 [D3InteractiveChartCard] set_chart() llamado")
+        print(f"  🔹 Título: {self._title}")
+        print(f"  🔹 Tipo: {chart_type}")
+        print(f"  🔹 Datos: {datos}")
+        print(f"  🔹 Subtítulo: {subtitulo}")
+
         # Actualizar data source si se proporciona
         if data_source:
             self.data_source = data_source
@@ -284,7 +274,11 @@ class D3InteractiveChartCard(ctk.CTkFrame):
 
         # Generar HTML D3.js INTERACTIVO
         tema = 'dark' if self.theme_manager.is_dark_mode() else 'light'
+        print(f"  🔹 Tema: {tema}")
+
         self.html_content = self._generate_d3_interactive_html(chart_type, datos, subtitulo, tema)
+
+        print(f"  🔹 HTML generado: {len(self.html_content)} caracteres")
 
         # Guardar y obtener URL
         chart_id = f"{id(self)}_{chart_type}"
@@ -293,11 +287,21 @@ class D3InteractiveChartCard(ctk.CTkFrame):
             chart_id
         )
 
-        # Renderizar según disponibilidad
-        if TKINTERWEB_AVAILABLE:
-            self._render_embedded()
-        else:
-            self._render_button_view()
+        print(f"  🔹 Archivo guardado: {self.chart_filepath}")
+        print(f"  🔹 URL: {self.chart_url}")
+
+        # Renderizar SIEMPRE embebido (con fallback si falla)
+        self._render_embedded()
+
+        # Actualizar menú de opciones con los datos actuales
+        if hasattr(self, 'options_menu') and self.options_menu:
+            self.options_menu.chart_data = datos
+            self.options_menu.chart_type = chart_type
+            self.options_menu.html_content = self.html_content
+            self.options_menu.chart_title = self._title
+
+            # Actualizar timestamp de última actualización
+            self.options_menu.last_update = datetime.now()
 
         print(f"✅ D3.js Interactivo {chart_type}: {self.chart_url}")
 
@@ -309,7 +313,8 @@ class D3InteractiveChartCard(ctk.CTkFrame):
                 datos=datos,
                 subtitulo=subtitulo,
                 tema=tema,
-                data_source=self.data_source
+                data_source=self.data_source,
+                chart_height=int(self._height)
             )
         elif chart_type == 'donut' or chart_type == 'pie':
             return self.motor_nvd3.generar_grafico_donut_interactivo(
@@ -317,7 +322,8 @@ class D3InteractiveChartCard(ctk.CTkFrame):
                 datos=datos,
                 subtitulo=subtitulo,
                 tema=tema,
-                data_source=self.data_source
+                data_source=self.data_source,
+                chart_height=int(self._height)
             )
         elif chart_type == 'line':
             return self.motor_nvd3.generar_grafico_lineas_interactivo(
@@ -325,7 +331,8 @@ class D3InteractiveChartCard(ctk.CTkFrame):
                 datos=datos,
                 subtitulo=subtitulo,
                 tema=tema,
-                data_source=self.data_source
+                data_source=self.data_source,
+                chart_height=int(self._height)
             )
         else:
             # Fallback a barras
@@ -334,17 +341,38 @@ class D3InteractiveChartCard(ctk.CTkFrame):
                 datos=datos,
                 subtitulo=subtitulo,
                 tema=tema,
-                data_source=self.data_source
+                data_source=self.data_source,
+                chart_height=int(self._height)
             )
 
     def _render_embedded(self):
         """Renderizar embebido con tkinterweb"""
         try:
+            print(f"  🔍 [DEBUG] Intentando renderizar embebido...")
+            print(f"  🔍 [DEBUG] Chart URL: {self.chart_url}")
+            print(f"  🔍 [DEBUG] Chart File: {self.chart_filepath}")
+            print(f"  🔍 [DEBUG] TKINTERWEB_AVAILABLE: {TKINTERWEB_AVAILABLE}")
+
+            if not TKINTERWEB_AVAILABLE:
+                print(f"  ⚠️ tkinterweb no disponible, usando vista de botón")
+                self._render_button_view()
+                return
+
+            # Verificar que el archivo HTML existe
+            if not os.path.exists(self.chart_filepath):
+                print(f"  ❌ ERROR: Archivo HTML no existe: {self.chart_filepath}")
+                self._render_button_view()
+                return
+
+            print(f"  ✅ Archivo HTML existe ({os.path.getsize(self.chart_filepath)} bytes)")
+
             html_frame = Frame(
                 self.content_container,
                 bg=self.content_container._fg_color
             )
             html_frame.pack(fill='both', expand=True, padx=5, pady=5)
+
+            print(f"  ✅ Frame creado")
 
             html_widget = HtmlFrame(
                 html_frame,
@@ -353,14 +381,18 @@ class D3InteractiveChartCard(ctk.CTkFrame):
                 horizontal_scrollbar=False
             )
 
+            print(f"  ✅ HtmlFrame creado")
+
             # IMPORTANTE: Cargar desde URL HTTP (ejecuta JavaScript correctamente)
             html_widget.load_url(self.chart_url)
             html_widget.pack(fill='both', expand=True)
 
-            print(f"  ✅ D3.js Interactivo renderizado embebido")
+            print(f"  ✅ D3.js Interactivo renderizado embebido en: {self.chart_url}")
 
         except Exception as e:
-            print(f"  ⚠️ Error embebiendo: {e}")
+            import traceback
+            print(f"  ❌ Error embebiendo: {e}")
+            print(f"  ❌ Traceback: {traceback.format_exc()}")
             # Fallback a vista de botón
             for widget in self.content_container.winfo_children():
                 widget.destroy()
@@ -436,34 +468,139 @@ class D3InteractiveChartCard(ctk.CTkFrame):
         except Exception as e:
             print(f"  ❌ Error abriendo navegador: {e}")
 
-    def _trigger_fullscreen(self):
-        """Expandir a modal PyWebView fullscreen"""
-        if not PYWEBVIEW_AVAILABLE or not ModalD3Fullscreen:
-            print("⚠️ PyWebView modal no disponible")
-            self._open_in_browser()
-            return
+    def _toggle_expansion(self):
+        """Toggle entre vista compacta y expandida"""
+        if self.is_expanded:
+            self._collapse_chart()
+        else:
+            self._expand_chart()
 
+    def _expand_chart(self):
+        """Expandir gráfico D3/NVD3 in-place (regenerar HTML con mayor tamaño)"""
         if not self.chart_type or not self.chart_data:
-            print("⚠️ No hay datos de gráfico para expandir")
             return
 
         try:
-            # Crear modal fullscreen con pywebview
-            ModalD3Fullscreen(
-                parent=self.winfo_toplevel(),
-                title=self._title,
-                chart_type=self.chart_type,
-                chart_data=self.chart_data,
-                engine=self.chart_engine,
-                data_source=self.data_source
+            print(f"  📊 Expandiendo D3/NVD3 Interactivo: {self._title}")
+
+            # Cambiar estado
+            self.is_expanded = True
+
+            # Actualizar botón (cambiar ícono)
+            self.expand_btn.configure(text="↙")
+
+            # Cambiar altura del contenedor (2.5x el tamaño original)
+            self._height = self._expanded_height
+
+            # Configurar altura mínima del contenedor (para que se expanda visualmente)
+            self.configure(height=int(self._height) + 150)  # +150 para header y padding
+
+            # Regenerar gráfico con nuevo tamaño
+            self.set_chart(
+                self.chart_type,
+                self.chart_data,
+                self.chart_subtitle or ''
             )
-            print(f"✅ Modal PyWebView fullscreen abierto: {self._title}")
+
+            print(f"  ✅ Expandido exitosamente a {self._height}px")
+
         except Exception as e:
-            print(f"❌ Error abriendo modal fullscreen: {e}")
+            print(f"❌ Error expandiendo: {e}")
             import traceback
             traceback.print_exc()
-            # Fallback a navegador
-            self._open_in_browser()
+            self.is_expanded = False
+            self.expand_btn.configure(text="⛶")
+
+    def _collapse_chart(self):
+        """Colapsar gráfico D3/NVD3 in-place (regenerar HTML con tamaño compacto)"""
+        try:
+            print(f"  📉 Colapsando D3/NVD3 Interactivo: {self._title}")
+
+            # Cambiar estado
+            self.is_expanded = False
+
+            # Actualizar botón (restaurar ícono)
+            self.expand_btn.configure(text="⛶")
+
+            # Cambiar altura del contenedor
+            self._height = self._compact_height
+
+            # Restaurar altura original del contenedor
+            self.configure(height=int(self._height) + 150)  # +150 para header y padding
+
+            # Regenerar gráfico con tamaño compacto
+            self.set_chart(
+                self.chart_type,
+                self.chart_data,
+                self.chart_subtitle or ''
+            )
+
+            print(f"  ✅ Colapsado exitosamente a {self._height}px")
+
+        except Exception as e:
+            print(f"❌ Error colapsando: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _toggle_data_table(self):
+        """Mostrar/ocultar tabla de datos expandible IN-PLACE"""
+        if self.table_visible:
+            self._hide_data_table()
+        else:
+            self._show_data_table()
+
+    def _show_data_table(self):
+        """Mostrar tabla de datos expandible"""
+        if not self.chart_data or 'labels' not in self.chart_data:
+            print("⚠️ No hay datos para mostrar en la tabla")
+            return
+
+        try:
+            print(f"📊 Mostrando tabla de datos para: {self._title}")
+
+            # Ocultar gráfico
+            self.content_container.pack_forget()
+
+            # Crear widget de tabla expandible
+            from smart_reports.ui.components.charts.data_table_expandable import DataTableExpandable
+
+            self.data_table_widget = DataTableExpandable(
+                self,
+                title=self._title,
+                data=self.chart_data,
+                chart_type=self.chart_type,
+                on_close=self._hide_data_table
+            )
+            self.data_table_widget.pack(fill='both', expand=True, padx=15, pady=(0, 15))
+
+            self.table_visible = True
+            print("✅ Tabla de datos mostrada")
+
+        except Exception as e:
+            print(f"❌ Error mostrando tabla: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _hide_data_table(self):
+        """Ocultar tabla de datos y restaurar gráfico"""
+        try:
+            print(f"📊 Ocultando tabla de datos para: {self._title}")
+
+            # Destruir tabla
+            if self.data_table_widget:
+                self.data_table_widget.destroy()
+                self.data_table_widget = None
+
+            # Restaurar gráfico
+            self.content_container.pack(fill='both', expand=True, padx=15, pady=(0, 15))
+
+            self.table_visible = False
+            print("✅ Tabla de datos ocultada")
+
+        except Exception as e:
+            print(f"❌ Error ocultando tabla: {e}")
+            import traceback
+            traceback.print_exc()
 
     def clear(self):
         """Limpiar gráfico"""
