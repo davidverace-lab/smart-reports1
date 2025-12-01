@@ -703,10 +703,17 @@ QToolTip {{
 """
 
 
-class ThemeManager:
+from PyQt6.QtCore import QObject, pyqtSignal
+
+
+class ThemeManager(QObject):
     """Gestor de temas para PyQt6"""
 
+    # Signal emitido cuando cambia el tema
+    theme_changed = pyqtSignal(str)  # Emite el nuevo tema ('dark' o 'light')
+
     def __init__(self):
+        super().__init__()
         self.current_theme = 'dark'  # 'dark' o 'light'
 
     def get_stylesheet(self, theme: str = None) -> str:
@@ -723,6 +730,8 @@ class ThemeManager:
         """Aplicar tema a la aplicación"""
         self.current_theme = theme
         app.setStyleSheet(self.get_stylesheet(theme))
+        # Emitir signal de cambio de tema
+        self.theme_changed.emit(theme)
 
     def toggle_theme(self, app):
         """Alternar entre tema oscuro y claro"""

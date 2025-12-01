@@ -25,13 +25,18 @@ class LoginWindow(QMainWindow):
 
         # Configurar ventana
         self.setWindowTitle("Smart Reports - Login")
-        self.setFixedSize(900, 600)
+        self.setMinimumSize(800, 600)
+
+        # Forzar modo claro al iniciar
+        if self.theme_manager:
+            if self.theme_manager.is_dark_mode():
+                self.theme_manager.toggle_theme(self.app)
 
         # Crear UI
         self._create_ui()
 
-        # Centrar ventana
-        self._center_window()
+        # Mostrar en pantalla completa
+        self.showMaximized()
 
     def _center_window(self):
         """Centrar ventana en la pantalla"""
@@ -77,34 +82,44 @@ class LoginWindow(QMainWindow):
 
         layout = QVBoxLayout(panel)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setContentsMargins(40, 40, 40, 40)
+        layout.setSpacing(20)
 
-        # Logo/Icono
-        logo_label = QLabel("🏢")
-        logo_label.setFont(QFont("Arial", 80))
+        # Logo de Instituto HP (imagen)
+        logo_label = QLabel()
         logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        logo_label.setStyleSheet("color: white; background: transparent;")
+
+        # Intentar cargar logo
+        logo_path = "assets/images/LogoInstitutoHP-blanco.png"
+        try:
+            pixmap = QPixmap(logo_path)
+            if not pixmap.isNull():
+                # Escalar logo manteniendo aspect ratio
+                scaled_pixmap = pixmap.scaled(300, 200, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                logo_label.setPixmap(scaled_pixmap)
+            else:
+                # Fallback si no se encuentra la imagen
+                logo_label.setText("INSTITUTO\nHUTCHISON PORTS")
+                logo_label.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))
+                logo_label.setStyleSheet("color: white; background: transparent;")
+                logo_label.setWordWrap(True)
+        except Exception as e:
+            # Fallback si hay error
+            logo_label.setText("INSTITUTO\nHUTCHISON PORTS")
+            logo_label.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))
+            logo_label.setStyleSheet("color: white; background: transparent;")
+            logo_label.setWordWrap(True)
+
         layout.addWidget(logo_label)
 
-        # Título
+        layout.addSpacing(40)
+
+        # Título (movido abajo)
         title_label = QLabel("SMART REPORTS")
-        title_label.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
+        title_label.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_label.setStyleSheet("color: white; background: transparent; margin-top: 20px;")
+        title_label.setStyleSheet("color: white; background: transparent;")
         layout.addWidget(title_label)
-
-        # Subtítulo
-        subtitle_label = QLabel("Instituto Hutchison Ports")
-        subtitle_label.setFont(QFont("Montserrat", 14))
-        subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        subtitle_label.setStyleSheet("color: #00D4AA; background: transparent; margin-top: 10px;")
-        layout.addWidget(subtitle_label)
-
-        # Versión
-        version_label = QLabel("v3.0 PyQt6")
-        version_label.setFont(QFont("Montserrat", 10))
-        version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        version_label.setStyleSheet("color: rgba(255, 255, 255, 0.6); background: transparent; margin-top: 30px;")
-        layout.addWidget(version_label)
 
         return panel
 
@@ -130,27 +145,53 @@ class LoginWindow(QMainWindow):
         layout.addWidget(form_subtitle)
 
         # Campo de usuario
-        user_label = QLabel("👤 Usuario")
+        user_label = QLabel("Usuario")
         user_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
+        user_label.setStyleSheet("color: #003087;")
         layout.addWidget(user_label)
 
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Ingresa tu usuario")
         self.username_input.setFixedHeight(45)
+        self.username_input.setFont(QFont("Montserrat", 11))
+        self.username_input.setStyleSheet("""
+            QLineEdit {
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 10px;
+                background-color: #ffffff;
+            }
+            QLineEdit:focus {
+                border: 2px solid #003087;
+            }
+        """)
         self.username_input.returnPressed.connect(self._handle_login)
         layout.addWidget(self.username_input)
 
         layout.addSpacing(20)
 
         # Campo de contraseña
-        pass_label = QLabel("🔒 Contraseña")
+        pass_label = QLabel("Contraseña")
         pass_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
+        pass_label.setStyleSheet("color: #003087;")
         layout.addWidget(pass_label)
 
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Ingresa tu contraseña")
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_input.setFixedHeight(45)
+        self.password_input.setFont(QFont("Montserrat", 11))
+        self.password_input.setStyleSheet("""
+            QLineEdit {
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 10px;
+                background-color: #ffffff;
+            }
+            QLineEdit:focus {
+                border: 2px solid #003087;
+            }
+        """)
         self.password_input.returnPressed.connect(self._handle_login)
         layout.addWidget(self.password_input)
 
@@ -158,31 +199,28 @@ class LoginWindow(QMainWindow):
 
         # Botón de login
         self.login_button = QPushButton("INICIAR SESIÓN")
-        self.login_button.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        self.login_button.setFixedHeight(50)
+        self.login_button.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        self.login_button.setFixedHeight(55)
+        self.login_button.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+            QPushButton:pressed {
+                background-color: #002060;
+            }
+        """)
         self.login_button.clicked.connect(self._handle_login)
         self.login_button.setCursor(Qt.CursorShape.PointingHandCursor)
         layout.addWidget(self.login_button)
 
-        layout.addSpacing(20)
-
-        # Toggle tema
-        theme_toggle = QPushButton("🌓 Cambiar Tema")
-        theme_toggle.setProperty("class", "secondary")
-        theme_toggle.setFixedHeight(40)
-        theme_toggle.clicked.connect(self._toggle_theme)
-        theme_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
-        layout.addWidget(theme_toggle)
-
         # Spacer para empujar contenido hacia arriba
         layout.addStretch()
-
-        # Nota de demo
-        demo_note = QLabel("💡 Demo: cualquier usuario/contraseña")
-        demo_note.setFont(QFont("Montserrat", 9))
-        demo_note.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        demo_note.setStyleSheet("color: #888888; font-style: italic;")
-        layout.addWidget(demo_note)
 
         return panel
 
