@@ -1,6 +1,6 @@
 """
 Main Window - PyQt6
-Ventana principal de Smart Reports con navegación lateral
+Ventana principal de Smart Reports con navegación lateral colapsable
 """
 
 from PyQt6.QtWidgets import (
@@ -9,6 +9,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
+
+# Importar ModernSidebar
+from smart_reports_pyqt6.ui.components.navigation.modern_sidebar import ModernSidebar
 
 
 class MainWindow(QMainWindow):
@@ -47,63 +50,77 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # Sidebar (barra lateral de navegación)
-        sidebar = self._create_sidebar()
-        main_layout.addWidget(sidebar)
+        # Sidebar moderna con botón hamburguesa (COLAPSABLE)
+        navigation_callbacks = {
+            'dashboard': lambda: self._navigate_to('dashboard'),
+            'consultas': lambda: self._navigate_to('consultas'),
+            'importacion': lambda: self._navigate_to('importacion'),
+            'reportes': lambda: self._navigate_to('reportes'),
+            'configuracion': lambda: self._navigate_to('config'),
+        }
+
+        self.sidebar = ModernSidebar(
+            parent=central_widget,
+            navigation_callbacks=navigation_callbacks,
+            theme_manager=self.theme_manager
+        )
+        main_layout.addWidget(self.sidebar)
 
         # Contenedor de paneles
         self.content_area = self._create_content_area()
         main_layout.addWidget(self.content_area, 1)
 
-    def _create_sidebar(self):
-        """Crear barra lateral de navegación"""
+    def _create_top_bar(self):
+        """Crear barra superior con info de usuario y botón de cerrar sesión"""
 
-        sidebar = QFrame()
-        sidebar.setObjectName("sidebar")
-        sidebar.setFixedWidth(250)
-        sidebar.setStyleSheet("""
-            #sidebar {
-                background-color: """ + ("#2d2d2d" if self.theme_manager.is_dark_mode() else "#ffffff") + """;
-                border-right: 1px solid """ + ("#383838" if self.theme_manager.is_dark_mode() else "#e0e0e0") + """;
-            }
+        top_bar = QFrame()
+        top_bar.setObjectName("topBar")
+        top_bar.setFixedHeight(70)
+
+        is_dark = self.theme_manager.is_dark_mode()
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        border_color = "#383838" if is_dark else "#e0e0e0"
+
+        top_bar.setStyleSheet(f"""
+            #topBar {{
+                background-color: {bg_color};
+                border-bottom: 1px solid {border_color};
+            }}
         """)
 
-        layout = QVBoxLayout(sidebar)
-        layout.setContentsMargins(15, 20, 15, 20)
-        layout.setSpacing(10)
+        layout = QHBoxLayout(top_bar)
+        layout.setContentsMargins(20, 10, 20, 10)
 
-        # Header con usuario
-        header = self._create_sidebar_header()
-        layout.addWidget(header)
+        # Info de usuario
+        user_frame = QFrame()
+        user_layout = QHBoxLayout(user_frame)
+        user_layout.setContentsMargins(0, 0, 0, 0)
+        user_layout.setSpacing(10)
 
-        layout.addSpacing(20)
+        # Icono
+        user_icon = QLabel("👤")
+        user_icon.setFont(QFont("Arial", 24))
+        user_layout.addWidget(user_icon)
 
-        # Menús de navegación
-        self.menu_buttons = {}
+        # Nombre y rol
+        user_info = QFrame()
+        user_info_layout = QVBoxLayout(user_info)
+        user_info_layout.setContentsMargins(0, 0, 0, 0)
+        user_info_layout.setSpacing(0)
 
-        menus = [
-            ("📊", "Dashboard", "dashboard"),
-            ("📈", "Gráficos", "graficos"),
-            ("🔍", "Consultas", "consultas"),
-            ("📄", "Reportes", "reportes"),
-            ("⚙️", "Configuración", "config"),
-        ]
+        username_label = QLabel(self.username)
+        username_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        user_info_layout.addWidget(username_label)
 
-        for icon, label, key in menus:
-            btn = self._create_menu_button(icon, label, key)
-            self.menu_buttons[key] = btn
-            layout.addWidget(btn)
+        role_label = QLabel(f"Rol: {self.role.capitalize()}")
+        role_label.setFont(QFont("Montserrat", 10))
+        role_label.setStyleSheet("color: #00D4AA;")
+        user_info_layout.addWidget(role_label)
 
-        # Spacer para empujar botones hacia arriba
+        user_layout.addWidget(user_info)
+
+        layout.addWidget(user_frame)
         layout.addStretch()
-
-        # Botón de cambiar tema
-        theme_btn = QPushButton("🌓 Tema")
-        theme_btn.setProperty("class", "secondary")
-        theme_btn.setFixedHeight(40)
-        theme_btn.clicked.connect(self._toggle_theme)
-        theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        layout.addWidget(theme_btn)
 
         # Botón de cerrar sesión
         logout_btn = QPushButton("🚪 Cerrar Sesión")
@@ -113,53 +130,20 @@ class MainWindow(QMainWindow):
         logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         layout.addWidget(logout_btn)
 
-        return sidebar
-
-    def _create_sidebar_header(self):
-        """Crear header de sidebar con info de usuario"""
-
-        header = QFrame()
-        layout = QVBoxLayout(header)
-        layout.setContentsMargins(10, 10, 10, 10)
-
-        # Icono de usuario
-        user_icon = QLabel("👤")
-        user_icon.setFont(QFont("Arial", 32))
-        user_icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(user_icon)
-
-        # Nombre de usuario
-        username_label = QLabel(self.username)
-        username_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        username_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(username_label)
-
-        # Rol
-        role_label = QLabel(f"Rol: {self.role.capitalize()}")
-        role_label.setFont(QFont("Montserrat", 10))
-        role_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        role_label.setStyleSheet("color: #00D4AA;")
-        layout.addWidget(role_label)
-
-        return header
-
-    def _create_menu_button(self, icon: str, label: str, key: str):
-        """Crear botón de menú"""
-
-        btn = QPushButton(f"{icon}  {label}")
-        btn.setFont(QFont("Montserrat", 11))
-        btn.setFixedHeight(45)
-        btn.clicked.connect(lambda: self._navigate_to(key))
-        btn.setCursor(Qt.CursorShape.PointingHandCursor)
-
-        # Estilo especial para botón activo
-        if key == self.current_panel:
-            btn.setProperty("class", "active")
-
-        return btn
+        return top_bar
 
     def _create_content_area(self):
         """Crear área de contenido con stack de paneles"""
+
+        # Container principal para top bar + contenido
+        content_container = QWidget()
+        content_layout = QVBoxLayout(content_container)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(0)
+
+        # Top bar con info de usuario
+        top_bar = self._create_top_bar()
+        content_layout.addWidget(top_bar)
 
         # Scroll area para contener el stacked widget
         scroll = QScrollArea()
@@ -178,6 +162,7 @@ class MainWindow(QMainWindow):
         from smart_reports_pyqt6.ui.views.panel_consultas import ConsultasPanel
         from smart_reports_pyqt6.ui.views.panel_reportes import ReportesPanel
         from smart_reports_pyqt6.ui.views.panel_configuracion import ConfiguracionPanel
+        from smart_reports_pyqt6.ui.views.panel_importacion import PanelImportacion
 
         try:
             # Dashboard
@@ -210,21 +195,28 @@ class MainWindow(QMainWindow):
             self.panel_stack.addWidget(config_panel)
             print("✅ Panel Configuración cargado")
 
+            # Importación
+            importacion_panel = PanelImportacion(parent=self, theme_manager=self.theme_manager)
+            self.panels['importacion'] = importacion_panel
+            self.panel_stack.addWidget(importacion_panel)
+            print("✅ Panel Importación cargado")
+
         except Exception as e:
             print(f"❌ Error cargando paneles: {e}")
             import traceback
             traceback.print_exc()
 
             # Fallback a placeholder si hay error
-            for panel_name in ["dashboard", "graficos", "consultas", "reportes", "config"]:
+            for panel_name in ["dashboard", "graficos", "consultas", "reportes", "config", "importacion"]:
                 if panel_name not in self.panels:
                     panel = self._create_placeholder_panel(panel_name)
                     self.panels[panel_name] = panel
                     self.panel_stack.addWidget(panel)
 
         scroll.setWidget(self.panel_stack)
+        content_layout.addWidget(scroll)
 
-        return scroll
+        return content_container
 
     def _create_placeholder_panel(self, panel_name: str):
         """Crear panel placeholder (temporal)"""
@@ -283,33 +275,15 @@ class MainWindow(QMainWindow):
         panel_widget = self.panels[panel_key]
         self.panel_stack.setCurrentWidget(panel_widget)
 
-        # Actualizar estilos de botones
-        for key, btn in self.menu_buttons.items():
-            if key == panel_key:
-                btn.setProperty("class", "active")
-            else:
-                btn.setProperty("class", "")
-            btn.style().unpolish(btn)
-            btn.style().polish(btn)
+        # Actualizar botón activo en sidebar
+        self.sidebar.set_active(panel_key)
 
     def _toggle_theme(self):
         """Cambiar tema"""
         new_theme = self.theme_manager.toggle_theme(self.app)
         print(f"✅ Tema cambiado a: {new_theme}")
 
-        # Actualizar sidebar
-        self._update_sidebar_style()
-
-    def _update_sidebar_style(self):
-        """Actualizar estilo de sidebar según tema"""
-        sidebar = self.findChild(QFrame, "sidebar")
-        if sidebar:
-            sidebar.setStyleSheet("""
-                #sidebar {
-                    background-color: """ + ("#2d2d2d" if self.theme_manager.is_dark_mode() else "#ffffff") + """;
-                    border-right: 1px solid """ + ("#383838" if self.theme_manager.is_dark_mode() else "#e0e0e0") + """;
-                }
-            """)
+        # El sidebar y los paneles se actualizan automáticamente mediante sus callbacks
 
     def _logout(self):
         """Cerrar sesión"""
