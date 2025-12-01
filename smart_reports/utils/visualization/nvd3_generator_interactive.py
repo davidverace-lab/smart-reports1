@@ -31,22 +31,29 @@ class MotorTemplatesNVD3Interactive:
     ]
 
     @staticmethod
-    def _generar_head_interactivo(titulo: str, tema: str = 'dark', data_source: Dict = None) -> str:
-        """Generar <head> con estilos mejorados y data source embebido"""
+    def _generar_head_interactivo(titulo: str, tema: str = 'dark', data_source: Dict = None, chart_height: int = 500) -> str:
+        """Generar <head> con estilos mejorados y data source embebido
 
-        # Colores según tema
+        Args:
+            titulo: Título del gráfico
+            tema: 'dark' o 'light'
+            data_source: Info de origen de datos
+            chart_height: Altura del gráfico en píxeles (default: 500)
+        """
+
+        # Colores según tema - HUTCHISON PORTS THEME
         if tema == 'dark':
-            bg_color = '#1a1d2e'
-            card_bg = '#2b2d42'
+            bg_color = '#1a1a1a'  # Negro (Hutchison dark mode)
+            card_bg = '#2d2d2d'   # Gris oscuro (Hutchison cards)
             text_color = '#ffffff'
-            text_secondary = '#a0a0b0'
-            hover_bg = '#3a3d52'
+            text_secondary = '#b0b0b0'
+            hover_bg = '#383838'  # Hutchison hover dark
         else:
-            bg_color = '#f0f2f5'
+            bg_color = '#f5f5f5'  # Hutchison light background
             card_bg = '#ffffff'
-            text_color = '#2b2d42'
-            text_secondary = '#6c6c80'
-            hover_bg = '#f8f9fa'
+            text_color = '#003087'  # Hutchison navy text
+            text_secondary = '#4a5c8a'  # Navy más claro
+            hover_bg = '#f0f0f0'  # Hutchison hover light
 
         # Data source por defecto
         if not data_source:
@@ -124,8 +131,27 @@ class MotorTemplatesNVD3Interactive:
         }}
 
         #chart {{
-            height: 500px;
+            height: {chart_height}px;
             position: relative;
+            width: 100%;
+        }}
+
+        /* Asegurar que el SVG se renderice correctamente */
+        #chart svg {{
+            width: 100%;
+            height: 100%;
+        }}
+
+        /* Estilos para el SVG en ambos temas */
+        .nvd3 text {{
+            fill: {text_color} !important;
+            font-family: 'Montserrat', sans-serif !important;
+        }}
+
+        .nvd3 .nv-axis path,
+        .nvd3 .nv-axis line {{
+            stroke: {text_secondary} !important;
+            stroke-opacity: 0.3;
         }}
 
         /* TOOLTIPS MEJORADOS */
@@ -434,7 +460,8 @@ class MotorTemplatesNVD3Interactive:
         datos: Dict[str, Any],
         subtitulo: str = "",
         tema: str = 'dark',
-        data_source: Dict = None
+        data_source: Dict = None,
+        chart_height: int = 400
     ) -> str:
         """
         Generar gráfico de barras INTERACTIVO con NVD3.js
@@ -445,6 +472,7 @@ class MotorTemplatesNVD3Interactive:
             subtitulo: Subtítulo opcional
             tema: 'dark' o 'light'
             data_source: {'database': str, 'table': str, 'last_update': str, 'records_count': int}
+            chart_height: Altura del gráfico en píxeles (default: 400)
         """
 
         labels = datos.get('labels') or datos.get('categorias', [])
@@ -458,7 +486,7 @@ class MotorTemplatesNVD3Interactive:
         # VALIDACIÓN: Verificar que haya datos
         if not labels or not values:
             print(f"⚠️ [WARNING] No hay datos para generar el gráfico de barras")
-            html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source)
+            html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source, chart_height)
             html += f"""
 <body>
     <div class="container">
@@ -501,7 +529,7 @@ class MotorTemplatesNVD3Interactive:
 
         print(f"✅ [DEBUG] Datos transformados correctamente: {len(chart_data)} puntos")
 
-        html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source)
+        html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source, chart_height)
 
         html += f"""
 <body>
@@ -590,7 +618,8 @@ class MotorTemplatesNVD3Interactive:
         datos: Dict[str, Any],
         subtitulo: str = "",
         tema: str = 'dark',
-        data_source: Dict = None
+        data_source: Dict = None,
+        chart_height: int = 400
     ) -> str:
         """
         Generar gráfico donut INTERACTIVO con NVD3.js
@@ -610,7 +639,7 @@ class MotorTemplatesNVD3Interactive:
 
         if not labels or not values:
             print(f"⚠️ [WARNING] No hay datos para generar el gráfico donut")
-            html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source)
+            html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source, chart_height)
             html += """
 <body>
     <div class="container">
@@ -642,7 +671,7 @@ class MotorTemplatesNVD3Interactive:
         chart_data_json = json.dumps(chart_data)
         colors_json = json.dumps(MotorTemplatesNVD3Interactive.PALETA_COLORES)
 
-        html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source)
+        html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source, chart_height)
 
         html += f"""
 <body>
@@ -722,7 +751,8 @@ class MotorTemplatesNVD3Interactive:
         datos: Dict[str, Any],
         subtitulo: str = "",
         tema: str = 'dark',
-        data_source: Dict = None
+        data_source: Dict = None,
+        chart_height: int = 400
     ) -> str:
         """
         Generar gráfico de líneas INTERACTIVO con NVD3.js
@@ -742,7 +772,7 @@ class MotorTemplatesNVD3Interactive:
 
         if not labels or not values:
             print(f"⚠️ [WARNING] No hay datos para generar el gráfico de líneas")
-            html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source)
+            html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source, chart_height)
             html += """
 <body>
     <div class="container">
@@ -777,7 +807,7 @@ class MotorTemplatesNVD3Interactive:
         chart_data_json = json.dumps([{"key": "Tendencia", "values": chart_data}])
         colors_json = json.dumps([HUTCHISON_COLORS['primary']])
 
-        html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source)
+        html = MotorTemplatesNVD3Interactive._generar_head_interactivo(titulo, tema, data_source, chart_height)
 
         html += f"""
 <body>

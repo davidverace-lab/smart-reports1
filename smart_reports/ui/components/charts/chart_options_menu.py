@@ -36,7 +36,7 @@ class ChartOptionsMenu(ctk.CTkFrame):
     """
 
     def __init__(self, parent, chart_title='', chart_data=None, chart_type='bar',
-                 chart_figure=None, html_content=None, on_refresh=None, **kwargs):
+                 chart_figure=None, html_content=None, on_refresh=None, on_show_table=None, **kwargs):
         self.theme_manager = get_theme_manager()
         theme = self.theme_manager.get_current_theme()
 
@@ -52,6 +52,7 @@ class ChartOptionsMenu(ctk.CTkFrame):
         self.chart_figure = chart_figure
         self.html_content = html_content
         self.on_refresh = on_refresh  # Callback para actualizar datos
+        self.on_show_table = on_show_table  # Callback para mostrar tabla expandible
         self.menu_visible = False
         self.last_update = None  # Timestamp de última actualización
 
@@ -60,6 +61,9 @@ class ChartOptionsMenu(ctk.CTkFrame):
 
         # Crear menú desplegable (inicialmente oculto)
         self._create_dropdown_menu()
+
+        # Registrar callback para cambios de tema
+        self.theme_manager.register_callback(self._on_theme_changed)
 
     def _create_menu_button(self):
         """Crear botón de 3 puntitos (⋮)"""
@@ -102,7 +106,6 @@ class ChartOptionsMenu(ctk.CTkFrame):
             ("🖼️ Exportar PNG", self._export_png, '#3b82f6'),
             ("📄 Exportar Tabla PDF", self._export_table_pdf, '#ef4444'),
             ("📋 Copiar al Portapapeles", self._copy_to_clipboard, '#f59e0b'),
-            ("📈 Ver Estadísticas", self._show_statistics, '#8b5cf6'),
         ]
 
         for i, (text, command, color) in enumerate(options):
@@ -131,16 +134,23 @@ class ChartOptionsMenu(ctk.CTkFrame):
 
     def _show_menu(self):
         """Mostrar menú desplegable"""
-        # Calcular posición (debajo del botón)
-        x = self.menu_btn.winfo_rootx()
-        y = self.menu_btn.winfo_rooty() + self.menu_btn.winfo_height() + 5
+        # Forzar update para obtener coordenadas correctas
+        self.menu_btn.update_idletasks()
+
+        # Calcular posición (debajo del botón, alineado a la derecha)
+        button_x = self.menu_btn.winfo_rootx()
+        button_y = self.menu_btn.winfo_rooty()
+        button_width = self.menu_btn.winfo_width()
+        button_height = self.menu_btn.winfo_height()
 
         # Convertir a coordenadas relativas de la ventana
         win_x = self.winfo_toplevel().winfo_rootx()
         win_y = self.winfo_toplevel().winfo_rooty()
 
-        rel_x = x - win_x
-        rel_y = y - win_y
+        # Posicionar menú DEBAJO del botón, alineado a la DERECHA
+        menu_width = 250  # Ancho aproximado del menú
+        rel_x = button_x - win_x - menu_width + button_width  # Alineado a la derecha del botón
+        rel_y = button_y - win_y + button_height + 5  # 5px debajo del botón
 
         self.dropdown.place(x=rel_x, y=rel_y)
         self.dropdown.lift()
@@ -179,18 +189,17 @@ class ChartOptionsMenu(ctk.CTkFrame):
     # ========== OPCIONES DEL MENÚ ==========
 
     def _show_data_table(self):
-        """Mostrar datos en tabla modal"""
+        """Mostrar datos en tabla expandible IN-PLACE"""
         print(f"📊 Mostrando tabla de datos: {self.chart_title}")
 
-        # Importar modal de tabla
-        from smart_reports.ui.components.charts.data_table_modal import DataTableModal
-
-        modal = DataTableModal(
-            self.winfo_toplevel(),
-            title=self.chart_title,
-            data=self.chart_data,
-            chart_type=self.chart_type
-        )
+        # Llamar al callback para mostrar tabla expandible
+        if self.on_show_table:
+            self.on_show_table()
+        else:
+            messagebox.showinfo(
+                "Función no disponible",
+                "La visualización de tabla no está disponible para este gráfico"
+            )
 
     def _export_csv(self):
         """Exportar datos a CSV"""
@@ -520,3 +529,25 @@ class ChartOptionsMenu(ctk.CTkFrame):
             print(f"❌ Error actualizando datos: {e}")
             import traceback
             traceback.print_exc()
+
+    def _on_theme_changed(self, theme_mode: str):
+        """Actualizar colores del menú cuando cambia el tema"""
+        theme = self.theme_manager.get_current_theme()
+
+        # Actualizar botón de menú
+        self.menu_btn.configure(
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
+            text_color=theme['colors']['text'],
+            border_color=theme['colors']['border']
+        )
+
+        # Actualizar dropdown
+        self.dropdown.configure(
+            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
+            border_color=HUTCHISON_COLORS['primary']
+        )
+
+        # Actualizar botones del dropdown
+        for widget in self.dropdown.winfo_children():
+            if isinstance(widget, ctk.CTkButton):
+                widget.configure(text_color=theme['colors']['text'])

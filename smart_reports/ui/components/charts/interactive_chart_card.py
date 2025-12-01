@@ -741,32 +741,12 @@ class InteractiveChartCard(ctk.CTkFrame):
             print("⚠️ No hay datos de gráfico para expandir")
             return
 
-        # Prioridad 1: Modal PyWebView fullscreen (mejor experiencia)
-        if D3_MODAL_AVAILABLE and ModalD3Fullscreen:
-            try:
-                from datetime import datetime
-                data_source = {
-                    'database': 'MySQL - Instituto Hutchison Ports',
-                    'table': 'Data Visualization',
-                    'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'records_count': len(self.chart_data.get('values', []))
-                }
+        # DESHABILITADO: Modal PyWebView (causa error de thread)
+        # Ahora se usa solo expansión in-place
+        # if D3_MODAL_AVAILABLE and ModalD3Fullscreen:
+        #     ...
 
-                ModalD3Fullscreen(
-                    parent=self.winfo_toplevel(),
-                    title=self.title_text,
-                    chart_type=self.chart_type,
-                    chart_data=self.chart_data,
-                    engine=self.chart_engine,
-                    data_source=data_source
-                )
-                print(f"✅ Modal PyWebView D3.js abierto: {self.title_text}")
-                return
-            except Exception as e:
-                print(f"⚠️ Error abriendo modal PyWebView: {e}")
-                # Continuar con fallbacks
-
-        # Prioridad 2: Expansión in-place con tkinterweb
+        # Prioridad 1: Expansión in-place con tkinterweb
         if TKINTERWEB_AVAILABLE:
             # Toggle entre estado expandido y compacto
             if self.is_expanded:

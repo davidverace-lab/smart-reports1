@@ -51,6 +51,9 @@ pytest-cov>=4.1.0
 # Empaquetado
 pyinstaller>=6.0.0
 
+# Dependencias adicionales para CEF browser (opcional)
+# cefpython3>=66.0  # Comentado - puede causar problemas de instalación en algunos sistemas
+
 # ============================================================================
 # IMPORTANTE: SQL Server ODBC Driver
 # ============================================================================
