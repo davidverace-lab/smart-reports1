@@ -64,6 +64,8 @@ class MainWindow(QMainWindow):
             navigation_callbacks=navigation_callbacks,
             theme_manager=self.theme_manager
         )
+        # Conectar signal de logout
+        self.sidebar.logout_clicked.connect(self._logout)
         main_layout.addWidget(self.sidebar)
 
         # Contenedor de paneles
@@ -71,15 +73,16 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.content_area, 1)
 
     def _create_top_bar(self):
-        """Crear barra superior con info de usuario y botón de cerrar sesión"""
+        """Crear barra superior con rol e institución"""
 
         top_bar = QFrame()
         top_bar.setObjectName("topBar")
-        top_bar.setFixedHeight(70)
+        top_bar.setFixedHeight(60)
 
         is_dark = self.theme_manager.is_dark_mode()
         bg_color = "#2d2d2d" if is_dark else "#ffffff"
         border_color = "#383838" if is_dark else "#e0e0e0"
+        text_color = "#ffffff" if is_dark else "#003087"
 
         top_bar.setStyleSheet(f"""
             #topBar {{
@@ -89,46 +92,21 @@ class MainWindow(QMainWindow):
         """)
 
         layout = QHBoxLayout(top_bar)
-        layout.setContentsMargins(20, 10, 20, 10)
+        layout.setContentsMargins(30, 10, 30, 10)
 
-        # Info de usuario
-        user_frame = QFrame()
-        user_layout = QHBoxLayout(user_frame)
-        user_layout.setContentsMargins(0, 0, 0, 0)
-        user_layout.setSpacing(10)
+        # Mensaje de bienvenida con rol
+        welcome_label = QLabel(f"Bienvenido {self.role.upper()}")
+        welcome_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
+        welcome_label.setStyleSheet(f"color: {text_color};")
+        layout.addWidget(welcome_label)
 
-        # Icono
-        user_icon = QLabel("👤")
-        user_icon.setFont(QFont("Arial", 24))
-        user_layout.addWidget(user_icon)
-
-        # Nombre y rol
-        user_info = QFrame()
-        user_info_layout = QVBoxLayout(user_info)
-        user_info_layout.setContentsMargins(0, 0, 0, 0)
-        user_info_layout.setSpacing(0)
-
-        username_label = QLabel(self.username)
-        username_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        user_info_layout.addWidget(username_label)
-
-        role_label = QLabel(f"Rol: {self.role.capitalize()}")
-        role_label.setFont(QFont("Montserrat", 10))
-        role_label.setStyleSheet("color: #00D4AA;")
-        user_info_layout.addWidget(role_label)
-
-        user_layout.addWidget(user_info)
-
-        layout.addWidget(user_frame)
         layout.addStretch()
 
-        # Botón de cerrar sesión
-        logout_btn = QPushButton("🚪 Cerrar Sesión")
-        logout_btn.setProperty("class", "danger")
-        logout_btn.setFixedHeight(40)
-        logout_btn.clicked.connect(self._logout)
-        logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        layout.addWidget(logout_btn)
+        # Instituto a la derecha
+        instituto_label = QLabel("Instituto Hutchison Ports")
+        instituto_label.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))
+        instituto_label.setStyleSheet(f"color: {text_color};")
+        layout.addWidget(instituto_label)
 
         return top_bar
 

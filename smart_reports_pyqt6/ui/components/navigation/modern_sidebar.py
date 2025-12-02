@@ -13,8 +13,9 @@ from PyQt6.QtGui import QFont
 class ModernSidebar(QFrame):
     """Sidebar moderna con logo, navegación y footer - COLAPSABLE"""
 
-    # Signal emitido cuando se hace click en navegación
+    # Signals
     navigation_clicked = pyqtSignal(str)
+    logout_clicked = pyqtSignal()
 
     def __init__(self, parent=None, navigation_callbacks=None, theme_manager=None):
         """
@@ -125,24 +126,24 @@ class ModernSidebar(QFrame):
         """Crear botones de navegación"""
 
         nav_items = [
-            ('📊', 'Dashboards', 'dashboard'),
-            ('🔍', 'Consulta de Empleados', 'consultas'),
-            ('📥', 'Importación de Datos', 'importacion'),
-            ('📄', 'Generar Reportes', 'reportes'),
-            ('⚙️', 'Configuración', 'configuracion'),
+            ('Dashboards', 'dashboard'),
+            ('Consulta de Empleados', 'consultas'),
+            ('Importación de Datos', 'importacion'),
+            ('Generar Reportes', 'reportes'),
+            ('Configuración', 'configuracion'),
         ]
 
-        for icon, text, key in nav_items:
-            btn = QPushButton(f"{icon}  {text}")
-            btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))
-            btn.setFixedHeight(55)
+        for text, key in nav_items:
+            btn = QPushButton(text)
+            btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+            btn.setFixedHeight(50)
             btn.setObjectName("navButton")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(lambda checked, k=key: self._on_nav_click(k))
 
             # Guardar referencia al texto completo
-            btn.setProperty("fullText", f"{icon}  {text}")
-            btn.setProperty("icon", icon)
+            btn.setProperty("fullText", text)
+            btn.setProperty("shortText", text[:3].upper())
             btn.setProperty("navKey", key)
 
             self.nav_buttons[key] = btn
@@ -170,18 +171,18 @@ class ModernSidebar(QFrame):
         toggle_container_layout = QHBoxLayout(toggle_container)
         toggle_container_layout.setContentsMargins(10, 0, 10, 0)
 
-        # Label con icono
+        # Label (sin icono)
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else True
-        self.theme_label = QLabel('🌙 Modo Oscuro' if is_dark else '☀️ Modo Claro')
-        self.theme_label.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        self.theme_label = QLabel('Modo Oscuro' if is_dark else 'Modo Claro')
+        self.theme_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
         toggle_container_layout.addWidget(self.theme_label)
 
         toggle_container_layout.addStretch()
 
-        # Botón de toggle (simulado como botón)
-        self.theme_btn = QPushButton("⚫" if is_dark else "⚪")
-        self.theme_btn.setFont(QFont("Arial", 12))
-        self.theme_btn.setFixedSize(50, 24)
+        # Botón de toggle (switch simulado)
+        self.theme_btn = QPushButton("DARK" if is_dark else "LIGHT")
+        self.theme_btn.setFont(QFont("Montserrat", 9, QFont.Weight.Bold))
+        self.theme_btn.setFixedSize(55, 26)
         self.theme_btn.setObjectName("themeToggleBtn")
         self.theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.theme_btn.clicked.connect(self._on_theme_toggle)
@@ -199,13 +200,13 @@ class ModernSidebar(QFrame):
         self.main_layout.addWidget(self.toggle_frame)
 
     def _create_footer(self):
-        """Crear footer con información de versión"""
+        """Crear footer con botón de cerrar sesión"""
 
         self.footer_frame = QWidget()
         self.footer_frame.setObjectName("footerFrame")
         footer_layout = QVBoxLayout(self.footer_frame)
-        footer_layout.setContentsMargins(10, 10, 10, 0)
-        footer_layout.setSpacing(5)
+        footer_layout.setContentsMargins(10, 10, 10, 10)
+        footer_layout.setSpacing(10)
 
         # Línea separadora superior
         self.footer_separator = QFrame()
@@ -214,19 +215,14 @@ class ModernSidebar(QFrame):
         self.footer_separator.setObjectName("separator")
         footer_layout.addWidget(self.footer_separator)
 
-        footer_layout.addSpacing(5)
-
-        # Versión
-        self.version_label = QLabel("v3.0.0 PyQt6")
-        self.version_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
-        self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        footer_layout.addWidget(self.version_label)
-
-        # Copyright
-        self.copyright_label = QLabel("© 2025 INSTITUTO HP")
-        self.copyright_label.setFont(QFont("Montserrat", 10))
-        self.copyright_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        footer_layout.addWidget(self.copyright_label)
+        # Botón de cerrar sesión
+        self.logout_btn = QPushButton("Cerrar Sesión")
+        self.logout_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        self.logout_btn.setFixedHeight(45)
+        self.logout_btn.setObjectName("logoutButton")
+        self.logout_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.logout_btn.clicked.connect(self.logout_clicked.emit)
+        footer_layout.addWidget(self.logout_btn)
 
         self.main_layout.addWidget(self.footer_frame)
 
@@ -243,10 +239,10 @@ class ModernSidebar(QFrame):
             self.logo_frame.hide()
             self.header_separator.hide()
 
-            # Actualizar botones para mostrar solo iconos
+            # Actualizar botones para mostrar texto corto
             for key, btn in self.nav_buttons.items():
-                icon = btn.property("icon")
-                btn.setText(icon)
+                short_text = btn.property("shortText")
+                btn.setText(short_text)
                 btn.setToolTip(btn.property("fullText"))
 
             # Ocultar elementos del toggle de tema
@@ -255,8 +251,7 @@ class ModernSidebar(QFrame):
             self.theme_separator_bottom.hide()
 
             # Ocultar footer
-            self.version_label.hide()
-            self.copyright_label.hide()
+            self.logout_btn.hide()
             self.footer_separator.hide()
 
         else:
@@ -279,16 +274,20 @@ class ModernSidebar(QFrame):
             self.theme_separator_bottom.show()
 
             # Mostrar footer
-            self.version_label.show()
-            self.copyright_label.show()
+            self.logout_btn.show()
             self.footer_separator.show()
 
         # Forzar actualización
         self.updateGeometry()
         self.update()
 
-    def _on_nav_click(self, key):
-        """Manejar click en navegación"""
+    def _on_nav_click(self, key, trigger_callback=True):
+        """Manejar click en navegación
+
+        Args:
+            key: Identificador del botón
+            trigger_callback: Si debe ejecutar el callback (False cuando se llama programáticamente)
+        """
 
         # Actualizar estilos de botones
         for btn_key, btn in self.nav_buttons.items():
@@ -302,16 +301,17 @@ class ModernSidebar(QFrame):
             btn.style().unpolish(btn)
             btn.style().polish(btn)
 
-        # Ejecutar callback
-        if key in self.navigation_callbacks:
+        # Ejecutar callback solo si no es llamada programática
+        if trigger_callback and key in self.navigation_callbacks:
             self.navigation_callbacks[key]()
 
         # Emitir señal
-        self.navigation_clicked.emit(key)
+        if trigger_callback:
+            self.navigation_clicked.emit(key)
 
     def set_active(self, key):
-        """Establecer botón activo programáticamente"""
-        self._on_nav_click(key)
+        """Establecer botón activo programáticamente SIN triggear navegación"""
+        self._on_nav_click(key, trigger_callback=False)
 
     def _on_theme_toggle(self):
         """Manejar cambio de tema"""
@@ -331,20 +331,21 @@ class ModernSidebar(QFrame):
 
         is_dark = self.theme_manager.is_dark_mode()
 
-        # Actualizar label de tema
-        self.theme_label.setText('🌙 Modo Oscuro' if is_dark else '☀️ Modo Claro')
-        self.theme_btn.setText("⚫" if is_dark else "⚪")
+        # Actualizar label de tema (sin emojis)
+        self.theme_label.setText('Modo Oscuro' if is_dark else 'Modo Claro')
+        self.theme_btn.setText("DARK" if is_dark else "LIGHT")
 
         # Los estilos QSS se manejan a nivel de aplicación
         # Pero podemos actualizar colores específicos aquí si es necesario
 
         # Actualizar stylesheet del sidebar
-        sidebar_bg = "#2d2d2d" if is_dark else "#003087"
+        sidebar_bg = "#2d2d2d" if is_dark else "#f5f5f5"
         text_color = "#ffffff"
-        text_secondary = "#E0E0E0" if not is_dark else "#888888"
-        border_color = "#4a5a8a" if not is_dark else "#383838"
-        hover_color = "#4a5a8a" if not is_dark else "#2b2b2b"
-        active_bg = "#4a5a8a" if not is_dark else "#2b2b2b"
+        border_color = "#383838" if is_dark else "#e0e0e0"
+        button_bg = "#003087"  # Navy blue para TODOS los botones
+        button_text = "#ffffff"  # Texto blanco
+        button_hover = "#004ba0"  # Navy más claro para hover
+        button_active = "#002060"  # Navy más oscuro para activo
 
         self.setStyleSheet(f"""
             #modernSidebar {{
@@ -354,35 +355,36 @@ class ModernSidebar(QFrame):
 
             #hamburgerBtn {{
                 background-color: transparent;
-                color: {text_color};
+                color: {'#ffffff' if is_dark else '#003087'};
                 border: none;
                 border-radius: 5px;
             }}
 
             #hamburgerBtn:hover {{
-                background-color: {hover_color};
+                background-color: {border_color};
             }}
 
             #logoFrame QLabel {{
-                color: {text_color};
+                color: {'#ffffff' if is_dark else '#003087'};
             }}
 
             #navButton {{
-                background-color: transparent;
-                color: {text_secondary};
+                background-color: {button_bg};
+                color: {button_text};
                 border: none;
-                border-radius: 10px;
-                text-align: left;
-                padding-left: 15px;
+                border-radius: 8px;
+                text-align: center;
+                padding: 10px;
             }}
 
             #navButton:hover {{
-                background-color: {hover_color};
+                background-color: {button_hover};
             }}
 
             #navButton[class="active"] {{
-                background-color: {active_bg};
+                background-color: {button_active};
                 color: {text_color};
+                font-weight: bold;
             }}
 
             #separator {{
@@ -390,21 +392,28 @@ class ModernSidebar(QFrame):
             }}
 
             #toggleFrame QLabel {{
-                color: {text_color if not is_dark else text_secondary};
+                color: {'#ffffff' if is_dark else '#003087'};
             }}
 
             #themeToggleBtn {{
-                background-color: {hover_color};
-                color: {text_color};
-                border: 1px solid {border_color};
-                border-radius: 12px;
+                background-color: {button_bg};
+                color: {button_text};
+                border: none;
+                border-radius: 13px;
             }}
 
             #themeToggleBtn:hover {{
-                background-color: {active_bg};
+                background-color: {button_hover};
             }}
 
-            #footerFrame QLabel {{
-                color: {text_secondary};
+            #logoutButton {{
+                background-color: #d32f2f;
+                color: {text_color};
+                border: none;
+                border-radius: 8px;
+            }}
+
+            #logoutButton:hover {{
+                background-color: #b71c1c;
             }}
         """)
