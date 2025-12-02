@@ -75,13 +75,13 @@ class LoginWindow:
             text_secondary = DARK_THEME['colors']['text_secondary']
             border_color = HUTCHISON_COLORS.get('primary', '#003087')
 
-        # Frame principal
+        # Frame principal - SIN MÁRGENES
         self.main_frame = ctk.CTkFrame(
             self.root,
             fg_color=bg_color,
             corner_radius=0
         )
-        self.main_frame.pack(fill='both', expand=True)
+        self.main_frame.pack(fill='both', expand=True, padx=0, pady=0)
 
         # Frame central para la tarjeta de login
         center_container = ctk.CTkFrame(

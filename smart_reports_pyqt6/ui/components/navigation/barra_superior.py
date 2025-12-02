@@ -1,24 +1,26 @@
-"""Barra Superior Completa - PyQt6"""
+"""Barra Superior Completa - PyQt6 con MODO CLARO/OSCURO"""
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QFrame
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
 class BarraSuperior(QFrame):
     """Barra superior con breadcrumb, búsqueda y acciones"""
-    
+
     logout_clicked = pyqtSignal()
     settings_clicked = pyqtSignal()
     notifications_clicked = pyqtSignal()
-    
-    def __init__(self, username="Usuario", user_role="Usuario", parent=None):
+    theme_toggle_clicked = pyqtSignal()  # NUEVO: Signal para cambiar tema
+
+    def __init__(self, username="Usuario", user_role="Usuario", theme_manager=None, parent=None):
         super().__init__(parent)
-        
+
         self.username = username
         self.user_role = user_role
-        
+        self.theme_manager = theme_manager  # NUEVO
+
         self.setObjectName("barraSuperior")
         self.setFixedHeight(70)
-        
+
         self._create_ui()
     
     def _create_ui(self):
@@ -34,7 +36,26 @@ class BarraSuperior(QFrame):
         layout.addWidget(self.title_label)
         
         layout.addStretch()
-        
+
+        # Botón MODO CLARO/OSCURO - CRÍTICO
+        self.theme_btn = QPushButton("🌙" if self.theme_manager and not self.theme_manager.is_dark_mode() else "☀️")
+        self.theme_btn.setFont(QFont("Arial", 20))
+        self.theme_btn.setFixedSize(45, 45)
+        self.theme_btn.clicked.connect(self._toggle_theme)
+        self.theme_btn.setToolTip("Cambiar a modo claro/oscuro")
+        self.theme_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        layout.addWidget(self.theme_btn)
+
         # Botón de notificaciones
         notifications_btn = QPushButton("🔔")
         notifications_btn.setFont(QFont("Arial", 18))
@@ -42,7 +63,7 @@ class BarraSuperior(QFrame):
         notifications_btn.clicked.connect(self.notifications_clicked.emit)
         notifications_btn.setToolTip("Notificaciones")
         layout.addWidget(notifications_btn)
-        
+
         # Botón de configuración
         settings_btn = QPushButton("⚙️")
         settings_btn.setFont(QFont("Arial", 18))
@@ -98,3 +119,13 @@ class BarraSuperior(QFrame):
     def set_title(self, title):
         """Establecer título de la sección actual"""
         self.title_label.setText(title)
+
+    def _toggle_theme(self):
+        """Cambiar entre modo claro y oscuro"""
+        if self.theme_manager:
+            self.theme_manager.toggle_theme()
+            # Actualizar icono del botón
+            is_dark = self.theme_manager.is_dark_mode()
+            self.theme_btn.setText("☀️" if is_dark else "🌙")
+            # Emitir señal
+            self.theme_toggle_clicked.emit()

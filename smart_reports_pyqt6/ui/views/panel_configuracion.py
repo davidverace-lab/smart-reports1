@@ -1,285 +1,637 @@
 """
-Panel de Configuración
-PyQt6 Version - Configuración del sistema
+Panel de Configuración con navegación interna - PyQt6
+Migrado desde CustomTkinter con sistema de fragments
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QTabWidget,
-    QLineEdit, QComboBox, QCheckBox,
-    QFrame, QMessageBox, QListWidget
+    QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+    QLabel, QPushButton, QFrame, QStackedWidget, QScrollArea,
+    QLineEdit, QTableWidget, QTableWidgetItem, QHeaderView,
+    QTextEdit, QComboBox, QMessageBox
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
 
-class ConfiguracionPanel(QWidget):
-    """Panel de Configuración"""
+class ConfigCard(QFrame):
+    """Tarjeta de configuración clickeable"""
 
-    def __init__(self, parent=None, theme_manager=None):
+    clicked = pyqtSignal()
+
+    def __init__(self, icon: str, title: str, description: str, button_text: str = "Abrir", theme_manager=None, parent=None):
         super().__init__(parent)
 
         self.theme_manager = theme_manager
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+        self.setMinimumHeight(220)
+
+        # Aplicar tema
+        self._apply_theme()
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(25, 25, 25, 25)
+        layout.setSpacing(15)
+
+        # Icono y título
+        header_label = QLabel(f"{icon} {title}")
+        header_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
+        is_dark = theme_manager.is_dark_mode() if theme_manager else False
+        text_color = "#ffffff" if is_dark else "#003087"
+        header_label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        layout.addWidget(header_label)
+
+        # Descripción
+        desc_label = QLabel(description)
+        desc_label.setWordWrap(True)
+        desc_label.setFont(QFont("Montserrat", 13))
+        desc_color = "#b0b0b0" if is_dark else "#666666"
+        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent;")
+        layout.addWidget(desc_label)
+
+        layout.addStretch()
+
+        # Botón
+        btn = QPushButton(button_text)
+        btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        btn.setFixedHeight(45)
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 10px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn.clicked.connect(self.clicked.emit)
+        layout.addWidget(btn)
+
+    def _apply_theme(self):
+        """Aplicar tema"""
+        if not self.theme_manager:
+            return
+
+        is_dark = self.theme_manager.is_dark_mode()
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+
+        self.setStyleSheet(f"""
+            ConfigCard {{
+                background-color: {bg_color};
+                border: 2px solid #003087;
+                border-radius: 15px;
+            }}
+            ConfigCard:hover {{
+                border: 3px solid #003087;
+            }}
+        """)
+
+
+class ConfigMainView(QWidget):
+    """Vista principal de configuración con grid 2x2"""
+
+    gestionar_empleados_clicked = pyqtSignal()
+    soporte_tickets_clicked = pyqtSignal()
+    historial_reportes_clicked = pyqtSignal()
+
+    def __init__(self, theme_manager=None, parent=None):
+        super().__init__(parent)
+
+        self.theme_manager = theme_manager
+        self._create_ui()
+
+    def _create_ui(self):
+        """Crear UI"""
+
+        # Scroll area
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+
+        scroll_widget = QWidget()
+        scroll.setWidget(scroll_widget)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(scroll)
+
+        main_layout = QVBoxLayout(scroll_widget)
+        main_layout.setContentsMargins(15, 15, 15, 15)
+        main_layout.setSpacing(20)
+
+        # Header
+        header = QWidget()
+        header_layout = QVBoxLayout(header)
+        header_layout.setContentsMargins(5, 5, 5, 5)
+        header_layout.setSpacing(5)
+
+        title = QLabel("⚙️ Configuración")
+        title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        title_color = "#ffffff" if is_dark else "#002E6D"
+        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        header_layout.addWidget(title)
+
+        subtitle = QLabel("Gestiona las opciones del sistema")
+        subtitle.setFont(QFont("Montserrat", 14))
+        subtitle_color = "#b0b0b0" if is_dark else "#666666"
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent;")
+        header_layout.addWidget(subtitle)
+
+        main_layout.addWidget(header)
+
+        # Grid 2x2 de tarjetas
+        grid = QGridLayout()
+        grid.setSpacing(15)
+
+        # Card 1: Gestionar Empleados
+        card1 = ConfigCard(
+            "👥", "Gestionar Empleados",
+            "Agregar, editar o consultar empleados del sistema",
+            "Gestionar", self.theme_manager
+        )
+        card1.clicked.connect(self.gestionar_empleados_clicked.emit)
+        grid.addWidget(card1, 0, 0)
+
+        # Card 2: Registro de Soporte
+        card2 = ConfigCard(
+            "📝", "Registro de Soporte",
+            "Registrar soporte brindado a usuarios por correo electrónico",
+            "Registrar", self.theme_manager
+        )
+        card2.clicked.connect(self.soporte_tickets_clicked.emit)
+        grid.addWidget(card2, 0, 1)
+
+        # Card 3: Historial de Reportes
+        card3 = ConfigCard(
+            "📋", "Historial de Reportes",
+            "Ver y descargar reportes PDF generados anteriormente",
+            "Ver Historial", self.theme_manager
+        )
+        card3.clicked.connect(self.historial_reportes_clicked.emit)
+        grid.addWidget(card3, 1, 0)
+
+        # Card 4: Acerca de
+        card4 = ConfigCard(
+            "ℹ️", "Acerca de",
+            "Información de la versión y del desarrollador",
+            "Ver Info", self.theme_manager
+        )
+        card4.clicked.connect(self._show_about)
+        grid.addWidget(card4, 1, 1)
+
+        main_layout.addLayout(grid)
+        main_layout.addStretch()
+
+    def _show_about(self):
+        """Mostrar acerca de"""
+        QMessageBox.information(
+            self,
+            "Acerca de",
+            "SMART REPORTS V2.0\n\n"
+            "SISTEMA DE GESTIÓN DE CAPACITACIONES\n"
+            "INSTITUTO HUTCHISON PORTS\n\n"
+            "Desarrollado por: David Vera\n"
+            "© 2025 - TODOS LOS DERECHOS RESERVADOS"
+        )
+
+
+class GestionUsuariosView(QWidget):
+    """Vista de gestión de usuarios"""
+
+    back_clicked = pyqtSignal()
+
+    def __init__(self, theme_manager=None, db_connection=None, parent=None):
+        super().__init__(parent)
+
+        self.theme_manager = theme_manager
+        self.db_connection = db_connection
+
+        self._create_ui()
+
+    def _create_ui(self):
+        """Crear UI"""
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
+
+        # Header con botón volver
+        header = QWidget()
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+
+        back_btn = QPushButton("← Volver")
+        back_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        back_btn.setFixedHeight(45)
+        back_btn.setFixedWidth(140)
+        back_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.clicked.connect(self.back_clicked.emit)
+        header_layout.addWidget(back_btn)
+
+        title = QLabel("👥 Gestión de Usuarios")
+        title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        title_color = "#ffffff" if is_dark else "#003087"
+        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        header_layout.addWidget(title)
+
+        header_layout.addStretch()
+
+        layout.addWidget(header)
+
+        # Tabla de usuarios
+        self.users_table = QTableWidget(0, 5)
+        self.users_table.setHorizontalHeaderLabels(["ID", "Nombre", "Email", "Unidad", "Rol"])
+        self.users_table.setAlternatingRowColors(True)
+        self.users_table.setMinimumHeight(400)
+        self.users_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        layout.addWidget(self.users_table)
+
+        # Botones de acción - NAVY BLUE ESTANDARIZADO
+        actions_layout = QHBoxLayout()
+
+        add_btn = QPushButton("➕ Agregar Usuario")
+        add_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        add_btn.setFixedHeight(40)  # REDUCIDO
+        add_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        add_btn.clicked.connect(self._add_user)  # CONECTAR FUNCIÓN
+        actions_layout.addWidget(add_btn)
+
+        edit_btn = QPushButton("✏️ Editar")
+        edit_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        edit_btn.setFixedHeight(40)  # REDUCIDO
+        edit_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        edit_btn.clicked.connect(self._edit_user)  # CONECTAR FUNCIÓN
+        actions_layout.addWidget(edit_btn)
+
+        delete_btn = QPushButton("🗑️ Eliminar")
+        delete_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        delete_btn.setFixedHeight(40)  # REDUCIDO
+        delete_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #C53030;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #9B2C2C;
+            }
+        """)
+        delete_btn.clicked.connect(self._delete_user)  # CONECTAR FUNCIÓN
+        actions_layout.addWidget(delete_btn)
+
+        actions_layout.addStretch()
+
+        layout.addLayout(actions_layout)
+
+        # Cargar datos dummy
+        self._load_dummy_users()
+
+    def _load_dummy_users(self):
+        """Cargar usuarios dummy"""
+        data = [
+            ["1", "Juan Pérez", "juan@hp.com", "ICAVE", "Usuario"],
+            ["2", "María García", "maria@hp.com", "TNG", "Admin"],
+            ["3", "Carlos López", "carlos@hp.com", "ECV", "Usuario"],
+        ]
+
+        self.users_table.setRowCount(len(data))
+        for row, row_data in enumerate(data):
+            for col, value in enumerate(row_data):
+                self.users_table.setItem(row, col, QTableWidgetItem(value))
+
+    def _add_user(self):
+        """Agregar nuevo usuario"""
+        QMessageBox.information(self, "Agregar Usuario", "Funcionalidad de agregar usuario\n(En desarrollo)")
+
+    def _edit_user(self):
+        """Editar usuario seleccionado"""
+        selected_rows = self.users_table.selectionModel().selectedRows()
+        if not selected_rows:
+            QMessageBox.warning(self, "Sin Selección", "Por favor seleccione un usuario para editar")
+            return
+        QMessageBox.information(self, "Editar Usuario", "Funcionalidad de editar usuario\n(En desarrollo)")
+
+    def _delete_user(self):
+        """Eliminar usuario seleccionado"""
+        selected_rows = self.users_table.selectionModel().selectedRows()
+        if not selected_rows:
+            QMessageBox.warning(self, "Sin Selección", "Por favor seleccione un usuario para eliminar")
+            return
+
+        reply = QMessageBox.question(
+            self,
+            "Confirmar Eliminación",
+            "¿Está seguro de eliminar este usuario?\nEsta acción no se puede deshacer.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            self.users_table.removeRow(selected_rows[0].row())
+            QMessageBox.information(self, "Eliminado", "Usuario eliminado correctamente")
+
+
+class SoporteTicketsView(QWidget):
+    """Vista de soporte/tickets"""
+
+    back_clicked = pyqtSignal()
+
+    def __init__(self, theme_manager=None, db_connection=None, parent=None):
+        super().__init__(parent)
+
+        self.theme_manager = theme_manager
+        self.db_connection = db_connection
+
+        self._create_ui()
+
+    def _create_ui(self):
+        """Crear UI"""
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
+
+        # Header
+        header = QWidget()
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+
+        back_btn = QPushButton("← Volver")
+        back_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        back_btn.setFixedHeight(45)
+        back_btn.setFixedWidth(140)
+        back_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.clicked.connect(self.back_clicked.emit)
+        header_layout.addWidget(back_btn)
+
+        title = QLabel("📝 Registro de Soporte")
+        title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        title_color = "#ffffff" if is_dark else "#003087"
+        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        header_layout.addWidget(title)
+
+        header_layout.addStretch()
+
+        layout.addWidget(header)
+
+        # Formulario
+        form_frame = QFrame()
+        form_layout = QVBoxLayout(form_frame)
+        form_layout.setSpacing(15)
+
+        # Usuario
+        user_label = QLabel("Usuario:")
+        user_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        form_layout.addWidget(user_label)
+
+        self.user_entry = QLineEdit()
+        self.user_entry.setPlaceholderText("Email del usuario")
+        self.user_entry.setFixedHeight(40)
+        form_layout.addWidget(self.user_entry)
+
+        # Asunto
+        subject_label = QLabel("Asunto:")
+        subject_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        form_layout.addWidget(subject_label)
+
+        self.subject_entry = QLineEdit()
+        self.subject_entry.setPlaceholderText("Asunto del ticket")
+        self.subject_entry.setFixedHeight(40)
+        form_layout.addWidget(self.subject_entry)
+
+        # Descripción
+        desc_label = QLabel("Descripción:")
+        desc_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        form_layout.addWidget(desc_label)
+
+        self.desc_text = QTextEdit()
+        self.desc_text.setPlaceholderText("Descripción del soporte brindado...")
+        self.desc_text.setMinimumHeight(150)
+        form_layout.addWidget(self.desc_text)
+
+        # Botón registrar
+        register_btn = QPushButton("✅ Registrar Ticket")
+        register_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        register_btn.setFixedHeight(50)
+        register_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #28a745;
+                color: white;
+                border: none;
+                border-radius: 10px;
+            }
+            QPushButton:hover {
+                background-color: #218838;
+            }
+        """)
+        register_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        register_btn.clicked.connect(self._register_ticket)
+        form_layout.addWidget(register_btn)
+
+        layout.addWidget(form_frame)
+        layout.addStretch()
+
+    def _register_ticket(self):
+        """Registrar ticket"""
+        QMessageBox.information(self, "Éxito", "Ticket registrado correctamente")
+
+
+class HistorialReportesView(QWidget):
+    """Vista de historial de reportes"""
+
+    back_clicked = pyqtSignal()
+
+    def __init__(self, theme_manager=None, db_connection=None, parent=None):
+        super().__init__(parent)
+
+        self.theme_manager = theme_manager
+        self.db_connection = db_connection
+
+        self._create_ui()
+
+    def _create_ui(self):
+        """Crear UI"""
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
+
+        # Header
+        header = QWidget()
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+
+        back_btn = QPushButton("← Volver")
+        back_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        back_btn.setFixedHeight(45)
+        back_btn.setFixedWidth(140)
+        back_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.clicked.connect(self.back_clicked.emit)
+        header_layout.addWidget(back_btn)
+
+        title = QLabel("📋 Historial de Reportes")
+        title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        title_color = "#ffffff" if is_dark else "#003087"
+        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        header_layout.addWidget(title)
+
+        header_layout.addStretch()
+
+        layout.addWidget(header)
+
+        # Tabla de reportes
+        self.reports_table = QTableWidget(0, 5)
+        self.reports_table.setHorizontalHeaderLabels(["Fecha", "Tipo", "Usuario", "Estado", "Acciones"])
+        self.reports_table.setAlternatingRowColors(True)
+        self.reports_table.setMinimumHeight(400)
+        self.reports_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        layout.addWidget(self.reports_table)
+
+        # Cargar datos dummy
+        self._load_dummy_reports()
+
+    def _load_dummy_reports(self):
+        """Cargar reportes dummy"""
+        data = [
+            ["2025-01-15", "Global", "admin@hp.com", "✅ Completado"],
+            ["2025-01-14", "Por Unidad", "user@hp.com", "✅ Completado"],
+            ["2025-01-13", "Por Usuario", "admin@hp.com", "✅ Completado"],
+        ]
+
+        self.reports_table.setRowCount(len(data))
+        for row, row_data in enumerate(data):
+            for col, value in enumerate(row_data):
+                if col == 4:  # Columna de acciones
+                    btn = QPushButton("📄 Descargar")
+                    btn.setStyleSheet("""
+                        QPushButton {
+                            background-color: #003087;
+                            color: white;
+                            border: none;
+                            border-radius: 5px;
+                            padding: 5px 10px;
+                        }
+                        QPushButton:hover {
+                            background-color: #004ba0;
+                        }
+                    """)
+                    self.reports_table.setCellWidget(row, col, btn)
+                else:
+                    self.reports_table.setItem(row, col, QTableWidgetItem(value))
+
+
+class ConfiguracionPanel(QWidget):
+    """Panel de Configuración con navegación interna tipo stack"""
+
+    def __init__(self, parent=None, theme_manager=None, db_connection=None):
+        super().__init__(parent)
+
+        self.theme_manager = theme_manager
+        self.db_connection = db_connection
+
+        # Stack para navegación
+        self.stack = QStackedWidget()
 
         # Crear UI
         self._create_ui()
 
     def _create_ui(self):
-        """Crear interfaz"""
+        """Crear UI"""
 
+        # Layout principal
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
-
-        # Header
-        header_layout = QHBoxLayout()
-
-        title = QLabel("⚙️ Configuración")
-        title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
-        header_layout.addWidget(title)
-
-        header_layout.addStretch()
-
-        save_btn = QPushButton("💾 Guardar Cambios")
-        save_btn.setFixedHeight(40)
-        save_btn.clicked.connect(self._save_settings)
-        header_layout.addWidget(save_btn)
-
-        layout.addLayout(header_layout)
-
-        # Tabs de configuración
-        tabs = QTabWidget()
-
-        # Tab 1: General
-        general_tab = self._create_general_tab()
-        tabs.addTab(general_tab, "🔧 General")
-
-        # Tab 2: Base de Datos
-        db_tab = self._create_database_tab()
-        tabs.addTab(db_tab, "🗄️ Base de Datos")
-
-        # Tab 3: Usuarios
-        users_tab = self._create_users_tab()
-        tabs.addTab(users_tab, "👥 Usuarios")
-
-        # Tab 4: Importación
-        import_tab = self._create_import_tab()
-        tabs.addTab(import_tab, "📥 Importación")
-
-        layout.addWidget(tabs)
-
-    def _create_general_tab(self):
-        """Tab de configuración general"""
-
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-
-        # Tema
-        theme_frame = self._create_setting_frame(
-            "🎨 Tema de la Aplicación",
-            "Selecciona el tema visual"
-        )
-        theme_layout = QVBoxLayout(theme_frame)
-
-        self.theme_combo = QComboBox()
-        self.theme_combo.addItems(["Oscuro", "Claro"])
-        if self.theme_manager and self.theme_manager.is_dark_mode():
-            self.theme_combo.setCurrentIndex(0)
-        else:
-            self.theme_combo.setCurrentIndex(1)
-
-        theme_layout.addWidget(self.theme_combo)
-
-        layout.addWidget(theme_frame)
-
-        # Idioma
-        lang_frame = self._create_setting_frame(
-            "🌐 Idioma",
-            "Selecciona el idioma de la interfaz"
-        )
-        lang_layout = QVBoxLayout(lang_frame)
-
-        self.lang_combo = QComboBox()
-        self.lang_combo.addItems(["Español", "English"])
-        lang_layout.addWidget(self.lang_combo)
-
-        layout.addWidget(lang_frame)
-
-        # Notificaciones
-        notif_frame = self._create_setting_frame(
-            "🔔 Notificaciones",
-            "Configurar alertas y notificaciones"
-        )
-        notif_layout = QVBoxLayout(notif_frame)
-
-        self.notif_enable = QCheckBox("Habilitar notificaciones")
-        self.notif_enable.setChecked(True)
-        notif_layout.addWidget(self.notif_enable)
-
-        self.notif_sound = QCheckBox("Sonido de notificaciones")
-        notif_layout.addWidget(self.notif_sound)
-
-        layout.addWidget(notif_frame)
-
-        layout.addStretch()
-
-        return widget
-
-    def _create_database_tab(self):
-        """Tab de configuración de BD"""
-
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-
-        # Conexión
-        conn_frame = self._create_setting_frame(
-            "🔗 Conexión a Base de Datos",
-            "Configurar parámetros de conexión"
-        )
-        conn_layout = QVBoxLayout(conn_frame)
-
-        # Host
-        host_layout = QHBoxLayout()
-        host_layout.addWidget(QLabel("Host:"))
-        self.db_host = QLineEdit("localhost")
-        host_layout.addWidget(self.db_host)
-        conn_layout.addLayout(host_layout)
-
-        # Puerto
-        port_layout = QHBoxLayout()
-        port_layout.addWidget(QLabel("Puerto:"))
-        self.db_port = QLineEdit("3306")
-        port_layout.addWidget(self.db_port)
-        conn_layout.addLayout(port_layout)
-
-        # Base de datos
-        db_layout = QHBoxLayout()
-        db_layout.addWidget(QLabel("Base de Datos:"))
-        self.db_name = QLineEdit("smart_reports")
-        db_layout.addWidget(self.db_name)
-        conn_layout.addLayout(db_layout)
-
-        # Botón probar conexión
-        test_btn = QPushButton("🔍 Probar Conexión")
-        test_btn.setProperty("class", "secondary")
-        test_btn.clicked.connect(self._test_connection)
-        conn_layout.addWidget(test_btn)
-
-        layout.addWidget(conn_frame)
-
-        layout.addStretch()
-
-        return widget
-
-    def _create_users_tab(self):
-        """Tab de gestión de usuarios"""
-
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-
-        # Lista de usuarios
-        users_label = QLabel("Usuarios del Sistema:")
-        users_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        layout.addWidget(users_label)
-
-        self.users_list = QListWidget()
-        self.users_list.addItems([
-            "👤 admin - Administrador",
-            "👤 juan.perez - Usuario",
-            "👤 maria.garcia - Usuario",
-            "👤 carlos.lopez - Supervisor",
-        ])
-        layout.addWidget(self.users_list)
-
-        # Botones
-        buttons_layout = QHBoxLayout()
-
-        add_user_btn = QPushButton("➕ Nuevo Usuario")
-        add_user_btn.clicked.connect(self._add_user)
-        buttons_layout.addWidget(add_user_btn)
-
-        edit_user_btn = QPushButton("✏️ Editar")
-        edit_user_btn.setProperty("class", "secondary")
-        buttons_layout.addWidget(edit_user_btn)
-
-        delete_user_btn = QPushButton("🗑️ Eliminar")
-        delete_user_btn.setProperty("class", "danger")
-        buttons_layout.addWidget(delete_user_btn)
-
-        buttons_layout.addStretch()
-
-        layout.addLayout(buttons_layout)
-
-        return widget
-
-    def _create_import_tab(self):
-        """Tab de importación de datos"""
-
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-
-        import_label = QLabel("Importar Datos desde Archivo:")
-        import_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        layout.addWidget(import_label)
-
-        # Botones de importación
-        import_excel_btn = QPushButton("📊 Importar desde Excel")
-        import_excel_btn.setFixedHeight(50)
-        import_excel_btn.clicked.connect(self._import_excel)
-        layout.addWidget(import_excel_btn)
-
-        import_csv_btn = QPushButton("📄 Importar desde CSV")
-        import_csv_btn.setFixedHeight(50)
-        import_csv_btn.clicked.connect(self._import_csv)
-        layout.addWidget(import_csv_btn)
-
-        import_db_btn = QPushButton("🗄️ Importar desde otra BD")
-        import_db_btn.setFixedHeight(50)
-        import_db_btn.clicked.connect(self._import_db)
-        layout.addWidget(import_db_btn)
-
-        layout.addStretch()
-
-        return widget
-
-    def _create_setting_frame(self, title: str, description: str):
-        """Crear frame de configuración"""
-
-        frame = QFrame()
-        frame.setFrameShape(QFrame.Shape.StyledPanel)
-
-        layout = QVBoxLayout(frame)
-
-        title_label = QLabel(title)
-        title_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        layout.addWidget(title_label)
-
-        desc_label = QLabel(description)
-        desc_label.setStyleSheet("color: #888888;")
-        layout.addWidget(desc_label)
-
-        return frame
-
-    def _save_settings(self):
-        """Guardar configuración"""
-        QMessageBox.information(self, "Guardado", "Configuración guardada exitosamente")
-
-    def _test_connection(self):
-        """Probar conexión a BD"""
-        QMessageBox.information(self, "Conexión", "✅ Conexión exitosa a la base de datos")
-
-    def _add_user(self):
-        """Agregar nuevo usuario"""
-        QMessageBox.information(self, "Nuevo Usuario", "Aquí se abrirá un diálogo para crear usuario")
-
-    def _import_excel(self):
-        """Importar desde Excel"""
-        QMessageBox.information(self, "Importar", "Importando datos desde Excel...")
-
-    def _import_csv(self):
-        """Importar desde CSV"""
-        QMessageBox.information(self, "Importar", "Importando datos desde CSV...")
-
-    def _import_db(self):
-        """Importar desde otra BD"""
-        QMessageBox.information(self, "Importar", "Conectando a base de datos externa...")
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.stack)
+
+        # Vista principal
+        self.main_view = ConfigMainView(self.theme_manager)
+        self.main_view.gestionar_empleados_clicked.connect(self._open_gestion_usuarios)
+        self.main_view.soporte_tickets_clicked.connect(self._open_soporte_tickets)
+        self.main_view.historial_reportes_clicked.connect(self._open_historial_reportes)
+        self.stack.addWidget(self.main_view)
+
+    def _open_gestion_usuarios(self):
+        """Abrir gestión de usuarios"""
+        view = GestionUsuariosView(self.theme_manager, self.db_connection)
+        view.back_clicked.connect(lambda: self._go_back(view))
+        self.stack.addWidget(view)
+        self.stack.setCurrentWidget(view)
+
+    def _open_soporte_tickets(self):
+        """Abrir soporte/tickets"""
+        view = SoporteTicketsView(self.theme_manager, self.db_connection)
+        view.back_clicked.connect(lambda: self._go_back(view))
+        self.stack.addWidget(view)
+        self.stack.setCurrentWidget(view)
+
+    def _open_historial_reportes(self):
+        """Abrir historial de reportes"""
+        view = HistorialReportesView(self.theme_manager, self.db_connection)
+        view.back_clicked.connect(lambda: self._go_back(view))
+        self.stack.addWidget(view)
+        self.stack.setCurrentWidget(view)
+
+    def _go_back(self, view):
+        """Volver a vista principal"""
+        self.stack.setCurrentWidget(self.main_view)
+        self.stack.removeWidget(view)
+        view.deleteLater()

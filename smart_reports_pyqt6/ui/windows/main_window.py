@@ -35,6 +35,10 @@ class MainWindow(QMainWindow):
         # Crear UI
         self._create_ui()
 
+        # Conectar signal de cambio de tema
+        if self.theme_manager:
+            self.theme_manager.theme_changed.connect(self._on_theme_changed)
+
         # Mostrar pantalla completa por defecto
         self.showMaximized()
 
@@ -255,6 +259,21 @@ class MainWindow(QMainWindow):
 
         # Actualizar botón activo en sidebar
         self.sidebar.set_active(panel_key)
+
+    def _on_theme_changed(self, new_theme: str):
+        """Callback cuando cambia el tema"""
+        print(f"🎨 MainWindow: Actualizando tema a {new_theme}")
+
+        # Actualizar el top bar
+        if hasattr(self, 'content_area'):
+            # Recrear el top bar con los nuevos colores
+            content_layout = self.content_area.layout()
+            if content_layout and content_layout.count() > 0:
+                old_top_bar = content_layout.itemAt(0).widget()
+                if old_top_bar:
+                    old_top_bar.deleteLater()
+                    new_top_bar = self._create_top_bar()
+                    content_layout.insertWidget(0, new_top_bar)
 
     def _toggle_theme(self):
         """Cambiar tema"""

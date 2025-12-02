@@ -67,7 +67,8 @@ class ConfiguracionPanel(ctk.CTkFrame):
                 on_historial_reportes=self.show_report_history_frame
             )
 
-        self.main_fragment.pack(fill='both', expand=True)
+        # SIN MÁRGENES GRISES
+        self.main_fragment.pack(fill='both', expand=True, padx=0, pady=0)
 
     def show_user_manager_frame(self):
         """Mostrar fragment de gestión de usuarios"""

@@ -135,13 +135,13 @@ class VentanaPrincipalView:
         """Crear interfaz de usuario (SOLO UI)"""
         theme = self.theme_manager.get_current_theme()
 
-        # Container principal
+        # Container principal - SIN MÁRGENES GRISES
         self.main_container = ctk.CTkFrame(
             self.root,
             fg_color=theme['colors']['background'],
             corner_radius=0
         )
-        self.main_container.pack(fill='both', expand=True)
+        self.main_container.pack(fill='both', expand=True, padx=0, pady=0)
 
         # === SIDEBAR (Navegación lateral) ===
         navigation_callbacks = {
@@ -159,29 +159,29 @@ class VentanaPrincipalView:
         )
         self.sidebar.pack(side='left', fill='y')
 
-        # === RIGHT FRAME (TopBar + Content) ===
+        # === RIGHT FRAME (TopBar + Content) - SIN MÁRGENES ===
         right_frame = ctk.CTkFrame(
             self.main_container,
             fg_color=theme['colors']['background'],
             corner_radius=0
         )
-        right_frame.pack(side='left', fill='both', expand=True)
+        right_frame.pack(side='left', fill='both', expand=True, padx=0, pady=0)
 
-        # TopBar (Barra superior)
+        # TopBar (Barra superior) - SIN MÁRGENES
         self.top_bar = TopBar(
             right_frame,
             username=self.username,
             user_role=self.user_role
         )
-        self.top_bar.pack(side='top', fill='x')
+        self.top_bar.pack(side='top', fill='x', padx=0, pady=0)
 
-        # Content Area (Área de contenido principal)
+        # Content Area (Área de contenido principal) - SIN MÁRGENES
         self.content_area = ctk.CTkFrame(
             right_frame,
             fg_color=theme['colors']['background'],
             corner_radius=0
         )
-        self.content_area.pack(side='top', fill='both', expand=True)
+        self.content_area.pack(side='top', fill='both', expand=True, padx=0, pady=0)
 
         # Mostrar dashboard por defecto
         self.show_dashboard()
@@ -219,6 +219,7 @@ class VentanaPrincipalView:
             print(f"Panel type: {type(panel)}")
 
             if panel:
+                # CRÍTICO: SIN MÁRGENES para eliminar espacios grises
                 panel.pack(fill='both', expand=True, padx=0, pady=0)
                 print(f"Panel empaquetado: {panel.winfo_ismapped()}")
                 print(f"Panel size: {panel.winfo_width()}x{panel.winfo_height()}")

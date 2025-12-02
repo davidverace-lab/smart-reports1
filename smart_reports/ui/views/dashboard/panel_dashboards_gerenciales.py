@@ -204,9 +204,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
 
         self.grid_view = ctk.CTkFrame(self, fg_color='transparent')
 
-        # Tabs - Sin header fijo para permitir scroll completo
+        # Tabs - SIN MÁRGENES GRISES
         self.tab_view = CustomTabView(self.grid_view)
-        self.tab_view.pack(fill='both', expand=True, padx=10, pady=10)
+        self.tab_view.pack(fill='both', expand=True, padx=5, pady=5)
 
         # Tab 1: General
         self.tab_general = self.tab_view.add("General", "📊")
@@ -220,8 +220,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         """Crear contenido del tab General"""
         theme = self.theme_manager.get_current_theme()
 
+        # Container - SIN MÁRGENES GRISES
         container = ctk.CTkScrollableFrame(self.tab_general, fg_color='transparent')
-        container.pack(fill='both', expand=True, padx=10, pady=10)
+        container.pack(fill='both', expand=True, padx=5, pady=5)
 
         # ═══ MÉTRICAS ═══
         metrics_frame = ctk.CTkFrame(container, fg_color='transparent')
@@ -294,8 +295,9 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         """Crear contenido del tab Dashboards con grid 2x3"""
         theme = self.theme_manager.get_current_theme()
 
+        # Container - SIN MÁRGENES GRISES
         container = ctk.CTkScrollableFrame(self.tab_dashboards, fg_color='transparent')
-        container.pack(fill='both', expand=True, padx=10, pady=10)
+        container.pack(fill='both', expand=True, padx=5, pady=5)
 
         # Título - Navy en light mode, white en dark mode
         is_dark = theme['colors']['background'] == '#1a1a1a'
@@ -392,8 +394,14 @@ class DashboardsGerencialesPanel(ctk.CTkFrame):
         )
         card.grid(row=row, column=column, padx=10, pady=10, sticky='nsew')
 
-        # Establecer datos del gráfico
-        card.set_chart(d3_chart_type, data, subtitulo='')
+        # CRÍTICO: Establecer datos con delay para asegurar renderizado correcto
+        # Esto soluciona el problema de gráficas en blanco al cambiar de menú
+        def load_chart_data():
+            if card.winfo_exists():
+                card.set_chart(d3_chart_type, data, subtitulo='')
+
+        # Ejecutar después de 100ms para dar tiempo al widget de renderizarse
+        card.after(100, load_chart_data)
 
     def _render_chart_preview(self, container, chart_id, chart_type):
         """Renderizar preview pequeño de la gráfica"""

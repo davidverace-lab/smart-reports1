@@ -223,9 +223,9 @@ class PanelControlEjecutivo(ctk.CTkFrame):
 
         self.grid_view = ctk.CTkFrame(self, fg_color='transparent')
 
-        # Header
+        # Header - SIN MÁRGENES GRISES
         header = ctk.CTkFrame(self.grid_view, fg_color='transparent', height=60)
-        header.pack(fill='x', padx=20, pady=(15, 10))
+        header.pack(fill='x', padx=15, pady=(10, 5))
         header.pack_propagate(False)
 
         # Título
@@ -236,9 +236,9 @@ class PanelControlEjecutivo(ctk.CTkFrame):
             text_color=theme['colors']['text']
         ).pack(side='left')
 
-        # Tabs
+        # Tabs - SIN MÁRGENES GRISES
         self.tab_view = CustomTabView(self.grid_view)
-        self.tab_view.pack(fill='both', expand=True, padx=10, pady=10)
+        self.tab_view.pack(fill='both', expand=True, padx=5, pady=5)
 
         # Tab 1: General
         self.tab_general = self.tab_view.add("General", "📊")
@@ -252,8 +252,9 @@ class PanelControlEjecutivo(ctk.CTkFrame):
         """Crear contenido del tab General"""
         theme = self.theme_manager.get_current_theme()
 
+        # Container - SIN MÁRGENES GRISES
         container = ctk.CTkScrollableFrame(self.tab_general, fg_color='transparent')
-        container.pack(fill='both', expand=True, padx=10, pady=10)
+        container.pack(fill='both', expand=True, padx=5, pady=5)
 
         # ═══ MÉTRICAS ═══
         metrics_frame = ctk.CTkFrame(container, fg_color='transparent')

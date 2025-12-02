@@ -82,8 +82,8 @@ class LoginWindow(QMainWindow):
 
         layout = QVBoxLayout(panel)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setContentsMargins(40, 40, 40, 40)
-        layout.setSpacing(20)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)
 
         # Logo de Instituto HP (imagen)
         logo_label = QLabel()
@@ -129,7 +129,7 @@ class LoginWindow(QMainWindow):
         panel = QFrame()
         layout = QVBoxLayout(panel)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setContentsMargins(60, 40, 60, 40)
+        layout.setContentsMargins(30, 20, 30, 20)
 
         # Título del formulario
         form_title = QLabel("Iniciar Sesión")

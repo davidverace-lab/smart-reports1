@@ -42,11 +42,12 @@ class PanelConsultas(ctk.CTkFrame):
         theme = self.theme_manager.get_current_theme()
 
         # Container con scroll
+        # SIN MÁRGENES GRISES
         main_container = ctk.CTkScrollableFrame(
             self,
             fg_color='transparent'
         )
-        main_container.pack(fill='both', expand=True, padx=20, pady=20)
+        main_container.pack(fill='both', expand=True, padx=10, pady=10)
 
         # === HEADER ===
         self._create_header(main_container, theme)

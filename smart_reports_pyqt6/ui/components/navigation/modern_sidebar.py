@@ -46,6 +46,10 @@ class ModernSidebar(QFrame):
         # Aplicar tema inicial
         self._update_theme()
 
+        # Conectar signal de cambio de tema
+        if self.theme_manager:
+            self.theme_manager.theme_changed.connect(lambda new_theme: self._update_theme())
+
     def _create_ui(self):
         """Crear interfaz completa"""
 
@@ -123,17 +127,17 @@ class ModernSidebar(QFrame):
         self.main_layout.addWidget(header_container)
 
     def _create_navigation(self):
-        """Crear botones de navegación"""
+        """Crear botones de navegación con iconos"""
 
         nav_items = [
-            ('Dashboards', 'dashboard'),
-            ('Consulta de Empleados', 'consultas'),
-            ('Importación de Datos', 'importacion'),
-            ('Generar Reportes', 'reportes'),
-            ('Configuración', 'configuracion'),
+            ('📊 Dashboards', 'dashboard', '📊'),
+            ('👥 Consulta de Empleados', 'consultas', '👥'),
+            ('📥 Importación de Datos', 'importacion', '📥'),
+            ('📄 Generar Reportes', 'reportes', '📄'),
+            ('⚙️ Configuración', 'configuracion', '⚙️'),
         ]
 
-        for text, key in nav_items:
+        for text, key, icon in nav_items:
             btn = QPushButton(text)
             btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
             btn.setFixedHeight(50)
@@ -141,16 +145,16 @@ class ModernSidebar(QFrame):
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(lambda checked, k=key: self._on_nav_click(k))
 
-            # Guardar referencia al texto completo
+            # Guardar referencia al texto completo e icono
             btn.setProperty("fullText", text)
-            btn.setProperty("shortText", text[:3].upper())
+            btn.setProperty("iconOnly", icon)
             btn.setProperty("navKey", key)
 
             self.nav_buttons[key] = btn
             self.main_layout.addWidget(btn)
 
     def _create_theme_toggle(self):
-        """Crear toggle para modo claro/oscuro"""
+        """Crear toggle para modo claro/oscuro con switch animado"""
 
         # Frame para el toggle
         self.toggle_frame = QWidget()
@@ -169,23 +173,27 @@ class ModernSidebar(QFrame):
         # Container horizontal
         toggle_container = QWidget()
         toggle_container_layout = QHBoxLayout(toggle_container)
-        toggle_container_layout.setContentsMargins(10, 0, 10, 0)
+        toggle_container_layout.setContentsMargins(10, 5, 10, 5)
+        toggle_container_layout.setSpacing(10)
 
-        # Label (sin icono)
+        # Label con texto dinámico
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else True
-        self.theme_label = QLabel('Modo Oscuro' if is_dark else 'Modo Claro')
-        self.theme_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        mode_text = "Modo Oscuro" if is_dark else "Modo Claro"
+        self.theme_label = QLabel(mode_text)
+        self.theme_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
         toggle_container_layout.addWidget(self.theme_label)
 
         toggle_container_layout.addStretch()
 
-        # Botón de toggle (switch simulado)
-        self.theme_btn = QPushButton("DARK" if is_dark else "LIGHT")
-        self.theme_btn.setFont(QFont("Montserrat", 9, QFont.Weight.Bold))
-        self.theme_btn.setFixedSize(55, 26)
-        self.theme_btn.setObjectName("themeToggleBtn")
+        # Botón de toggle estilo iOS switch animado
+        self.theme_btn = QPushButton()
+        self.theme_btn.setFixedSize(60, 30)
+        self.theme_btn.setObjectName("themeToggleSwitch")
         self.theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.theme_btn.clicked.connect(self._on_theme_toggle)
+        self.theme_btn.setProperty("isDark", is_dark)
+        self.theme_btn.setCheckable(True)
+        self.theme_btn.setChecked(is_dark)
         toggle_container_layout.addWidget(self.theme_btn)
 
         toggle_layout.addWidget(toggle_container)
@@ -239,14 +247,16 @@ class ModernSidebar(QFrame):
             self.logo_frame.hide()
             self.header_separator.hide()
 
-            # Actualizar botones para mostrar texto corto
+            # Actualizar botones para mostrar solo iconos
             for key, btn in self.nav_buttons.items():
-                short_text = btn.property("shortText")
-                btn.setText(short_text)
+                icon_only = btn.property("iconOnly")
+                btn.setText(icon_only)
                 btn.setToolTip(btn.property("fullText"))
+                btn.setFont(QFont("Arial", 24))  # Hacer iconos más grandes
 
-            # Ocultar elementos del toggle de tema
+            # Mostrar solo icono del toggle de tema
             self.theme_label.hide()
+            self.theme_btn.setFixedSize(50, 50)  # Hacer el botón más grande y cuadrado
             self.theme_separator_top.hide()
             self.theme_separator_bottom.hide()
 
@@ -267,9 +277,11 @@ class ModernSidebar(QFrame):
                 full_text = btn.property("fullText")
                 btn.setText(full_text)
                 btn.setToolTip("")
+                btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))  # Restaurar fuente
 
             # Mostrar elementos del toggle de tema
             self.theme_label.show()
+            self.theme_btn.setFixedSize(50, 28)  # Restaurar tamaño normal
             self.theme_separator_top.show()
             self.theme_separator_bottom.show()
 
@@ -331,9 +343,11 @@ class ModernSidebar(QFrame):
 
         is_dark = self.theme_manager.is_dark_mode()
 
-        # Actualizar label de tema (sin emojis)
-        self.theme_label.setText('Modo Oscuro' if is_dark else 'Modo Claro')
-        self.theme_btn.setText("DARK" if is_dark else "LIGHT")
+        # Actualizar label de tema con texto dinámico
+        mode_text = "Modo Oscuro" if is_dark else "Modo Claro"
+        self.theme_label.setText(mode_text)
+        self.theme_btn.setChecked(is_dark)
+        self.theme_btn.setProperty("isDark", is_dark)
 
         # Los estilos QSS se manejan a nivel de aplicación
         # Pero podemos actualizar colores específicos aquí si es necesario
@@ -395,15 +409,28 @@ class ModernSidebar(QFrame):
                 color: {'#ffffff' if is_dark else '#003087'};
             }}
 
-            #themeToggleBtn {{
-                background-color: {button_bg};
-                color: {button_text};
+            #themeToggleSwitch {{
+                background-color: {'#002E6D' if is_dark else '#ccc'};
                 border: none;
-                border-radius: 13px;
+                border-radius: 15px;
+                text-align: left;
+                padding: 3px;
             }}
 
-            #themeToggleBtn:hover {{
-                background-color: {button_hover};
+            #themeToggleSwitch:checked {{
+                background-color: #002E6D;
+            }}
+
+            #themeToggleSwitch:!checked {{
+                background-color: #ccc;
+            }}
+
+            #themeToggleSwitch:hover {{
+                background-color: {'#001a3d' if is_dark else '#bbb'};
+            }}
+
+            #themeToggleSwitch:checked:hover {{
+                background-color: #001a3d;
             }}
 
             #logoutButton {{

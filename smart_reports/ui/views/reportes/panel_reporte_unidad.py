@@ -109,12 +109,12 @@ class UnitReportPanel(ctk.CTkFrame):
 
         theme = self.theme_manager.get_current_theme()
 
-        # Contenedor con scroll
+        # Contenedor con scroll - SIN MÁRGENES GRISES
         scroll_frame = ctk.CTkScrollableFrame(
             self,
             fg_color='transparent'
         )
-        scroll_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
+        scroll_frame.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
         scroll_frame.grid_columnconfigure(0, weight=1)
 
         # Header

@@ -30,8 +30,8 @@ class PanelImportacion(QWidget):
         """Crear interfaz"""
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
 
         # Header
         header_layout = QHBoxLayout()

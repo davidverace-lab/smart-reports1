@@ -1,20 +1,61 @@
 """
-Panel de Consultas SQL
-PyQt6 Version - Consultas a la base de datos
+Panel de Consultas - PyQt6
+Migrado desde CustomTkinter con diseño grid 2x2
 """
 
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QLineEdit, QTextEdit,
-    QTableWidget, QTableWidgetItem, QComboBox,
-    QFrame, QScrollArea, QTabWidget, QMessageBox
+    QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+    QLabel, QPushButton, QLineEdit, QComboBox, QFrame,
+    QScrollArea, QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
 
+class SearchSectionCard(QFrame):
+    """Tarjeta de sección de búsqueda"""
+
+    def __init__(self, title: str, icon: str, theme_manager=None, parent=None):
+        super().__init__(parent)
+
+        self.theme_manager = theme_manager
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+
+        # Aplicar tema
+        self._apply_theme()
+
+        # Layout principal - SIN MÁRGENES GRISES
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(10, 10, 10, 10)
+        self.layout.setSpacing(10)
+
+        # Título
+        title_label = QLabel(f"{icon} {title}")
+        title_label.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))
+        is_dark = theme_manager.is_dark_mode() if theme_manager else False
+        text_color = "#ffffff" if is_dark else "#003087"
+        title_label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        self.layout.addWidget(title_label)
+
+    def _apply_theme(self):
+        """Aplicar tema"""
+        if not self.theme_manager:
+            return
+
+        is_dark = self.theme_manager.is_dark_mode()
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+
+        self.setStyleSheet(f"""
+            SearchSectionCard {{
+                background-color: {bg_color};
+                border: 2px solid #003087;
+                border-radius: 12px;
+            }}
+        """)
+
+
 class ConsultasPanel(QWidget):
-    """Panel de Consultas SQL"""
+    """Panel de Consultas con diseño grid 2x2"""
 
     def __init__(self, parent=None, theme_manager=None, db_connection=None):
         super().__init__(parent)
@@ -28,209 +69,330 @@ class ConsultasPanel(QWidget):
     def _create_ui(self):
         """Crear interfaz"""
 
+        # Scroll área principal
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+
+        scroll_widget = QWidget()
+        scroll.setWidget(scroll_widget)
+
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(scroll)
+
+        main_layout = QVBoxLayout(scroll_widget)
+        main_layout.setContentsMargins(5, 5, 5, 5)  # SIN MÁRGENES GRISES
+        main_layout.setSpacing(10)
 
         # Header
-        header_layout = QHBoxLayout()
+        self._create_header(main_layout)
 
-        title = QLabel("🔍 Consultas SQL")
+        # Grid de búsquedas 2x2
+        grid_layout = QGridLayout()
+        grid_layout.setSpacing(20)
+
+        # Card 1: Buscar por ID (Top-Left)
+        card1 = self._create_search_by_id_card()
+        grid_layout.addWidget(card1, 0, 0)
+
+        # Card 2: Buscar por Unidad (Top-Right)
+        card2 = self._create_search_by_unit_card()
+        grid_layout.addWidget(card2, 0, 1)
+
+        # Card 3: Usuarios Nuevos (Bottom-Left)
+        card3 = self._create_new_users_card()
+        grid_layout.addWidget(card3, 1, 0)
+
+        # Card 4: Estadísticas (Bottom-Right)
+        card4 = self._create_stats_card()
+        grid_layout.addWidget(card4, 1, 1)
+
+        main_layout.addLayout(grid_layout)
+
+        # Sección de resultados
+        self._create_results_section(main_layout)
+
+    def _create_header(self, layout):
+        """Crear header"""
+
+        # Frame del header
+        header_frame = QFrame()
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        header_frame.setStyleSheet(f"""
+            QFrame {{
+                background-color: {bg_color};
+                border: 2px solid #003087;
+                border-radius: 15px;
+            }}
+        """)
+
+        header_layout = QVBoxLayout(header_frame)
+        header_layout.setContentsMargins(30, 20, 30, 20)
+        header_layout.setSpacing(5)
+
+        # Título
+        title = QLabel("🔍 Panel de Consultas")
         title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
+        title_color = "#ffffff" if is_dark else "#003087"
+        title.setStyleSheet(f"color: {title_color}; background: transparent;")
         header_layout.addWidget(title)
 
-        header_layout.addStretch()
+        # Subtítulo
+        subtitle = QLabel("Búsquedas y filtros en la base de datos de capacitación")
+        subtitle.setFont(QFont("Montserrat", 14))
+        subtitle_color = "#b0b0b0" if is_dark else "#666666"
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent;")
+        header_layout.addWidget(subtitle)
 
-        execute_btn = QPushButton("▶️ Ejecutar")
-        execute_btn.setFixedHeight(40)
-        execute_btn.setFixedWidth(150)
-        execute_btn.clicked.connect(self._execute_query)
-        header_layout.addWidget(execute_btn)
+        layout.addWidget(header_frame)
 
-        clear_btn = QPushButton("🗑️ Limpiar")
-        clear_btn.setProperty("class", "secondary")
-        clear_btn.setFixedHeight(40)
-        clear_btn.setFixedWidth(120)
-        clear_btn.clicked.connect(self._clear_query)
-        header_layout.addWidget(clear_btn)
+    def _create_search_by_id_card(self):
+        """Card: Buscar por ID"""
 
-        layout.addLayout(header_layout)
+        card = SearchSectionCard("Buscar Usuario por ID", "👤", self.theme_manager)
 
-        # Tabs
-        tabs = QTabWidget()
+        # Input frame
+        input_layout = QHBoxLayout()
 
-        # Tab 1: Consulta personalizada
-        custom_tab = self._create_custom_query_tab()
-        tabs.addTab(custom_tab, "📝 Consulta Personalizada")
+        label = QLabel("ID Usuario:")
+        label.setFont(QFont("Montserrat", 13))
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        text_color = "#ffffff" if is_dark else "#003087"
+        label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        input_layout.addWidget(label)
 
-        # Tab 2: Consultas predefinidas
-        predefined_tab = self._create_predefined_queries_tab()
-        tabs.addTab(predefined_tab, "⚡ Consultas Rápidas")
+        self.user_id_entry = QLineEdit()
+        self.user_id_entry.setPlaceholderText("Ej: 12345")
+        self.user_id_entry.setFont(QFont("Montserrat", 13))
+        self.user_id_entry.setFixedHeight(40)
+        input_layout.addWidget(self.user_id_entry, 1)
 
-        # Tab 3: Historial
-        history_tab = self._create_history_tab()
-        tabs.addTab(history_tab, "📚 Historial")
+        search_btn = QPushButton("🔍 Buscar")
+        search_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        search_btn.setFixedHeight(40)
+        search_btn.setFixedWidth(120)
+        search_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        search_btn.clicked.connect(self._search_by_id)
+        input_layout.addWidget(search_btn)
 
-        layout.addWidget(tabs)
+        card.layout.addLayout(input_layout)
+        card.layout.addStretch()
 
-    def _create_custom_query_tab(self):
-        """Tab de consulta personalizada"""
+        return card
 
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+    def _create_search_by_unit_card(self):
+        """Card: Buscar por Unidad"""
 
-        # Editor de SQL
-        sql_label = QLabel("Query SQL:")
-        sql_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
-        layout.addWidget(sql_label)
+        card = SearchSectionCard("Consultar por Unidad de Negocio", "🏢", self.theme_manager)
 
-        self.sql_editor = QTextEdit()
-        self.sql_editor.setPlaceholderText("SELECT * FROM tabla WHERE ...")
-        self.sql_editor.setMinimumHeight(150)
-        self.sql_editor.setFont(QFont("Courier New", 10))
-        layout.addWidget(self.sql_editor)
+        # Input frame
+        input_layout = QHBoxLayout()
 
-        # Botones de ayuda
-        help_layout = QHBoxLayout()
+        label = QLabel("Unidad:")
+        label.setFont(QFont("Montserrat", 13))
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        text_color = "#ffffff" if is_dark else "#003087"
+        label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        input_layout.addWidget(label)
 
-        help_btn = QPushButton("❓ Ayuda SQL")
-        help_btn.setProperty("class", "secondary")
-        help_btn.clicked.connect(self._show_sql_help)
-        help_layout.addWidget(help_btn)
+        self.unit_combo = QComboBox()
+        self.unit_combo.addItems([
+            "Selecciona una unidad",
+            "ICAVE", "TNG", "ECV", "HPMX", "Container",
+            "LCMT", "HPLM", "TILH", "CCI", "TIMSA", "LCT", "EIT"
+        ])
+        self.unit_combo.setFont(QFont("Montserrat", 13))
+        self.unit_combo.setFixedHeight(40)
+        input_layout.addWidget(self.unit_combo, 1)
 
-        tables_btn = QPushButton("📋 Ver Tablas")
-        tables_btn.setProperty("class", "secondary")
-        tables_btn.clicked.connect(self._show_tables)
-        help_layout.addWidget(tables_btn)
+        search_btn = QPushButton("🔍 Consultar")
+        search_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        search_btn.setFixedHeight(40)
+        search_btn.setFixedWidth(120)
+        search_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        search_btn.clicked.connect(self._search_by_unit)
+        input_layout.addWidget(search_btn)
 
-        help_layout.addStretch()
+        card.layout.addLayout(input_layout)
+        card.layout.addStretch()
 
-        layout.addLayout(help_layout)
+        return card
 
-        # Resultados
-        results_label = QLabel("Resultados:")
-        results_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
-        layout.addWidget(results_label)
+    def _create_new_users_card(self):
+        """Card: Usuarios Nuevos"""
 
+        card = SearchSectionCard("Usuarios Nuevos (Últimos 30 días)", "📅", self.theme_manager)
+
+        # Botón
+        search_btn = QPushButton("📋 Ver Usuarios Nuevos")
+        search_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        search_btn.setFixedHeight(50)
+        search_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 10px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        search_btn.clicked.connect(self._search_new_users)
+        card.layout.addWidget(search_btn)
+
+        card.layout.addStretch()
+
+        return card
+
+    def _create_stats_card(self):
+        """Card: Estadísticas Globales"""
+
+        card = SearchSectionCard("Estadísticas Globales", "📊", self.theme_manager)
+
+        # Botón
+        search_btn = QPushButton("📈 Ver Estadísticas")
+        search_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        search_btn.setFixedHeight(50)
+        search_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 10px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        search_btn.clicked.connect(self._show_stats)
+        card.layout.addWidget(search_btn)
+
+        card.layout.addStretch()
+
+        return card
+
+    def _create_results_section(self, layout):
+        """Sección de resultados"""
+
+        # Frame de resultados
+        results_frame = QFrame()
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        results_frame.setStyleSheet(f"""
+            QFrame {{
+                background-color: {bg_color};
+                border-radius: 12px;
+            }}
+        """)
+
+        results_layout = QVBoxLayout(results_frame)
+        results_layout.setContentsMargins(20, 20, 20, 20)
+        results_layout.setSpacing(15)
+
+        # Título
+        results_title = QLabel("📋 Resultados")
+        results_title.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))
+        text_color = "#ffffff" if is_dark else "#003087"
+        results_title.setStyleSheet(f"color: {text_color}; background: transparent;")
+        results_layout.addWidget(results_title)
+
+        # Tabla de resultados
         self.results_table = QTableWidget(0, 0)
         self.results_table.setAlternatingRowColors(True)
-        self.results_table.setMinimumHeight(300)
-        layout.addWidget(self.results_table)
+        self.results_table.setMinimumHeight(250)
+        self.results_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        results_layout.addWidget(self.results_table)
 
         # Info de resultados
-        self.results_info = QLabel("No hay resultados")
-        self.results_info.setStyleSheet("color: #888888;")
-        layout.addWidget(self.results_info)
+        self.results_info = QLabel("No hay resultados. Realiza una búsqueda.")
+        self.results_info.setFont(QFont("Montserrat", 11))
+        info_color = "#888888"
+        self.results_info.setStyleSheet(f"color: {info_color}; background: transparent;")
+        results_layout.addWidget(self.results_info)
 
-        return widget
+        layout.addWidget(results_frame)
 
-    def _create_predefined_queries_tab(self):
-        """Tab de consultas predefinidas"""
+    # ==================== MÉTODOS DE BÚSQUEDA ====================
 
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+    def _search_by_id(self):
+        """Buscar usuario por ID"""
+        user_id = self.user_id_entry.text().strip()
 
-        # Selector de consulta
-        query_label = QLabel("Selecciona una consulta:")
-        query_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
-        layout.addWidget(query_label)
-
-        self.query_combo = QComboBox()
-        self.query_combo.addItems([
-            "-- Selecciona una consulta --",
-            "Usuarios por unidad de negocio",
-            "Progreso de módulos",
-            "Reportes generados últimos 7 días",
-            "Top 10 usuarios más activos",
-            "Unidades con menor avance",
-            "Consultas más ejecutadas",
-            "Estadísticas generales"
-        ])
-        self.query_combo.currentIndexChanged.connect(self._load_predefined_query)
-        layout.addWidget(self.query_combo)
-
-        # Descripción
-        self.query_description = QLabel("Selecciona una consulta para ver su descripción")
-        self.query_description.setWordWrap(True)
-        self.query_description.setStyleSheet("color: #888888; padding: 10px; background-color: rgba(0,0,0,0.1); border-radius: 5px;")
-        layout.addWidget(self.query_description)
-
-        # Preview del SQL
-        preview_label = QLabel("Vista previa SQL:")
-        preview_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
-        layout.addWidget(preview_label)
-
-        self.query_preview = QTextEdit()
-        self.query_preview.setReadOnly(True)
-        self.query_preview.setMinimumHeight(100)
-        self.query_preview.setFont(QFont("Courier New", 9))
-        layout.addWidget(self.query_preview)
-
-        # Tabla de resultados predefinidos
-        self.predefined_results_table = QTableWidget(0, 0)
-        self.predefined_results_table.setAlternatingRowColors(True)
-        self.predefined_results_table.setMinimumHeight(200)
-        layout.addWidget(self.predefined_results_table)
-
-        layout.addStretch()
-
-        return widget
-
-    def _create_history_tab(self):
-        """Tab de historial de consultas"""
-
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-
-        # Tabla de historial
-        self.history_table = QTableWidget(0, 4)
-        self.history_table.setHorizontalHeaderLabels(["Fecha", "Consulta", "Resultados", "Acciones"])
-        self.history_table.setAlternatingRowColors(True)
-        layout.addWidget(self.history_table)
-
-        # Cargar historial dummy
-        self._load_history_dummy()
-
-        # Botones
-        buttons_layout = QHBoxLayout()
-
-        clear_history_btn = QPushButton("🗑️ Limpiar Historial")
-        clear_history_btn.setProperty("class", "danger")
-        clear_history_btn.clicked.connect(self._clear_history)
-        buttons_layout.addWidget(clear_history_btn)
-
-        buttons_layout.addStretch()
-
-        layout.addLayout(buttons_layout)
-
-        return widget
-
-    def _execute_query(self):
-        """Ejecutar consulta SQL"""
-
-        query = self.sql_editor.toPlainText().strip()
-
-        if not query:
-            QMessageBox.warning(self, "Query vacía", "Por favor ingresa una consulta SQL")
+        if not user_id:
+            QMessageBox.warning(self, "Campo vacío", "Por favor ingresa un ID de usuario")
             return
 
-        print(f"🔍 Ejecutando query: {query[:100]}...")
+        print(f"🔍 Buscando usuario con ID: {user_id}")
 
-        # TODO: Ejecutar query real en la base de datos
+        # TODO: Consulta real a BD
         # Por ahora, datos dummy
-        self._load_dummy_results()
+        self._load_dummy_results(f"Usuario ID: {user_id}")
 
-    def _load_dummy_results(self):
+    def _search_by_unit(self):
+        """Buscar por unidad"""
+        unit = self.unit_combo.currentText()
+
+        if unit == "Selecciona una unidad":
+            QMessageBox.warning(self, "Selección requerida", "Por favor selecciona una unidad")
+            return
+
+        print(f"🔍 Buscando usuarios de unidad: {unit}")
+
+        # TODO: Consulta real a BD
+        self._load_dummy_results(f"Unidad: {unit}")
+
+    def _search_new_users(self):
+        """Buscar usuarios nuevos"""
+        print("🔍 Buscando usuarios nuevos (últimos 30 días)")
+
+        # TODO: Consulta real a BD
+        self._load_dummy_results("Usuarios Nuevos")
+
+    def _show_stats(self):
+        """Mostrar estadísticas"""
+        print("📊 Mostrando estadísticas globales")
+
+        # TODO: Consulta real a BD
+        self._load_dummy_results("Estadísticas Globales")
+
+    def _load_dummy_results(self, query_type: str):
         """Cargar resultados dummy"""
 
         # Datos de ejemplo
-        headers = ["ID", "Nombre", "Unidad", "Módulo", "Progreso", "Fecha"]
+        headers = ["ID", "Nombre", "Unidad", "Email", "Progreso", "Último Acceso"]
         data = [
-            ["1", "Juan Pérez", "ICAVE", "Módulo 1", "95%", "2024-01-15"],
-            ["2", "María García", "TNG", "Módulo 2", "88%", "2024-01-16"],
-            ["3", "Carlos López", "ECV", "Módulo 1", "92%", "2024-01-17"],
-            ["4", "Ana Martínez", "HPMX", "Módulo 3", "78%", "2024-01-18"],
-            ["5", "Luis Rodríguez", "Container", "Módulo 2", "85%", "2024-01-19"],
+            ["1001", "Juan Pérez", "ICAVE", "juan.perez@hp.com", "95%", "2025-01-15"],
+            ["1002", "María García", "TNG", "maria.garcia@hp.com", "88%", "2025-01-16"],
+            ["1003", "Carlos López", "ECV", "carlos.lopez@hp.com", "92%", "2025-01-17"],
+            ["1004", "Ana Martínez", "HPMX", "ana.martinez@hp.com", "78%", "2025-01-18"],
+            ["1005", "Luis Rodríguez", "Container", "luis.rodriguez@hp.com", "85%", "2025-01-19"],
         ]
 
         # Configurar tabla
@@ -244,117 +406,5 @@ class ConsultasPanel(QWidget):
                 item = QTableWidgetItem(value)
                 self.results_table.setItem(row, col, item)
 
-        # Ajustar columnas
-        self.results_table.resizeColumnsToContents()
-
         # Info
-        self.results_info.setText(f"✅ {len(data)} registros encontrados")
-
-    def _clear_query(self):
-        """Limpiar editor"""
-        self.sql_editor.clear()
-        self.results_table.setRowCount(0)
-        self.results_info.setText("No hay resultados")
-
-    def _show_sql_help(self):
-        """Mostrar ayuda de SQL"""
-        QMessageBox.information(
-            self,
-            "Ayuda SQL",
-            """
-<b>Sintaxis básica SQL:</b><br><br>
-
-<b>SELECT:</b> Seleccionar columnas<br>
-SELECT columna1, columna2 FROM tabla;<br><br>
-
-<b>WHERE:</b> Filtrar filas<br>
-SELECT * FROM tabla WHERE condicion;<br><br>
-
-<b>ORDER BY:</b> Ordenar resultados<br>
-SELECT * FROM tabla ORDER BY columna ASC;<br><br>
-
-<b>LIMIT:</b> Limitar resultados<br>
-SELECT * FROM tabla LIMIT 10;
-            """
-        )
-
-    def _show_tables(self):
-        """Mostrar tablas disponibles"""
-        QMessageBox.information(
-            self,
-            "Tablas Disponibles",
-            """
-<b>Tablas del sistema:</b><br><br>
-
-• usuarios<br>
-• unidades_negocio<br>
-• modulos<br>
-• progreso<br>
-• reportes<br>
-• consultas<br>
-• tickets<br>
-• logs
-            """
-        )
-
-    def _load_predefined_query(self, index):
-        """Cargar consulta predefinida"""
-
-        queries = {
-            1: {
-                'desc': 'Obtiene el conteo de usuarios por cada unidad de negocio',
-                'sql': 'SELECT unidad, COUNT(*) as total\nFROM usuarios\nGROUP BY unidad\nORDER BY total DESC;'
-            },
-            2: {
-                'desc': 'Muestra el progreso promedio de todos los módulos',
-                'sql': 'SELECT modulo, AVG(progreso) as promedio\nFROM progreso\nGROUP BY modulo;'
-            },
-            3: {
-                'desc': 'Reportes generados en los últimos 7 días',
-                'sql': 'SELECT *\nFROM reportes\nWHERE fecha >= DATE_SUB(NOW(), INTERVAL 7 DAY);'
-            }
-        }
-
-        if index in queries:
-            q = queries[index]
-            self.query_description.setText(q['desc'])
-            self.query_preview.setText(q['sql'])
-        else:
-            self.query_description.setText("Selecciona una consulta para ver su descripción")
-            self.query_preview.clear()
-
-    def _load_history_dummy(self):
-        """Cargar historial dummy"""
-
-        history = [
-            ["2024-01-20 10:30", "SELECT * FROM usuarios...", "152 registros", "Ver"],
-            ["2024-01-20 09:15", "SELECT unidad, COUNT(*)...", "11 registros", "Ver"],
-            ["2024-01-19 16:45", "SELECT * FROM reportes...", "89 registros", "Ver"],
-        ]
-
-        self.history_table.setRowCount(len(history))
-
-        for row, row_data in enumerate(history):
-            for col, value in enumerate(row_data):
-                if col == 3:  # Botón de acción
-                    btn = QPushButton("📄 " + value)
-                    btn.setProperty("class", "secondary")
-                    self.history_table.setCellWidget(row, col, btn)
-                else:
-                    item = QTableWidgetItem(value)
-                    self.history_table.setItem(row, col, item)
-
-        self.history_table.resizeColumnsToContents()
-
-    def _clear_history(self):
-        """Limpiar historial"""
-        reply = QMessageBox.question(
-            self,
-            "Confirmar",
-            "¿Seguro que deseas limpiar todo el historial?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-
-        if reply == QMessageBox.StandardButton.Yes:
-            self.history_table.setRowCount(0)
-            QMessageBox.information(self, "Éxito", "Historial limpiado")
+        self.results_info.setText(f"✅ {len(data)} registros encontrados - Consulta: {query_type}")

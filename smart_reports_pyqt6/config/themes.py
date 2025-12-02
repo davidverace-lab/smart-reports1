@@ -52,9 +52,9 @@ QWidget {{
 
 /* Frames y paneles */
 QFrame {{
-    background-color: #2d2d2d;
-    border-radius: 10px;
-    border: 1px solid #383838;
+    background-color: #1a1a1a;
+    border-radius: 0px;
+    border: 1px solid #1a1a1a;
 }}
 
 /* Labels */
@@ -111,7 +111,7 @@ QLineEdit {{
     background-color: #2d2d2d;
     color: #ffffff;
     border: 2px solid #383838;
-    border-radius: 8px;
+    border-radius: 0px;
     padding: 10px;
     min-height: 35px;
 }}
@@ -125,7 +125,7 @@ QTextEdit {{
     background-color: #2d2d2d;
     color: #ffffff;
     border: 2px solid #383838;
-    border-radius: 8px;
+    border-radius: 0px;
     padding: 8px;
 }}
 
@@ -138,7 +138,7 @@ QComboBox {{
     background-color: #2d2d2d;
     color: #ffffff;
     border: 2px solid #383838;
-    border-radius: 8px;
+    border-radius: 0px;
     padding: 10px;
     min-height: 35px;
 }}
@@ -172,7 +172,7 @@ QListWidget {{
     background-color: #2d2d2d;
     color: #ffffff;
     border: 2px solid #383838;
-    border-radius: 8px;
+    border-radius: 0px;
 }}
 
 QListWidget::item {{
@@ -296,15 +296,15 @@ QProgressBar::chunk {{
 QTabWidget::pane {{
     background-color: #2d2d2d;
     border: 1px solid #383838;
-    border-radius: 8px;
+    border-radius: 0px;
 }}
 
 QTabBar::tab {{
     background-color: #383838;
     color: #ffffff;
     padding: 10px 20px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
     margin-right: 2px;
 }}
 
@@ -326,7 +326,7 @@ QCheckBox::indicator {{
     width: 20px;
     height: 20px;
     border: 2px solid #383838;
-    border-radius: 4px;
+    border-radius: 0px;
     background-color: #2d2d2d;
 }}
 
@@ -384,9 +384,9 @@ QWidget {{
 
 /* Frames y paneles */
 QFrame {{
-    background-color: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
+    border-radius: 0px;
+    border: 1px solid #f5f5f5;
 }}
 
 /* Labels */
@@ -444,7 +444,7 @@ QLineEdit {{
     background-color: #ffffff;
     color: #003087;
     border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 0px;
     padding: 10px;
     min-height: 35px;
 }}
@@ -458,7 +458,7 @@ QTextEdit {{
     background-color: #ffffff;
     color: #003087;
     border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 0px;
     padding: 8px;
 }}
 
@@ -471,7 +471,7 @@ QComboBox {{
     background-color: #ffffff;
     color: #003087;
     border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 0px;
     padding: 10px;
     min-height: 35px;
 }}
@@ -505,7 +505,7 @@ QListWidget {{
     background-color: #ffffff;
     color: #003087;
     border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 0px;
 }}
 
 QListWidget::item {{
@@ -633,15 +633,15 @@ QProgressBar::chunk {{
 QTabWidget::pane {{
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 0px;
 }}
 
 QTabBar::tab {{
     background-color: #e0e0e0;
     color: #003087;
     padding: 10px 20px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
     margin-right: 2px;
 }}
 
@@ -664,7 +664,7 @@ QCheckBox::indicator {{
     width: 20px;
     height: 20px;
     border: 2px solid #e0e0e0;
-    border-radius: 4px;
+    border-radius: 0px;
     background-color: #ffffff;
 }}
 
@@ -704,6 +704,7 @@ QToolTip {{
 
 
 from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWidgets import QApplication
 
 
 class ThemeManager(QObject):
@@ -729,9 +730,23 @@ class ThemeManager(QObject):
     def set_theme(self, app, theme: str):
         """Aplicar tema a la aplicación"""
         self.current_theme = theme
-        app.setStyleSheet(self.get_stylesheet(theme))
+
+        # Aplicar stylesheet global
+        if isinstance(app, QApplication):
+            app.setStyleSheet(self.get_stylesheet(theme))
+        else:
+            # Si es una ventana, obtener la aplicación
+            QApplication.instance().setStyleSheet(self.get_stylesheet(theme))
+
         # Emitir signal de cambio de tema
         self.theme_changed.emit(theme)
+
+        # Forzar actualización de todos los widgets
+        if isinstance(app, QApplication):
+            for widget in app.allWidgets():
+                widget.update()
+        else:
+            app.update()
 
     def toggle_theme(self, app):
         """Alternar entre tema oscuro y claro"""
