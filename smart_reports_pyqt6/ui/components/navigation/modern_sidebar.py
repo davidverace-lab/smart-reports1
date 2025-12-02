@@ -353,7 +353,7 @@ class ModernSidebar(QFrame):
         # Pero podemos actualizar colores específicos aquí si es necesario
 
         # Actualizar stylesheet del sidebar
-        sidebar_bg = "#2d2d2d" if is_dark else "#f5f5f5"
+        sidebar_bg = "#2d2d2d" if is_dark else "#ffffff"  # Blanco puro en modo claro
         text_color = "#ffffff"
         border_color = "#383838" if is_dark else "#e0e0e0"
         button_bg = "#003087"  # Navy blue para TODOS los botones
@@ -363,28 +363,28 @@ class ModernSidebar(QFrame):
 
         self.setStyleSheet(f"""
             #modernSidebar {{
-                background-color: {sidebar_bg};
+                background-color: {sidebar_bg} !important;
                 border-right: 1px solid {border_color};
             }}
 
             #hamburgerBtn {{
-                background-color: transparent;
-                color: {'#ffffff' if is_dark else '#003087'};
+                background-color: transparent !important;
+                color: {'#ffffff' if is_dark else '#003087'} !important;
                 border: none;
                 border-radius: 5px;
             }}
 
             #hamburgerBtn:hover {{
-                background-color: {border_color};
+                background-color: {border_color} !important;
             }}
 
             #logoFrame QLabel {{
-                color: {'#ffffff' if is_dark else '#003087'};
+                color: {'#ffffff' if is_dark else '#003087'} !important;
             }}
 
             #navButton {{
-                background-color: {button_bg};
-                color: {button_text};
+                background-color: {button_bg} !important;
+                color: {button_text} !important;
                 border: none;
                 border-radius: 8px;
                 text-align: center;
@@ -392,25 +392,25 @@ class ModernSidebar(QFrame):
             }}
 
             #navButton:hover {{
-                background-color: {button_hover};
+                background-color: {button_hover} !important;
             }}
 
             #navButton[class="active"] {{
-                background-color: {button_active};
-                color: {text_color};
+                background-color: {button_active} !important;
+                color: {text_color} !important;
                 font-weight: bold;
             }}
 
             #separator {{
-                background-color: {border_color};
+                background-color: {border_color} !important;
             }}
 
             #toggleFrame QLabel {{
-                color: {'#ffffff' if is_dark else '#003087'};
+                color: {'#ffffff' if is_dark else '#003087'} !important;
             }}
 
             #themeToggleSwitch {{
-                background-color: {'#002E6D' if is_dark else '#ccc'};
+                background-color: {'#002E6D' if is_dark else '#ccc'} !important;
                 border: none;
                 border-radius: 15px;
                 text-align: left;
@@ -418,29 +418,39 @@ class ModernSidebar(QFrame):
             }}
 
             #themeToggleSwitch:checked {{
-                background-color: #002E6D;
+                background-color: #002E6D !important;
             }}
 
             #themeToggleSwitch:!checked {{
-                background-color: #ccc;
+                background-color: #ccc !important;
             }}
 
             #themeToggleSwitch:hover {{
-                background-color: {'#001a3d' if is_dark else '#bbb'};
+                background-color: {'#001a3d' if is_dark else '#bbb'} !important;
             }}
 
             #themeToggleSwitch:checked:hover {{
-                background-color: #001a3d;
+                background-color: #001a3d !important;
             }}
 
             #logoutButton {{
-                background-color: #d32f2f;
-                color: {text_color};
+                background-color: #d32f2f !important;
+                color: {text_color} !important;
                 border: none;
                 border-radius: 8px;
             }}
 
             #logoutButton:hover {{
-                background-color: #b71c1c;
+                background-color: #b71c1c !important;
             }}
         """)
+
+        # Forzar actualización visual de todos los widgets
+        self.update()
+        self.repaint()
+
+        # Forzar actualización de los botones de navegación
+        for btn in self.nav_buttons.values():
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
+            btn.update()
