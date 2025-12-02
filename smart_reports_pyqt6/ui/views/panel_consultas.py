@@ -114,36 +114,35 @@ class ConsultasPanel(QWidget):
         self._create_results_section(main_layout)
 
     def _create_header(self, layout):
-        """Crear header"""
+        """Crear header - SIN BORDE ALREDEDOR DEL TÍTULO"""
 
-        # Frame del header
+        # Frame del header - SIN BORDE (solo texto)
         header_frame = QFrame()
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         bg_color = "#2d2d2d" if is_dark else "#ffffff"
         header_frame.setStyleSheet(f"""
             QFrame {{
                 background-color: {bg_color};
-                border: 2px solid #003087;
-                border-radius: 15px;
+                border: none;
             }}
         """)
 
         header_layout = QVBoxLayout(header_frame)
         header_layout.setContentsMargins(30, 20, 30, 20)
-        header_layout.setSpacing(5)
+        header_layout.setSpacing(8)
 
-        # Título
+        # Título - MÁS GRANDE
         title = QLabel("🔍 Panel de Consultas")
-        title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
+        title.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 28 a 32
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
         header_layout.addWidget(title)
 
-        # Subtítulo
+        # Subtítulo - MÁS GRANDE
         subtitle = QLabel("Búsquedas y filtros en la base de datos de capacitación")
-        subtitle.setFont(QFont("Montserrat", 14))
+        subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 14 a 16
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
         header_layout.addWidget(subtitle)
 
         layout.addWidget(header_frame)
