@@ -1,6 +1,6 @@
 """
 D3 Chart Widget - PyQt6 con QWebEngineView
-Widget para renderizar gráficos D3.js/NVD3.js interactivos
+Widget para renderizar gráficos D3.js v7 interactivos (sin NVD3)
 """
 
 import os
@@ -15,14 +15,15 @@ from PyQt6.QtCore import QUrl
 
 class D3ChartWidget(QWidget):
     """
-    Widget para renderizar gráficos D3.js usando QWebEngineView
+    Widget para renderizar gráficos D3.js v7 usando QWebEngineView
 
     Características:
     - Renderizado profesional con Chromium
+    - D3.js v7 (última versión)
     - Tooltips interactivos
-    - Hover effects y animaciones
-    - Click handlers personalizados
-    - Templates HTML/JS/CSS externos
+    - Hover effects y animaciones suaves
+    - Responsive design
+    - Colores corporativos Hutchison Ports
     """
 
     def __init__(self, parent=None):
@@ -55,17 +56,17 @@ class D3ChartWidget(QWidget):
 
     def set_chart(self, chart_type: str, title: str, datos: dict, subtitle: str = "", tema: str = 'dark'):
         """
-        Establecer gráfico D3.js
+        Establecer gráfico D3.js v7
 
         Args:
-            chart_type: 'bar', 'donut', 'line'
+            chart_type: 'bar', 'donut', 'line', 'area', 'scatter'
             title: Título del gráfico
             datos: {'labels': [...], 'values': [...]}
             subtitle: Subtítulo opcional
             tema: 'dark' o 'light'
         """
 
-        print(f"📊 Cargando gráfico {chart_type}: {title}")
+        print(f"📊 Cargando gráfico D3.js v7 - {chart_type}: {title}")
 
         # Guardar datos
         self.chart_type = chart_type
@@ -82,51 +83,34 @@ class D3ChartWidget(QWidget):
         QTimer.singleShot(50, lambda: self._load_html(html))
 
     def _generate_html(self, chart_type: str, title: str, datos: dict, subtitle: str, tema: str) -> str:
-        """Generar HTML del gráfico"""
-
-        # TODO: Aquí puedes usar templates externos o generar inline
-        # Por ahora, vamos a generar inline simple pero funcional
+        """Generar HTML del gráfico usando D3.js v7"""
 
         labels = datos.get('labels', [])
         values = datos.get('values', [])
 
-        # Preparar datos para NVD3
-        if chart_type == 'bar':
-            chart_data = [{
-                "key": "Valores",
-                "values": [
-                    {"x": str(labels[i]), "y": float(values[i])}
-                    for i in range(len(labels))
-                ]
-            }]
-        elif chart_type == 'donut':
-            chart_data = [
-                {"label": str(labels[i]), "value": float(values[i])}
-                for i in range(len(labels))
-            ]
-        elif chart_type == 'line':
-            chart_data = [{
-                "key": "Tendencia",
-                "values": [
-                    {"x": i, "y": float(values[i]), "label": str(labels[i])}
-                    for i in range(len(labels))
-                ]
-            }]
-        else:
-            chart_data = []
+        # Preparar datos para D3.js v7
+        chart_data = [
+            {"label": str(labels[i]), "value": float(values[i])}
+            for i in range(len(labels))
+        ]
 
         import json
         chart_data_json = json.dumps(chart_data)
-        labels_json = json.dumps(labels)
 
-        # Colores
+        # Colores Hutchison Ports
         hutchison_colors = [
             '#002E6D', '#003D82', '#004C97', '#0066CC', '#0080FF',
             '#009BDE', '#00B5E2', '#33C7F0', '#66D4F5', '#99E1FA'
         ]
         colors_json = json.dumps(hutchison_colors)
 
-        # HTML completo
+        # Colores de fondo según tema
+        bg_color = '#1a1a1a' if tema == 'dark' else '#f5f5f5'
+        card_bg = '#2d2d2d' if tema == 'dark' else '#ffffff'
+        text_color = '#ffffff' if tema == 'dark' else '#003087'
+        axis_color = '#b0b0b0' if tema == 'dark' else '#4a5c8a'
+
+        # HTML completo con D3.js v7
         html = f"""
 <!DOCTYPE html>
 <html>
@@ -134,12 +118,8 @@ class D3ChartWidget(QWidget):
     <meta charset="UTF-8">
     <title>{title}</title>
 
-    <!-- D3.js v3 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
-
-    <!-- NVD3.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css">
+    <!-- D3.js v7 (última versión) -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 
     <style>
         * {{
@@ -150,136 +130,521 @@ class D3ChartWidget(QWidget):
 
         body {{
             font-family: 'Montserrat', 'Segoe UI', sans-serif;
-            background: {'#1a1a1a' if tema == 'dark' else '#f5f5f5'};
-            color: {'#ffffff' if tema == 'dark' else '#003087'};
+            background: {bg_color};
+            color: {text_color};
             padding: 20px;
+            overflow: hidden;
+        }}
+
+        .chart-container {{
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }}
 
         .chart-card {{
-            background: {'#2d2d2d' if tema == 'dark' else '#ffffff'};
+            background: {card_bg};
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            width: 95%;
+            max-width: 1200px;
         }}
 
         .chart-title {{
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
+            color: {text_color};
+        }}
+
+        .chart-subtitle {{
+            text-align: center;
+            color: #888;
+            margin-bottom: 20px;
+            font-size: 14px;
         }}
 
         #chart {{
-            height: 400px;
             width: 100%;
+            height: 450px;
         }}
 
-        #chart svg {{
-            width: 100%;
-            height: 100%;
+        /* Estilos de ejes */
+        .axis text {{
+            fill: {text_color};
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
         }}
 
-        .nvd3 text {{
-            fill: {'#ffffff' if tema == 'dark' else '#003087'} !important;
-            font-family: 'Montserrat', sans-serif !important;
-        }}
-
-        .nvd3 .nv-axis path,
-        .nvd3 .nv-axis line {{
-            stroke: {'#b0b0b0' if tema == 'dark' else '#4a5c8a'} !important;
+        .axis line,
+        .axis path {{
+            stroke: {axis_color};
             stroke-opacity: 0.3;
         }}
 
-        .nvd3 .nvtooltip {{
-            background: rgba(0, 46, 109, 0.98) !important;
-            border: 2px solid #002E6D !important;
-            border-radius: 12px !important;
-            padding: 15px !important;
-            color: white !important;
+        .grid line {{
+            stroke: {axis_color};
+            stroke-opacity: 0.1;
         }}
 
-        .nvd3 .nv-bar:hover {{
-            opacity: 1 !important;
-            filter: brightness(1.2);
+        /* Estilos de tooltip */
+        .tooltip {{
+            position: absolute;
+            padding: 12px 16px;
+            background: rgba(0, 46, 109, 0.98);
+            border: 2px solid #002E6D;
+            border-radius: 12px;
+            color: white;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }}
+
+        .tooltip.show {{
+            opacity: 1;
+        }}
+
+        .tooltip-label {{
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }}
+
+        .tooltip-value {{
+            font-size: 16px;
+            color: #00D4AA;
+        }}
+
+        /* Estilos específicos por tipo de gráfico */
+        .bar {{
             cursor: pointer;
+            transition: all 0.3s ease;
+        }}
+
+        .bar:hover {{
+            opacity: 0.8;
+            filter: brightness(1.2);
+        }}
+
+        .line {{
+            fill: none;
+            stroke-width: 3;
+        }}
+
+        .dot {{
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }}
+
+        .dot:hover {{
+            r: 8;
+        }}
+
+        .arc {{
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }}
+
+        .arc:hover {{
+            opacity: 0.8;
+            filter: brightness(1.1);
+        }}
+
+        .legend {{
+            font-size: 12px;
+            fill: {text_color};
+        }}
+
+        .legend-item {{
+            cursor: pointer;
+        }}
+
+        .legend-item:hover {{
+            opacity: 0.7;
         }}
     </style>
 </head>
 <body>
-    <div class="chart-card">
-        <h1 class="chart-title">{title}</h1>
-        {f'<p style="text-align: center; color: #888; margin-bottom: 20px;">{subtitle}</p>' if subtitle else ''}
-        <svg id="chart"></svg>
+    <div class="chart-container">
+        <div class="chart-card">
+            <h1 class="chart-title">{title}</h1>
+            {f'<p class="chart-subtitle">{subtitle}</p>' if subtitle else ''}
+            <div id="chart"></div>
+        </div>
     </div>
 
     <script>
-        window.CHART_DATA = {chart_data_json};
-        window.LABELS = {labels_json};
-        window.COLORS = {colors_json};
+        // Datos del gráfico
+        const data = {chart_data_json};
+        const colors = {colors_json};
 
-        nv.addGraph(function() {{
-            var chart;
+        // Tipo de gráfico
+        const chartType = '{chart_type}';
 
-            {'// Gráfico de barras' if chart_type == 'bar' else '// Gráfico donut' if chart_type == 'donut' else '// Gráfico de líneas'}
+        // Tooltip
+        const tooltip = d3.select('body')
+            .append('div')
+            .attr('class', 'tooltip');
 
-            {self._get_chart_script(chart_type)}
+        // Funciones de tooltip
+        function showTooltip(event, d) {{
+            tooltip
+                .html(`
+                    <div class="tooltip-label">${{d.label}}</div>
+                    <div class="tooltip-value">${{d.value.toLocaleString()}}</div>
+                `)
+                .style('left', (event.pageX + 15) + 'px')
+                .style('top', (event.pageY - 15) + 'px')
+                .classed('show', true);
+        }}
 
-            d3.select('#chart')
-                .datum(window.CHART_DATA)
-                .call(chart);
+        function hideTooltip() {{
+            tooltip.classed('show', false);
+        }}
 
-            nv.utils.windowResize(chart.update);
-
-            return chart;
-        }});
+        // Renderizar según tipo
+        {self._get_d3v7_chart_script(chart_type)}
     </script>
 </body>
 </html>
 """
         return html
 
-    def _get_chart_script(self, chart_type: str) -> str:
-        """Obtener script específico del tipo de gráfico"""
+    def _get_d3v7_chart_script(self, chart_type: str) -> str:
+        """Obtener script D3.js v7 específico del tipo de gráfico"""
 
         if chart_type == 'bar':
             return """
-            chart = nv.models.discreteBarChart()
-                .x(function(d) { return d.x; })
-                .y(function(d) { return d.y; })
-                .staggerLabels(true)
-                .showValues(true)
-                .duration(350)
-                .color(window.COLORS);
+        // ===== GRÁFICO DE BARRAS D3.js v7 =====
+        const container = d3.select('#chart');
+        const containerNode = container.node();
+        const width = containerNode.clientWidth;
+        const height = containerNode.clientHeight;
+        const margin = {top: 40, right: 30, bottom: 80, left: 60};
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
 
-            chart.yAxis.tickFormat(d3.format(',.0f'));
+        const svg = container.append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        // Escalas
+        const x = d3.scaleBand()
+            .domain(data.map(d => d.label))
+            .range([0, chartWidth])
+            .padding(0.3);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.value) * 1.1])
+            .range([chartHeight, 0]);
+
+        // Escala de colores
+        const colorScale = d3.scaleOrdinal()
+            .domain(data.map(d => d.label))
+            .range(colors);
+
+        // Grid
+        g.append('g')
+            .attr('class', 'grid')
+            .call(d3.axisLeft(y)
+                .tickSize(-chartWidth)
+                .tickFormat('')
+            );
+
+        // Barras
+        g.selectAll('.bar')
+            .data(data)
+            .join('rect')
+            .attr('class', 'bar')
+            .attr('x', d => x(d.label))
+            .attr('y', chartHeight)
+            .attr('width', x.bandwidth())
+            .attr('height', 0)
+            .attr('fill', d => colorScale(d.label))
+            .on('mouseover', showTooltip)
+            .on('mousemove', showTooltip)
+            .on('mouseout', hideTooltip)
+            .transition()
+            .duration(800)
+            .ease(d3.easeCubicOut)
+            .attr('y', d => y(d.value))
+            .attr('height', d => chartHeight - y(d.value));
+
+        // Etiquetas de valores
+        g.selectAll('.label')
+            .data(data)
+            .join('text')
+            .attr('class', 'label')
+            .attr('x', d => x(d.label) + x.bandwidth() / 2)
+            .attr('y', d => y(d.value) - 5)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '{text_color}')
+            .attr('font-size', '12px')
+            .attr('font-weight', '600')
+            .attr('opacity', 0)
+            .text(d => d.value.toLocaleString())
+            .transition()
+            .delay(800)
+            .duration(300)
+            .attr('opacity', 1);
+
+        // Ejes
+        g.append('g')
+            .attr('class', 'axis')
+            .attr('transform', `translate(0,${chartHeight})`)
+            .call(d3.axisBottom(x))
+            .selectAll('text')
+            .attr('transform', 'rotate(-45)')
+            .style('text-anchor', 'end')
+            .attr('dx', '-0.5em')
+            .attr('dy', '0.5em');
+
+        g.append('g')
+            .attr('class', 'axis')
+            .call(d3.axisLeft(y).tickFormat(d => d.toLocaleString()));
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            location.reload();
+        });
             """
 
         elif chart_type == 'donut':
             return """
-            chart = nv.models.pieChart()
-                .x(function(d) { return d.label; })
-                .y(function(d) { return d.value; })
-                .showLabels(true)
-                .labelType("percent")
-                .donut(true)
-                .donutRatio(0.35)
-                .duration(350)
-                .color(window.COLORS);
+        // ===== GRÁFICO DONUT D3.js v7 =====
+        const container = d3.select('#chart');
+        const containerNode = container.node();
+        const width = containerNode.clientWidth;
+        const height = containerNode.clientHeight;
+        const radius = Math.min(width, height) / 2 - 40;
+
+        const svg = container.append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        const g = svg.append('g')
+            .attr('transform', `translate(${width/2},${height/2})`);
+
+        // Escala de colores
+        const colorScale = d3.scaleOrdinal()
+            .domain(data.map(d => d.label))
+            .range(colors);
+
+        // Generador de arcos
+        const arc = d3.arc()
+            .innerRadius(radius * 0.6)
+            .outerRadius(radius);
+
+        const pie = d3.pie()
+            .value(d => d.value)
+            .sort(null);
+
+        // Dibujar arcos
+        const arcs = g.selectAll('.arc')
+            .data(pie(data))
+            .join('g')
+            .attr('class', 'arc');
+
+        arcs.append('path')
+            .attr('d', arc)
+            .attr('fill', d => colorScale(d.data.label))
+            .attr('stroke', '{card_bg}')
+            .attr('stroke-width', 3)
+            .style('opacity', 0)
+            .on('mouseover', function(event, d) {
+                d3.select(this).transition().duration(200)
+                    .attr('d', d3.arc()
+                        .innerRadius(radius * 0.6)
+                        .outerRadius(radius + 10)
+                    );
+                showTooltip(event, d.data);
+            })
+            .on('mousemove', (event, d) => showTooltip(event, d.data))
+            .on('mouseout', function() {
+                d3.select(this).transition().duration(200)
+                    .attr('d', arc);
+                hideTooltip();
+            })
+            .transition()
+            .duration(800)
+            .style('opacity', 1)
+            .attrTween('d', function(d) {
+                const i = d3.interpolate(d.startAngle, d.endAngle);
+                return function(t) {
+                    d.endAngle = i(t);
+                    return arc(d);
+                };
+            });
+
+        // Etiquetas
+        arcs.append('text')
+            .attr('transform', d => `translate(${arc.centroid(d)})`)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '13px')
+            .attr('font-weight', '600')
+            .attr('fill', 'white')
+            .attr('opacity', 0)
+            .text(d => {
+                const percent = (d.data.value / d3.sum(data, d => d.value) * 100).toFixed(1);
+                return percent > 5 ? percent + '%' : '';
+            })
+            .transition()
+            .delay(800)
+            .duration(300)
+            .attr('opacity', 1);
+
+        // Leyenda
+        const legend = svg.append('g')
+            .attr('class', 'legend')
+            .attr('transform', `translate(20, 20)`);
+
+        const legendItems = legend.selectAll('.legend-item')
+            .data(data)
+            .join('g')
+            .attr('class', 'legend-item')
+            .attr('transform', (d, i) => `translate(0, ${i * 25})`);
+
+        legendItems.append('rect')
+            .attr('width', 18)
+            .attr('height', 18)
+            .attr('fill', d => colorScale(d.label))
+            .attr('rx', 3);
+
+        legendItems.append('text')
+            .attr('x', 25)
+            .attr('y', 13)
+            .attr('fill', '{text_color}')
+            .attr('font-size', '12px')
+            .text(d => d.label);
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            location.reload();
+        });
             """
 
         elif chart_type == 'line':
             return """
-            chart = nv.models.lineChart()
-                .useInteractiveGuideline(true)
-                .duration(350)
-                .showLegend(true)
-                .color([window.COLORS[0]]);
+        // ===== GRÁFICO DE LÍNEAS D3.js v7 =====
+        const container = d3.select('#chart');
+        const containerNode = container.node();
+        const width = containerNode.clientWidth;
+        const height = containerNode.clientHeight;
+        const margin = {top: 40, right: 30, bottom: 80, left: 60};
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
 
-            chart.xAxis.tickFormat(function(d) {
-                return window.LABELS[d] || d;
-            });
+        const svg = container.append('svg')
+            .attr('width', width)
+            .attr('height', height);
 
-            chart.yAxis.tickFormat(d3.format(',.0f'));
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        // Escalas
+        const x = d3.scalePoint()
+            .domain(data.map(d => d.label))
+            .range([0, chartWidth])
+            .padding(0.5);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.value) * 1.1])
+            .range([chartHeight, 0]);
+
+        // Grid
+        g.append('g')
+            .attr('class', 'grid')
+            .call(d3.axisLeft(y)
+                .tickSize(-chartWidth)
+                .tickFormat('')
+            );
+
+        // Generador de línea
+        const line = d3.line()
+            .x(d => x(d.label))
+            .y(d => y(d.value))
+            .curve(d3.curveMonotoneX);
+
+        // Área bajo la línea
+        const area = d3.area()
+            .x(d => x(d.label))
+            .y0(chartHeight)
+            .y1(d => y(d.value))
+            .curve(d3.curveMonotoneX);
+
+        // Dibujar área
+        g.append('path')
+            .datum(data)
+            .attr('fill', colors[0])
+            .attr('fill-opacity', 0.2)
+            .attr('d', area);
+
+        // Dibujar línea
+        const path = g.append('path')
+            .datum(data)
+            .attr('class', 'line')
+            .attr('stroke', colors[0])
+            .attr('d', line);
+
+        // Animación de la línea
+        const pathLength = path.node().getTotalLength();
+        path
+            .attr('stroke-dasharray', pathLength)
+            .attr('stroke-dashoffset', pathLength)
+            .transition()
+            .duration(1500)
+            .ease(d3.easeCubicOut)
+            .attr('stroke-dashoffset', 0);
+
+        // Puntos
+        g.selectAll('.dot')
+            .data(data)
+            .join('circle')
+            .attr('class', 'dot')
+            .attr('cx', d => x(d.label))
+            .attr('cy', d => y(d.value))
+            .attr('r', 0)
+            .attr('fill', colors[0])
+            .attr('stroke', 'white')
+            .attr('stroke-width', 2)
+            .on('mouseover', showTooltip)
+            .on('mousemove', showTooltip)
+            .on('mouseout', hideTooltip)
+            .transition()
+            .delay((d, i) => i * 100 + 1500)
+            .duration(300)
+            .attr('r', 5);
+
+        // Ejes
+        g.append('g')
+            .attr('class', 'axis')
+            .attr('transform', `translate(0,${chartHeight})`)
+            .call(d3.axisBottom(x))
+            .selectAll('text')
+            .attr('transform', 'rotate(-45)')
+            .style('text-anchor', 'end')
+            .attr('dx', '-0.5em')
+            .attr('dy', '0.5em');
+
+        g.append('g')
+            .attr('class', 'axis')
+            .call(d3.axisLeft(y).tickFormat(d => d.toLocaleString()));
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            location.reload();
+        });
             """
 
         return ""
@@ -301,7 +666,7 @@ class D3ChartWidget(QWidget):
             url = QUrl.fromLocalFile(self.temp_file)
             self.webview.load(url)
 
-            print(f"✅ Gráfico D3.js cargado: {self.temp_file}")
+            print(f"✅ Gráfico D3.js v7 cargado: {self.temp_file}")
 
         except Exception as e:
             print(f"❌ Error cargando HTML: {e}")
