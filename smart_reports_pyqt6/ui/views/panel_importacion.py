@@ -43,17 +43,17 @@ class PanelImportacion(QWidget):
         title_layout.setSpacing(5)
 
         title = QLabel("📥 Cruce e Importación de Datos")
-        title.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 28 a 32
+        title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 32 a 40
         # Color según tema
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; border: none; background: transparent;")
+        title.setStyleSheet(f"color: {title_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         title_layout.addWidget(title)
 
         subtitle = QLabel("Sistema de validación y matching de datos CSOD")
-        subtitle.setFont(QFont("Montserrat", 14))  # Aumentado de 11 a 14
+        subtitle.setFont(QFont("Montserrat", 18))  # MUCHO MÁS GRANDE: de 14 a 18
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; border: none; background: transparent;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         title_layout.addWidget(subtitle)
 
         header_layout.addWidget(title_container)
@@ -77,8 +77,8 @@ class PanelImportacion(QWidget):
 
         # Sección de archivos
         files_label = QLabel("📁 Archivos a Importar")
-        files_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))  # Aumentado de 16 a 20
-        files_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent;")
+        files_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 20 a 24
+        files_label.setStyleSheet(f"color: {title_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         layout.addWidget(files_label)
 
         # Grid de archivos
@@ -114,8 +114,8 @@ class PanelImportacion(QWidget):
 
         # Sección de acciones
         actions_label = QLabel("⚙️ Acciones")
-        actions_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))  # Aumentado de 16 a 20
-        actions_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent;")
+        actions_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 20 a 24
+        actions_label.setStyleSheet(f"color: {title_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         layout.addWidget(actions_label)
 
         # Botones de acción - NAVY BLUE
@@ -123,8 +123,8 @@ class PanelImportacion(QWidget):
         actions_layout.setSpacing(15)
 
         import_btn = QPushButton("📥 Importar y Cruzar Datos")
-        import_btn.setFixedHeight(55)  # Aumentado de 50 a 55
-        import_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))  # Aumentado de 12 a 13
+        import_btn.setFixedHeight(60)  # MUCHO MÁS ALTO: de 55 a 60
+        import_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 13 a 15
         import_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087 !important;
@@ -141,8 +141,8 @@ class PanelImportacion(QWidget):
         actions_layout.addWidget(import_btn)
 
         preview_btn = QPushButton("👁️ Vista Previa")
-        preview_btn.setFixedHeight(55)
-        preview_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        preview_btn.setFixedHeight(60)  # MUCHO MÁS ALTO: de 55 a 60
+        preview_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 13 a 15
         preview_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087 !important;
@@ -159,8 +159,8 @@ class PanelImportacion(QWidget):
         actions_layout.addWidget(preview_btn)
 
         validate_btn = QPushButton("✅ Validar Datos")
-        validate_btn.setFixedHeight(55)
-        validate_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        validate_btn.setFixedHeight(60)  # MUCHO MÁS ALTO: de 55 a 60
+        validate_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 13 a 15
         validate_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087 !important;
@@ -187,8 +187,8 @@ class PanelImportacion(QWidget):
 
         # Sección de log
         log_label = QLabel("📋 Log de Operaciones")
-        log_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))  # Aumentado de 16 a 20
-        log_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent;")
+        log_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 20 a 24
+        log_label.setStyleSheet(f"color: {title_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         layout.addWidget(log_label)
 
         # Log text area

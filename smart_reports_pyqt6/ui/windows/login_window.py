@@ -135,26 +135,26 @@ class LoginWindow(QMainWindow):
         # Spacer superior para centrar verticalmente
         layout.addStretch(1)
 
-        # Título del formulario - MÁS GRANDE
+        # Título del formulario - MUCHO MÁS GRANDE
         form_title = QLabel("Iniciar Sesión")
-        form_title.setFont(QFont("Montserrat", 34, QFont.Weight.Bold))
+        form_title.setFont(QFont("Montserrat", 42, QFont.Weight.Bold))  # De 34 a 42
         form_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(form_title)
 
         layout.addSpacing(10)
 
-        # Subtítulo - MÁS GRANDE
+        # Subtítulo - MUCHO MÁS GRANDE
         form_subtitle = QLabel("Ingresa tus credenciales")
-        form_subtitle.setFont(QFont("Montserrat", 16))
+        form_subtitle.setFont(QFont("Montserrat", 20))  # De 16 a 20
         form_subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         form_subtitle.setStyleSheet("color: #888888;")
         layout.addWidget(form_subtitle)
 
         layout.addSpacing(40)
 
-        # Campo de usuario
+        # Campo de usuario - MÁS GRANDE
         user_label = QLabel("Usuario")
-        user_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        user_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # De 12 a 16
         user_label.setStyleSheet("color: #003087;")
         layout.addWidget(user_label)
 
@@ -162,8 +162,8 @@ class LoginWindow(QMainWindow):
 
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Ingresa tu usuario")
-        self.username_input.setFixedHeight(50)
-        self.username_input.setFont(QFont("Montserrat", 12))
+        self.username_input.setFixedHeight(55)  # De 50 a 55
+        self.username_input.setFont(QFont("Montserrat", 14))  # De 12 a 14
         self.username_input.setStyleSheet("""
             QLineEdit {
                 border: 2px solid #e0e0e0;
@@ -181,9 +181,9 @@ class LoginWindow(QMainWindow):
 
         layout.addSpacing(25)
 
-        # Campo de contraseña
+        # Campo de contraseña - MÁS GRANDE
         pass_label = QLabel("Contraseña")
-        pass_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        pass_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # De 12 a 16
         pass_label.setStyleSheet("color: #003087;")
         layout.addWidget(pass_label)
 
@@ -192,8 +192,8 @@ class LoginWindow(QMainWindow):
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Ingresa tu contraseña")
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password_input.setFixedHeight(50)
-        self.password_input.setFont(QFont("Montserrat", 12))
+        self.password_input.setFixedHeight(55)  # De 50 a 55
+        self.password_input.setFont(QFont("Montserrat", 14))  # De 12 a 14
         self.password_input.setStyleSheet("""
             QLineEdit {
                 border: 2px solid #e0e0e0;
@@ -211,10 +211,10 @@ class LoginWindow(QMainWindow):
 
         layout.addSpacing(35)
 
-        # Botón de login
+        # Botón de login - MÁS GRANDE
         self.login_button = QPushButton("INICIAR SESIÓN")
-        self.login_button.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        self.login_button.setFixedHeight(55)
+        self.login_button.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # De 14 a 16
+        self.login_button.setFixedHeight(60)  # De 55 a 60
         self.login_button.setStyleSheet("""
             QPushButton {
                 background-color: #003087 !important;

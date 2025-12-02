@@ -189,7 +189,7 @@ class ExpandedChartView(QWidget):
 
 
 class MetricCard(QFrame):
-    """Tarjeta de métrica - MÁS CUADRADA Y GRANDE"""
+    """Tarjeta de métrica - MUCHO MÁS CUADRADA Y GRANDE"""
 
     def __init__(self, title: str, value: str, icon: str = "", theme_manager=None, parent=None):
         super().__init__(parent)
@@ -197,8 +197,9 @@ class MetricCard(QFrame):
         self.theme_manager = theme_manager
 
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setMinimumHeight(140)  # Aumentado de 100 a 140
-        self.setMinimumWidth(250)  # Añadido ancho mínimo para ser más cuadrada
+        self.setMinimumHeight(180)  # MUCHO MÁS ALTO: de 140 a 180
+        self.setMinimumWidth(280)  # MÁS ANCHO: de 250 a 280
+        self.setMaximumHeight(200)  # Limitar altura máxima para mantener cuadrado
 
         # Estilo con borde navy y SIN CUADROS GRISES
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
@@ -213,25 +214,31 @@ class MetricCard(QFrame):
                 border: 3px solid {border_color};
                 border-radius: 12px;
             }}
+            MetricCard QLabel {{
+                background: transparent !important;
+                border: none !important;
+                margin: 0;
+                padding: 0;
+            }}
         """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)  # Más padding - de 15 a 20
-        layout.setSpacing(12)  # Aumentado de 8 a 12
+        layout.setContentsMargins(25, 25, 25, 25)  # MÁS padding: de 20 a 25
+        layout.setSpacing(15)  # Aumentado de 12 a 15
 
-        # Título - MÁS GRANDE
+        # Título - MUCHO MÁS GRANDE
         title_label = QLabel(title)
-        title_label.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # Aumentado de 11 a 14
-        title_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        title_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 14 a 16
+        title_label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         title_label.setWordWrap(True)
         layout.addWidget(title_label)
 
         layout.addStretch()
 
-        # Valor - MÁS GRANDE
+        # Valor - MUCHO MÁS GRANDE
         value_label = QLabel(value)
-        value_label.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 22 a 32
-        value_label.setStyleSheet(f"color: {value_color}; background: transparent; border: none;")
+        value_label.setFont(QFont("Montserrat", 42, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 32 a 42
+        value_label.setStyleSheet(f"color: {value_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         value_label.setWordWrap(True)
         layout.addWidget(value_label)
 
@@ -258,16 +265,16 @@ class ChartCard(QFrame):
 
         # Header con título y botones de acción
         header = QWidget()
-        header.setFixedHeight(40)
+        header.setFixedHeight(50)  # De 40 a 50 para título más grande
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(12, 3, 12, 3)
 
-        # Título del gráfico
+        # Título del gráfico - MUCHO MÁS GRANDE
         self.title_label = QLabel(title)
-        self.title_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        self.title_label.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 13 a 18
         is_dark = theme_manager.is_dark_mode() if theme_manager else (theme == 'dark')
         title_color = "#ffffff" if is_dark else "#003087"
-        self.title_label.setStyleSheet(f"color: {title_color}; background: transparent;")
+        self.title_label.setStyleSheet(f"color: {title_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(self.title_label)
 
         header_layout.addStretch()
@@ -678,19 +685,19 @@ class DashboardPanel(QWidget):
         header_layout = QHBoxLayout()
 
         self.title_label = QLabel("Panel de Control Ejecutivo")
-        self.title_label.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 26 a 32
+        self.title_label.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 32 a 40
         # Color según tema
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        self.title_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent;")
+        self.title_label.setStyleSheet(f"color: {title_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         header_layout.addWidget(self.title_label)
 
         header_layout.addStretch()
 
         refresh_btn = QPushButton("Actualizar")
-        refresh_btn.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
-        refresh_btn.setFixedHeight(40)
-        refresh_btn.setFixedWidth(140)
+        refresh_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # De 11 a 14
+        refresh_btn.setFixedHeight(50)  # De 40 a 50
+        refresh_btn.setFixedWidth(160)  # De 140 a 160
         refresh_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;

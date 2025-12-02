@@ -25,7 +25,7 @@ class BarraSuperior(QFrame):
         self.theme_manager = theme_manager
 
         self.setObjectName("barraSuperior")
-        self.setFixedHeight(90)  # Más alto - de 70 a 90
+        self.setFixedHeight(110)  # MUCHO MÁS ALTO: de 90 a 110
 
         self._create_ui()
 
@@ -41,21 +41,21 @@ class BarraSuperior(QFrame):
 
         # Layout principal
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(30, 0, 30, 0)
-        layout.setSpacing(20)
+        layout.setContentsMargins(40, 0, 40, 0)  # Más margen: de 30 a 40
+        layout.setSpacing(25)  # Más espacio: de 20 a 25
 
-        # === LADO IZQUIERDO: Bienvenida ===
+        # === LADO IZQUIERDO: Bienvenida - MUCHO MÁS GRANDE ===
         self.greeting_label = QLabel(f"¡Bienvenido, {self.username}!")
-        self.greeting_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Más grande - de 20 a 22
+        self.greeting_label.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 22 a 28
         self.greeting_label.setObjectName("greetingLabel")
         layout.addWidget(self.greeting_label, alignment=Qt.AlignmentFlag.AlignVCenter)
 
         # Spacer para empujar a los lados
         layout.addStretch()
 
-        # === LADO DERECHO: Branding ===
+        # === LADO DERECHO: Branding - MUCHO MÁS GRANDE ===
         self.brand_label = QLabel("HUTCHISON PORTS")
-        self.brand_label.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))  # Más grande - de 24 a 26
+        self.brand_label.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 26 a 32
         self.brand_label.setObjectName("brandLabel")
         layout.addWidget(self.brand_label, alignment=Qt.AlignmentFlag.AlignVCenter)
 
@@ -103,12 +103,16 @@ class BarraSuperior(QFrame):
                 color: {text_color} !important;
                 background: transparent !important;
                 border: none !important;
+                margin: 0;
+                padding: 0;
             }}
 
             #brandLabel {{
                 color: {brand_color} !important;
                 background: transparent !important;
                 border: none !important;
+                margin: 0;
+                padding: 0;
             }}
         """)
 

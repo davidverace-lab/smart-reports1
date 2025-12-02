@@ -33,7 +33,7 @@ class ModernSidebar(QFrame):
 
         # Estado de colapso
         self.is_collapsed = False
-        self.expanded_width = 260  # Más ancho - de 240 a 260
+        self.expanded_width = 300  # MÁS ANCHO - de 260 a 300
         self.collapsed_width = 70
 
         # Configurar sidebar
@@ -128,20 +128,21 @@ class ModernSidebar(QFrame):
         self.main_layout.addWidget(header_container)
 
     def _create_navigation(self):
-        """Crear botones de navegación con iconos - MÁS GRANDES"""
+        """Crear botones de navegación con iconos BLANCOS - MÁS GRANDES"""
 
+        # ICONOS BLANCOS (sin color) - usando símbolos Unicode
         nav_items = [
-            ('📊  Dashboards', 'dashboard', '📊'),
-            ('🔍  Consulta de Empleados', 'consultas', '🔍'),
-            ('📥  Importación de Datos', 'importacion', '📥'),
-            ('📄  Generar Reportes', 'reportes', '📄'),
-            ('⚙️  Configuración', 'configuracion', '⚙️'),
+            ('▣  Dashboards', 'dashboard', '▣'),
+            ('⚲  Consulta de Empleados', 'consultas', '⚲'),
+            ('↓  Importación de Datos', 'importacion', '↓'),
+            ('◫  Generar Reportes', 'reportes', '◫'),
+            ('⚙  Configuración', 'configuracion', '⚙'),
         ]
 
         for text, key, icon in nav_items:
             btn = QPushButton(text)
-            btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # Aumentado de 13 a 15
-            btn.setFixedHeight(55)  # Aumentado de 50 a 55
+            btn.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # Aumentado de 15 a 16
+            btn.setFixedHeight(60)  # Aumentado de 55 a 60
             btn.setObjectName("navButton")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.clicked.connect(lambda checked, k=key: self._on_nav_click(k))
@@ -387,9 +388,17 @@ class ModernSidebar(QFrame):
                 background-color: {hover_color} !important;
             }}
 
+            #logoFrame {{
+                background: transparent !important;
+                border: none !important;
+            }}
+
             #logoFrame QLabel {{
                 color: {text_color} !important;
                 background: transparent !important;
+                border: none !important;
+                margin: 0;
+                padding: 0;
             }}
 
             #navButton {{
@@ -443,14 +452,25 @@ class ModernSidebar(QFrame):
                 background-color: #002a70 !important;
             }}
 
+            #footerFrame {{
+                background: transparent !important;
+                border: none !important;
+            }}
+
             #versionLabel {{
                 color: {text_secondary} !important;
                 background: transparent !important;
+                border: none !important;
+                margin: 0;
+                padding: 0;
             }}
 
             #copyrightLabel {{
                 color: {text_secondary} !important;
                 background: transparent !important;
+                border: none !important;
+                margin: 0;
+                padding: 0;
             }}
         """)
 
