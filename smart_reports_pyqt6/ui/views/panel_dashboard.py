@@ -186,6 +186,11 @@ class ChartCard(QFrame):
         table_action.triggered.connect(self._show_data_table)
         menu.addAction(table_action)
 
+        # Acción: Copiar Datos al Portapapeles
+        copy_data_action = QAction("Copiar Datos al Portapapeles", self)
+        copy_data_action.triggered.connect(self._copy_data_to_clipboard)
+        menu.addAction(copy_data_action)
+
         menu.addSeparator()
 
         # Acción: Exportar PDF
@@ -197,6 +202,11 @@ class ChartCard(QFrame):
         export_png_action = QAction("Exportar como PNG", self)
         export_png_action.triggered.connect(lambda: self._export_chart("png"))
         menu.addAction(export_png_action)
+
+        # Acción: Copiar PNG al Portapapeles
+        copy_png_action = QAction("Copiar PNG al Portapapeles", self)
+        copy_png_action.triggered.connect(self._copy_png_to_clipboard)
+        menu.addAction(copy_png_action)
 
         # Acción: Exportar SVG
         export_svg_action = QAction("Exportar como SVG", self)
@@ -364,6 +374,61 @@ class ChartCard(QFrame):
                 self.window(),
                 "Error",
                 f"Error al generar PDF:\n{e}"
+            )
+
+    def _copy_data_to_clipboard(self):
+        """Copiar datos del gráfico al portapapeles"""
+        from PyQt6.QtWidgets import QApplication, QMessageBox
+
+        try:
+            # Preparar datos en formato CSV
+            csv_data = "Categoría,Valor\n"
+            if 'labels' in self.data and 'values' in self.data:
+                for label, value in zip(self.data['labels'], self.data['values']):
+                    csv_data += f"{label},{value}\n"
+
+            # Copiar al portapapeles
+            clipboard = QApplication.clipboard()
+            clipboard.setText(csv_data)
+
+            QMessageBox.information(
+                self.window(),
+                "Datos Copiados",
+                f"Los datos de '{self.title}' han sido copiados al portapapeles en formato CSV.\n\nPuedes pegarlos en Excel, Google Sheets, etc."
+            )
+
+        except Exception as e:
+            QMessageBox.critical(
+                self.window(),
+                "Error",
+                f"Error al copiar datos al portapapeles:\n{e}"
+            )
+
+    def _copy_png_to_clipboard(self):
+        """Copiar imagen PNG del gráfico al portapapeles"""
+        from PyQt6.QtWidgets import QApplication, QMessageBox
+        from PyQt6.QtGui import QPixmap, QImage
+        from PyQt6.QtCore import QBuffer, QIODevice
+
+        try:
+            # Capturar el widget del gráfico como imagen
+            pixmap = self.chart_widget.grab()
+
+            # Copiar al portapapeles
+            clipboard = QApplication.clipboard()
+            clipboard.setPixmap(pixmap)
+
+            QMessageBox.information(
+                self.window(),
+                "Imagen Copiada",
+                f"La imagen del gráfico '{self.title}' ha sido copiada al portapapeles.\n\nPuedes pegarla en Word, PowerPoint, Paint, etc."
+            )
+
+        except Exception as e:
+            QMessageBox.critical(
+                self.window(),
+                "Error",
+                f"Error al copiar imagen al portapapeles:\n{e}"
             )
 
 
