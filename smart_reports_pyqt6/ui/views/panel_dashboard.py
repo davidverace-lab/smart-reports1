@@ -189,7 +189,7 @@ class ExpandedChartView(QWidget):
 
 
 class MetricCard(QFrame):
-    """Tarjeta de métrica"""
+    """Tarjeta de métrica - MÁS CUADRADA Y GRANDE"""
 
     def __init__(self, title: str, value: str, icon: str = "", theme_manager=None, parent=None):
         super().__init__(parent)
@@ -197,9 +197,10 @@ class MetricCard(QFrame):
         self.theme_manager = theme_manager
 
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setMinimumHeight(100)
+        self.setMinimumHeight(140)  # Aumentado de 100 a 140
+        self.setMinimumWidth(250)  # Añadido ancho mínimo para ser más cuadrada
 
-        # Estilo con borde navy
+        # Estilo con borde navy y SIN CUADROS GRISES
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         bg_color = "#2d2d2d" if is_dark else "#ffffff"
         border_color = "#003087"
@@ -209,28 +210,28 @@ class MetricCard(QFrame):
         self.setStyleSheet(f"""
             MetricCard {{
                 background-color: {bg_color};
-                border: 2px solid {border_color};
+                border: 3px solid {border_color};
                 border-radius: 12px;
             }}
         """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(8)
+        layout.setContentsMargins(20, 20, 20, 20)  # Más padding - de 15 a 20
+        layout.setSpacing(12)  # Aumentado de 8 a 12
 
-        # Título
+        # Título - MÁS GRANDE
         title_label = QLabel(title)
-        title_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
-        title_label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        title_label.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # Aumentado de 11 a 14
+        title_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
         title_label.setWordWrap(True)
         layout.addWidget(title_label)
 
         layout.addStretch()
 
-        # Valor
+        # Valor - MÁS GRANDE
         value_label = QLabel(value)
-        value_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))
-        value_label.setStyleSheet(f"color: {value_color}; background: transparent;")
+        value_label.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 22 a 32
+        value_label.setStyleSheet(f"color: {value_color}; background: transparent; border: none;")
         value_label.setWordWrap(True)
         layout.addWidget(value_label)
 
@@ -677,11 +678,11 @@ class DashboardPanel(QWidget):
         header_layout = QHBoxLayout()
 
         self.title_label = QLabel("Panel de Control Ejecutivo")
-        self.title_label.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))
+        self.title_label.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 26 a 32
         # Color según tema
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        self.title_label.setStyleSheet(f"color: {title_color};")
+        self.title_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent;")
         header_layout.addWidget(self.title_label)
 
         header_layout.addStretch()

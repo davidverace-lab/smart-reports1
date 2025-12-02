@@ -32,20 +32,20 @@ class ReportCard(QFrame):
         layout.setContentsMargins(15, 15, 15, 15)  # REDUCIDO de 20 a 15
         layout.setSpacing(8)  # REDUCIDO de 12 a 8
 
-        # Icono y título
+        # Icono y título - MÁS GRANDE
         header_label = QLabel(f"{icon} {title}")
-        header_label.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))
+        header_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))  # Aumentado de 18 a 20
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         text_color = "#ffffff" if is_dark else "#003087"
-        header_label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
         layout.addWidget(header_label)
 
-        # Descripción
+        # Descripción - MÁS GRANDE
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 12))
+        desc_label.setFont(QFont("Montserrat", 13))  # Aumentado de 12 a 13
         desc_color = "#b0b0b0" if is_dark else "#666666"
-        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent;")
+        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none;")
         layout.addWidget(desc_label)
 
         layout.addStretch()
@@ -136,12 +136,12 @@ class ReportGenerationView(QWidget):
         back_btn.clicked.connect(self.back_clicked.emit)
         header_layout.addWidget(back_btn)
 
-        # Título
+        # Título - MÁS GRANDE
         title = QLabel(f"📊 {self.report_type}")
-        title.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))
+        title.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))  # Aumentado de 22 a 26
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
@@ -445,16 +445,16 @@ class ReportesPanel(QWidget):
         header_layout.setContentsMargins(5, 5, 5, 5)
 
         title = QLabel("📊 Generación de Reportes")
-        title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
+        title.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 28 a 32
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
         header_layout.addWidget(title)
 
         subtitle = QLabel("Selecciona el tipo de reporte que deseas generar")
-        subtitle.setFont(QFont("Montserrat", 13))
+        subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 13 a 16
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
         header_layout.addWidget(subtitle)
 
         layout.addWidget(header)

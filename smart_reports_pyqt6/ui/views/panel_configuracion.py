@@ -32,20 +32,20 @@ class ConfigCard(QFrame):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(15)
 
-        # Icono y título
+        # Icono y título - SIN BORDES
         header_label = QLabel(f"{icon} {title}")
-        header_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
+        header_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Aumentado de 20 a 22
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         text_color = "#ffffff" if is_dark else "#003087"
-        header_label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
         layout.addWidget(header_label)
 
-        # Descripción
+        # Descripción - MÁS GRANDE Y SIN BORDES
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 13))
+        desc_label.setFont(QFont("Montserrat", 14))  # Aumentado de 13 a 14
         desc_color = "#b0b0b0" if is_dark else "#666666"
-        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent;")
+        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none;")
         layout.addWidget(desc_label)
 
         layout.addStretch()
@@ -128,16 +128,16 @@ class ConfigMainView(QWidget):
         header_layout.setSpacing(5)
 
         title = QLabel("⚙️ Configuración")
-        title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))
+        title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))  # Ya está en 36pt ✅
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        title_color = "#ffffff" if is_dark else "#002E6D"
-        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title_color = "#ffffff" if is_dark else "#003087"  # Cambiado a #003087 para consistencia
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
         header_layout.addWidget(title)
 
         subtitle = QLabel("Gestiona las opciones del sistema")
-        subtitle.setFont(QFont("Montserrat", 14))
+        subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 14 a 16
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
         header_layout.addWidget(subtitle)
 
         main_layout.addWidget(header)
