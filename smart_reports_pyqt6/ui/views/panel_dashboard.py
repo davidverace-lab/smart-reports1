@@ -111,7 +111,7 @@ class ChartCard(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # Header con título y botón de menú
+        # Header con título y botones de acción
         header = QWidget()
         header.setFixedHeight(45)
         header_layout = QHBoxLayout(header)
@@ -126,6 +126,26 @@ class ChartCard(QFrame):
         header_layout.addWidget(title_label)
 
         header_layout.addStretch()
+
+        # Botón de expandir (FUERA del menú)
+        expand_btn = QPushButton("⤢")
+        expand_btn.setFont(QFont("Arial", 16, QFont.Weight.Bold))
+        expand_btn.setFixedSize(35, 35)
+        expand_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 17px;
+            }}
+            QPushButton:hover {{
+                background-color: #004ba0;
+            }}
+        """)
+        expand_btn.setToolTip("Expandir a pantalla completa")
+        expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        expand_btn.clicked.connect(self._toggle_fullscreen)
+        header_layout.addWidget(expand_btn)
 
         # Botón de menú (3 puntos)
         menu_btn = QPushButton("⋮")
@@ -142,6 +162,7 @@ class ChartCard(QFrame):
                 background-color: #004ba0;
             }}
         """)
+        menu_btn.setToolTip("Más opciones")
         menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         menu_btn.clicked.connect(self._show_menu)
         header_layout.addWidget(menu_btn)
@@ -160,12 +181,17 @@ class ChartCard(QFrame):
 
         menu = QMenu(self)
 
-        # Acción: Pantalla completa
-        fullscreen_action = QAction("Pantalla Completa", self)
-        fullscreen_action.triggered.connect(self._toggle_fullscreen)
-        menu.addAction(fullscreen_action)
+        # Acción: Mostrar en Tabla
+        table_action = QAction("Mostrar en Tabla", self)
+        table_action.triggered.connect(self._show_data_table)
+        menu.addAction(table_action)
 
         menu.addSeparator()
+
+        # Acción: Exportar PDF
+        export_pdf_action = QAction("Exportar como PDF", self)
+        export_pdf_action.triggered.connect(self._export_as_pdf)
+        menu.addAction(export_pdf_action)
 
         # Acción: Exportar PNG
         export_png_action = QAction("Exportar como PNG", self)
@@ -221,6 +247,124 @@ class ChartCard(QFrame):
         """Actualizar gráfico"""
         print(f"🔄 Actualizando gráfico '{self.title}'...")
         self.chart_widget.set_chart(self.chart_type, self.title, self.data, tema=self.theme)
+
+    def _show_data_table(self):
+        """Mostrar datos del gráfico en tabla"""
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView
+
+        # Crear diálogo
+        dialog = QDialog(self.window())
+        dialog.setWindowTitle(f"Datos: {self.title}")
+        dialog.setMinimumSize(600, 400)
+
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Título
+        title_label = QLabel(f"Datos de '{self.title}'")
+        title_label.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        layout.addWidget(title_label)
+
+        # Crear tabla
+        table = QTableWidget()
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels(["Categoría", "Valor"])
+
+        # Poblar tabla con datos
+        if 'labels' in self.data and 'values' in self.data:
+            table.setRowCount(len(self.data['labels']))
+            for i, (label, value) in enumerate(zip(self.data['labels'], self.data['values'])):
+                table.setItem(i, 0, QTableWidgetItem(str(label)))
+                table.setItem(i, 1, QTableWidgetItem(str(value)))
+
+        # Ajustar columnas
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        layout.addWidget(table)
+
+        # Botón cerrar
+        close_btn = QPushButton("Cerrar")
+        close_btn.setFixedHeight(40)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        close_btn.clicked.connect(dialog.close)
+        layout.addWidget(close_btn)
+
+        dialog.exec()
+
+    def _export_as_pdf(self):
+        """Exportar gráfico como PDF"""
+        from PyQt6.QtWidgets import QFileDialog, QMessageBox
+        import os
+
+        # Solicitar ubicación de guardado
+        filename, _ = QFileDialog.getSaveFileName(
+            self.window(),
+            "Guardar PDF",
+            f"{self.title}.pdf",
+            "PDF Files (*.pdf)"
+        )
+
+        if not filename:
+            return  # Usuario canceló
+
+        try:
+            # Importar generador de PDF
+            import sys
+            sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
+            from smart_reports.utils.visualization.pdf_generator import PDFReportGenerator
+
+            # Crear generador
+            pdf_gen = PDFReportGenerator()
+
+            # Preparar datos para tabla
+            data_table = [["Categoría", "Valor"]]
+            if 'labels' in self.data and 'values' in self.data:
+                for label, value in zip(self.data['labels'], self.data['values']):
+                    data_table.append([str(label), str(value)])
+
+            # Información adicional
+            additional_info = {
+                "Tipo de Gráfico": self.chart_type.capitalize(),
+                "Total de Registros": len(self.data.get('labels', [])),
+            }
+
+            # Por ahora sin figura matplotlib (solo tabla)
+            # TODO: Convertir gráfico D3 a matplotlib o imagen
+            pdf_gen.create_dashboard_pdf(
+                filename=filename,
+                dashboard_title=self.title,
+                figure=None,
+                data_table=data_table,
+                additional_info=additional_info
+            )
+
+            QMessageBox.information(
+                self.window(),
+                "PDF Generado",
+                f"El PDF se ha guardado correctamente en:\n{filename}"
+            )
+
+        except ImportError as e:
+            QMessageBox.warning(
+                self.window(),
+                "Librería Faltante",
+                f"No se pudo generar el PDF. Falta instalar ReportLab:\n\npip install reportlab\n\nError: {e}"
+            )
+        except Exception as e:
+            QMessageBox.critical(
+                self.window(),
+                "Error",
+                f"Error al generar PDF:\n{e}"
+            )
 
 
 class DashboardPanel(QWidget):
