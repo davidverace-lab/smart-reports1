@@ -35,12 +35,12 @@ class MenuReportes:
         """Mostrar panel de selección de reportes"""
         # Eliminar bloqueo - permitir ver interfaz sin BD
 
-        # Container
+        # Container - SIN MÁRGENES GRISES
         container = ctk.CTkScrollableFrame(
             self.parent,
             fg_color='transparent'
         )
-        container.pack(fill='both', expand=True, padx=20, pady=20)
+        container.pack(fill='both', expand=True, padx=10, pady=10)
 
         # Crear título
         self._create_title(container)
@@ -171,13 +171,14 @@ class MenuReportes:
         )
         desc.pack(anchor='w', pady=(0, 20))
 
-        # Botón generar
+        # Botón generar - NAVY BLUE CON TEXTO BLANCO
         btn = ctk.CTkButton(
             content,
             text="Generar Reporte",
             font=('Montserrat', 14, 'bold'),
-            fg_color=HUTCHISON_COLORS['primary'],
+            fg_color=HUTCHISON_COLORS['primary'],  # #002E6D Navy
             hover_color='#003D8F',
+            text_color='white',  # Texto blanco SIEMPRE
             height=45,
             corner_radius=10,
             command=command

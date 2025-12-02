@@ -103,12 +103,12 @@ class UserReportPanel(ctk.CTkFrame):
 
         theme = self.theme_manager.get_current_theme()
 
-        # Contenedor con scroll
+        # Contenedor con scroll - SIN MÁRGENES GRISES
         scroll_frame = ctk.CTkScrollableFrame(
             self,
             fg_color='transparent'
         )
-        scroll_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
+        scroll_frame.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
         scroll_frame.grid_columnconfigure(0, weight=1)
 
         # Header
@@ -152,92 +152,94 @@ class UserReportPanel(ctk.CTkFrame):
             text_color=theme['colors']['text_secondary']
         ).grid(row=1, column=title_col, sticky='w', pady=(5, 0))
 
-        # Sección de entrada de usuario
+        # Sección de entrada de usuario - MÁS COMPACTA
         input_section = ctk.CTkFrame(
             scroll_frame,
             fg_color=theme['colors'].get('card_background', '#2d2d2d'),
-            corner_radius=15
+            corner_radius=12
         )
-        input_section.grid(row=1, column=0, sticky='ew', pady=(0, 20))
+        input_section.grid(row=1, column=0, sticky='ew', pady=(0, 15))
         input_section.grid_columnconfigure(1, weight=1)
 
-        # Padding interno
+        # Padding interno - REDUCIDO
         input_content = ctk.CTkFrame(input_section, fg_color='transparent')
-        input_content.pack(fill='both', expand=True, padx=30, pady=30)
+        input_content.pack(fill='both', expand=True, padx=20, pady=20)  # Reducido de 30 a 20
         input_content.grid_columnconfigure(1, weight=1)
 
-        # Label User ID
+        # Label User ID - MÁS COMPACTO
         ctk.CTkLabel(
             input_content,
             text='User ID:',
-            font=('Montserrat', 16, 'bold'),
+            font=('Montserrat', 14, 'bold'),  # Reducido de 16 a 14
             text_color=theme['colors']['text']
-        ).grid(row=0, column=0, sticky='w', pady=10, padx=(0, 15))
+        ).grid(row=0, column=0, sticky='w', pady=5, padx=(0, 12))  # Reducido padding
 
-        # Entry User ID
+        # Entry User ID - MÁS COMPACTO
         self.userid_entry = ctk.CTkEntry(
             input_content,
             placeholder_text='Ingrese el User ID',
-            font=('Montserrat', 14),
-            height=45,
-            corner_radius=10
+            font=('Montserrat', 13),  # Reducido de 14 a 13
+            height=40,  # Reducido de 45 a 40
+            corner_radius=8
         )
-        self.userid_entry.grid(row=0, column=1, sticky='ew', pady=10)
+        self.userid_entry.grid(row=0, column=1, sticky='ew', pady=5)
 
-        # Botón generar
+        # Botón generar - NAVY BLUE y MÁS COMPACTO
         button_color = '#002E6D'  # Navy blue
         ctk.CTkButton(
             input_content,
             text='🔍 Generar Vista Previa',
-            font=('Montserrat', 16, 'bold'),
+            font=('Montserrat', 14, 'bold'),  # Reducido de 16 a 14
             fg_color=button_color,
             hover_color='#003D8F',
-            corner_radius=10,
-            height=50,
-            width=250,
+            text_color='white',
+            corner_radius=8,
+            height=40,  # Reducido de 50 a 40
+            width=220,  # Reducido de 250 a 220
             command=self._generate_preview
-        ).grid(row=0, column=2, sticky='e', pady=10, padx=(15, 0))
+        ).grid(row=0, column=2, sticky='e', pady=5, padx=(12, 0))
 
-        # Sección de vista previa
+        # Sección de vista previa - MÁS COMPACTA
         preview_section = ctk.CTkFrame(
             scroll_frame,
             fg_color=theme['colors'].get('card_background', '#2d2d2d'),
-            corner_radius=15
+            corner_radius=12
         )
-        preview_section.grid(row=2, column=0, sticky='nsew', pady=(0, 20))
+        preview_section.grid(row=2, column=0, sticky='nsew', pady=(0, 15))
         preview_section.grid_columnconfigure(0, weight=1)
         scroll_frame.grid_rowconfigure(2, weight=1)
 
-        # Header de vista previa
+        # Header de vista previa - MÁS COMPACTO
         preview_header = ctk.CTkFrame(preview_section, fg_color='transparent')
-        preview_header.pack(fill='x', padx=30, pady=(30, 10))
+        preview_header.pack(fill='x', padx=20, pady=(20, 10))  # Reducido padding
         preview_header.grid_columnconfigure(0, weight=1)
 
         ctk.CTkLabel(
             preview_header,
             text='Vista Previa del Reporte',
-            font=('Montserrat', 20, 'bold'),
+            font=('Montserrat', 18, 'bold'),  # Reducido de 20 a 18
             text_color=theme['colors']['text']
         ).grid(row=0, column=0, sticky='w')
 
-        # Botón guardar (inicialmente oculto)
+        # Botón guardar - NAVY BLUE y ARRIBA (mejor UX)
         self.save_button = ctk.CTkButton(
             preview_header,
             text='💾 Guardar PDF',
-            font=('Montserrat', 14, 'bold'),
+            font=('Montserrat', 13, 'bold'),  # Reducido de 14 a 13
             fg_color=button_color,
             hover_color='#003D8F',
-            corner_radius=10,
-            height=45,
-            width=180,
+            text_color='white',
+            corner_radius=8,
+            height=38,  # Reducido de 45 a 38
+            width=160,  # Reducido de 180 a 160
             command=self._save_pdf,
             state='disabled'
         )
-        self.save_button.grid(row=0, column=1, sticky='e', padx=(15, 0))
+        self.save_button.grid(row=0, column=1, sticky='e', padx=(12, 0))
 
-        # Área de vista previa - HTML profesional estilo Word
+        # Área de vista previa - HTML profesional estilo Word - MÁS COMPACTA
         self.preview_widget = PrevisualizadorReporte(preview_section)
-        self.preview_widget.pack(fill='both', expand=True, padx=30, pady=(0, 30))
+        self.preview_widget.pack(fill='both', expand=True, padx=20, pady=(0, 20))  # Reducido padding
 
     def _generate_preview(self):
         """Generar vista previa del reporte"""

@@ -71,11 +71,15 @@ class D3ChartWidget(QWidget):
         self.chart_type = chart_type
         self.chart_data = datos
 
+        # CRÍTICO: Limpiar webview antes de cargar nuevo contenido
+        self.webview.setHtml("")
+
         # Generar HTML
         html = self._generate_html(chart_type, title, datos, subtitle, tema)
 
-        # Cargar en webview
-        self._load_html(html)
+        # Cargar en webview con delay para asegurar renderizado
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(50, lambda: self._load_html(html))
 
     def _generate_html(self, chart_type: str, title: str, datos: dict, subtitle: str, tema: str) -> str:
         """Generar HTML del gráfico"""

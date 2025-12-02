@@ -199,17 +199,17 @@ class D3InteractiveChartCard(ctk.CTkFrame):
         controls_frame = ctk.CTkFrame(header, fg_color='transparent')
         controls_frame.grid(row=0, column=1, sticky='e')
 
-        # Botón "Ver Grande" para expansión in-place (más compacto)
+        # Botón "Ver Grande" para expansión in-place - MÁS VISIBLE
         self.expand_btn = ctk.CTkButton(
             controls_frame,
-            text='⛶',
-            font=('Montserrat', 14, 'bold'),
+            text='⛶',  # Icono de expandir
+            font=('Segoe UI', 16, 'bold'),  # Fuente más grande y legible
             fg_color=HUTCHISON_COLORS['primary'],
             hover_color='#001a3d',
             text_color='white',
-            corner_radius=6,
-            width=35,
-            height=28,
+            corner_radius=8,
+            width=40,  # Más ancho
+            height=32,  # Más alto
             command=self._toggle_expansion
         )
         self.expand_btn.pack(side='left', padx=(0, 5))
@@ -374,11 +374,12 @@ class D3InteractiveChartCard(ctk.CTkFrame):
 
             print(f"  ✅ Frame creado")
 
+            # HtmlFrame SIN SCROLLBARS (clean UI)
             html_widget = HtmlFrame(
                 html_frame,
                 messages_enabled=False,
-                vertical_scrollbar=False,
-                horizontal_scrollbar=False
+                vertical_scrollbar=False,  # Sin scrollbar vertical
+                horizontal_scrollbar=False  # Sin scrollbar horizontal
             )
 
             print(f"  ✅ HtmlFrame creado")

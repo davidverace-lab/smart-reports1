@@ -35,12 +35,12 @@ class HistorialReportesFragment(ctk.CTkFrame):
         """Crear interfaz completa del fragment"""
         theme = self.theme_manager.get_current_theme()
 
-        # Scroll frame principal
+        # Scroll frame principal - SIN MÁRGENES GRISES
         scroll_frame = ctk.CTkScrollableFrame(
             self,
             fg_color='transparent'
         )
-        scroll_frame.pack(fill='both', expand=True, padx=20, pady=20)
+        scroll_frame.pack(fill='both', expand=True, padx=10, pady=10)
 
         # Header con botón volver
         self._create_header(scroll_frame, theme)
@@ -49,61 +49,63 @@ class HistorialReportesFragment(ctk.CTkFrame):
         self._create_history_card(scroll_frame, theme)
 
     def _create_header(self, parent, theme):
-        """Crear header con título y botón volver"""
-        header = ctk.CTkFrame(parent, fg_color='transparent', height=60)
-        header.pack(fill='x', pady=(0, 20))
+        """Crear header con título y botón volver - NAVY BLUE"""
+        from smart_reports.config.themes import HUTCHISON_COLORS
+
+        header = ctk.CTkFrame(parent, fg_color='transparent', height=55)  # Reducido de 60 a 55
+        header.pack(fill='x', pady=(0, 15))  # Reducido padding
         header.pack_propagate(False)
 
-        # Botón volver
+        # Botón volver - NAVY BLUE
         back_btn = ctk.CTkButton(
             header,
             text='← Volver',
-            font=('Montserrat', 14, 'bold'),
-            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
-            text_color=theme['colors']['text'],
-            hover_color=theme['colors'].get('background_secondary', '#2b2b2b'),
-            corner_radius=10,
-            width=120,
-            height=40,
+            font=('Montserrat', 13, 'bold'),  # Reducido de 14 a 13
+            fg_color=HUTCHISON_COLORS['primary'],
+            text_color='white',
+            hover_color='#003D8F',
+            corner_radius=8,
+            width=110,  # Reducido de 120 a 110
+            height=38,  # Reducido de 40 a 38
             command=self.on_back if self.on_back else None
         )
         back_btn.pack(side='left')
 
-        # Título
+        # Título - Navy en modo claro, blanco en modo oscuro
         is_dark = self.theme_manager.is_dark_mode()
-        title_color = '#FFFFFF' if is_dark else '#002E6D'
+        title_color = '#FFFFFF' if is_dark else HUTCHISON_COLORS['primary']
 
         title = ctk.CTkLabel(
             header,
             text='📋 Historial de Reportes',
-            font=('Montserrat', 28, 'bold'),
+            font=('Montserrat', 26, 'bold'),  # Reducido de 28 a 26
             text_color=title_color
         )
-        title.pack(side='left', padx=20)
+        title.pack(side='left', padx=15)  # Reducido de 20 a 15
 
     def _create_history_card(self, parent, theme):
-        """Card de historial de reportes"""
+        """Card de historial de reportes - MÁS COMPACTO"""
         history_card = ctk.CTkFrame(
             parent,
             fg_color=theme['colors'].get('card_background', '#2d2d2d'),
-            corner_radius=15,
+            corner_radius=12,  # Reducido de 15 a 12
             border_width=1,
             border_color=theme['colors']['border']
         )
         history_card.pack(fill='both', expand=True)
 
-        # Contenido del historial
+        # Contenido del historial - PADDING REDUCIDO
         history_content = ctk.CTkFrame(history_card, fg_color='transparent')
-        history_content.pack(fill='both', expand=True, padx=30, pady=30)
+        history_content.pack(fill='both', expand=True, padx=20, pady=20)  # Reducido de 30 a 20
 
-        # Título de la tabla
+        # Título de la tabla - MÁS COMPACTO
         table_title = ctk.CTkLabel(
             history_content,
             text='📑 Reportes Generados',
-            font=('Montserrat', 18, 'bold'),
+            font=('Montserrat', 16, 'bold'),  # Reducido de 18 a 16
             text_color=theme['colors']['text']
         )
-        table_title.pack(anchor='w', pady=(0, 20))
+        table_title.pack(anchor='w', pady=(0, 15))  # Reducido de 20 a 15
 
         # Container para tabla
         table_container_bg = theme['colors']['background'] if self.theme_manager.is_dark_mode() else '#f5f5f5'
@@ -191,46 +193,50 @@ class HistorialReportesFragment(ctk.CTkFrame):
         parent.grid_columnconfigure(0, weight=1)
 
     def _create_action_buttons(self, parent, theme):
-        """Crear botones de acción"""
+        """Crear botones de acción - NAVY BLUE con texto blanco"""
         button_frame = ctk.CTkFrame(parent, fg_color='transparent')
-        button_frame.pack(fill='x', pady=(20, 0))
+        button_frame.pack(fill='x', pady=(15, 0))  # Reducido padding
 
-        button_color = self._get_button_color()
+        # ESTANDARIZAR: Todos los botones navy blue con texto blanco
+        from smart_reports.config.themes import HUTCHISON_COLORS
+        button_color = HUTCHISON_COLORS['primary']  # #002E6D - Navy blue
 
         ctk.CTkButton(
             button_frame,
             text='📥 Descargar Seleccionado',
-            font=('Montserrat', 14, 'bold'),
+            font=('Montserrat', 13, 'bold'),  # Reducido de 14 a 13
             fg_color=button_color,
-            hover_color=self._get_button_hover_color(button_color),
-            corner_radius=10,
-            height=45,
-            width=220,
+            hover_color='#003D8F',
+            text_color='white',
+            corner_radius=8,
+            height=40,  # Reducido de 45 a 40
+            width=210,  # Reducido de 220 a 210
             command=self._download_selected
         ).pack(side='left', padx=5)
 
         ctk.CTkButton(
             button_frame,
             text='🔄 Actualizar Lista',
-            font=('Montserrat', 14, 'bold'),
-            fg_color=theme['colors'].get('background_secondary', '#2b2b2b'),
-            text_color=theme['colors']['text'],
-            hover_color=theme['colors']['border'],
-            corner_radius=10,
-            height=45,
-            width=180,
+            font=('Montserrat', 13, 'bold'),
+            fg_color=button_color,
+            hover_color='#003D8F',
+            text_color='white',
+            corner_radius=8,
+            height=40,
+            width=170,  # Reducido de 180 a 170
             command=self._refresh_list
         ).pack(side='left', padx=5)
 
         ctk.CTkButton(
             button_frame,
             text='🗑️ Eliminar Seleccionado',
-            font=('Montserrat', 14, 'bold'),
-            fg_color='#E53E3E',
-            hover_color='#C53030',
-            corner_radius=10,
-            height=45,
-            width=200,
+            font=('Montserrat', 13, 'bold'),
+            fg_color='#C53030',  # Rojo más oscuro para peligro
+            hover_color='#9B2C2C',
+            text_color='white',
+            corner_radius=8,
+            height=40,
+            width=190,  # Reducido de 200 a 190
             command=self._delete_selected
         ).pack(side='left', padx=5)
 

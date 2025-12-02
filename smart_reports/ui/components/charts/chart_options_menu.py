@@ -66,21 +66,20 @@ class ChartOptionsMenu(ctk.CTkFrame):
         self.theme_manager.register_callback(self._on_theme_changed)
 
     def _create_menu_button(self):
-        """Crear botón de 3 puntitos (⋮)"""
+        """Crear botón de 3 puntitos (⋮) - MÁS VISIBLE"""
         theme = self.theme_manager.get_current_theme()
 
         self.menu_btn = ctk.CTkButton(
             self,
-            text="⋮",
-            width=35,
-            height=28,
-            font=('Montserrat', 18, 'bold'),
-            fg_color=theme['colors'].get('card_background', '#2d2d2d'),
-            hover_color=HUTCHISON_COLORS['primary'],
-            text_color=theme['colors']['text'],
-            corner_radius=6,
-            border_width=1,
-            border_color=theme['colors']['border'],
+            text="⋮",  # Tres puntos verticales
+            width=40,  # Más ancho
+            height=32,  # Más alto
+            font=('Segoe UI', 20, 'bold'),  # Fuente más grande
+            fg_color=HUTCHISON_COLORS['primary'],  # Azul navy para visibilidad
+            hover_color='#001a3d',
+            text_color='white',  # Texto blanco para contraste
+            corner_radius=8,
+            border_width=0,  # Sin borde para look más limpio
             command=self._toggle_menu
         )
         self.menu_btn.pack()

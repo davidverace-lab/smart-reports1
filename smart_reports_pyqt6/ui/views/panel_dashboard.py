@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QFrame, QScrollArea
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
 from smart_reports_pyqt6.ui.widgets.d3_chart_widget import D3ChartWidget
@@ -45,6 +45,149 @@ MODULOS_MENOR_AVANCE_DATA = {
 }
 
 
+class ExpandedChartView(QWidget):
+    """Vista expandida de gráfico (flujo tipo app móvil)"""
+
+    back_clicked = pyqtSignal()
+
+    def __init__(self, chart_type: str, title: str, data: dict, theme: str = 'dark', theme_manager=None, parent=None):
+        super().__init__(parent)
+
+        self.chart_type = chart_type
+        self.title = title
+        self.data = data
+        self.theme = theme
+        self.theme_manager = theme_manager
+
+        # Crear UI
+        self._create_ui()
+
+    def _create_ui(self):
+        """Crear interfaz de vista expandida con header compacto"""
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(5, 5, 5, 5)  # SIN MÁRGENES GRISES
+        layout.setSpacing(8)
+
+        # Header compacto con todos los controles en una sola fila
+        header = QWidget()
+        header.setFixedHeight(50)
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(5, 5, 5, 5)
+        header_layout.setSpacing(10)
+
+        # Botón de retorno más compacto
+        back_btn = QPushButton("←")
+        back_btn.setFont(QFont("Arial", 18, QFont.Weight.Bold))
+        back_btn.setFixedSize(45, 40)
+        back_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        back_btn.setToolTip("Volver al dashboard")
+        back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        back_btn.clicked.connect(self.back_clicked.emit)
+        header_layout.addWidget(back_btn)
+
+        # Título del gráfico más compacto
+        title_label = QLabel(self.title)
+        title_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+        title_color = "#ffffff" if is_dark else "#003087"
+        title_label.setStyleSheet(f"color: {title_color}; background: transparent;")
+        header_layout.addWidget(title_label)
+
+        header_layout.addStretch()
+
+        # Botón de menú con opciones
+        menu_btn = QPushButton("⋯")
+        menu_btn.setFont(QFont("Arial", 20, QFont.Weight.Bold))
+        menu_btn.setFixedSize(45, 40)
+        menu_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        menu_btn.setToolTip("Opciones del gráfico")
+        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        menu_btn.clicked.connect(self._show_menu)
+        header_layout.addWidget(menu_btn)
+
+        layout.addWidget(header)
+
+        # Gráfico grande (ocupa todo el espacio restante)
+        self.chart_widget = D3ChartWidget(self)
+        self.chart_widget.set_chart(self.chart_type, "", self.data, tema=self.theme)
+        layout.addWidget(self.chart_widget)
+
+    def _show_menu(self):
+        """Mostrar menú de opciones"""
+        from PyQt6.QtWidgets import QMenu
+        from PyQt6.QtGui import QAction
+
+        menu = QMenu(self)
+
+        # Opciones similares al ChartCard
+        table_action = QAction("Mostrar en Tabla", self)
+        table_action.triggered.connect(self._show_data_table)
+        menu.addAction(table_action)
+
+        copy_data_action = QAction("Copiar Datos al Portapapeles", self)
+        copy_data_action.triggered.connect(self._copy_data_to_clipboard)
+        menu.addAction(copy_data_action)
+
+        menu.addSeparator()
+
+        export_pdf_action = QAction("Exportar como PDF", self)
+        export_pdf_action.triggered.connect(self._export_as_pdf)
+        menu.addAction(export_pdf_action)
+
+        export_png_action = QAction("Exportar como PNG", self)
+        export_png_action.triggered.connect(lambda: self._export_chart("png"))
+        menu.addAction(export_png_action)
+
+        copy_png_action = QAction("Copiar PNG al Portapapeles", self)
+        copy_png_action.triggered.connect(self._copy_png_to_clipboard)
+        menu.addAction(copy_png_action)
+
+        menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
+
+    def _show_data_table(self):
+        """Mostrar datos en tabla"""
+        # Implementación similar a ChartCard
+        print(f"📊 Mostrando tabla de datos para '{self.title}'")
+
+    def _copy_data_to_clipboard(self):
+        """Copiar datos al portapapeles"""
+        print(f"📋 Copiando datos de '{self.title}'")
+
+    def _export_as_pdf(self):
+        """Exportar como PDF"""
+        print(f"📄 Exportando '{self.title}' como PDF")
+
+    def _export_chart(self, format: str):
+        """Exportar gráfico"""
+        print(f"💾 Exportando '{self.title}' como {format.upper()}")
+
+    def _copy_png_to_clipboard(self):
+        """Copiar PNG al portapapeles"""
+        print(f"🖼️ Copiando imagen de '{self.title}'")
+
+
 class MetricCard(QFrame):
     """Tarjeta de métrica"""
 
@@ -72,13 +215,13 @@ class MetricCard(QFrame):
         """)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(10)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(8)
 
         # Título
         title_label = QLabel(title)
         title_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
-        title_label.setStyleSheet(f"color: {text_color};")
+        title_label.setStyleSheet(f"color: {text_color}; background: transparent;")
         title_label.setWordWrap(True)
         layout.addWidget(title_label)
 
@@ -87,7 +230,7 @@ class MetricCard(QFrame):
         # Valor
         value_label = QLabel(value)
         value_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))
-        value_label.setStyleSheet(f"color: {value_color};")
+        value_label.setStyleSheet(f"color: {value_color}; background: transparent;")
         value_label.setWordWrap(True)
         layout.addWidget(value_label)
 
@@ -106,6 +249,7 @@ class ChartCard(QFrame):
 
         self.setFrameShape(QFrame.Shape.NoFrame)
         self.setMinimumHeight(450)
+        self.setSizePolicy(QWidget().sizePolicy().Policy.Expanding, QWidget().sizePolicy().Policy.Expanding)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -113,56 +257,58 @@ class ChartCard(QFrame):
 
         # Header con título y botones de acción
         header = QWidget()
-        header.setFixedHeight(45)
+        header.setFixedHeight(40)
         header_layout = QHBoxLayout(header)
-        header_layout.setContentsMargins(15, 5, 15, 5)
+        header_layout.setContentsMargins(12, 3, 12, 3)
 
         # Título del gráfico
         title_label = QLabel(title)
         title_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
         is_dark = theme_manager.is_dark_mode() if theme_manager else (theme == 'dark')
         title_color = "#ffffff" if is_dark else "#003087"
-        title_label.setStyleSheet(f"color: {title_color};")
+        title_label.setStyleSheet(f"color: {title_color}; background: transparent;")
         header_layout.addWidget(title_label)
 
         header_layout.addStretch()
 
-        # Botón de expandir (FUERA del menú)
-        expand_btn = QPushButton("⤢")
-        expand_btn.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        expand_btn.setFixedSize(35, 35)
+        # Botón de expandir (FUERA del menú) con icono de flecha
+        expand_btn = QPushButton("↗")
+        expand_btn.setFont(QFont("Arial", 18, QFont.Weight.Bold))
+        expand_btn.setFixedSize(38, 38)
         expand_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #003087;
                 color: white;
                 border: none;
-                border-radius: 17px;
+                border-radius: 19px;
+                font-weight: bold;
             }}
             QPushButton:hover {{
                 background-color: #004ba0;
             }}
         """)
-        expand_btn.setToolTip("Expandir a pantalla completa")
+        expand_btn.setToolTip("Expandir gráfico")
         expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         expand_btn.clicked.connect(self._toggle_fullscreen)
         header_layout.addWidget(expand_btn)
 
-        # Botón de menú (3 puntos)
-        menu_btn = QPushButton("⋮")
-        menu_btn.setFont(QFont("Arial", 18, QFont.Weight.Bold))
-        menu_btn.setFixedSize(35, 35)
+        # Botón de menú (3 puntos) con icono mejorado
+        menu_btn = QPushButton("⋯")
+        menu_btn.setFont(QFont("Arial", 20, QFont.Weight.Bold))
+        menu_btn.setFixedSize(38, 38)
         menu_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #003087;
                 color: white;
                 border: none;
-                border-radius: 17px;
+                border-radius: 19px;
+                font-weight: bold;
             }}
             QPushButton:hover {{
                 background-color: #004ba0;
             }}
         """)
-        menu_btn.setToolTip("Más opciones")
+        menu_btn.setToolTip("Opciones del gráfico")
         menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         menu_btn.clicked.connect(self._show_menu)
         header_layout.addWidget(menu_btn)
@@ -224,10 +370,47 @@ class ChartCard(QFrame):
         menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
 
     def _toggle_fullscreen(self):
-        """Expandir gráfico a pantalla completa (sin modal)"""
+        """Expandir gráfico en nueva vista (flujo de app móvil)"""
+        # Obtener referencia a la ventana principal
+        main_window = self.window()
+
+        # Verificar si tiene panel_stack (está en MainWindow)
+        if not hasattr(main_window, 'panel_stack'):
+            # Fallback a modal si no está en contexto correcto
+            self._show_modal_fullscreen()
+            return
+
+        # Crear vista expandida
+        expanded_view = ExpandedChartView(
+            chart_type=self.chart_type,
+            title=self.title,
+            data=self.data,
+            theme=self.theme,
+            theme_manager=self.theme_manager,
+            parent=main_window
+        )
+
+        # Conectar botón de retorno
+        expanded_view.back_clicked.connect(lambda: self._close_expanded_view(main_window, expanded_view))
+
+        # Agregar al stack
+        main_window.panel_stack.addWidget(expanded_view)
+        main_window.panel_stack.setCurrentWidget(expanded_view)
+
+    def _close_expanded_view(self, main_window, expanded_view):
+        """Cerrar vista expandida y volver al dashboard"""
+        # Volver al dashboard
+        if hasattr(main_window, 'panels') and 'dashboard' in main_window.panels:
+            main_window.panel_stack.setCurrentWidget(main_window.panels['dashboard'])
+
+        # Remover widget del stack
+        main_window.panel_stack.removeWidget(expanded_view)
+        expanded_view.deleteLater()
+
+    def _show_modal_fullscreen(self):
+        """Mostrar gráfico en modal (fallback)"""
         from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
-        # Crear diálogo fullscreen
         dialog = QDialog(self.window())
         dialog.setWindowTitle(self.title)
         dialog.showMaximized()
@@ -235,14 +418,24 @@ class ChartCard(QFrame):
         layout = QVBoxLayout(dialog)
         layout.setContentsMargins(20, 20, 20, 20)
 
-        # Crear nuevo widget de gráfico
         chart = D3ChartWidget(dialog)
         chart.set_chart(self.chart_type, self.title, self.data, tema=self.theme)
         layout.addWidget(chart)
 
-        # Botón para cerrar
-        close_btn = QPushButton("Cerrar")
-        close_btn.setFixedHeight(40)
+        close_btn = QPushButton("← Cerrar")
+        close_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        close_btn.setFixedHeight(45)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
         close_btn.clicked.connect(dialog.close)
         layout.addWidget(close_btn)
 
@@ -465,8 +658,8 @@ class DashboardPanel(QWidget):
         layout.addWidget(scroll)
 
         main_layout = QVBoxLayout(scroll_widget)
-        main_layout.setContentsMargins(30, 30, 30, 30)
-        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(5, 5, 5, 5)  # SIN MÁRGENES GRISES
+        main_layout.setSpacing(10)
 
         # Header
         header_layout = QHBoxLayout()
@@ -512,7 +705,7 @@ class DashboardPanel(QWidget):
         metrics_layout.addWidget(card1)
 
         # Métrica 2: Módulo Actual
-        card2 = MetricCard("Módulo Actual", "Módulo 9: Evaluación Final", "", self.theme_manager)
+        card2 = MetricCard("Módulo Actual", "SIGA", "", self.theme_manager)
         self.metric_cards.append(card2)
         metrics_layout.addWidget(card2)
 
@@ -576,14 +769,6 @@ class DashboardPanel(QWidget):
     def _on_theme_changed(self, new_theme: str):
         """Callback cuando cambia el tema"""
         print(f"🎨 Dashboard: Actualizando tema a {new_theme}")
-
-        # Actualizar todos los gráficos
-        for chart_card in self.chart_cards:
-            chart_card.update_theme(new_theme)
-
-        # Actualizar todas las métricas
-        for metric_card in self.metric_cards:
-            metric_card.update_theme(new_theme)
 
         # Recargar el panel completo (más simple)
         # Esto recargará todo el UI con los colores correctos
