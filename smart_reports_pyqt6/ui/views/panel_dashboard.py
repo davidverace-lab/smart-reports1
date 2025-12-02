@@ -262,12 +262,12 @@ class ChartCard(QFrame):
         header_layout.setContentsMargins(12, 3, 12, 3)
 
         # Título del gráfico
-        title_label = QLabel(title)
-        title_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        self.title_label = QLabel(title)
+        self.title_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
         is_dark = theme_manager.is_dark_mode() if theme_manager else (theme == 'dark')
         title_color = "#ffffff" if is_dark else "#003087"
-        title_label.setStyleSheet(f"color: {title_color}; background: transparent;")
-        header_layout.addWidget(title_label)
+        self.title_label.setStyleSheet(f"color: {title_color}; background: transparent;")
+        header_layout.addWidget(self.title_label)
 
         header_layout.addStretch()
 
@@ -624,6 +624,18 @@ class ChartCard(QFrame):
                 f"Error al copiar imagen al portapapeles:\n{e}"
             )
 
+    def update_theme_colors(self):
+        """Actualizar colores del tema"""
+        if not self.theme_manager:
+            return
+
+        is_dark = self.theme_manager.is_dark_mode()
+        title_color = "#ffffff" if is_dark else "#003087"
+
+        # Actualizar color del título
+        if hasattr(self, 'title_label'):
+            self.title_label.setStyleSheet(f"color: {title_color}; background: transparent;")
+
 
 class DashboardPanel(QWidget):
     """Panel de Dashboard - Control Ejecutivo"""
@@ -664,13 +676,13 @@ class DashboardPanel(QWidget):
         # Header
         header_layout = QHBoxLayout()
 
-        title = QLabel("Panel de Control Ejecutivo")
-        title.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))
+        self.title_label = QLabel("Panel de Control Ejecutivo")
+        self.title_label.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))
         # Color según tema
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color};")
-        header_layout.addWidget(title)
+        self.title_label.setStyleSheet(f"color: {title_color};")
+        header_layout.addWidget(self.title_label)
 
         header_layout.addStretch()
 
@@ -770,24 +782,58 @@ class DashboardPanel(QWidget):
         """Callback cuando cambia el tema"""
         print(f"🎨 Dashboard: Actualizando tema a {new_theme}")
 
-        # Recargar el panel completo (más simple)
-        # Esto recargará todo el UI con los colores correctos
-        self._reload_ui()
+        # En lugar de recargar todo, simplemente actualizar los gráficos existentes
+        tema = self.theme_manager.current_theme if self.theme_manager else 'dark'
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+
+        # Actualizar color del título principal
+        if hasattr(self, 'title_label'):
+            title_color = "#ffffff" if is_dark else "#003087"
+            self.title_label.setStyleSheet(f"color: {title_color};")
+
+        # Actualizar gráficos existentes
+        for chart_card in self.chart_cards:
+            chart_card.theme = tema
+
+            # Actualizar colores de los títulos
+            if hasattr(chart_card, 'update_theme_colors'):
+                chart_card.update_theme_colors()
+
+            # Actualizar el gráfico D3
+            if hasattr(chart_card, 'chart_widget'):
+                try:
+                    chart_card.chart_widget.set_chart(
+                        chart_card.chart_type,
+                        chart_card.title,
+                        chart_card.data,
+                        tema=tema
+                    )
+                except Exception as e:
+                    print(f"⚠️ Error actualizando gráfico: {e}")
+
+        # Actualizar métricas
+        for metric_card in self.metric_cards:
+            bg_color = "#2d2d2d" if is_dark else "#ffffff"
+            border_color = "#003087"
+            text_color = "#ffffff" if is_dark else "#003087"
+
+            metric_card.setStyleSheet(f"""
+                MetricCard {{
+                    background-color: {bg_color};
+                    border: 2px solid {border_color};
+                    border-radius: 12px;
+                }}
+            """)
+
+            # Actualizar colores de los labels dentro de la tarjeta
+            for child in metric_card.findChildren(QLabel):
+                child.setStyleSheet(f"color: {text_color}; background: transparent;")
+
+        # Forzar actualización visual
+        self.update()
+        self.repaint()
 
     def _reload_ui(self):
-        """Recargar UI completo con nuevo tema"""
-        # Limpiar layout actual
-        layout = self.layout()
-        if layout is not None:
-            while layout.count():
-                item = layout.takeAt(0)
-                widget = item.widget()
-                if widget:
-                    widget.deleteLater()
-
-        # Limpiar referencias
-        self.chart_cards.clear()
-        self.metric_cards.clear()
-
-        # Recrear UI
-        self._create_ui()
+        """Recargar UI completo con nuevo tema (método de respaldo)"""
+        # Este método ya no se usa, pero lo mantenemos por compatibilidad
+        pass

@@ -129,37 +129,47 @@ class LoginWindow(QMainWindow):
         panel = QFrame()
         layout = QVBoxLayout(panel)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setContentsMargins(30, 20, 30, 20)
+        layout.setContentsMargins(80, 50, 80, 50)  # Márgenes más amplios
+
+        # Spacer superior para centrar verticalmente
+        layout.addStretch(1)
 
         # Título del formulario
         form_title = QLabel("Iniciar Sesión")
-        form_title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
+        form_title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
         form_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(form_title)
 
+        layout.addSpacing(10)
+
         # Subtítulo
         form_subtitle = QLabel("Ingresa tus credenciales")
-        form_subtitle.setFont(QFont("Montserrat", 12))
+        form_subtitle.setFont(QFont("Montserrat", 13))
         form_subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        form_subtitle.setStyleSheet("color: #888888; margin-bottom: 30px;")
+        form_subtitle.setStyleSheet("color: #888888;")
         layout.addWidget(form_subtitle)
+
+        layout.addSpacing(40)
 
         # Campo de usuario
         user_label = QLabel("Usuario")
-        user_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
+        user_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
         user_label.setStyleSheet("color: #003087;")
         layout.addWidget(user_label)
 
+        layout.addSpacing(5)
+
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Ingresa tu usuario")
-        self.username_input.setFixedHeight(45)
-        self.username_input.setFont(QFont("Montserrat", 11))
+        self.username_input.setFixedHeight(50)
+        self.username_input.setFont(QFont("Montserrat", 12))
         self.username_input.setStyleSheet("""
             QLineEdit {
                 border: 2px solid #e0e0e0;
                 border-radius: 8px;
-                padding: 10px;
+                padding: 12px;
                 background-color: #ffffff;
+                color: #003087;
             }
             QLineEdit:focus {
                 border: 2px solid #003087;
@@ -168,25 +178,28 @@ class LoginWindow(QMainWindow):
         self.username_input.returnPressed.connect(self._handle_login)
         layout.addWidget(self.username_input)
 
-        layout.addSpacing(20)
+        layout.addSpacing(25)
 
         # Campo de contraseña
         pass_label = QLabel("Contraseña")
-        pass_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
+        pass_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
         pass_label.setStyleSheet("color: #003087;")
         layout.addWidget(pass_label)
+
+        layout.addSpacing(5)
 
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Ingresa tu contraseña")
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password_input.setFixedHeight(45)
-        self.password_input.setFont(QFont("Montserrat", 11))
+        self.password_input.setFixedHeight(50)
+        self.password_input.setFont(QFont("Montserrat", 12))
         self.password_input.setStyleSheet("""
             QLineEdit {
                 border: 2px solid #e0e0e0;
                 border-radius: 8px;
-                padding: 10px;
+                padding: 12px;
                 background-color: #ffffff;
+                color: #003087;
             }
             QLineEdit:focus {
                 border: 2px solid #003087;
@@ -195,32 +208,32 @@ class LoginWindow(QMainWindow):
         self.password_input.returnPressed.connect(self._handle_login)
         layout.addWidget(self.password_input)
 
-        layout.addSpacing(30)
+        layout.addSpacing(35)
 
         # Botón de login
         self.login_button = QPushButton("INICIAR SESIÓN")
-        self.login_button.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        self.login_button.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
         self.login_button.setFixedHeight(55)
         self.login_button.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
-                color: white;
+                background-color: #003087 !important;
+                color: white !important;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #004ba0 !important;
             }
             QPushButton:pressed {
-                background-color: #002060;
+                background-color: #002060 !important;
             }
         """)
         self.login_button.clicked.connect(self._handle_login)
         self.login_button.setCursor(Qt.CursorShape.PointingHandCursor)
         layout.addWidget(self.login_button)
 
-        # Spacer para empujar contenido hacia arriba
-        layout.addStretch()
+        # Spacer inferior para centrar verticalmente
+        layout.addStretch(1)
 
         return panel
 
