@@ -22,12 +22,12 @@ PyQt6-WebEngine>=6.6.0
 pillow>=10.0.0
 
 # DEPRECADO - CustomTkinter y dependencias Tkinter ya no se usan
-# Se eliminaron en favor de PyQt6 para mejor integración con JavaScript/D3.js
-# customtkinter>=5.2.0  # REMOVED
-# tkinterdnd2-universal>=1.7.3  # REMOVED
-# tkhtmlview>=0.1.1  # REMOVED
-# tkinterweb>=3.23.0  # REMOVED - Reemplazado por QWebEngineView
-# pywebview>=4.0.0  # REMOVED - Reemplazado por QWebEngineView
+# Se eliminaron en favor de PyQt6 para mejor integracion con JavaScript/D3.js
+# customtkinter>=5.2.0  # Removido
+# tkinterdnd2-universal>=1.7.3  # Removido
+# tkhtmlview>=0.1.1  # Removido
+# tkinterweb>=3.23.0  # Removido - Reemplazado por QWebEngineView
+# pywebview>=4.0.0  # Removido - Reemplazado por QWebEngineView
 
 # Graficos y visualizacion
 matplotlib>=3.7.0
