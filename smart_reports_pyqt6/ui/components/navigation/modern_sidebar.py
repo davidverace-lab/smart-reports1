@@ -1,484 +1,470 @@
-"""
-ModernSidebar - PyQt6
-Barra lateral moderna con navegación y botón hamburguesa para colapsar/expandir
-"""
-
+import sys
 from PyQt6.QtWidgets import (
-    QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget
+    QFrame, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QWidget, QCheckBox
 )
-from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, pyqtSignal, QRect, QPoint, QPropertyAnimation, QEasingCurve, pyqtProperty
+from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QBrush
+
+# ===================================================================
+# 1. SWITCH ANIMADO ROBUSTO
+# ===================================================================
+class AnimatedToggle(QCheckBox):
+    def __init__(self, width=60, height=32, parent=None):
+        super().__init__(parent)
+        self._w = width
+        self._h = height
+        self.setFixedSize(self._w, self._h)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        # Colores
+        self.bar_color = QColor("#777")
+        self.circle_color = QColor("#FFF")
+        self.active_color = QColor("#002E6D")
+
+        # Animación
+        self._circle_x = 3
+        self.animation = QPropertyAnimation(self, b"circle_x", self)
+        self.animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
+        self.animation.setDuration(300)
+
+        self.stateChanged.connect(self.start_transition)
+
+    def hitButton(self, pos: QPoint):
+        return self.contentsRect().contains(pos)
+
+    @pyqtProperty(float)
+    def circle_x(self):
+        return self._circle_x
+
+    @circle_x.setter
+    def circle_x(self, pos):
+        self._circle_x = pos
+        self.update()
+
+    def start_transition(self, state):
+        self.animation.stop()
+        padding = 3
+        if state: # ON (Derecha)
+            target = self.width() - self.height() + padding
+        else:     # OFF (Izquierda)
+            target = padding
+        self.animation.setEndValue(target)
+        self.animation.start()
+
+    def paintEvent(self, e):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setPen(Qt.PenStyle.NoPen)
+
+        if self.isChecked():
+            p.setBrush(self.active_color)
+        else:
+            p.setBrush(self.bar_color)
+        p.drawRoundedRect(0, 0, self.width(), self.height(), self.height() / 2, self.height() / 2)
+
+        p.setBrush(self.circle_color)
+        padding = 3
+        radius = int((self.height() - (padding * 2)) / 2)
+        center_y = int(self.height() / 2)
+        center_x = int(self._circle_x + radius)
+
+        if center_x > self.width() - radius:
+            center_x = self.width() - radius - padding
+
+        p.drawEllipse(QPoint(center_x, center_y), radius, radius)
+        p.end()
+
+    def resize_animated(self, w, h):
+        self.setFixedSize(w, h)
+        if self.isChecked():
+            self._circle_x = w - h + 3
+        else:
+            self._circle_x = 3
+        self.update()
 
 
+# ===================================================================
+# 2. BARRA LATERAL (ModernSidebar) - CORREGIDA (FIX CRASH)
+# ===================================================================
 class ModernSidebar(QFrame):
-    """Sidebar moderna con logo, navegación y footer - COLAPSABLE"""
 
-    # Signals
     navigation_clicked = pyqtSignal(str)
     logout_clicked = pyqtSignal()
 
     def __init__(self, parent=None, navigation_callbacks=None, theme_manager=None):
-        """
-        Args:
-            parent: Widget padre
-            navigation_callbacks: Dict con {nombre: callback_function}
-            theme_manager: Gestor de temas
-        """
         super().__init__(parent)
-
         self.navigation_callbacks = navigation_callbacks or {}
         self.theme_manager = theme_manager
         self.nav_buttons = {}
-        self.active_button = None
 
-        # Estado de colapso
         self.is_collapsed = False
-        self.expanded_width = 280  # Más ancho - de 240 a 280
-        self.collapsed_width = 75
+        self.expanded_width = 300
+        self.collapsed_width = 90
 
-        # Configurar sidebar
         self.setFixedWidth(self.expanded_width)
         self.setObjectName("modernSidebar")
 
-        # Crear UI
         self._create_ui()
-
-        # Aplicar tema inicial
         self._update_theme()
 
-        # Conectar signal de cambio de tema
         if self.theme_manager:
-            self.theme_manager.theme_changed.connect(lambda new_theme: self._update_theme())
+            self.theme_manager.theme_changed.connect(lambda: self._update_theme())
 
     def _create_ui(self):
-        """Crear interfaz completa"""
-
-        # Layout principal
         self.main_layout = QVBoxLayout(self)
-        self.main_layout.setContentsMargins(10, 15, 10, 20)
-        self.main_layout.setSpacing(10)
+        self.main_layout.setContentsMargins(10, 20, 10, 20)
+        self.main_layout.setSpacing(15)
 
-        # Header con botón hamburguesa
         self._create_header()
-
-        self.main_layout.addSpacing(20)
-
-        # Navegación
         self._create_navigation()
-
-        # Spacer para empujar elementos al fondo
         self.main_layout.addStretch()
-
-        # Toggle de tema
         self._create_theme_toggle()
-
-        # Footer
         self._create_footer()
 
     def _create_header(self):
-        """Crear header con botón hamburguesa y logo"""
+        container = QWidget()
+        container.setObjectName("headerContainer")
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0,0,0,0)
+        layout.setSpacing(5)
 
-        # Container del header
-        header_container = QWidget()
-        header_container.setObjectName("headerContainer")
-        header_layout = QVBoxLayout(header_container)
-        header_layout.setContentsMargins(0, 0, 0, 0)
-        header_layout.setSpacing(10)
-
-        # Botón hamburguesa - MÁS GRANDE
+        # Botón Hamburguesa
         self.collapse_btn = QPushButton("☰")
-        self.collapse_btn.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
-        self.collapse_btn.setFixedSize(55, 45)
+        self.collapse_btn.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 32px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+        """)
+        self.collapse_btn.setFixedSize(60, 50)
         self.collapse_btn.setObjectName("hamburgerBtn")
         self.collapse_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.collapse_btn.clicked.connect(self._toggle_collapse)
-        header_layout.addWidget(self.collapse_btn, alignment=Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(self.collapse_btn, alignment=Qt.AlignmentFlag.AlignTop)
 
-        # Frame del logo (colapsable) - MÁS ALTO
+        # Logo Frame (AUMENTADO DE 120 A 160 PARA QUE QUEPA EL TEXTO)
         self.logo_frame = QWidget()
         self.logo_frame.setObjectName("logoFrame")
-        self.logo_frame.setFixedHeight(110)
+        self.logo_frame.setFixedHeight(160)
         logo_layout = QVBoxLayout(self.logo_frame)
-        logo_layout.setContentsMargins(10, 15, 10, 10)
-        logo_layout.setSpacing(5)
+        logo_layout.setContentsMargins(0,10,0,0)
 
-        # Título principal - MÁS GRANDE (30pt)
+        # --- TEXTO GIGANTE CON STYLESHEET EN LUGAR DE SETFONT ---
         self.logo_label = QLabel("SMART\nREPORTS")
-        self.logo_label.setFont(QFont("Montserrat", 30, QFont.Weight.Bold))
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.logo_label.setWordWrap(True)
-        logo_layout.addWidget(self.logo_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.logo_label.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 32px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+        """)
+        logo_layout.addWidget(self.logo_label)
 
-        # Subtítulo - MÁS GRANDE (12pt)
+        # Subtítulo
         self.subtitle = QLabel("Instituto Hutchison Ports")
-        self.subtitle.setFont(QFont("Montserrat", 12))
         self.subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.subtitle.setWordWrap(True)
-        logo_layout.addWidget(self.subtitle, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.subtitle.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 12px;
+            font-weight: normal;
+            border: none;
+            background: transparent;
+        """)
+        logo_layout.addWidget(self.subtitle)
 
-        header_layout.addWidget(self.logo_frame)
+        layout.addWidget(self.logo_frame)
 
-        # Línea separadora
+        # Separador
         self.header_separator = QFrame()
         self.header_separator.setFrameShape(QFrame.Shape.HLine)
-        self.header_separator.setFixedHeight(1)
+        self.header_separator.setFixedHeight(2)
         self.header_separator.setObjectName("separator")
-        header_layout.addWidget(self.header_separator)
+        layout.addWidget(self.header_separator)
 
-        self.main_layout.addWidget(header_container)
+        self.main_layout.addWidget(container)
 
     def _create_navigation(self):
-        """Crear botones de navegación con iconos - MÁS GRANDES"""
-
-        nav_items = [
-            ('▣  Dashboards', 'dashboard', '▣'),
-            ('⚲  Consulta de Empleados', 'consultas', '⚲'),
-            ('⬇  Importación de Datos', 'importacion', '⬇'),
-            ('☰  Generar Reportes', 'reportes', '☰'),
-            ('⚙  Configuración', 'configuracion', '⚙'),
+        # Aseguramos que TODAS las claves coincidan con MainWindow
+        items = [
+            ('📊  Dashboards', 'dashboard', '📊'),
+            ('🔍  Consulta de Empleados', 'consultas', '🔍'),
+            ('📥  Importación de Datos', 'importacion', '📥'),
+            ('📄  Generar Reportes', 'reportes', '📄'),
+            ('⚙️  Configuración', 'configuracion', '⚙️'),
         ]
 
-        for text, key, icon in nav_items:
+        for text, key, icon in items:
             btn = QPushButton(text)
-            btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # Aumentado de 13 a 15
-            btn.setFixedHeight(55)  # Aumentado de 50 a 55
+            btn.setStyleSheet("""
+                font-family: 'Montserrat';
+                font-size: 18px;
+                font-weight: bold;
+                text-align: left;
+                padding-left: 20px;
+                border: none;
+                background: transparent;
+            """)
+            btn.setFixedHeight(60)
             btn.setObjectName("navButton")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn.clicked.connect(lambda checked, k=key: self._on_nav_click(k))
 
-            # Guardar referencia al texto completo e icono
+            # FIX 1: Pasamos el evento normalmente
+            btn.clicked.connect(lambda ch, k=key: self._on_nav_click(k))
+
             btn.setProperty("fullText", text)
             btn.setProperty("iconOnly", icon)
-            btn.setProperty("navKey", key)
 
             self.nav_buttons[key] = btn
             self.main_layout.addWidget(btn)
 
     def _create_theme_toggle(self):
-        """Crear toggle para modo claro/oscuro con switch animado"""
-
-        # Frame para el toggle
         self.toggle_frame = QWidget()
         self.toggle_frame.setObjectName("toggleFrame")
-        toggle_layout = QVBoxLayout(self.toggle_frame)
-        toggle_layout.setContentsMargins(5, 15, 5, 5)
-        toggle_layout.setSpacing(10)
+        v_layout = QVBoxLayout(self.toggle_frame)
+        v_layout.setContentsMargins(0, 5, 0, 5)
 
-        # Línea separadora superior
-        self.theme_separator_top = QFrame()
-        self.theme_separator_top.setFrameShape(QFrame.Shape.HLine)
-        self.theme_separator_top.setFixedHeight(1)
-        self.theme_separator_top.setObjectName("separator")
-        toggle_layout.addWidget(self.theme_separator_top)
+        self.sep_top = QFrame()
+        self.sep_top.setFrameShape(QFrame.Shape.HLine)
+        self.sep_top.setFixedHeight(1)
+        self.sep_top.setObjectName("separator")
+        v_layout.addWidget(self.sep_top)
 
-        # Container horizontal
-        toggle_container = QWidget()
-        toggle_container_layout = QHBoxLayout(toggle_container)
-        toggle_container_layout.setContentsMargins(10, 5, 10, 5)
-        toggle_container_layout.setSpacing(10)
+        self.toggle_container_h = QWidget()
+        self.h_layout = QHBoxLayout(self.toggle_container_h)
+        self.h_layout.setContentsMargins(5, 5, 5, 5)
 
-        # Label con texto dinámico e icono - MÁS GRANDE (símbolos simples)
-        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else True
-        mode_icon = "☾  " if is_dark else "☀  "
-        mode_text = mode_icon + ("Modo Oscuro" if is_dark else "Modo Claro")
-        self.theme_label = QLabel(mode_text)
-        self.theme_label.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # Aumentado de 11 a 15
-        toggle_container_layout.addWidget(self.theme_label)
+        self.theme_label = QLabel("Modo")
+        self.theme_label.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+        """)
+        self.h_layout.addWidget(self.theme_label)
 
-        toggle_container_layout.addStretch()
+        self.h_layout.addStretch()
 
-        # Botón de toggle estilo iOS switch animado - MÁS GRANDE
-        self.theme_btn = QPushButton()
-        self.theme_btn.setFixedSize(65, 32)
-        self.theme_btn.setObjectName("themeToggleSwitch")
-        self.theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.theme_btn.clicked.connect(self._on_theme_toggle)
-        self.theme_btn.setProperty("isDark", is_dark)
-        self.theme_btn.setCheckable(True)
-        self.theme_btn.setChecked(is_dark)
-        toggle_container_layout.addWidget(self.theme_btn)
+        self.theme_switch = AnimatedToggle(width=60, height=32)
+        self.theme_switch.clicked.connect(self._on_theme_toggle)
+        self.h_layout.addWidget(self.theme_switch)
 
-        toggle_layout.addWidget(toggle_container)
+        v_layout.addWidget(self.toggle_container_h)
 
-        # Línea separadora inferior
-        self.theme_separator_bottom = QFrame()
-        self.theme_separator_bottom.setFrameShape(QFrame.Shape.HLine)
-        self.theme_separator_bottom.setFixedHeight(1)
-        self.theme_separator_bottom.setObjectName("separator")
-        toggle_layout.addWidget(self.theme_separator_bottom)
+        self.sep_bot = QFrame()
+        self.sep_bot.setFrameShape(QFrame.Shape.HLine)
+        self.sep_bot.setFixedHeight(1)
+        self.sep_bot.setObjectName("separator")
+        v_layout.addWidget(self.sep_bot)
 
         self.main_layout.addWidget(self.toggle_frame)
 
     def _create_footer(self):
-        """Crear footer con información de versión - BASADO EN CUSTOMTKINTER"""
-
         self.footer_frame = QWidget()
         self.footer_frame.setObjectName("footerFrame")
-        footer_layout = QVBoxLayout(self.footer_frame)
-        footer_layout.setContentsMargins(20, 20, 20, 20)
-        footer_layout.setSpacing(10)
+        layout = QVBoxLayout(self.footer_frame)
+        layout.setSpacing(5)
 
-        # Línea separadora superior
-        self.footer_separator = QFrame()
-        self.footer_separator.setFrameShape(QFrame.Shape.HLine)
-        self.footer_separator.setFixedHeight(1)
-        self.footer_separator.setObjectName("separator")
-        footer_layout.addWidget(self.footer_separator)
-
-        # Versión - MÁS GRANDE (12pt)
         self.version_label = QLabel("v2.0.0")
-        self.version_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.version_label.setObjectName("versionLabel")
-        footer_layout.addWidget(self.version_label)
+        self.version_label.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+        """)
+        layout.addWidget(self.version_label)
 
-        # Copyright - MÁS GRANDE (11pt)
         self.copyright_label = QLabel("© 2025 INSTITUTO HP")
-        self.copyright_label.setFont(QFont("Montserrat", 11))
         self.copyright_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.copyright_label.setObjectName("copyrightLabel")
-        footer_layout.addWidget(self.copyright_label)
+        self.copyright_label.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 11px;
+            font-weight: normal;
+            border: none;
+            background: transparent;
+        """)
+        layout.addWidget(self.copyright_label)
 
         self.main_layout.addWidget(self.footer_frame)
 
     def _toggle_collapse(self):
-        """Toggle colapso del sidebar"""
-
         self.is_collapsed = not self.is_collapsed
 
         if self.is_collapsed:
-            # Colapsar
             self.setFixedWidth(self.collapsed_width)
-
-            # Ocultar logo
             self.logo_frame.hide()
             self.header_separator.hide()
-
-            # Actualizar botones para mostrar solo iconos
-            for key, btn in self.nav_buttons.items():
-                icon_only = btn.property("iconOnly")
-                btn.setText(icon_only)
-                btn.setToolTip(btn.property("fullText"))
-                btn.setFont(QFont("Arial", 24))  # Hacer iconos más grandes
-
-            # Mostrar solo icono del toggle de tema
             self.theme_label.hide()
-            self.theme_btn.setFixedSize(50, 50)  # Hacer el botón más grande y cuadrado
-            self.theme_separator_top.hide()
-            self.theme_separator_bottom.hide()
+            self.footer_frame.hide()
+            self.sep_top.hide()
+            self.sep_bot.hide()
 
-            # Ocultar footer
-            self.version_label.hide()
-            self.copyright_label.hide()
-            self.footer_separator.hide()
+            for btn in self.nav_buttons.values():
+                btn.setText(btn.property("iconOnly"))
+                btn.setStyleSheet("""
+                    font-family: 'Segoe UI Emoji';
+                    font-size: 26px;
+                    font-weight: normal;
+                    text-align: center;
+                    padding: 0px;
+                    border: none;
+                    background: transparent;
+                """)
+                btn.setToolTip(btn.property("fullText"))
+
+            self.h_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.h_layout.setContentsMargins(0, 5, 0, 5)
+            self.theme_switch.resize_animated(40, 24)
 
         else:
-            # Expandir
             self.setFixedWidth(self.expanded_width)
-
-            # Mostrar logo
             self.logo_frame.show()
             self.header_separator.show()
-
-            # Restaurar texto completo en botones
-            for key, btn in self.nav_buttons.items():
-                full_text = btn.property("fullText")
-                btn.setText(full_text)
-                btn.setToolTip("")
-                btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # Restaurar fuente correcta
-
-            # Mostrar elementos del toggle de tema
             self.theme_label.show()
-            self.theme_btn.setFixedSize(50, 28)  # Restaurar tamaño normal
-            self.theme_separator_top.show()
-            self.theme_separator_bottom.show()
+            self.footer_frame.show()
+            self.sep_top.show()
+            self.sep_bot.show()
 
-            # Mostrar footer
-            self.version_label.show()
-            self.copyright_label.show()
-            self.footer_separator.show()
+            for btn in self.nav_buttons.values():
+                btn.setText(btn.property("fullText"))
+                btn.setStyleSheet("""
+                    font-family: 'Montserrat';
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-align: left;
+                    padding-left: 20px;
+                    border: none;
+                    background: transparent;
+                """)
+                btn.setToolTip("")
 
-        # Forzar actualización
-        self.updateGeometry()
-        self.update()
+            self.h_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+            self.h_layout.setContentsMargins(5, 5, 5, 5)
+            self.theme_switch.resize_animated(60, 32)
+
+        # Forzar actualización de tema después de colapsar/expandir
+        self._update_theme()
+
+    # ==========================================================
+    # FIX PRINCIPAL: Evitar bucle infinito y agregar set_active
+    # ==========================================================
 
     def _on_nav_click(self, key, trigger_callback=True):
-        """Manejar click en navegación
-
-        Args:
-            key: Identificador del botón
-            trigger_callback: Si debe ejecutar el callback (False cuando se llama programáticamente)
         """
-
-        # Actualizar estilos de botones
-        for btn_key, btn in self.nav_buttons.items():
-            if btn_key == key:
-                btn.setProperty("class", "active")
-                self.active_button = btn
-            else:
-                btn.setProperty("class", "")
-
-            # Refrescar estilo
+        Maneja el clic en un botón.
+        Args:
+            key: ID del botón
+            trigger_callback: Si es True, avisa a MainWindow. Si es False, solo actualiza visualmente.
+        """
+        # 1. Actualizar visualmente (poner clase 'active' al botón correcto)
+        for k, btn in self.nav_buttons.items():
+            btn.setProperty("class", "active" if k == key else "")
             btn.style().unpolish(btn)
             btn.style().polish(btn)
 
-        # Ejecutar callback solo si no es llamada programática
-        if trigger_callback and key in self.navigation_callbacks:
-            self.navigation_callbacks[key]()
-
-        # Emitir señal
+        # 2. Solo ejecutar callbacks si trigger_callback es True
+        # Esto previene el bucle infinito cuando MainWindow llama de vuelta a set_active
         if trigger_callback:
+            if key in self.navigation_callbacks:
+                self.navigation_callbacks[key]() # <--- Esto causaba el crash si se llamaba recursivamente
             self.navigation_clicked.emit(key)
 
     def set_active(self, key):
-        """Establecer botón activo programáticamente SIN triggear navegación"""
-        self._on_nav_click(key, trigger_callback=False)
+        """
+        Método público llamado por MainWindow para marcar un botón como activo.
+        IMPORTANTE: Llama a _on_nav_click con trigger_callback=False
+        """
+        if key in self.nav_buttons:
+            self._on_nav_click(key, trigger_callback=False)
 
     def _on_theme_toggle(self):
-        """Manejar cambio de tema"""
-
         if self.theme_manager:
-            # Toggle theme
-            new_theme = self.theme_manager.toggle_theme(self.window())
-
-            # Actualizar UI
+            self.theme_manager.toggle_theme(self.window())
             self._update_theme()
 
     def _update_theme(self):
-        """Actualizar colores según tema actual"""
-
-        if not self.theme_manager:
-            return
-
+        if not self.theme_manager: return
         is_dark = self.theme_manager.is_dark_mode()
 
-        # Actualizar label de tema con texto dinámico e icono (símbolos simples)
-        mode_icon = "☾  " if is_dark else "☀  "
-        mode_text = mode_icon + ("Modo Oscuro" if is_dark else "Modo Claro")
-        self.theme_label.setText(mode_text)
-        self.theme_btn.setChecked(is_dark)
-        self.theme_btn.setProperty("isDark", is_dark)
+        icon = "☾ " if is_dark else "☀ "
+        text = "Modo Oscuro" if is_dark else "Modo Claro"
+        self.theme_label.setText(f"{icon} {text}")
 
-        # ====== COLORES BASADOS EN CUSTOMTKINTER ======
-        # Modo claro: Fondo azul navy (#002E6D), texto blanco, botones sin color (solo hover)
-        # Modo oscuro: Fondo gris oscuro (#2d2d2d), texto blanco también
+        self.theme_switch.blockSignals(True)
+        self.theme_switch.setChecked(is_dark)
+        self.theme_switch.blockSignals(False)
 
-        sidebar_bg = "#2d2d2d" if is_dark else "#002E6D"  # Navy corporativo en modo claro!
-        text_color = "#FFFFFF"  # Blanco en ambos modos
-        text_secondary = "#E0E0E0" if not is_dark else "#A0A0A0"
-        border_color = "#383838" if is_dark else "#4a5a8a"  # Tonalidad navy más clara
-        hover_color = "#383838" if is_dark else "#003D82"  # Navy más claro para hover
-        active_bg = "#383838" if is_dark else "#004C97"  # Navy más claro para activo
+        bg = "#2d2d2d" if is_dark else "#002E6D"
+        text_c = "#FFFFFF"
+        sec_c = "#A0A0A0" if is_dark else "#E0E0E0"
+        border_c = "#383838" if is_dark else "#4a5a8a"
+        hover_c = "#383838" if is_dark else "#003D82"
+        active_c = "#404040" if is_dark else "#004C97"
+
+        self.theme_switch.active_color = QColor("#004C97") if not is_dark else QColor("#002E6D")
+        self.theme_switch.bar_color = QColor("#6a7aa0") if not is_dark else QColor("#505050")
+        self.theme_switch.update()
 
         self.setStyleSheet(f"""
             #modernSidebar {{
-                background-color: {sidebar_bg} !important;
-                border-right: 2px solid {border_color};
+                background-color: {bg} !important;
+                border-right: 1px solid {border_c};
             }}
-
-            #modernSidebar QWidget {{
-                background-color: transparent !important;
+            QWidget {{
+                background: transparent !important;
+                border: none !important;
             }}
-
-            #hamburgerBtn {{
-                background-color: transparent !important;
-                color: {text_color} !important;
-                border: none;
-                border-radius: 8px;
+            QLabel {{
+                color: {text_c};
+                border: none !important;
+                background: transparent !important;
             }}
-
-            #hamburgerBtn:hover {{
-                background-color: {hover_color} !important;
-            }}
-
-            #logoFrame QLabel {{
-                color: {text_color} !important;
+            QPushButton {{
+                color: {text_c};
+                border: none !important;
                 background: transparent !important;
             }}
 
-            #navButton {{
-                background-color: transparent !important;
-                color: {text_color} !important;
-                border: none;
-                border-radius: 10px;
-                text-align: left;
-                padding: 12px 18px;
-            }}
-
-            #navButton:hover {{
-                background-color: {hover_color} !important;
-                color: {text_color} !important;
-            }}
-
-            #navButton[class="active"] {{
-                background-color: {active_bg} !important;
-                color: {text_color} !important;
-                font-weight: bold;
+            #copyrightLabel, #versionLabel {{
+                color: {sec_c};
+                border: none !important;
+                background: transparent !important;
             }}
 
             #separator {{
-                background-color: {border_color} !important;
+                background-color: {border_c};
+                max-height: 2px;
+                border: none !important;
             }}
 
-            #toggleFrame {{
-                background-color: transparent !important;
+            #navButton {{
+                border-radius: 10px;
+                border: none !important;
+            }}
+            #navButton:hover {{
+                background-color: {hover_c} !important;
             }}
 
-            #toggleFrame QLabel {{
-                color: {text_color} !important;
-                background: transparent !important;
+            #navButton[class="active"] {{
+                background-color: {active_c} !important;
+                font-weight: bold;
+                border-left: 5px solid #FFFFFF !important;
             }}
 
-            #themeToggleSwitch {{
-                background-color: {'#5a6a90' if not is_dark else '#404040'} !important;
-                border: none;
-                border-radius: 15px;
-                text-align: left;
-                padding: 3px;
+            #hamburgerBtn:hover {{
+                background-color: {hover_c} !important;
+                border-radius: 5px;
             }}
 
-            #themeToggleSwitch:checked {{
-                background-color: {'#003D82' if not is_dark else '#002E6D'} !important;
-            }}
-
-            #themeToggleSwitch:!checked {{
-                background-color: {'#6a7aa0' if not is_dark else '#505050'} !important;
-            }}
-
-            #themeToggleSwitch:hover {{
-                background-color: {'#4a5a80' if not is_dark else '#505050'} !important;
-            }}
-
-            #themeToggleSwitch:checked:hover {{
-                background-color: {'#003570' if not is_dark else '#002a60'} !important;
-            }}
-
-            #headerContainer, #footerFrame, #logoFrame {{
-                background-color: transparent !important;
-            }}
-
-            #logoFrame QLabel {{
-                color: {text_color} !important;
-                background: transparent !important;
-            }}
-
-            #versionLabel {{
-                color: {text_secondary} !important;
-                background: transparent !important;
-            }}
-
-            #copyrightLabel {{
-                color: {text_secondary} !important;
+            #logoFrame QLabel, #toggleFrame QLabel, #footerFrame QLabel {{
+                border: none !important;
                 background: transparent !important;
             }}
         """)
-
-        # Forzar actualización visual de todos los widgets
-        self.update()
-        self.repaint()
-
-        # Forzar actualización de los botones de navegación
-        for btn in self.nav_buttons.values():
-            btn.style().unpolish(btn)
-            btn.style().polish(btn)
-            btn.update()
