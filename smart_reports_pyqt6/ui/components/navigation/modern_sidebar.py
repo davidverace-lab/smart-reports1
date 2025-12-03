@@ -376,6 +376,10 @@ class ModernSidebar(QFrame):
                 border-right: 2px solid {border_color};
             }}
 
+            #modernSidebar QWidget {{
+                background-color: transparent !important;
+            }}
+
             #hamburgerBtn {{
                 background-color: transparent !important;
                 color: {text_color} !important;
@@ -449,8 +453,13 @@ class ModernSidebar(QFrame):
                 background-color: {'#003570' if not is_dark else '#002a60'} !important;
             }}
 
-            #headerContainer, #footerFrame {{
+            #headerContainer, #footerFrame, #logoFrame {{
                 background-color: transparent !important;
+            }}
+
+            #logoFrame QLabel {{
+                color: {text_color} !important;
+                background: transparent !important;
             }}
 
             #versionLabel {{
