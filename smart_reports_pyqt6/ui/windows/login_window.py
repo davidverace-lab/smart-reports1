@@ -82,44 +82,69 @@ class LoginWindow(QMainWindow):
 
         layout = QVBoxLayout(panel)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(40, 40, 40, 40)
+        layout.setSpacing(20)
 
         # Logo de Instituto HP (imagen)
         logo_label = QLabel()
         logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        logo_label.setStyleSheet("background: transparent; border: none; margin: 0; padding: 0;")
+        logo_label.setStyleSheet("""
+            background: transparent;
+            border: none;
+            margin: 0;
+            padding: 0;
+        """)
+        logo_label.setContentsMargins(0, 0, 0, 0)
 
         # Intentar cargar logo
         logo_path = "assets/images/LogoInstitutoHP-blanco.png"
         try:
             pixmap = QPixmap(logo_path)
             if not pixmap.isNull():
-                # Escalar logo manteniendo aspect ratio - MÁS GRANDE
-                scaled_pixmap = pixmap.scaled(450, 300, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                # Escalar logo manteniendo aspect ratio - MÁS GRANDE (500x350)
+                scaled_pixmap = pixmap.scaled(550, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
                 logo_label.setPixmap(scaled_pixmap)
             else:
                 # Fallback si no se encuentra la imagen
                 logo_label.setText("INSTITUTO\nHUTCHISON PORTS")
-                logo_label.setFont(QFont("Montserrat", 38, QFont.Weight.Bold))
-                logo_label.setStyleSheet("color: white; background: transparent; border: none; margin: 0; padding: 0;")
+                logo_label.setFont(QFont("Montserrat", 42, QFont.Weight.Bold))
+                logo_label.setStyleSheet("""
+                    color: white;
+                    background: transparent;
+                    border: none;
+                    margin: 0;
+                    padding: 0;
+                """)
                 logo_label.setWordWrap(True)
         except Exception as e:
             # Fallback si hay error
             logo_label.setText("INSTITUTO\nHUTCHISON PORTS")
-            logo_label.setFont(QFont("Montserrat", 38, QFont.Weight.Bold))
-            logo_label.setStyleSheet("color: white; background: transparent; border: none; margin: 0; padding: 0;")
+            logo_label.setFont(QFont("Montserrat", 42, QFont.Weight.Bold))
+            logo_label.setStyleSheet("""
+                color: white;
+                background: transparent;
+                border: none;
+                margin: 0;
+                padding: 0;
+            """)
             logo_label.setWordWrap(True)
 
         layout.addWidget(logo_label)
 
-        layout.addSpacing(40)
+        layout.addSpacing(50)
 
-        # Título (movido abajo) - MÁS GRANDE
+        # Título (movido abajo) - MÁS GRANDE (42)
         title_label = QLabel("SMART REPORTS")
-        title_label.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))
+        title_label.setFont(QFont("Montserrat", 44, QFont.Weight.Bold))
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_label.setStyleSheet("color: white; background: transparent; border: none; margin: 0; padding: 0;")
+        title_label.setStyleSheet("""
+            color: white;
+            background: transparent;
+            border: none;
+            margin: 0;
+            padding: 0;
+        """)
+        title_label.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(title_label)
 
         return panel
@@ -135,17 +160,17 @@ class LoginWindow(QMainWindow):
         # Spacer superior para centrar verticalmente
         layout.addStretch(1)
 
-        # Título del formulario - MÁS GRANDE
+        # Título del formulario - MÁS GRANDE (38)
         form_title = QLabel("Iniciar Sesión")
-        form_title.setFont(QFont("Montserrat", 34, QFont.Weight.Bold))
+        form_title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))
         form_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(form_title)
 
-        layout.addSpacing(10)
+        layout.addSpacing(15)
 
-        # Subtítulo - MÁS GRANDE
+        # Subtítulo - MÁS GRANDE (20)
         form_subtitle = QLabel("Ingresa tus credenciales")
-        form_subtitle.setFont(QFont("Montserrat", 16))
+        form_subtitle.setFont(QFont("Montserrat", 20))
         form_subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         form_subtitle.setStyleSheet("color: #888888;")
         layout.addWidget(form_subtitle)
