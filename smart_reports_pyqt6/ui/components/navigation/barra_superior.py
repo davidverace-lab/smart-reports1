@@ -25,7 +25,7 @@ class BarraSuperior(QFrame):
         self.theme_manager = theme_manager
 
         self.setObjectName("barraSuperior")
-        self.setFixedHeight(100)  # Más alto - de 70 a 100
+        self.setFixedHeight(80)  # Igual que CustomTkinter
 
         self._create_ui()
 
@@ -46,8 +46,15 @@ class BarraSuperior(QFrame):
 
         # === LADO IZQUIERDO: Bienvenida ===
         self.greeting_label = QLabel(f"¡Bienvenido, {self.username}!")
-        self.greeting_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # Más grande - de 20 a 24
         self.greeting_label.setObjectName("greetingLabel")
+        # Usar setStyleSheet para la fuente en lugar de setFont
+        self.greeting_label.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+        """)
         layout.addWidget(self.greeting_label, alignment=Qt.AlignmentFlag.AlignVCenter)
 
         # Spacer para empujar a los lados
@@ -55,8 +62,15 @@ class BarraSuperior(QFrame):
 
         # === LADO DERECHO: Branding ===
         self.brand_label = QLabel("HUTCHISON PORTS")
-        self.brand_label.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))  # Más grande - de 24 a 28
         self.brand_label.setObjectName("brandLabel")
+        # Usar setStyleSheet para la fuente en lugar de setFont
+        self.brand_label.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 22px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+        """)
         layout.addWidget(self.brand_label, alignment=Qt.AlignmentFlag.AlignVCenter)
 
     def set_title(self, title):
@@ -92,28 +106,40 @@ class BarraSuperior(QFrame):
         brand_color = "#ffffff" if is_dark else "#002E6D"  # Branding: blanco en oscuro, navy en claro
         border_color = "#383838" if is_dark else "#002E6D"  # Borde: gris en oscuro, navy corporativo en claro
 
+        # Actualizar estilos del frame principal y labels
         self.setStyleSheet(f"""
             #barraSuperior {{
                 background-color: {bg_color} !important;
-                border: none;
-                border-bottom: 4px solid {border_color} !important;
+                border: none !important;
+                border-bottom: 2px solid {border_color} !important;
             }}
-
-            #greetingLabel {{
-                color: {text_color} !important;
+            QWidget {{
                 background: transparent !important;
                 border: none !important;
-                padding: 0;
-                margin: 0;
             }}
-
-            #brandLabel {{
-                color: {brand_color} !important;
-                background: transparent !important;
+            QLabel {{
                 border: none !important;
-                padding: 0;
-                margin: 0;
+                background: transparent !important;
             }}
+        """)
+
+        # Actualizar colores de los labels manteniendo las fuentes definidas
+        self.greeting_label.setStyleSheet(f"""
+            font-family: 'Montserrat';
+            font-size: 18px;
+            font-weight: bold;
+            color: {text_color};
+            border: none;
+            background: transparent;
+        """)
+
+        self.brand_label.setStyleSheet(f"""
+            font-family: 'Montserrat';
+            font-size: 22px;
+            font-weight: bold;
+            color: {brand_color};
+            border: none;
+            background: transparent;
         """)
 
         # Forzar actualización visual
