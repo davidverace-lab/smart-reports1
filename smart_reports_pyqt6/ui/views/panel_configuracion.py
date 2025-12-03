@@ -32,37 +32,37 @@ class ConfigCard(QFrame):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(15)
 
-        # Icono y título - SIN BORDES
-        header_label = QLabel(f"{icon} {title}")
-        header_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Aumentado de 20 a 22
+        # Título - SIN EMOJI Y MÁS GRANDE
+        header_label = QLabel(f"{title}")
+        header_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # Aumentado de 20 a 24
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
-        text_color = "#ffffff" if is_dark else "#003087"
-        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
         layout.addWidget(header_label)
 
         # Descripción - MÁS GRANDE Y SIN BORDES
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 14))  # Aumentado de 13 a 14
+        desc_label.setFont(QFont("Montserrat", 15))  # Aumentado de 13 a 15
         desc_color = "#b0b0b0" if is_dark else "#666666"
-        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none;")
+        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none; padding: 0; margin: 0;")
         layout.addWidget(desc_label)
 
         layout.addStretch()
 
-        # Botón
+        # Botón - NAVY CORPORATIVO
         btn = QPushButton(button_text)
-        btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        btn.setFixedHeight(45)
+        btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))
+        btn.setFixedHeight(50)
         btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 10px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -70,21 +70,22 @@ class ConfigCard(QFrame):
         layout.addWidget(btn)
 
     def _apply_theme(self):
-        """Aplicar tema"""
+        """Aplicar tema - Contenedores cambian según modo"""
         if not self.theme_manager:
             return
 
         is_dark = self.theme_manager.is_dark_mode()
         bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        border_color = "#002E6D"  # Navy corporativo
 
         self.setStyleSheet(f"""
             ConfigCard {{
                 background-color: {bg_color};
-                border: 2px solid #003087;
+                border: 3px solid {border_color};
                 border-radius: 15px;
             }}
             ConfigCard:hover {{
-                border: 3px solid #003087;
+                border: 4px solid {border_color};
             }}
         """)
 
@@ -127,17 +128,17 @@ class ConfigMainView(QWidget):
         header_layout.setContentsMargins(5, 5, 5, 5)
         header_layout.setSpacing(5)
 
-        title = QLabel("⚙️ Configuración")
-        title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))  # Ya está en 36pt ✅
+        title = QLabel("Configuración")
+        title.setFont(QFont("Montserrat", 38, QFont.Weight.Bold))  # Aumentado de 36pt a 38pt
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        title_color = "#ffffff" if is_dark else "#003087"  # Cambiado a #003087 para consistencia
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        title_color = "#ffffff" if is_dark else "#002E6D"  # Navy corporativo
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(title)
 
         subtitle = QLabel("Gestiona las opciones del sistema")
-        subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 14 a 16
+        subtitle.setFont(QFont("Montserrat", 18))  # Aumentado de 14 a 18
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(subtitle)
 
         main_layout.addWidget(header)
@@ -224,29 +225,29 @@ class GestionUsuariosView(QWidget):
         header_layout.setContentsMargins(0, 0, 0, 0)
 
         back_btn = QPushButton("← Volver")
-        back_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        back_btn.setFixedHeight(45)
-        back_btn.setFixedWidth(140)
+        back_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        back_btn.setFixedHeight(50)
+        back_btn.setFixedWidth(150)
         back_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         back_btn.clicked.connect(self.back_clicked.emit)
         header_layout.addWidget(back_btn)
 
-        title = QLabel("👥 Gestión de Usuarios")
-        title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
+        title = QLabel("Gestión de Usuarios")
+        title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title_color = "#ffffff" if is_dark else "#002E6D"
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
@@ -261,46 +262,48 @@ class GestionUsuariosView(QWidget):
         self.users_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.users_table)
 
-        # Botones de acción - NAVY BLUE ESTANDARIZADO
+        # Botones de acción - NAVY CORPORATIVO SIN EMOJIS
         actions_layout = QHBoxLayout()
 
-        add_btn = QPushButton("➕ Agregar Usuario")
-        add_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        add_btn.setFixedHeight(40)  # REDUCIDO
+        add_btn = QPushButton("Agregar Usuario")
+        add_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        add_btn.setFixedHeight(50)
         add_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
-        add_btn.clicked.connect(self._add_user)  # CONECTAR FUNCIÓN
+        add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        add_btn.clicked.connect(self._add_user)
         actions_layout.addWidget(add_btn)
 
-        edit_btn = QPushButton("✏️ Editar")
-        edit_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        edit_btn.setFixedHeight(40)  # REDUCIDO
+        edit_btn = QPushButton("Editar")
+        edit_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        edit_btn.setFixedHeight(50)
         edit_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
-        edit_btn.clicked.connect(self._edit_user)  # CONECTAR FUNCIÓN
+        edit_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        edit_btn.clicked.connect(self._edit_user)
         actions_layout.addWidget(edit_btn)
 
-        delete_btn = QPushButton("🗑️ Eliminar")
-        delete_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        delete_btn.setFixedHeight(40)  # REDUCIDO
+        delete_btn = QPushButton("Eliminar")
+        delete_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        delete_btn.setFixedHeight(50)
         delete_btn.setStyleSheet("""
             QPushButton {
                 background-color: #C53030;
@@ -312,7 +315,8 @@ class GestionUsuariosView(QWidget):
                 background-color: #9B2C2C;
             }
         """)
-        delete_btn.clicked.connect(self._delete_user)  # CONECTAR FUNCIÓN
+        delete_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        delete_btn.clicked.connect(self._delete_user)
         actions_layout.addWidget(delete_btn)
 
         actions_layout.addStretch()
