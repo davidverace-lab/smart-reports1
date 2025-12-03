@@ -223,15 +223,15 @@ class ReportGenerationView(QWidget):
         layout.addWidget(scroll)
 
     def _create_filters(self, layout):
-        """Crear filtros según el tipo de reporte"""
+        """Crear filtros segun el tipo de reporte"""
 
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         text_color = "#ffffff" if is_dark else "#002E6D"
         label_style = f"color: {text_color}; font-weight: bold; background: transparent; border: none; padding: 0; margin: 0;"
 
-        # Título de filtros - SIN EMOJI Y MÁS GRANDE
-        filter_title = QLabel("Configuración del Reporte")
-        filter_title.setFont(QFont("Montserrat", 20, QFont.Weight.Bold"))
+        # Titulo de filtros - SIN EMOJI Y MAS GRANDE
+        filter_title = QLabel("Configuracion del Reporte")
+        filter_title.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
         filter_title.setStyleSheet(label_style)
         layout.addWidget(filter_title)
 

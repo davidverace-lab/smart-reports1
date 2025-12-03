@@ -133,19 +133,7 @@ class LoginWindow(QMainWindow):
 
         layout.addSpacing(50)
 
-        # Título (movido abajo) - MÁS GRANDE (42)
-        title_label = QLabel("SMART REPORTS")
-        title_label.setFont(QFont("Montserrat", 44, QFont.Weight.Bold))
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_label.setStyleSheet("""
-            color: white;
-            background: transparent;
-            border: none;
-            margin: 0;
-            padding: 0;
-        """)
-        title_label.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(title_label)
+        # TÍTULO "SMART REPORTS" ELIMINADO (solo logo)
 
         return panel
 
@@ -160,17 +148,17 @@ class LoginWindow(QMainWindow):
         # Spacer superior para centrar verticalmente
         layout.addStretch(1)
 
-        # Título del formulario - MÁS GRANDE (38)
+        # Título del formulario - EXTRA GRANDE para mejor visibilidad
         form_title = QLabel("Iniciar Sesión")
-        form_title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))
+        form_title.setFont(QFont("Montserrat", 52, QFont.Weight.Bold))  # Aumentado de 40 a 52
         form_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(form_title)
 
         layout.addSpacing(15)
 
-        # Subtítulo - MÁS GRANDE (20)
+        # Subtítulo - MÁS GRANDE para mejor visibilidad
         form_subtitle = QLabel("Ingresa tus credenciales")
-        form_subtitle.setFont(QFont("Montserrat", 20))
+        form_subtitle.setFont(QFont("Montserrat", 26))  # Aumentado de 20 a 26
         form_subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         form_subtitle.setStyleSheet("color: #888888;")
         layout.addWidget(form_subtitle)
