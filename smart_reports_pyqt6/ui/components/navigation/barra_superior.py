@@ -25,7 +25,7 @@ class BarraSuperior(QFrame):
         self.theme_manager = theme_manager
 
         self.setObjectName("barraSuperior")
-        self.setFixedHeight(90)  # Más alto - de 70 a 90
+        self.setFixedHeight(100)  # Más alto - de 70 a 100
 
         self._create_ui()
 
@@ -46,7 +46,7 @@ class BarraSuperior(QFrame):
 
         # === LADO IZQUIERDO: Bienvenida ===
         self.greeting_label = QLabel(f"¡Bienvenido, {self.username}!")
-        self.greeting_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Más grande - de 20 a 22
+        self.greeting_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # Más grande - de 20 a 24
         self.greeting_label.setObjectName("greetingLabel")
         layout.addWidget(self.greeting_label, alignment=Qt.AlignmentFlag.AlignVCenter)
 
@@ -55,7 +55,7 @@ class BarraSuperior(QFrame):
 
         # === LADO DERECHO: Branding ===
         self.brand_label = QLabel("HUTCHISON PORTS")
-        self.brand_label.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))  # Más grande - de 24 a 26
+        self.brand_label.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))  # Más grande - de 24 a 28
         self.brand_label.setObjectName("brandLabel")
         layout.addWidget(self.brand_label, alignment=Qt.AlignmentFlag.AlignVCenter)
 
@@ -90,25 +90,29 @@ class BarraSuperior(QFrame):
         bg_color = "#2d2d2d" if is_dark else "#f5f5f5"  # Card background
         text_color = "#ffffff" if is_dark else "#333333"  # Texto normal
         brand_color = "#ffffff" if is_dark else "#002E6D"  # Branding: blanco en oscuro, navy en claro
-        border_color = "#383838" if is_dark else "#003087"  # Borde: gris en oscuro, navy en claro
+        border_color = "#383838" if is_dark else "#002E6D"  # Borde: gris en oscuro, navy corporativo en claro
 
         self.setStyleSheet(f"""
             #barraSuperior {{
                 background-color: {bg_color} !important;
                 border: none;
-                border-bottom: 3px solid {border_color} !important;
+                border-bottom: 4px solid {border_color} !important;
             }}
 
             #greetingLabel {{
                 color: {text_color} !important;
                 background: transparent !important;
                 border: none !important;
+                padding: 0;
+                margin: 0;
             }}
 
             #brandLabel {{
                 color: {brand_color} !important;
                 background: transparent !important;
                 border: none !important;
+                padding: 0;
+                margin: 0;
             }}
         """)
 
