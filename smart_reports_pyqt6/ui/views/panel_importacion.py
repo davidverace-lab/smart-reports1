@@ -42,7 +42,7 @@ class PanelImportacion(QWidget):
         title_layout.setContentsMargins(0, 0, 0, 0)
         title_layout.setSpacing(5)
 
-        title = QLabel("📥 Cruce e Importación de Datos")
+        title = QLabel("↓ Cruce e Importación de Datos")  # Ícono blanco: de 📥 a ↓
         title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 32 a 40
         # Color según tema
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
@@ -76,7 +76,7 @@ class PanelImportacion(QWidget):
         layout.addLayout(header_layout)
 
         # Sección de archivos
-        files_label = QLabel("📁 Archivos a Importar")
+        files_label = QLabel("◫ Archivos a Importar")  # Ícono blanco: de 📁 a ◫
         files_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 20 a 24
         files_label.setStyleSheet(f"color: {title_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         layout.addWidget(files_label)
@@ -85,18 +85,18 @@ class PanelImportacion(QWidget):
         files_grid = QGridLayout()
         files_grid.setSpacing(15)
 
-        # Archivo 1: Training Report
+        # Archivo 1: Training Report - CONTENEDOR CON BORDE NAVY
         training_card = self._create_file_card(
-            "📊 Enterprise Training Report",
+            "▤ Enterprise Training Report",  # Ícono blanco: de 📊 a ▤
             "Módulos y calificaciones",
             "Seleccionar Training Report",
             self._select_training_file
         )
         files_grid.addWidget(training_card, 0, 0)
 
-        # Archivo 2: Org Planning
+        # Archivo 2: Org Planning - CONTENEDOR CON BORDE NAVY
         org_card = self._create_file_card(
-            "👥 CSOD Org Planning",
+            "◉ CSOD Org Planning",  # Ícono blanco: de 👥 a ◉
             "Usuarios y departamentos",
             "Seleccionar Org Planning",
             self._select_org_file
@@ -113,7 +113,7 @@ class PanelImportacion(QWidget):
         layout.addWidget(sep1)
 
         # Sección de acciones
-        actions_label = QLabel("⚙️ Acciones")
+        actions_label = QLabel("⚙ Acciones")  # Ícono blanco: de ⚙️ a ⚙
         actions_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 20 a 24
         actions_label.setStyleSheet(f"color: {title_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         layout.addWidget(actions_label)
@@ -122,7 +122,7 @@ class PanelImportacion(QWidget):
         actions_layout = QHBoxLayout()
         actions_layout.setSpacing(15)
 
-        import_btn = QPushButton("📥 Importar y Cruzar Datos")
+        import_btn = QPushButton("↓ Importar y Cruzar Datos")  # Ícono blanco: de 📥 a ↓
         import_btn.setFixedHeight(60)  # MUCHO MÁS ALTO: de 55 a 60
         import_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 13 a 15
         import_btn.setStyleSheet("""
@@ -140,7 +140,7 @@ class PanelImportacion(QWidget):
         import_btn.clicked.connect(self._import_data)
         actions_layout.addWidget(import_btn)
 
-        preview_btn = QPushButton("👁️ Vista Previa")
+        preview_btn = QPushButton("◉ Vista Previa")  # Ícono blanco: de 👁️ a ◉
         preview_btn.setFixedHeight(60)  # MUCHO MÁS ALTO: de 55 a 60
         preview_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 13 a 15
         preview_btn.setStyleSheet("""
@@ -158,7 +158,7 @@ class PanelImportacion(QWidget):
         preview_btn.clicked.connect(self._preview_data)
         actions_layout.addWidget(preview_btn)
 
-        validate_btn = QPushButton("✅ Validar Datos")
+        validate_btn = QPushButton("✓ Validar Datos")  # Ícono blanco: de ✅ a ✓
         validate_btn.setFixedHeight(60)  # MUCHO MÁS ALTO: de 55 a 60
         validate_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 13 a 15
         validate_btn.setStyleSheet("""
@@ -186,7 +186,7 @@ class PanelImportacion(QWidget):
         layout.addWidget(sep2)
 
         # Sección de log
-        log_label = QLabel("📋 Log de Operaciones")
+        log_label = QLabel("◫ Log de Operaciones")  # Ícono blanco: de 📋 a ◫
         log_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 20 a 24
         log_label.setStyleSheet(f"color: {title_color}; border: none !important; background: transparent !important; margin: 0; padding: 0;")
         layout.addWidget(log_label)
@@ -202,39 +202,74 @@ class PanelImportacion(QWidget):
         layout.addStretch()
 
     def _create_file_card(self, title, subtitle, button_text, command):
-        """Crear tarjeta de archivo"""
+        """Crear tarjeta de archivo - CON BORDE NAVY"""
+
+        # Detectar tema
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        text_color = "#ffffff" if is_dark else "#003087"
 
         card = QFrame()
         card.setFrameShape(QFrame.Shape.StyledPanel)
-        card.setMinimumHeight(150)
+        card.setMinimumHeight(180)  # MÁS ALTO: de 150 a 180
+        # CONTENEDOR CON BORDE NAVY
+        card.setStyleSheet(f"""
+            QFrame {{
+                background-color: {bg_color};
+                border: 3px solid #003087;
+                border-radius: 12px;
+            }}
+            QFrame QLabel {{
+                background: transparent !important;
+                border: none !important;
+                margin: 0;
+                padding: 0;
+            }}
+        """)
 
         layout = QVBoxLayout(card)
-        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setContentsMargins(20, 20, 20, 20)  # MÁS padding: de 15 a 20
+        layout.setSpacing(12)
 
-        # Título
+        # Título - MÁS GRANDE Y SIN BORDES
         title_label = QLabel(title)
-        title_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        title_label.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 18
+        title_label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         layout.addWidget(title_label)
 
-        # Subtítulo
+        # Subtítulo - MÁS GRANDE
         subtitle_label = QLabel(subtitle)
-        subtitle_label.setFont(QFont("Montserrat", 10))
-        subtitle_label.setStyleSheet("color: #888888;")
+        subtitle_label.setFont(QFont("Montserrat", 14))  # MÁS GRANDE: de 10 a 14
+        subtitle_color = "#b0b0b0" if is_dark else "#666666"
+        subtitle_label.setStyleSheet(f"color: {subtitle_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         layout.addWidget(subtitle_label)
 
         layout.addSpacing(10)
 
         # Status
-        status_label = QLabel("📄 No seleccionado")
-        status_label.setFont(QFont("Montserrat", 10))
-        status_label.setStyleSheet("color: #888888;")
+        status_label = QLabel("◫ No seleccionado")  # Ícono blanco: de 📄 a ◫
+        status_label.setFont(QFont("Montserrat", 12))  # MÁS GRANDE: de 10 a 12
+        status_label.setStyleSheet(f"color: {subtitle_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         layout.addWidget(status_label)
 
         layout.addStretch()
 
-        # Botón
+        # Botón - MÁS GRANDE
         select_btn = QPushButton(button_text)
-        select_btn.setFixedHeight(40)
+        select_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # MÁS GRANDE
+        select_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
+        select_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #003087;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #004ba0;
+            }
+        """)
+        select_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         select_btn.clicked.connect(command)
         layout.addWidget(select_btn)
 

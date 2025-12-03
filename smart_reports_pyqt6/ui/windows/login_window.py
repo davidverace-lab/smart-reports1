@@ -85,41 +85,41 @@ class LoginWindow(QMainWindow):
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(15)
 
-        # Logo de Instituto HP (imagen)
+        # Logo de Instituto HP (imagen) - MUCHO MÁS GRANDE
         logo_label = QLabel()
         logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        logo_label.setStyleSheet("background: transparent; border: none; margin: 0; padding: 0;")
+        logo_label.setStyleSheet("background: transparent !important; border: none !important; margin: 0; padding: 0;")
 
         # Intentar cargar logo
         logo_path = "assets/images/LogoInstitutoHP-blanco.png"
         try:
             pixmap = QPixmap(logo_path)
             if not pixmap.isNull():
-                # Escalar logo manteniendo aspect ratio - MÁS GRANDE
-                scaled_pixmap = pixmap.scaled(450, 300, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                # Escalar logo manteniendo aspect ratio - MUCHO MÁS GRANDE: de 450x300 a 550x400
+                scaled_pixmap = pixmap.scaled(550, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
                 logo_label.setPixmap(scaled_pixmap)
             else:
                 # Fallback si no se encuentra la imagen
                 logo_label.setText("INSTITUTO\nHUTCHISON PORTS")
-                logo_label.setFont(QFont("Montserrat", 38, QFont.Weight.Bold))
-                logo_label.setStyleSheet("color: white; background: transparent; border: none; margin: 0; padding: 0;")
+                logo_label.setFont(QFont("Montserrat", 42, QFont.Weight.Bold))  # MÁS GRANDE
+                logo_label.setStyleSheet("color: white; background: transparent !important; border: none !important; margin: 0; padding: 0;")
                 logo_label.setWordWrap(True)
         except Exception as e:
             # Fallback si hay error
             logo_label.setText("INSTITUTO\nHUTCHISON PORTS")
-            logo_label.setFont(QFont("Montserrat", 38, QFont.Weight.Bold))
-            logo_label.setStyleSheet("color: white; background: transparent; border: none; margin: 0; padding: 0;")
+            logo_label.setFont(QFont("Montserrat", 42, QFont.Weight.Bold))  # MÁS GRANDE
+            logo_label.setStyleSheet("color: white; background: transparent !important; border: none !important; margin: 0; padding: 0;")
             logo_label.setWordWrap(True)
 
         layout.addWidget(logo_label)
 
         layout.addSpacing(40)
 
-        # Título (movido abajo) - MÁS GRANDE
+        # Título (movido abajo) - MUCHO MÁS GRANDE
         title_label = QLabel("SMART REPORTS")
-        title_label.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))
+        title_label.setFont(QFont("Montserrat", 48, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 36 a 48
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title_label.setStyleSheet("color: white; background: transparent; border: none; margin: 0; padding: 0;")
+        title_label.setStyleSheet("color: white; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         layout.addWidget(title_label)
 
         return panel

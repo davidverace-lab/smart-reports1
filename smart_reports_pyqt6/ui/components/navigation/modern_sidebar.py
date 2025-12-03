@@ -178,9 +178,9 @@ class ModernSidebar(QFrame):
         toggle_container_layout.setContentsMargins(10, 5, 10, 5)
         toggle_container_layout.setSpacing(10)
 
-        # Label con texto dinámico e icono - MÁS GRANDE
+        # Label con texto dinámico e icono - MÁS GRANDE E ICONOS BLANCOS
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else True
-        mode_icon = "🌙  " if is_dark else "☀️  "
+        mode_icon = "◐  " if is_dark else "◯  "  # ICONOS BLANCOS: de 🌙/☀️ a ◐/◯
         mode_text = mode_icon + ("Modo Oscuro" if is_dark else "Modo Claro")
         self.theme_label = QLabel(mode_text)
         self.theme_label.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # Aumentado de 11 a 14
@@ -353,8 +353,8 @@ class ModernSidebar(QFrame):
 
         is_dark = self.theme_manager.is_dark_mode()
 
-        # Actualizar label de tema con texto dinámico e icono
-        mode_icon = "🌙  " if is_dark else "☀️  "
+        # Actualizar label de tema con texto dinámico e icono - ICONOS BLANCOS
+        mode_icon = "◐  " if is_dark else "◯  "  # ICONOS BLANCOS: de 🌙/☀️ a ◐/◯
         mode_text = mode_icon + ("Modo Oscuro" if is_dark else "Modo Claro")
         self.theme_label.setText(mode_text)
         self.theme_btn.setChecked(is_dark)
