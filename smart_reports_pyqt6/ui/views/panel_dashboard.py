@@ -76,16 +76,16 @@ class ExpandedChartView(QWidget):
         header_layout.setContentsMargins(5, 5, 5, 5)
         header_layout.setSpacing(10)
 
-        # Botón de retorno más compacto
+        # Botón de retorno más grande
         back_btn = QPushButton("←")
-        back_btn.setFont(QFont("Arial", 18, QFont.Weight.Bold))
-        back_btn.setFixedSize(45, 40)
+        back_btn.setFont(QFont("Arial", 22, QFont.Weight.Bold))
+        back_btn.setFixedSize(50, 45)
         back_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
                 color: white;
                 border: none;
-                border-radius: 8px;
+                border-radius: 10px;
             }
             QPushButton:hover {
                 background-color: #004ba0;
@@ -96,20 +96,20 @@ class ExpandedChartView(QWidget):
         back_btn.clicked.connect(self.back_clicked.emit)
         header_layout.addWidget(back_btn)
 
-        # Título del gráfico más compacto
+        # Título del gráfico - MÁS GRANDE Y VISIBLE (20pt)
         title_label = QLabel(self.title)
-        title_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
+        title_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
         title_color = "#ffffff" if is_dark else "#003087"
-        title_label.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title_label.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
         header_layout.addWidget(title_label)
 
         header_layout.addStretch()
 
-        # Botón de menú con opciones
+        # Botón de menú con opciones - MÁS GRANDE Y MÁS VISIBLE
         menu_btn = QPushButton("⋯")
-        menu_btn.setFont(QFont("Arial", 20, QFont.Weight.Bold))
-        menu_btn.setFixedSize(45, 40)
+        menu_btn.setFont(QFont("Arial", 26, QFont.Weight.Bold))
+        menu_btn.setFixedSize(50, 45)
         menu_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -262,26 +262,26 @@ class ChartCard(QFrame):
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(12, 3, 12, 3)
 
-        # Título del gráfico
+        # Título del gráfico - MÁS GRANDE (16pt)
         self.title_label = QLabel(title)
-        self.title_label.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        self.title_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
         is_dark = theme_manager.is_dark_mode() if theme_manager else (theme == 'dark')
         title_color = "#ffffff" if is_dark else "#003087"
-        self.title_label.setStyleSheet(f"color: {title_color}; background: transparent;")
+        self.title_label.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
         header_layout.addWidget(self.title_label)
 
         header_layout.addStretch()
 
-        # Botón de expandir (FUERA del menú) con icono de flecha
+        # Botón de expandir (FUERA del menú) con icono de flecha - MÁS GRANDE
         expand_btn = QPushButton("↗")
-        expand_btn.setFont(QFont("Arial", 18, QFont.Weight.Bold))
-        expand_btn.setFixedSize(38, 38)
+        expand_btn.setFont(QFont("Arial", 20, QFont.Weight.Bold))
+        expand_btn.setFixedSize(42, 42)
         expand_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #003087;
                 color: white;
                 border: none;
-                border-radius: 19px;
+                border-radius: 21px;
                 font-weight: bold;
             }}
             QPushButton:hover {{
@@ -293,16 +293,16 @@ class ChartCard(QFrame):
         expand_btn.clicked.connect(self._toggle_fullscreen)
         header_layout.addWidget(expand_btn)
 
-        # Botón de menú (3 puntos) con icono mejorado
+        # Botón de menú (3 puntos) con icono mejorado - MÁS GRANDE Y VISIBLE
         menu_btn = QPushButton("⋯")
-        menu_btn.setFont(QFont("Arial", 20, QFont.Weight.Bold))
-        menu_btn.setFixedSize(38, 38)
+        menu_btn.setFont(QFont("Arial", 24, QFont.Weight.Bold))
+        menu_btn.setFixedSize(42, 42)
         menu_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: #003087;
                 color: white;
                 border: none;
-                border-radius: 19px;
+                border-radius: 21px;
                 font-weight: bold;
             }}
             QPushButton:hover {{
