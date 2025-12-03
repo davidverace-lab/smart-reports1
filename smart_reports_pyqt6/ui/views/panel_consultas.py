@@ -29,12 +29,12 @@ class SearchSectionCard(QFrame):
         self.layout.setContentsMargins(10, 10, 10, 10)
         self.layout.setSpacing(10)
 
-        # Título
+        # Título - MÁS GRANDE SIN BORDES
         title_label = QLabel(f"{icon} {title}")
-        title_label.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))
+        title_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # MÁS GRANDE: de 18 a 22
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         text_color = "#ffffff" if is_dark else "#003087"
-        title_label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        title_label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         self.layout.addWidget(title_label)
 
     def _apply_theme(self):
@@ -131,18 +131,18 @@ class ConsultasPanel(QWidget):
         header_layout.setContentsMargins(30, 20, 30, 20)
         header_layout.setSpacing(8)
 
-        # Título - MÁS GRANDE
-        title = QLabel("🔍 Panel de Consultas")
-        title.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 28 a 32
+        # Título - MUCHO MÁS GRANDE (ícono blanco)
+        title = QLabel("⚲ Panel de Consultas")  # Ícono blanco: de 🔍 a ⚲
+        title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 32 a 40
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(title)
 
-        # Subtítulo - MÁS GRANDE
+        # Subtítulo - MUCHO MÁS GRANDE
         subtitle = QLabel("Búsquedas y filtros en la base de datos de capacitación")
-        subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 14 a 16
+        subtitle.setFont(QFont("Montserrat", 20))  # MUCHO MÁS GRANDE: de 16 a 20
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(subtitle)
 
         layout.addWidget(header_frame)
@@ -150,28 +150,28 @@ class ConsultasPanel(QWidget):
     def _create_search_by_id_card(self):
         """Card: Buscar por ID"""
 
-        card = SearchSectionCard("Buscar Usuario por ID", "👤", self.theme_manager)
+        card = SearchSectionCard("Buscar Usuario por ID", "◉", self.theme_manager)  # Ícono blanco: de 👤 a ◉
 
         # Input frame
         input_layout = QHBoxLayout()
 
         label = QLabel("ID Usuario:")
-        label.setFont(QFont("Montserrat", 13))
+        label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 16
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         text_color = "#ffffff" if is_dark else "#003087"
-        label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         input_layout.addWidget(label)
 
         self.user_id_entry = QLineEdit()
         self.user_id_entry.setPlaceholderText("Ej: 12345")
-        self.user_id_entry.setFont(QFont("Montserrat", 13))
-        self.user_id_entry.setFixedHeight(40)
+        self.user_id_entry.setFont(QFont("Montserrat", 15))  # MÁS GRANDE: de 13 a 15
+        self.user_id_entry.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         input_layout.addWidget(self.user_id_entry, 1)
 
-        search_btn = QPushButton("🔍 Buscar")
-        search_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        search_btn.setFixedHeight(40)
-        search_btn.setFixedWidth(120)
+        search_btn = QPushButton("⚲ Buscar")  # Ícono blanco: de 🔍 a ⚲
+        search_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 15
+        search_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
+        search_btn.setFixedWidth(140)  # MÁS ANCHO: de 120 a 140
         search_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -195,16 +195,16 @@ class ConsultasPanel(QWidget):
     def _create_search_by_unit_card(self):
         """Card: Buscar por Unidad"""
 
-        card = SearchSectionCard("Consultar por Unidad de Negocio", "🏢", self.theme_manager)
+        card = SearchSectionCard("Consultar por Unidad de Negocio", "▣", self.theme_manager)  # Ícono blanco: de 🏢 a ▣
 
         # Input frame
         input_layout = QHBoxLayout()
 
         label = QLabel("Unidad:")
-        label.setFont(QFont("Montserrat", 13))
+        label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 16
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         text_color = "#ffffff" if is_dark else "#003087"
-        label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         input_layout.addWidget(label)
 
         self.unit_combo = QComboBox()
@@ -213,14 +213,14 @@ class ConsultasPanel(QWidget):
             "ICAVE", "TNG", "ECV", "HPMX", "Container",
             "LCMT", "HPLM", "TILH", "CCI", "TIMSA", "LCT", "EIT"
         ])
-        self.unit_combo.setFont(QFont("Montserrat", 13))
-        self.unit_combo.setFixedHeight(40)
+        self.unit_combo.setFont(QFont("Montserrat", 15))  # MÁS GRANDE: de 13 a 15
+        self.unit_combo.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         input_layout.addWidget(self.unit_combo, 1)
 
-        search_btn = QPushButton("🔍 Consultar")
-        search_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        search_btn.setFixedHeight(40)
-        search_btn.setFixedWidth(120)
+        search_btn = QPushButton("⚲ Consultar")  # Ícono blanco: de 🔍 a ⚲
+        search_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 15
+        search_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
+        search_btn.setFixedWidth(140)  # MÁS ANCHO: de 120 a 140
         search_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -244,12 +244,12 @@ class ConsultasPanel(QWidget):
     def _create_new_users_card(self):
         """Card: Usuarios Nuevos"""
 
-        card = SearchSectionCard("Usuarios Nuevos (Últimos 30 días)", "📅", self.theme_manager)
+        card = SearchSectionCard("Usuarios Nuevos (Últimos 30 días)", "◐", self.theme_manager)  # Ícono blanco: de 📅 a ◐
 
-        # Botón
-        search_btn = QPushButton("📋 Ver Usuarios Nuevos")
-        search_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        search_btn.setFixedHeight(50)
+        # Botón - MÁS GRANDE
+        search_btn = QPushButton("◫ Ver Usuarios Nuevos")  # Ícono blanco: de 📋 a ◫
+        search_btn.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 14 a 16
+        search_btn.setFixedHeight(55)  # MÁS ALTO: de 50 a 55
         search_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -272,12 +272,12 @@ class ConsultasPanel(QWidget):
     def _create_stats_card(self):
         """Card: Estadísticas Globales"""
 
-        card = SearchSectionCard("Estadísticas Globales", "📊", self.theme_manager)
+        card = SearchSectionCard("Estadísticas Globales", "▤", self.theme_manager)  # Ícono blanco: de 📊 a ▤
 
-        # Botón
-        search_btn = QPushButton("📈 Ver Estadísticas")
-        search_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        search_btn.setFixedHeight(50)
+        # Botón - MÁS GRANDE
+        search_btn = QPushButton("▥ Ver Estadísticas")  # Ícono blanco: de 📈 a ▥
+        search_btn.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 14 a 16
+        search_btn.setFixedHeight(55)  # MÁS ALTO: de 50 a 55
         search_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -315,11 +315,11 @@ class ConsultasPanel(QWidget):
         results_layout.setContentsMargins(20, 20, 20, 20)
         results_layout.setSpacing(15)
 
-        # Título
-        results_title = QLabel("📋 Resultados")
-        results_title.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))
+        # Título - MÁS GRANDE SIN BORDES
+        results_title = QLabel("◫ Resultados")  # Ícono blanco: de 📋 a ◫
+        results_title.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # MÁS GRANDE: de 18 a 22
         text_color = "#ffffff" if is_dark else "#003087"
-        results_title.setStyleSheet(f"color: {text_color}; background: transparent;")
+        results_title.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         results_layout.addWidget(results_title)
 
         # Tabla de resultados
@@ -329,11 +329,11 @@ class ConsultasPanel(QWidget):
         self.results_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         results_layout.addWidget(self.results_table)
 
-        # Info de resultados
+        # Info de resultados - MÁS GRANDE SIN BORDES
         self.results_info = QLabel("No hay resultados. Realiza una búsqueda.")
-        self.results_info.setFont(QFont("Montserrat", 11))
+        self.results_info.setFont(QFont("Montserrat", 14))  # MÁS GRANDE: de 11 a 14
         info_color = "#888888"
-        self.results_info.setStyleSheet(f"color: {info_color}; background: transparent;")
+        self.results_info.setStyleSheet(f"color: {info_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         results_layout.addWidget(self.results_info)
 
         layout.addWidget(results_frame)

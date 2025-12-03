@@ -32,28 +32,28 @@ class ConfigCard(QFrame):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(15)
 
-        # Icono y título - SIN BORDES
+        # Icono y título - MUCHO MÁS GRANDE SIN BORDES
         header_label = QLabel(f"{icon} {title}")
-        header_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Aumentado de 20 a 22
+        header_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 22 a 24
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         text_color = "#ffffff" if is_dark else "#003087"
-        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        header_label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         layout.addWidget(header_label)
 
-        # Descripción - MÁS GRANDE Y SIN BORDES
+        # Descripción - MUCHO MÁS GRANDE SIN BORDES
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 14))  # Aumentado de 13 a 14
+        desc_label.setFont(QFont("Montserrat", 16))  # MUCHO MÁS GRANDE: de 14 a 16
         desc_color = "#b0b0b0" if is_dark else "#666666"
-        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none;")
+        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         layout.addWidget(desc_label)
 
         layout.addStretch()
 
-        # Botón
+        # Botón - MÁS GRANDE
         btn = QPushButton(button_text)
-        btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        btn.setFixedHeight(45)
+        btn.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 14 a 16
+        btn.setFixedHeight(50)  # MÁS ALTO: de 45 a 50
         btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -127,17 +127,17 @@ class ConfigMainView(QWidget):
         header_layout.setContentsMargins(5, 5, 5, 5)
         header_layout.setSpacing(5)
 
-        title = QLabel("⚙️ Configuración")
-        title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))  # Ya está en 36pt ✅
+        title = QLabel("⚙ Configuración")  # Ícono blanco: de ⚙️ a ⚙
+        title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 36 a 40
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        title_color = "#ffffff" if is_dark else "#003087"  # Cambiado a #003087 para consistencia
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        title_color = "#ffffff" if is_dark else "#003087"
+        title.setStyleSheet(f"color: {title_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(title)
 
         subtitle = QLabel("Gestiona las opciones del sistema")
-        subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 14 a 16
+        subtitle.setFont(QFont("Montserrat", 20))  # MUCHO MÁS GRANDE: de 16 a 20
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(subtitle)
 
         main_layout.addWidget(header)
@@ -146,36 +146,36 @@ class ConfigMainView(QWidget):
         grid = QGridLayout()
         grid.setSpacing(15)
 
-        # Card 1: Gestionar Empleados
+        # Card 1: Gestionar Empleados - ICONOS BLANCOS
         card1 = ConfigCard(
-            "👥", "Gestionar Empleados",
+            "◉", "Gestionar Empleados",  # Ícono blanco: de 👥 a ◉
             "Agregar, editar o consultar empleados del sistema",
             "Gestionar", self.theme_manager
         )
         card1.clicked.connect(self.gestionar_empleados_clicked.emit)
         grid.addWidget(card1, 0, 0)
 
-        # Card 2: Registro de Soporte
+        # Card 2: Registro de Soporte - ICONOS BLANCOS
         card2 = ConfigCard(
-            "📝", "Registro de Soporte",
+            "✎", "Registro de Soporte",  # Ícono blanco: de 📝 a ✎
             "Registrar soporte brindado a usuarios por correo electrónico",
             "Registrar", self.theme_manager
         )
         card2.clicked.connect(self.soporte_tickets_clicked.emit)
         grid.addWidget(card2, 0, 1)
 
-        # Card 3: Historial de Reportes
+        # Card 3: Historial de Reportes - ICONOS BLANCOS
         card3 = ConfigCard(
-            "📋", "Historial de Reportes",
+            "◫", "Historial de Reportes",  # Ícono blanco: de 📋 a ◫
             "Ver y descargar reportes PDF generados anteriormente",
             "Ver Historial", self.theme_manager
         )
         card3.clicked.connect(self.historial_reportes_clicked.emit)
         grid.addWidget(card3, 1, 0)
 
-        # Card 4: Acerca de
+        # Card 4: Acerca de - ICONOS BLANCOS
         card4 = ConfigCard(
-            "ℹ️", "Acerca de",
+            "◎", "Acerca de",  # Ícono blanco: de ℹ️ a ◎
             "Información de la versión y del desarrollador",
             "Ver Info", self.theme_manager
         )
@@ -224,9 +224,9 @@ class GestionUsuariosView(QWidget):
         header_layout.setContentsMargins(0, 0, 0, 0)
 
         back_btn = QPushButton("← Volver")
-        back_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        back_btn.setFixedHeight(45)
-        back_btn.setFixedWidth(140)
+        back_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 14
+        back_btn.setFixedHeight(50)  # MÁS ALTO: de 45 a 50
+        back_btn.setFixedWidth(150)  # MÁS ANCHO: de 140 a 150
         back_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -242,11 +242,11 @@ class GestionUsuariosView(QWidget):
         back_btn.clicked.connect(self.back_clicked.emit)
         header_layout.addWidget(back_btn)
 
-        title = QLabel("👥 Gestión de Usuarios")
-        title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
+        title = QLabel("◉ Gestión de Usuarios")  # Ícono blanco: de 👥 a ◉
+        title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 24 a 40
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
@@ -264,9 +264,9 @@ class GestionUsuariosView(QWidget):
         # Botones de acción - NAVY BLUE ESTANDARIZADO
         actions_layout = QHBoxLayout()
 
-        add_btn = QPushButton("➕ Agregar Usuario")
-        add_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        add_btn.setFixedHeight(40)  # REDUCIDO
+        add_btn = QPushButton("+ Agregar Usuario")  # Ícono blanco: de ➕ a +
+        add_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 15
+        add_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         add_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -278,12 +278,12 @@ class GestionUsuariosView(QWidget):
                 background-color: #004ba0;
             }
         """)
-        add_btn.clicked.connect(self._add_user)  # CONECTAR FUNCIÓN
+        add_btn.clicked.connect(self._add_user)
         actions_layout.addWidget(add_btn)
 
-        edit_btn = QPushButton("✏️ Editar")
-        edit_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        edit_btn.setFixedHeight(40)  # REDUCIDO
+        edit_btn = QPushButton("✎ Editar")  # Ícono blanco: de ✏️ a ✎
+        edit_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 15
+        edit_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         edit_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -295,12 +295,12 @@ class GestionUsuariosView(QWidget):
                 background-color: #004ba0;
             }
         """)
-        edit_btn.clicked.connect(self._edit_user)  # CONECTAR FUNCIÓN
+        edit_btn.clicked.connect(self._edit_user)
         actions_layout.addWidget(edit_btn)
 
-        delete_btn = QPushButton("🗑️ Eliminar")
-        delete_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        delete_btn.setFixedHeight(40)  # REDUCIDO
+        delete_btn = QPushButton("× Eliminar")  # Ícono blanco: de 🗑️ a ×
+        delete_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 15
+        delete_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         delete_btn.setStyleSheet("""
             QPushButton {
                 background-color: #C53030;
@@ -392,9 +392,9 @@ class SoporteTicketsView(QWidget):
         header_layout.setContentsMargins(0, 0, 0, 0)
 
         back_btn = QPushButton("← Volver")
-        back_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        back_btn.setFixedHeight(45)
-        back_btn.setFixedWidth(140)
+        back_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 14
+        back_btn.setFixedHeight(50)  # MÁS ALTO: de 45 a 50
+        back_btn.setFixedWidth(150)  # MÁS ANCHO: de 140 a 150
         back_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -410,11 +410,11 @@ class SoporteTicketsView(QWidget):
         back_btn.clicked.connect(self.back_clicked.emit)
         header_layout.addWidget(back_btn)
 
-        title = QLabel("📝 Registro de Soporte")
-        title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
+        title = QLabel("✎ Registro de Soporte")  # Ícono blanco: de 📝 a ✎
+        title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 24 a 40
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
@@ -426,40 +426,48 @@ class SoporteTicketsView(QWidget):
         form_layout = QVBoxLayout(form_frame)
         form_layout.setSpacing(15)
 
-        # Usuario
+        # Usuario - MÁS GRANDE SIN BORDES
         user_label = QLabel("Usuario:")
-        user_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        user_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
+        text_color = "#ffffff" if is_dark else "#003087"
+        user_label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         form_layout.addWidget(user_label)
 
         self.user_entry = QLineEdit()
         self.user_entry.setPlaceholderText("Email del usuario")
-        self.user_entry.setFixedHeight(40)
+        self.user_entry.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.user_entry.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         form_layout.addWidget(self.user_entry)
 
-        # Asunto
+        # Asunto - MÁS GRANDE SIN BORDES
         subject_label = QLabel("Asunto:")
-        subject_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        subject_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        subject_label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         form_layout.addWidget(subject_label)
 
         self.subject_entry = QLineEdit()
         self.subject_entry.setPlaceholderText("Asunto del ticket")
-        self.subject_entry.setFixedHeight(40)
+        self.subject_entry.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.subject_entry.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         form_layout.addWidget(self.subject_entry)
 
-        # Descripción
+        # Descripción - MÁS GRANDE SIN BORDES
         desc_label = QLabel("Descripción:")
-        desc_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        desc_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        desc_label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         form_layout.addWidget(desc_label)
 
         self.desc_text = QTextEdit()
         self.desc_text.setPlaceholderText("Descripción del soporte brindado...")
+        self.desc_text.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
         self.desc_text.setMinimumHeight(150)
         form_layout.addWidget(self.desc_text)
 
-        # Botón registrar
-        register_btn = QPushButton("✅ Registrar Ticket")
-        register_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        register_btn.setFixedHeight(50)
+        # Botón registrar - MÁS GRANDE
+        register_btn = QPushButton("✓ Registrar Ticket")  # Ícono blanco: de ✅ a ✓
+        register_btn.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 14 a 16
+        register_btn.setFixedHeight(55)  # MÁS ALTO: de 50 a 55
         register_btn.setStyleSheet("""
             QPushButton {
                 background-color: #28a745;
@@ -509,9 +517,9 @@ class HistorialReportesView(QWidget):
         header_layout.setContentsMargins(0, 0, 0, 0)
 
         back_btn = QPushButton("← Volver")
-        back_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        back_btn.setFixedHeight(45)
-        back_btn.setFixedWidth(140)
+        back_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 14
+        back_btn.setFixedHeight(50)  # MÁS ALTO: de 45 a 50
+        back_btn.setFixedWidth(150)  # MÁS ANCHO: de 140 a 150
         back_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -527,11 +535,11 @@ class HistorialReportesView(QWidget):
         back_btn.clicked.connect(self.back_clicked.emit)
         header_layout.addWidget(back_btn)
 
-        title = QLabel("📋 Historial de Reportes")
-        title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
+        title = QLabel("◫ Historial de Reportes")  # Ícono blanco: de 📋 a ◫
+        title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 24 a 40
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
@@ -561,14 +569,15 @@ class HistorialReportesView(QWidget):
         for row, row_data in enumerate(data):
             for col, value in enumerate(row_data):
                 if col == 4:  # Columna de acciones
-                    btn = QPushButton("📄 Descargar")
+                    btn = QPushButton("↓ Descargar")  # Ícono blanco: de 📄 a ↓
+                    btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # MÁS GRANDE
                     btn.setStyleSheet("""
                         QPushButton {
                             background-color: #003087;
                             color: white;
                             border: none;
                             border-radius: 5px;
-                            padding: 5px 10px;
+                            padding: 8px 15px;
                         }
                         QPushButton:hover {
                             background-color: #004ba0;

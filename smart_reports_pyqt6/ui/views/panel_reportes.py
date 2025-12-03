@@ -17,43 +17,43 @@ class ReportCard(QFrame):
 
     clicked = pyqtSignal()
 
-    def __init__(self, title: str, description: str, icon: str = "📄", theme_manager=None, parent=None):
+    def __init__(self, title: str, description: str, icon: str = "◫", theme_manager=None, parent=None):  # Ícono blanco
         super().__init__(parent)
 
         self.theme_manager = theme_manager
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setMinimumHeight(140)  # REDUCIDO de 180 a 140
+        self.setMinimumHeight(180)  # MUCHO MÁS GRANDE: de 140 a 180
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         # Aplicar estilo
         self._apply_theme()
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(15, 15, 15, 15)  # REDUCIDO de 20 a 15
-        layout.setSpacing(8)  # REDUCIDO de 12 a 8
+        layout.setContentsMargins(20, 20, 20, 20)  # MÁS ESPACIO: de 15 a 20
+        layout.setSpacing(12)  # MÁS ESPACIO: de 8 a 12
 
-        # Icono y título - MÁS GRANDE
+        # Icono y título - MUCHO MÁS GRANDE SIN BORDES
         header_label = QLabel(f"{icon} {title}")
-        header_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))  # Aumentado de 18 a 20
+        header_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 20 a 24
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         text_color = "#ffffff" if is_dark else "#003087"
-        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        header_label.setStyleSheet(f"color: {text_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         layout.addWidget(header_label)
 
-        # Descripción - MÁS GRANDE
+        # Descripción - MUCHO MÁS GRANDE SIN BORDES
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 13))  # Aumentado de 12 a 13
+        desc_label.setFont(QFont("Montserrat", 16))  # MUCHO MÁS GRANDE: de 13 a 16
         desc_color = "#b0b0b0" if is_dark else "#666666"
-        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none;")
+        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         layout.addWidget(desc_label)
 
         layout.addStretch()
 
-        # Botón
-        gen_btn = QPushButton("Generar Reporte")
-        gen_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        gen_btn.setFixedHeight(40)
+        # Botón - MÁS GRANDE
+        gen_btn = QPushButton("▶ Generar Reporte")  # Ícono blanco
+        gen_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MÁS GRANDE: de 13 a 15
+        gen_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         gen_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -116,11 +116,11 @@ class ReportGenerationView(QWidget):
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Botón de retorno
+        # Botón de retorno - MÁS GRANDE
         back_btn = QPushButton("← Volver")
-        back_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        back_btn.setFixedHeight(40)
-        back_btn.setFixedWidth(120)
+        back_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 14
+        back_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
+        back_btn.setFixedWidth(140)  # MÁS ANCHO: de 120 a 140
         back_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -136,24 +136,24 @@ class ReportGenerationView(QWidget):
         back_btn.clicked.connect(self.back_clicked.emit)
         header_layout.addWidget(back_btn)
 
-        # Título - MÁS GRANDE
-        title = QLabel(f"📊 {self.report_type}")
-        title.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))  # Aumentado de 22 a 26
+        # Título - MUCHO MÁS GRANDE SIN BORDES
+        title = QLabel(f"▤ {self.report_type}")  # Ícono blanco: de 📊 a ▤
+        title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 26 a 40
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
 
         layout.addWidget(header)
 
-        # BOTONES DE ACCIÓN ARRIBA (Mejor UX - no se pierden)
+        # BOTONES DE ACCIÓN ARRIBA (Mejor UX - no se pierden) - MÁS GRANDES
         actions_layout = QHBoxLayout()
 
-        preview_btn = QPushButton("👁️ Vista Previa")
-        preview_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        preview_btn.setFixedHeight(40)  # REDUCIDO de 45 a 40
+        preview_btn = QPushButton("◉ Vista Previa")  # Ícono blanco: de 👁️ a ◉
+        preview_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 15
+        preview_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         preview_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -168,9 +168,9 @@ class ReportGenerationView(QWidget):
         preview_btn.clicked.connect(self._preview_report)
         actions_layout.addWidget(preview_btn)
 
-        generate_btn = QPushButton("📄 Generar PDF")
-        generate_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        generate_btn.setFixedHeight(40)  # REDUCIDO de 45 a 40
+        generate_btn = QPushButton("◫ Generar PDF")  # Ícono blanco: de 📄 a ◫
+        generate_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 15
+        generate_btn.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         generate_btn.setStyleSheet("""
             QPushButton {
                 background-color: #003087;
@@ -227,10 +227,10 @@ class ReportGenerationView(QWidget):
         text_color = "#ffffff" if is_dark else "#003087"
         label_style = f"color: {text_color}; font-weight: bold; background: transparent;"
 
-        # Título de filtros
-        filter_title = QLabel("⚙️ Configuración del Reporte")
-        filter_title.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
-        filter_title.setStyleSheet(label_style)
+        # Título de filtros - MÁS GRANDE SIN BORDES
+        filter_title = QLabel("⚙ Configuración del Reporte")  # Ícono blanco: de ⚙️ a ⚙
+        filter_title.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))  # MÁS GRANDE: de 16 a 20
+        filter_title.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(filter_title)
 
         # Filtros específicos por tipo de reporte
@@ -247,96 +247,103 @@ class ReportGenerationView(QWidget):
 
     def _create_user_filters(self, layout, label_style):
         """Filtros para reporte de usuario"""
-        # User ID
+        # User ID - MÁS GRANDE SIN BORDES
         user_label = QLabel("User ID:")
-        user_label.setFont(QFont("Montserrat", 12))
-        user_label.setStyleSheet(label_style)
+        user_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        user_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(user_label)
 
         self.user_input = QLineEdit()
         self.user_input.setPlaceholderText("Ingrese el User ID")
-        self.user_input.setFixedHeight(40)
+        self.user_input.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.user_input.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.user_input)
 
-        # Búsqueda por nombre
+        # Búsqueda por nombre - MÁS GRANDE SIN BORDES
         name_label = QLabel("O buscar por nombre:")
-        name_label.setFont(QFont("Montserrat", 12))
-        name_label.setStyleSheet(label_style)
+        name_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        name_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(name_label)
 
         self.user_search = QLineEdit()
         self.user_search.setPlaceholderText("Buscar usuario por nombre...")
-        self.user_search.setFixedHeight(40)
+        self.user_search.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.user_search.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.user_search)
 
     def _create_unit_filters(self, layout, label_style):
         """Filtros para reporte por unidad"""
-        # Unidad de Negocio
+        # Unidad de Negocio - MÁS GRANDE SIN BORDES
         unit_label = QLabel("Unidad de Negocio:")
-        unit_label.setFont(QFont("Montserrat", 12))
-        unit_label.setStyleSheet(label_style)
+        unit_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        unit_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(unit_label)
 
         self.unit_combo = QComboBox()
         self.unit_combo.addItems(['TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX'])
-        self.unit_combo.setFixedHeight(40)
+        self.unit_combo.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.unit_combo.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.unit_combo)
 
-        # Módulo
+        # Módulo - MÁS GRANDE SIN BORDES
         module_label = QLabel("Módulo:")
-        module_label.setFont(QFont("Montserrat", 12))
-        module_label.setStyleSheet(label_style)
+        module_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        module_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(module_label)
 
         self.module_combo = QComboBox()
         modules = ['Todos'] + [f'Módulo {i}' for i in range(1, 9)]
         self.module_combo.addItems(modules)
-        self.module_combo.setFixedHeight(40)
+        self.module_combo.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.module_combo.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.module_combo)
 
     def _create_period_filters(self, layout, label_style):
         """Filtros para reporte por período"""
-        # Fecha inicio
+        # Fecha inicio - MÁS GRANDE SIN BORDES
         start_label = QLabel("Fecha Inicio:")
-        start_label.setFont(QFont("Montserrat", 12))
-        start_label.setStyleSheet(label_style)
+        start_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        start_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(start_label)
 
         self.start_date = QDateEdit()
         self.start_date.setCalendarPopup(True)
         self.start_date.setDate(QDate.currentDate().addMonths(-1))
-        self.start_date.setFixedHeight(40)
+        self.start_date.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.start_date.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.start_date)
 
-        # Fecha fin
+        # Fecha fin - MÁS GRANDE SIN BORDES
         end_label = QLabel("Fecha Fin:")
-        end_label.setFont(QFont("Montserrat", 12))
-        end_label.setStyleSheet(label_style)
+        end_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        end_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(end_label)
 
         self.end_date = QDateEdit()
         self.end_date.setCalendarPopup(True)
         self.end_date.setDate(QDate.currentDate())
-        self.end_date.setFixedHeight(40)
+        self.end_date.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.end_date.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.end_date)
 
-        # Unidad (opcional)
+        # Unidad (opcional) - MÁS GRANDE SIN BORDES
         unit_label = QLabel("Filtrar por Unidad (opcional):")
-        unit_label.setFont(QFont("Montserrat", 12))
-        unit_label.setStyleSheet(label_style)
+        unit_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        unit_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(unit_label)
 
         self.unit_filter = QComboBox()
         self.unit_filter.addItems(['Todas', 'TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX'])
-        self.unit_filter.setFixedHeight(40)
+        self.unit_filter.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.unit_filter.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.unit_filter)
 
     def _create_level_filters(self, layout, label_style):
         """Filtros para reporte por nivel de mando"""
-        # Nivel de mando
+        # Nivel de mando - MÁS GRANDE SIN BORDES
         level_label = QLabel("Nivel de Mando:")
-        level_label.setFont(QFont("Montserrat", 12))
-        level_label.setStyleSheet(label_style)
+        level_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        level_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(level_label)
 
         self.level_combo = QComboBox()
@@ -348,43 +355,47 @@ class ReportGenerationView(QWidget):
             'Supervisión',
             'Personal Operativo'
         ])
-        self.level_combo.setFixedHeight(40)
+        self.level_combo.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.level_combo.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.level_combo)
 
-        # Unidad (opcional)
+        # Unidad (opcional) - MÁS GRANDE SIN BORDES
         unit_label = QLabel("Filtrar por Unidad (opcional):")
-        unit_label.setFont(QFont("Montserrat", 12))
-        unit_label.setStyleSheet(label_style)
+        unit_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        unit_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(unit_label)
 
         self.unit_filter = QComboBox()
         self.unit_filter.addItems(['Todas', 'TNG', 'ICAVE', 'ECV', 'Container Care', 'HPMX'])
-        self.unit_filter.setFixedHeight(40)
+        self.unit_filter.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.unit_filter.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.unit_filter)
 
     def _create_global_filters(self, layout, label_style):
         """Filtros para reporte global"""
-        # Módulo
+        # Módulo - MÁS GRANDE SIN BORDES
         module_label = QLabel("Filtrar por Módulo:")
-        module_label.setFont(QFont("Montserrat", 12))
-        module_label.setStyleSheet(label_style)
+        module_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        module_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(module_label)
 
         self.module_combo = QComboBox()
         modules = ['Todos'] + [f'Módulo {i}' for i in range(1, 9)]
         self.module_combo.addItems(modules)
-        self.module_combo.setFixedHeight(40)
+        self.module_combo.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.module_combo.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.module_combo)
 
-        # Incluir estadísticas detalladas
+        # Incluir estadísticas detalladas - MÁS GRANDE SIN BORDES
         stats_label = QLabel("Nivel de Detalle:")
-        stats_label.setFont(QFont("Montserrat", 12))
-        stats_label.setStyleSheet(label_style)
+        stats_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # MÁS GRANDE: de 12 a 16
+        stats_label.setStyleSheet(f"{label_style} margin: 0; padding: 0; border: none !important;")
         layout.addWidget(stats_label)
 
         self.detail_combo = QComboBox()
         self.detail_combo.addItems(['Resumen Ejecutivo', 'Detallado', 'Completo con Gráficos'])
-        self.detail_combo.setFixedHeight(40)
+        self.detail_combo.setFont(QFont("Montserrat", 15))  # MÁS GRANDE
+        self.detail_combo.setFixedHeight(50)  # MÁS ALTO: de 40 a 50
         layout.addWidget(self.detail_combo)
 
     def _preview_report(self):
@@ -444,17 +455,17 @@ class ReportesPanel(QWidget):
         header_layout = QVBoxLayout(header)
         header_layout.setContentsMargins(5, 5, 5, 5)
 
-        title = QLabel("📊 Generación de Reportes")
-        title.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 28 a 32
+        title = QLabel("▤ Generación de Reportes")  # Ícono blanco: de 📊 a ▤
+        title.setFont(QFont("Montserrat", 40, QFont.Weight.Bold))  # MUCHO MÁS GRANDE: de 32 a 40
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        title.setStyleSheet(f"color: {title_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(title)
 
         subtitle = QLabel("Selecciona el tipo de reporte que deseas generar")
-        subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 13 a 16
+        subtitle.setFont(QFont("Montserrat", 20))  # MUCHO MÁS GRANDE: de 16 a 20
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent !important; border: none !important; margin: 0; padding: 0;")
         header_layout.addWidget(subtitle)
 
         layout.addWidget(header)
@@ -469,13 +480,13 @@ class ReportesPanel(QWidget):
         scroll_layout.setSpacing(12)
         scroll.setWidget(scroll_widget)
 
-        # Tipos de reportes
+        # Tipos de reportes - ICONOS BLANCOS
         reports = [
-            ("Progreso de Usuario", "Reporte detallado del progreso individual", "👤"),
-            ("Progreso por Unidad", "Reporte de progreso por unidad de negocio", "🏢"),
-            ("Reporte por Período", "Reporte de actividad en un rango de fechas", "📅"),
-            ("Reporte Global", "Vista general del sistema completo", "🌍"),
-            ("Niveles de Mando", "Reporte organizado por niveles gerenciales", "👔"),
+            ("Progreso de Usuario", "Reporte detallado del progreso individual", "◉"),  # de 👤 a ◉
+            ("Progreso por Unidad", "Reporte de progreso por unidad de negocio", "▣"),  # de 🏢 a ▣
+            ("Reporte por Período", "Reporte de actividad en un rango de fechas", "◐"),  # de 📅 a ◐
+            ("Reporte Global", "Vista general del sistema completo", "◎"),  # de 🌍 a ◎
+            ("Niveles de Mando", "Reporte organizado por niveles gerenciales", "▤"),  # de 👔 a ▤
         ]
 
         row = 0
