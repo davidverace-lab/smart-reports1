@@ -33,8 +33,8 @@ class ModernSidebar(QFrame):
 
         # Estado de colapso
         self.is_collapsed = False
-        self.expanded_width = 260  # Más ancho - de 240 a 260
-        self.collapsed_width = 70
+        self.expanded_width = 280  # Más ancho - de 240 a 280
+        self.collapsed_width = 75
 
         # Configurar sidebar
         self.setFixedWidth(self.expanded_width)
@@ -85,10 +85,10 @@ class ModernSidebar(QFrame):
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setSpacing(10)
 
-        # Botón hamburguesa
+        # Botón hamburguesa - MÁS GRANDE
         self.collapse_btn = QPushButton("☰")
-        self.collapse_btn.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
-        self.collapse_btn.setFixedSize(50, 40)
+        self.collapse_btn.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
+        self.collapse_btn.setFixedSize(55, 45)
         self.collapse_btn.setObjectName("hamburgerBtn")
         self.collapse_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.collapse_btn.clicked.connect(self._toggle_collapse)
@@ -97,21 +97,21 @@ class ModernSidebar(QFrame):
         # Frame del logo (colapsable) - MÁS ALTO
         self.logo_frame = QWidget()
         self.logo_frame.setObjectName("logoFrame")
-        self.logo_frame.setFixedHeight(100)
+        self.logo_frame.setFixedHeight(110)
         logo_layout = QVBoxLayout(self.logo_frame)
         logo_layout.setContentsMargins(10, 15, 10, 10)
         logo_layout.setSpacing(5)
 
-        # Título principal - MÁS GRANDE
+        # Título principal - MÁS GRANDE (30pt)
         self.logo_label = QLabel("SMART\nREPORTS")
-        self.logo_label.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
+        self.logo_label.setFont(QFont("Montserrat", 30, QFont.Weight.Bold))
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.logo_label.setWordWrap(True)
         logo_layout.addWidget(self.logo_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        # Subtítulo - MÁS GRANDE
+        # Subtítulo - MÁS GRANDE (12pt)
         self.subtitle = QLabel("Instituto Hutchison Ports")
-        self.subtitle.setFont(QFont("Montserrat", 11))
+        self.subtitle.setFont(QFont("Montserrat", 12))
         self.subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.subtitle.setWordWrap(True)
         logo_layout.addWidget(self.subtitle, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -131,11 +131,11 @@ class ModernSidebar(QFrame):
         """Crear botones de navegación con iconos - MÁS GRANDES"""
 
         nav_items = [
-            ('📊  Dashboards', 'dashboard', '📊'),
-            ('🔍  Consulta de Empleados', 'consultas', '🔍'),
-            ('📥  Importación de Datos', 'importacion', '📥'),
-            ('📄  Generar Reportes', 'reportes', '📄'),
-            ('⚙️  Configuración', 'configuracion', '⚙️'),
+            ('▣  Dashboards', 'dashboard', '▣'),
+            ('⚲  Consulta de Empleados', 'consultas', '⚲'),
+            ('⬇  Importación de Datos', 'importacion', '⬇'),
+            ('☰  Generar Reportes', 'reportes', '☰'),
+            ('⚙  Configuración', 'configuracion', '⚙'),
         ]
 
         for text, key, icon in nav_items:
@@ -177,19 +177,19 @@ class ModernSidebar(QFrame):
         toggle_container_layout.setContentsMargins(10, 5, 10, 5)
         toggle_container_layout.setSpacing(10)
 
-        # Label con texto dinámico e icono - MÁS GRANDE
+        # Label con texto dinámico e icono - MÁS GRANDE (símbolos simples)
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else True
-        mode_icon = "🌙  " if is_dark else "☀️  "
+        mode_icon = "☾  " if is_dark else "☀  "
         mode_text = mode_icon + ("Modo Oscuro" if is_dark else "Modo Claro")
         self.theme_label = QLabel(mode_text)
-        self.theme_label.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # Aumentado de 11 a 14
+        self.theme_label.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))  # Aumentado de 11 a 15
         toggle_container_layout.addWidget(self.theme_label)
 
         toggle_container_layout.addStretch()
 
-        # Botón de toggle estilo iOS switch animado
+        # Botón de toggle estilo iOS switch animado - MÁS GRANDE
         self.theme_btn = QPushButton()
-        self.theme_btn.setFixedSize(60, 30)
+        self.theme_btn.setFixedSize(65, 32)
         self.theme_btn.setObjectName("themeToggleSwitch")
         self.theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.theme_btn.clicked.connect(self._on_theme_toggle)
@@ -225,16 +225,16 @@ class ModernSidebar(QFrame):
         self.footer_separator.setObjectName("separator")
         footer_layout.addWidget(self.footer_separator)
 
-        # Versión - MÁS GRANDE
+        # Versión - MÁS GRANDE (12pt)
         self.version_label = QLabel("v2.0.0")
-        self.version_label.setFont(QFont("Montserrat", 11, QFont.Weight.Bold))
+        self.version_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.version_label.setObjectName("versionLabel")
         footer_layout.addWidget(self.version_label)
 
-        # Copyright - MÁS GRANDE
+        # Copyright - MÁS GRANDE (11pt)
         self.copyright_label = QLabel("© 2025 INSTITUTO HP")
-        self.copyright_label.setFont(QFont("Montserrat", 10))
+        self.copyright_label.setFont(QFont("Montserrat", 11))
         self.copyright_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.copyright_label.setObjectName("copyrightLabel")
         footer_layout.addWidget(self.copyright_label)
@@ -352,35 +352,35 @@ class ModernSidebar(QFrame):
 
         is_dark = self.theme_manager.is_dark_mode()
 
-        # Actualizar label de tema con texto dinámico e icono
-        mode_icon = "🌙  " if is_dark else "☀️  "
+        # Actualizar label de tema con texto dinámico e icono (símbolos simples)
+        mode_icon = "☾  " if is_dark else "☀  "
         mode_text = mode_icon + ("Modo Oscuro" if is_dark else "Modo Claro")
         self.theme_label.setText(mode_text)
         self.theme_btn.setChecked(is_dark)
         self.theme_btn.setProperty("isDark", is_dark)
 
         # ====== COLORES BASADOS EN CUSTOMTKINTER ======
-        # Modo claro: Fondo azul navy (#003087), texto blanco
-        # Modo oscuro: Fondo gris oscuro (#2d2d2d), texto normal
+        # Modo claro: Fondo azul navy (#002E6D), texto blanco, botones sin color (solo hover)
+        # Modo oscuro: Fondo gris oscuro (#2d2d2d), texto blanco también
 
-        sidebar_bg = "#2d2d2d" if is_dark else "#003087"  # Navy en modo claro!
-        text_color = "#ffffff" if not is_dark else "#ffffff"  # Blanco en ambos
-        text_secondary = "#e0e0e0" if not is_dark else "#a0a0a0"
+        sidebar_bg = "#2d2d2d" if is_dark else "#002E6D"  # Navy corporativo en modo claro!
+        text_color = "#FFFFFF"  # Blanco en ambos modos
+        text_secondary = "#E0E0E0" if not is_dark else "#A0A0A0"
         border_color = "#383838" if is_dark else "#4a5a8a"  # Tonalidad navy más clara
-        hover_color = "#2b2b2b" if is_dark else "#4a5a8a"  # Navy más claro para hover
-        active_bg = "#2b2b2b" if is_dark else "#4a5a8a"  # Navy más claro para activo
+        hover_color = "#383838" if is_dark else "#003D82"  # Navy más claro para hover
+        active_bg = "#383838" if is_dark else "#004C97"  # Navy más claro para activo
 
         self.setStyleSheet(f"""
             #modernSidebar {{
                 background-color: {sidebar_bg} !important;
-                border-right: 1px solid {border_color};
+                border-right: 2px solid {border_color};
             }}
 
             #hamburgerBtn {{
                 background-color: transparent !important;
                 color: {text_color} !important;
                 border: none;
-                border-radius: 5px;
+                border-radius: 8px;
             }}
 
             #hamburgerBtn:hover {{
@@ -394,15 +394,16 @@ class ModernSidebar(QFrame):
 
             #navButton {{
                 background-color: transparent !important;
-                color: {text_secondary} !important;
+                color: {text_color} !important;
                 border: none;
                 border-radius: 10px;
                 text-align: left;
-                padding: 10px 15px;
+                padding: 12px 18px;
             }}
 
             #navButton:hover {{
                 background-color: {hover_color} !important;
+                color: {text_color} !important;
             }}
 
             #navButton[class="active"] {{
@@ -415,12 +416,17 @@ class ModernSidebar(QFrame):
                 background-color: {border_color} !important;
             }}
 
+            #toggleFrame {{
+                background-color: transparent !important;
+            }}
+
             #toggleFrame QLabel {{
-                color: {text_color if not is_dark else text_secondary} !important;
+                color: {text_color} !important;
+                background: transparent !important;
             }}
 
             #themeToggleSwitch {{
-                background-color: {'#6a7aa0' if not is_dark else '#404040'} !important;
+                background-color: {'#5a6a90' if not is_dark else '#404040'} !important;
                 border: none;
                 border-radius: 15px;
                 text-align: left;
@@ -428,19 +434,23 @@ class ModernSidebar(QFrame):
             }}
 
             #themeToggleSwitch:checked {{
-                background-color: #003087 !important;
+                background-color: {'#003D82' if not is_dark else '#002E6D'} !important;
             }}
 
             #themeToggleSwitch:!checked {{
-                background-color: #6a7aa0 !important;
+                background-color: {'#6a7aa0' if not is_dark else '#505050'} !important;
             }}
 
             #themeToggleSwitch:hover {{
-                background-color: {'#5a6a90' if not is_dark else '#505050'} !important;
+                background-color: {'#4a5a80' if not is_dark else '#505050'} !important;
             }}
 
             #themeToggleSwitch:checked:hover {{
-                background-color: #002a70 !important;
+                background-color: {'#003570' if not is_dark else '#002a60'} !important;
+            }}
+
+            #headerContainer, #footerFrame {{
+                background-color: transparent !important;
             }}
 
             #versionLabel {{
