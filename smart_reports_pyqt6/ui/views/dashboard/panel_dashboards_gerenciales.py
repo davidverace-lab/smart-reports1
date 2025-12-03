@@ -258,14 +258,14 @@ class DashboardsGerencialesPanel(QWidget):
         title_color = "#ffffff" if is_dark else "#002E6D"
 
         title = QLabel("📊 Dashboards Interactivos - Sistema Gerencial")
-        title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))  # AUMENTADO de 28 a 36
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(title)
 
         subtitle = QLabel("Visualiza métricas y estadísticas en tiempo real")
-        subtitle.setFont(QFont("Montserrat", 14))
+        subtitle.setFont(QFont("Montserrat", 18))  # AUMENTADO de 14 a 18
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(subtitle)
 
         scroll_layout.addWidget(header)
