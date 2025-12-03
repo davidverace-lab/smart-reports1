@@ -254,12 +254,39 @@ class GestionUsuariosView(QWidget):
 
         layout.addWidget(header)
 
-        # Tabla de usuarios
+        # Tabla de usuarios - adaptado al tema
         self.users_table = QTableWidget(0, 5)
         self.users_table.setHorizontalHeaderLabels(["ID", "Nombre", "Email", "Unidad", "Rol"])
         self.users_table.setAlternatingRowColors(True)
         self.users_table.setMinimumHeight(400)
         self.users_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        # Aplicar tema
+        table_bg = "#1e1e1e" if is_dark else "#ffffff"
+        table_text = "#ffffff" if is_dark else "#000000"
+        table_alt = "#2d2d2d" if is_dark else "#f0f0f0"
+        table_header = "#002E6D"
+        self.users_table.setStyleSheet(f"""
+            QTableWidget {{
+                background-color: {table_bg};
+                color: {table_text};
+                gridline-color: #444444;
+                border: 1px solid #002E6D;
+                border-radius: 8px;
+            }}
+            QTableWidget::item {{
+                padding: 8px;
+            }}
+            QTableWidget::item:alternate {{
+                background-color: {table_alt};
+            }}
+            QHeaderView::section {{
+                background-color: {table_header};
+                color: white;
+                padding: 10px;
+                border: none;
+                font-weight: bold;
+            }}
+        """)
         layout.addWidget(self.users_table)
 
         # Botones de acción - NAVY CORPORATIVO SIN EMOJIS
@@ -401,13 +428,13 @@ class SoporteTicketsView(QWidget):
         back_btn.setFixedWidth(140)
         back_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -417,7 +444,7 @@ class SoporteTicketsView(QWidget):
         title = QLabel("📝 Registro de Soporte")
         title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        title_color = "#ffffff" if is_dark else "#003087"
+        title_color = "#ffffff" if is_dark else "#002E6D"
         title.setStyleSheet(f"color: {title_color}; background: transparent;")
         header_layout.addWidget(title)
 
@@ -433,31 +460,71 @@ class SoporteTicketsView(QWidget):
         # Usuario
         user_label = QLabel("Usuario:")
         user_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        label_color = "#ffffff" if is_dark else "#002E6D"
+        user_label.setStyleSheet(f"color: {label_color}; background: transparent;")
         form_layout.addWidget(user_label)
 
         self.user_entry = QLineEdit()
         self.user_entry.setPlaceholderText("Email del usuario")
         self.user_entry.setFixedHeight(40)
+        # Aplicar tema
+        input_bg = "#1e1e1e" if is_dark else "#ffffff"
+        input_text = "#ffffff" if is_dark else "#000000"
+        self.user_entry.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: {input_bg};
+                color: {input_text};
+                border: 2px solid #002E6D;
+                border-radius: 8px;
+                padding: 8px;
+            }}
+            QLineEdit:focus {{
+                border: 2px solid #00B5E2;
+            }}
+        """)
         form_layout.addWidget(self.user_entry)
 
         # Asunto
         subject_label = QLabel("Asunto:")
         subject_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        subject_label.setStyleSheet(f"color: {label_color}; background: transparent;")
         form_layout.addWidget(subject_label)
 
         self.subject_entry = QLineEdit()
         self.subject_entry.setPlaceholderText("Asunto del ticket")
         self.subject_entry.setFixedHeight(40)
+        self.subject_entry.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: {input_bg};
+                color: {input_text};
+                border: 2px solid #002E6D;
+                border-radius: 8px;
+                padding: 8px;
+            }}
+            QLineEdit:focus {{
+                border: 2px solid #00B5E2;
+            }}
+        """)
         form_layout.addWidget(self.subject_entry)
 
         # Descripción
         desc_label = QLabel("Descripción:")
         desc_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        desc_label.setStyleSheet(f"color: {label_color}; background: transparent;")
         form_layout.addWidget(desc_label)
 
         self.desc_text = QTextEdit()
         self.desc_text.setPlaceholderText("Descripción del soporte brindado...")
         self.desc_text.setMinimumHeight(150)
+        self.desc_text.setStyleSheet(f"""
+            QTextEdit {{
+                background-color: {input_bg};
+                color: {input_text};
+                border: 2px solid #002E6D;
+                border-radius: 8px;
+                padding: 10px;
+            }}
+        """)
         form_layout.addWidget(self.desc_text)
 
         # Botón registrar
@@ -518,13 +585,13 @@ class HistorialReportesView(QWidget):
         back_btn.setFixedWidth(140)
         back_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -534,7 +601,7 @@ class HistorialReportesView(QWidget):
         title = QLabel("📋 Historial de Reportes")
         title.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        title_color = "#ffffff" if is_dark else "#003087"
+        title_color = "#ffffff" if is_dark else "#002E6D"
         title.setStyleSheet(f"color: {title_color}; background: transparent;")
         header_layout.addWidget(title)
 
@@ -542,12 +609,39 @@ class HistorialReportesView(QWidget):
 
         layout.addWidget(header)
 
-        # Tabla de reportes
+        # Tabla de reportes - adaptado al tema
         self.reports_table = QTableWidget(0, 5)
         self.reports_table.setHorizontalHeaderLabels(["Fecha", "Tipo", "Usuario", "Estado", "Acciones"])
         self.reports_table.setAlternatingRowColors(True)
         self.reports_table.setMinimumHeight(400)
         self.reports_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        # Aplicar tema
+        table_bg = "#1e1e1e" if is_dark else "#ffffff"
+        table_text = "#ffffff" if is_dark else "#000000"
+        table_alt = "#2d2d2d" if is_dark else "#f0f0f0"
+        table_header = "#002E6D"
+        self.reports_table.setStyleSheet(f"""
+            QTableWidget {{
+                background-color: {table_bg};
+                color: {table_text};
+                gridline-color: #444444;
+                border: 1px solid #002E6D;
+                border-radius: 8px;
+            }}
+            QTableWidget::item {{
+                padding: 8px;
+            }}
+            QTableWidget::item:alternate {{
+                background-color: {table_alt};
+            }}
+            QHeaderView::section {{
+                background-color: {table_header};
+                color: white;
+                padding: 10px;
+                border: none;
+                font-weight: bold;
+            }}
+        """)
         layout.addWidget(self.reports_table)
 
         # Cargar datos dummy
@@ -568,14 +662,14 @@ class HistorialReportesView(QWidget):
                     btn = QPushButton("📄 Descargar")
                     btn.setStyleSheet("""
                         QPushButton {
-                            background-color: #003087;
+                            background-color: #002E6D;
                             color: white;
                             border: none;
                             border-radius: 5px;
                             padding: 5px 10px;
                         }
                         QPushButton:hover {
-                            background-color: #004ba0;
+                            background-color: #003D82;
                         }
                     """)
                     self.reports_table.setCellWidget(row, col, btn)

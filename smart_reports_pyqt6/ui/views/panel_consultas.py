@@ -167,6 +167,22 @@ class ConsultasPanel(QWidget):
         self.user_id_entry.setPlaceholderText("Ej: 12345")
         self.user_id_entry.setFont(QFont("Montserrat", 14))
         self.user_id_entry.setFixedHeight(45)
+        # Aplicar tema al input
+        input_bg = "#1e1e1e" if is_dark else "#ffffff"
+        input_text = "#ffffff" if is_dark else "#000000"
+        input_border = "#002E6D"
+        self.user_id_entry.setStyleSheet(f"""
+            QLineEdit {{
+                background-color: {input_bg};
+                color: {input_text};
+                border: 2px solid {input_border};
+                border-radius: 8px;
+                padding: 8px;
+            }}
+            QLineEdit:focus {{
+                border: 2px solid #00B5E2;
+            }}
+        """)
         input_layout.addWidget(self.user_id_entry, 1)
 
         search_btn = QPushButton("Buscar")
@@ -216,6 +232,30 @@ class ConsultasPanel(QWidget):
         ])
         self.unit_combo.setFont(QFont("Montserrat", 14))
         self.unit_combo.setFixedHeight(45)
+        # Aplicar tema al combo
+        combo_bg = "#1e1e1e" if is_dark else "#ffffff"
+        combo_text = "#ffffff" if is_dark else "#000000"
+        combo_border = "#002E6D"
+        self.unit_combo.setStyleSheet(f"""
+            QComboBox {{
+                background-color: {combo_bg};
+                color: {combo_text};
+                border: 2px solid {combo_border};
+                border-radius: 8px;
+                padding: 8px;
+            }}
+            QComboBox:hover {{
+                border: 2px solid #00B5E2;
+            }}
+            QComboBox::drop-down {{
+                border: none;
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {combo_bg};
+                color: {combo_text};
+                selection-background-color: #00B5E2;
+            }}
+        """)
         input_layout.addWidget(self.unit_combo, 1)
 
         search_btn = QPushButton("Consultar")
@@ -328,6 +368,33 @@ class ConsultasPanel(QWidget):
         self.results_table.setAlternatingRowColors(True)
         self.results_table.setMinimumHeight(250)
         self.results_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        # Aplicar tema a la tabla
+        table_bg = "#1e1e1e" if is_dark else "#ffffff"
+        table_text = "#ffffff" if is_dark else "#000000"
+        table_alt = "#2d2d2d" if is_dark else "#f0f0f0"
+        table_header = "#002E6D"
+        self.results_table.setStyleSheet(f"""
+            QTableWidget {{
+                background-color: {table_bg};
+                color: {table_text};
+                gridline-color: #444444;
+                border: 1px solid #002E6D;
+                border-radius: 8px;
+            }}
+            QTableWidget::item {{
+                padding: 8px;
+            }}
+            QTableWidget::item:alternate {{
+                background-color: {table_alt};
+            }}
+            QHeaderView::section {{
+                background-color: {table_header};
+                color: white;
+                padding: 10px;
+                border: none;
+                font-weight: bold;
+            }}
+        """)
         results_layout.addWidget(self.results_table)
 
         # Info de resultados

@@ -6,14 +6,14 @@ PyQt6 Version - Estilo CustomTkinter migrado con todas las funcionalidades
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QFrame, QStackedWidget, QScrollArea,
-    QLineEdit, QComboBox, QDateEdit, QMessageBox
+    QLineEdit, QComboBox, QDateEdit, QMessageBox, QSizePolicy
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QDate
+from PyQt6.QtCore import Qt, pyqtSignal, QDate, QSize
 from PyQt6.QtGui import QFont
 
 
 class ReportCard(QFrame):
-    """Tarjeta clickeable para seleccionar tipo de reporte"""
+    """Tarjeta clickeable para seleccionar tipo de reporte - MÁS CUADRADA Y CENTRADA"""
 
     clicked = pyqtSignal()
 
@@ -22,38 +22,44 @@ class ReportCard(QFrame):
 
         self.theme_manager = theme_manager
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setMinimumHeight(140)  # REDUCIDO de 180 a 140
+        self.setMinimumHeight(220)  # MÁS CUADRADO
+        self.setMinimumWidth(280)   # MÁS CUADRADO
+        self.setMaximumWidth(320)   # MÁS CUADRADO
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         # Aplicar estilo
         self._apply_theme()
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(15, 15, 15, 15)  # REDUCIDO de 20 a 15
-        layout.setSpacing(8)  # REDUCIDO de 12 a 8
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(12)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # CENTRADO
 
-        # Título - MÁS GRANDE Y SIN EMOJI
+        # Título - CENTRADO
         header_label = QLabel(f"{title}")
-        header_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Aumentado de 18 a 22
+        header_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         text_color = "#ffffff" if is_dark else "#002E6D"
         header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
+        header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # CENTRADO
+        header_label.setWordWrap(True)
         layout.addWidget(header_label)
 
-        # Descripción - MÁS GRANDE
+        # Descripción - CENTRADA
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 14))  # Aumentado de 12 a 14
+        desc_label.setFont(QFont("Montserrat", 12))
         desc_color = "#b0b0b0" if is_dark else "#666666"
         desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none; padding: 0; margin: 0;")
+        desc_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # CENTRADO
         layout.addWidget(desc_label)
 
         layout.addStretch()
 
         # Botón - NAVY CORPORATIVO
         gen_btn = QPushButton("Generar Reporte")
-        gen_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        gen_btn.setFixedHeight(45)
+        gen_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        gen_btn.setFixedHeight(42)
         gen_btn.setStyleSheet("""
             QPushButton {
                 background-color: #002E6D;
@@ -88,6 +94,112 @@ class ReportCard(QFrame):
                 border: 4px solid {border_color};
             }}
         """)
+
+
+class ChartCard(QFrame):
+    """Contenedor para gráficas con botón expandir y menú de 3 puntos"""
+
+    expand_clicked = pyqtSignal()
+    menu_clicked = pyqtSignal()
+
+    def __init__(self, title: str, theme_manager=None, parent=None):
+        super().__init__(parent)
+
+        self.theme_manager = theme_manager
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+
+        # Aplicar estilo
+        self._apply_theme()
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        # Header con título y botones
+        header = QFrame()
+        header.setStyleSheet("background: transparent; border: none;")
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(15, 12, 15, 12)
+        header_layout.setSpacing(10)
+
+        # Título
+        is_dark = theme_manager.is_dark_mode() if theme_manager else False
+        text_color = "#ffffff" if is_dark else "#002E6D"
+
+        title_label = QLabel(title)
+        title_label.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))
+        title_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        header_layout.addWidget(title_label)
+
+        header_layout.addStretch()
+
+        # Botón de expandir
+        expand_btn = QPushButton("↗")
+        expand_btn.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))
+        expand_btn.setFixedSize(36, 36)
+        expand_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #00B5E2;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #009BDE;
+            }
+        """)
+        expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        expand_btn.clicked.connect(self.expand_clicked.emit)
+        header_layout.addWidget(expand_btn)
+
+        # Botón de menú (3 puntos)
+        menu_btn = QPushButton("⋮")
+        menu_btn.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
+        menu_btn.setFixedSize(36, 36)
+        menu_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #666666;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #555555;
+            }
+        """)
+        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        menu_btn.clicked.connect(self.menu_clicked.emit)
+        header_layout.addWidget(menu_btn)
+
+        layout.addWidget(header)
+
+        # Container para el contenido (gráfica)
+        self.content_container = QFrame()
+        self.content_container.setStyleSheet("background: transparent; border: none;")
+        self.content_layout = QVBoxLayout(self.content_container)
+        self.content_layout.setContentsMargins(15, 5, 15, 15)
+        layout.addWidget(self.content_container)
+
+    def _apply_theme(self):
+        """Aplicar tema al contenedor"""
+        if not self.theme_manager:
+            return
+
+        is_dark = self.theme_manager.is_dark_mode()
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        border_color = "#002E6D"
+
+        self.setStyleSheet(f"""
+            ChartCard {{
+                background-color: {bg_color};
+                border: 2px solid {border_color};
+                border-radius: 12px;
+            }}
+        """)
+
+    def add_content(self, widget):
+        """Agregar contenido al contenedor"""
+        self.content_layout.addWidget(widget)
 
 
 class ReportGenerationView(QWidget):

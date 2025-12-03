@@ -93,11 +93,12 @@ class PanelImportacion(QWidget):
 
         layout.addLayout(files_grid)
 
-        # Separador
+        # Separador - adaptado al tema
         sep1 = QFrame()
         sep1.setFrameShape(QFrame.Shape.HLine)
         sep1.setFixedHeight(1)
-        sep1.setStyleSheet("background-color: #383838;")
+        sep_color = "#444444" if is_dark else "#d0d0d0"
+        sep1.setStyleSheet(f"background-color: {sep_color};")
         layout.addWidget(sep1)
 
         # Sección de acciones - SIN EMOJI
@@ -166,11 +167,12 @@ class PanelImportacion(QWidget):
 
         layout.addLayout(actions_layout)
 
-        # Separador
+        # Separador - adaptado al tema
         sep2 = QFrame()
         sep2.setFrameShape(QFrame.Shape.HLine)
         sep2.setFixedHeight(1)
-        sep2.setStyleSheet("background-color: #383838;")
+        sep_color = "#444444" if is_dark else "#d0d0d0"
+        sep2.setStyleSheet(f"background-color: {sep_color};")
         layout.addWidget(sep2)
 
         # Sección de log - SIN EMOJI
@@ -179,12 +181,24 @@ class PanelImportacion(QWidget):
         log_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent; padding: 0; margin: 0;")
         layout.addWidget(log_label)
 
-        # Log text area
+        # Log text area - adaptado al tema
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setMinimumHeight(200)
         self.log_text.setFont(QFont("Courier New", 10))
         self.log_text.setPlaceholderText("Los logs de importación aparecerán aquí...")
+        log_bg = "#1e1e1e" if is_dark else "#ffffff"
+        log_text = "#00ff00" if is_dark else "#008000"  # Verde para logs
+        log_border = "#002E6D"
+        self.log_text.setStyleSheet(f"""
+            QTextEdit {{
+                background-color: {log_bg};
+                color: {log_text};
+                border: 2px solid {log_border};
+                border-radius: 8px;
+                padding: 10px;
+            }}
+        """)
         layout.addWidget(self.log_text)
 
         layout.addStretch()
