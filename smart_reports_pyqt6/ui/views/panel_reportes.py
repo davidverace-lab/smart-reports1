@@ -32,37 +32,37 @@ class ReportCard(QFrame):
         layout.setContentsMargins(15, 15, 15, 15)  # REDUCIDO de 20 a 15
         layout.setSpacing(8)  # REDUCIDO de 12 a 8
 
-        # Icono y título - MÁS GRANDE
-        header_label = QLabel(f"{icon} {title}")
-        header_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))  # Aumentado de 18 a 20
+        # Título - MÁS GRANDE Y SIN EMOJI
+        header_label = QLabel(f"{title}")
+        header_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Aumentado de 18 a 22
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
-        text_color = "#ffffff" if is_dark else "#003087"
-        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
         layout.addWidget(header_label)
 
         # Descripción - MÁS GRANDE
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 13))  # Aumentado de 12 a 13
+        desc_label.setFont(QFont("Montserrat", 14))  # Aumentado de 12 a 14
         desc_color = "#b0b0b0" if is_dark else "#666666"
-        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none;")
+        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none; padding: 0; margin: 0;")
         layout.addWidget(desc_label)
 
         layout.addStretch()
 
-        # Botón
+        # Botón - NAVY CORPORATIVO
         gen_btn = QPushButton("Generar Reporte")
-        gen_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        gen_btn.setFixedHeight(40)
+        gen_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        gen_btn.setFixedHeight(45)
         gen_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         gen_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -76,16 +76,16 @@ class ReportCard(QFrame):
 
         is_dark = self.theme_manager.is_dark_mode()
         bg_color = "#2d2d2d" if is_dark else "#ffffff"
-        border_color = "#003087"
+        border_color = "#002E6D"  # Navy corporativo
 
         self.setStyleSheet(f"""
             ReportCard {{
                 background-color: {bg_color};
-                border: 2px solid {border_color};
+                border: 3px solid {border_color};
                 border-radius: 12px;
             }}
             ReportCard:hover {{
-                border: 3px solid {border_color};
+                border: 4px solid {border_color};
             }}
         """)
 
@@ -116,72 +116,74 @@ class ReportGenerationView(QWidget):
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Botón de retorno
+        # Botón de retorno - NAVY
         back_btn = QPushButton("← Volver")
-        back_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        back_btn.setFixedHeight(40)
-        back_btn.setFixedWidth(120)
+        back_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        back_btn.setFixedHeight(45)
+        back_btn.setFixedWidth(130)
         back_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         back_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         back_btn.clicked.connect(self.back_clicked.emit)
         header_layout.addWidget(back_btn)
 
-        # Título - MÁS GRANDE
-        title = QLabel(f"📊 {self.report_type}")
-        title.setFont(QFont("Montserrat", 26, QFont.Weight.Bold))  # Aumentado de 22 a 26
+        # Título - MÁS GRANDE Y SIN EMOJI
+        title = QLabel(f"{self.report_type}")
+        title.setFont(QFont("Montserrat", 30, QFont.Weight.Bold))  # Aumentado de 22 a 30
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        title_color = "#ffffff" if is_dark else "#002E6D"
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
 
         layout.addWidget(header)
 
-        # BOTONES DE ACCIÓN ARRIBA (Mejor UX - no se pierden)
+        # BOTONES DE ACCIÓN ARRIBA - SIN EMOJIS Y NAVY
         actions_layout = QHBoxLayout()
 
-        preview_btn = QPushButton("👁️ Vista Previa")
-        preview_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        preview_btn.setFixedHeight(40)  # REDUCIDO de 45 a 40
+        preview_btn = QPushButton("Vista Previa")
+        preview_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        preview_btn.setFixedHeight(50)
         preview_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
+        preview_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         preview_btn.clicked.connect(self._preview_report)
         actions_layout.addWidget(preview_btn)
 
-        generate_btn = QPushButton("📄 Generar PDF")
-        generate_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        generate_btn.setFixedHeight(40)  # REDUCIDO de 45 a 40
+        generate_btn = QPushButton("Generar PDF")
+        generate_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        generate_btn.setFixedHeight(50)
         generate_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
+        generate_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         generate_btn.clicked.connect(self._generate_report)
         actions_layout.addWidget(generate_btn)
 
@@ -196,14 +198,14 @@ class ReportGenerationView(QWidget):
         scroll_layout = QVBoxLayout(scroll_widget)
         scroll_layout.setSpacing(12)  # REDUCIDO de 15 a 12
 
-        # Frame de configuración - MÁS COMPACTO
+        # Frame de configuración - CON BORDE NAVY
         config_frame = QFrame()
         config_frame.setFrameShape(QFrame.Shape.StyledPanel)
         bg_color = "#2d2d2d" if is_dark else "#ffffff"
         config_frame.setStyleSheet(f"""
             QFrame {{
                 background-color: {bg_color};
-                border: 2px solid #003087;
+                border: 3px solid #002E6D;
                 border-radius: 12px;
             }}
         """)
@@ -224,12 +226,12 @@ class ReportGenerationView(QWidget):
         """Crear filtros según el tipo de reporte"""
 
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        text_color = "#ffffff" if is_dark else "#003087"
-        label_style = f"color: {text_color}; font-weight: bold; background: transparent;"
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        label_style = f"color: {text_color}; font-weight: bold; background: transparent; border: none; padding: 0; margin: 0;"
 
-        # Título de filtros
-        filter_title = QLabel("⚙️ Configuración del Reporte")
-        filter_title.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
+        # Título de filtros - SIN EMOJI Y MÁS GRANDE
+        filter_title = QLabel("Configuración del Reporte")
+        filter_title.setFont(QFont("Montserrat", 20, QFont.Weight.Bold"))
         filter_title.setStyleSheet(label_style)
         layout.addWidget(filter_title)
 
@@ -444,17 +446,17 @@ class ReportesPanel(QWidget):
         header_layout = QVBoxLayout(header)
         header_layout.setContentsMargins(5, 5, 5, 5)
 
-        title = QLabel("📊 Generación de Reportes")
-        title.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 28 a 32
+        title = QLabel("Generación de Reportes")
+        title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))  # Aumentado de 28 a 36
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        title_color = "#ffffff" if is_dark else "#002E6D"
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(title)
 
         subtitle = QLabel("Selecciona el tipo de reporte que deseas generar")
-        subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 13 a 16
+        subtitle.setFont(QFont("Montserrat", 18))  # Aumentado de 13 a 18
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
-        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none;")
+        subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(subtitle)
 
         layout.addWidget(header)

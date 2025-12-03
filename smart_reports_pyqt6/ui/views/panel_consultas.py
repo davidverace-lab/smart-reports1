@@ -29,12 +29,12 @@ class SearchSectionCard(QFrame):
         self.layout.setContentsMargins(10, 10, 10, 10)
         self.layout.setSpacing(10)
 
-        # Título
-        title_label = QLabel(f"{icon} {title}")
-        title_label.setFont(QFont("Montserrat", 18, QFont.Weight.Bold))
+        # Título - MÁS GRANDE y sin borde
+        title_label = QLabel(f"{title}")
+        title_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
-        text_color = "#ffffff" if is_dark else "#003087"
-        title_label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        title_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
         self.layout.addWidget(title_label)
 
     def _apply_theme(self):
@@ -44,11 +44,12 @@ class SearchSectionCard(QFrame):
 
         is_dark = self.theme_manager.is_dark_mode()
         bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        border_color = "#002E6D"  # Navy corporativo
 
         self.setStyleSheet(f"""
             SearchSectionCard {{
                 background-color: {bg_color};
-                border: 2px solid #003087;
+                border: 3px solid {border_color};
                 border-radius: 12px;
             }}
         """)
@@ -131,11 +132,11 @@ class ConsultasPanel(QWidget):
         header_layout.setContentsMargins(30, 20, 30, 20)
         header_layout.setSpacing(8)
 
-        # Título - MÁS GRANDE
-        title = QLabel("🔍 Panel de Consultas")
-        title.setFont(QFont("Montserrat", 32, QFont.Weight.Bold))  # Aumentado de 28 a 32
-        title_color = "#ffffff" if is_dark else "#003087"
-        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none;")
+        # Título - MÁS GRANDE (sin icono de emoji)
+        title = QLabel("Panel de Consultas")
+        title.setFont(QFont("Montserrat", 34, QFont.Weight.Bold))  # Aumentado de 28 a 34
+        title_color = "#ffffff" if is_dark else "#002E6D"
+        title.setStyleSheet(f"color: {title_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(title)
 
         # Subtítulo - MÁS GRANDE
@@ -150,37 +151,37 @@ class ConsultasPanel(QWidget):
     def _create_search_by_id_card(self):
         """Card: Buscar por ID"""
 
-        card = SearchSectionCard("Buscar Usuario por ID", "👤", self.theme_manager)
+        card = SearchSectionCard("Buscar Usuario por ID", "", self.theme_manager)
 
         # Input frame
         input_layout = QHBoxLayout()
 
         label = QLabel("ID Usuario:")
-        label.setFont(QFont("Montserrat", 13))
+        label.setFont(QFont("Montserrat", 14))
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        text_color = "#ffffff" if is_dark else "#003087"
-        label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
         input_layout.addWidget(label)
 
         self.user_id_entry = QLineEdit()
         self.user_id_entry.setPlaceholderText("Ej: 12345")
-        self.user_id_entry.setFont(QFont("Montserrat", 13))
-        self.user_id_entry.setFixedHeight(40)
+        self.user_id_entry.setFont(QFont("Montserrat", 14))
+        self.user_id_entry.setFixedHeight(45)
         input_layout.addWidget(self.user_id_entry, 1)
 
-        search_btn = QPushButton("🔍 Buscar")
-        search_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        search_btn.setFixedHeight(40)
-        search_btn.setFixedWidth(120)
+        search_btn = QPushButton("Buscar")
+        search_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        search_btn.setFixedHeight(45)
+        search_btn.setFixedWidth(130)
         search_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -195,16 +196,16 @@ class ConsultasPanel(QWidget):
     def _create_search_by_unit_card(self):
         """Card: Buscar por Unidad"""
 
-        card = SearchSectionCard("Consultar por Unidad de Negocio", "🏢", self.theme_manager)
+        card = SearchSectionCard("Consultar por Unidad de Negocio", "", self.theme_manager)
 
         # Input frame
         input_layout = QHBoxLayout()
 
         label = QLabel("Unidad:")
-        label.setFont(QFont("Montserrat", 13))
+        label.setFont(QFont("Montserrat", 14))
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
-        text_color = "#ffffff" if is_dark else "#003087"
-        label.setStyleSheet(f"color: {text_color}; background: transparent;")
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
         input_layout.addWidget(label)
 
         self.unit_combo = QComboBox()
@@ -213,23 +214,23 @@ class ConsultasPanel(QWidget):
             "ICAVE", "TNG", "ECV", "HPMX", "Container",
             "LCMT", "HPLM", "TILH", "CCI", "TIMSA", "LCT", "EIT"
         ])
-        self.unit_combo.setFont(QFont("Montserrat", 13))
-        self.unit_combo.setFixedHeight(40)
+        self.unit_combo.setFont(QFont("Montserrat", 14))
+        self.unit_combo.setFixedHeight(45)
         input_layout.addWidget(self.unit_combo, 1)
 
-        search_btn = QPushButton("🔍 Consultar")
-        search_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        search_btn.setFixedHeight(40)
-        search_btn.setFixedWidth(120)
+        search_btn = QPushButton("Consultar")
+        search_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        search_btn.setFixedHeight(45)
+        search_btn.setFixedWidth(130)
         search_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -244,21 +245,21 @@ class ConsultasPanel(QWidget):
     def _create_new_users_card(self):
         """Card: Usuarios Nuevos"""
 
-        card = SearchSectionCard("Usuarios Nuevos (Últimos 30 días)", "📅", self.theme_manager)
+        card = SearchSectionCard("Usuarios Nuevos (Últimos 30 días)", "", self.theme_manager)
 
         # Botón
-        search_btn = QPushButton("📋 Ver Usuarios Nuevos")
-        search_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        search_btn.setFixedHeight(50)
+        search_btn = QPushButton("Ver Usuarios Nuevos")
+        search_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))
+        search_btn.setFixedHeight(55)
         search_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 10px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -272,21 +273,21 @@ class ConsultasPanel(QWidget):
     def _create_stats_card(self):
         """Card: Estadísticas Globales"""
 
-        card = SearchSectionCard("Estadísticas Globales", "📊", self.theme_manager)
+        card = SearchSectionCard("Estadísticas Globales", "", self.theme_manager)
 
         # Botón
-        search_btn = QPushButton("📈 Ver Estadísticas")
-        search_btn.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        search_btn.setFixedHeight(50)
+        search_btn = QPushButton("Ver Estadísticas")
+        search_btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))
+        search_btn.setFixedHeight(55)
         search_btn.setStyleSheet("""
             QPushButton {
-                background-color: #003087;
+                background-color: #002E6D;
                 color: white;
                 border: none;
                 border-radius: 10px;
             }
             QPushButton:hover {
-                background-color: #004ba0;
+                background-color: #003D82;
             }
         """)
         search_btn.setCursor(Qt.CursorShape.PointingHandCursor)
