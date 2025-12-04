@@ -29,31 +29,36 @@ class ConfigCard(QFrame):
         self._apply_theme()
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(25, 25, 25, 25)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(12)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # CENTRADO
 
-        # Título - SIN EMOJI Y MÁS GRANDE
-        header_label = QLabel(f"{title}")
-        header_label.setFont(QFont("Montserrat", 24, QFont.Weight.Bold))  # Aumentado de 20 a 24
+        # Título - SIN EMOJI Y MÁS GRANDE - CENTRADO
+        self.header_label = QLabel(f"{title}")
+        self.header_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         text_color = "#ffffff" if is_dark else "#002E6D"
-        header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
-        layout.addWidget(header_label)
+        self.header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
+        self.header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.header_label.setWordWrap(True)
+        layout.addWidget(self.header_label)
 
-        # Descripción - MÁS GRANDE Y SIN BORDES
-        desc_label = QLabel(description)
-        desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 15))  # Aumentado de 13 a 15
+        # Descripción - MÁS GRANDE Y SIN BORDES - CENTRADA
+        self.desc_label = QLabel(description)
+        self.desc_label.setWordWrap(True)
+        self.desc_label.setFont(QFont("Montserrat", 12))
         desc_color = "#b0b0b0" if is_dark else "#666666"
-        desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none; padding: 0; margin: 0;")
-        layout.addWidget(desc_label)
+        self.desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none; padding: 0; margin: 0;")
+        self.desc_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.desc_label)
 
         layout.addStretch()
 
         # Botón - NAVY CORPORATIVO
         btn = QPushButton(button_text)
-        btn.setFont(QFont("Montserrat", 15, QFont.Weight.Bold))
-        btn.setFixedHeight(50)
+        btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
+        btn.setFixedHeight(42)
+        btn.setFixedWidth(180) # Ancho fijo para botón centrado
         btn.setStyleSheet("""
             QPushButton {
                 background-color: #002E6D;
@@ -88,6 +93,16 @@ class ConfigCard(QFrame):
                 border: 4px solid {border_color};
             }}
         """)
+        
+        # Actualizar etiquetas
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        desc_color = "#b0b0b0" if is_dark else "#666666"
+        
+        if hasattr(self, 'header_label'):
+            self.header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
+            
+        if hasattr(self, 'desc_label'):
+            self.desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none; padding: 0; margin: 0;")
 
 
 class ConfigMainView(QWidget):
@@ -129,6 +144,7 @@ class ConfigMainView(QWidget):
         header_layout.setSpacing(5)
 
         title = QLabel("Configuración")
+        self.title_label = title
         title.setFont(QFont("Montserrat", 38, QFont.Weight.Bold))  # Aumentado de 36pt a 38pt
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#002E6D"  # Navy corporativo
@@ -136,6 +152,7 @@ class ConfigMainView(QWidget):
         header_layout.addWidget(title)
 
         subtitle = QLabel("Gestiona las opciones del sistema")
+        self.subtitle_label = subtitle
         subtitle.setFont(QFont("Montserrat", 18))  # Aumentado de 14 a 18
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
         subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")
@@ -153,6 +170,7 @@ class ConfigMainView(QWidget):
             "Agregar, editar o consultar empleados del sistema",
             "Gestionar", self.theme_manager
         )
+        self.card1 = card1
         card1.clicked.connect(self.gestionar_empleados_clicked.emit)
         grid.addWidget(card1, 0, 0)
 
@@ -162,6 +180,7 @@ class ConfigMainView(QWidget):
             "Registrar soporte brindado a usuarios por correo electrónico",
             "Registrar", self.theme_manager
         )
+        self.card2 = card2
         card2.clicked.connect(self.soporte_tickets_clicked.emit)
         grid.addWidget(card2, 0, 1)
 
@@ -171,6 +190,7 @@ class ConfigMainView(QWidget):
             "Ver y descargar reportes PDF generados anteriormente",
             "Ver Historial", self.theme_manager
         )
+        self.card3 = card3
         card3.clicked.connect(self.historial_reportes_clicked.emit)
         grid.addWidget(card3, 1, 0)
 
@@ -180,6 +200,7 @@ class ConfigMainView(QWidget):
             "Información de la versión y del desarrollador",
             "Ver Info", self.theme_manager
         )
+        self.card4 = card4
         card4.clicked.connect(self._show_about)
         grid.addWidget(card4, 1, 1)
 
@@ -692,6 +713,10 @@ class ConfiguracionPanel(QWidget):
         # Crear UI
         self._create_ui()
 
+        # Conectar signal de cambio de tema
+        if self.theme_manager:
+            self.theme_manager.theme_changed.connect(self._on_theme_changed)
+
     def _create_ui(self):
         """Crear UI"""
 
@@ -733,3 +758,21 @@ class ConfiguracionPanel(QWidget):
         self.stack.setCurrentWidget(self.main_view)
         self.stack.removeWidget(view)
         view.deleteLater()
+
+    def _on_theme_changed(self, new_theme: str):
+        """Actualizar tema"""
+        is_dark = (new_theme == 'dark')
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        subtitle_color = "#b0b0b0" if is_dark else "#666666"
+
+        # Actualizar main view
+        if hasattr(self, 'main_view'):
+            if hasattr(self.main_view, 'title_label'):
+                self.main_view.title_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
+            if hasattr(self.main_view, 'subtitle_label'):
+                self.main_view.subtitle_label.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")
+            
+            # Actualizar tarjetas
+            for card in [self.main_view.card1, self.main_view.card2, self.main_view.card3, self.main_view.card4]:
+                card._apply_theme()
+                # Ya no es necesario actualizar hijos aquí, lo hace el card._apply_theme()

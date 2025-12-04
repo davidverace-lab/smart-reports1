@@ -139,10 +139,88 @@ class ExpandedChartView(QWidget):
 
         layout.addWidget(header)
 
-        # Gráfico grande (ocupa todo el espacio restante)
+        # Layout de contenido (Gráfico + Tabla) - HORIZONTAL
+        content_layout = QHBoxLayout()
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(10)
+
+        # Gráfico grande (Izquierda, mayor espacio)
         self.chart_widget = D3ChartWidget(self)
-        self.chart_widget.set_chart(self.chart_type, "", self.data, tema=self.theme)
-        layout.addWidget(self.chart_widget)
+        self.chart_widget.set_chart(self.chart_type, "", self.data, tema=self.theme, mode='detail')
+        content_layout.addWidget(self.chart_widget, 4) # Stretch 4
+
+        # Tabla de datos integrada (Derecha, menor espacio)
+        self._create_data_table(content_layout)
+
+        layout.addLayout(content_layout)
+
+    def _create_data_table(self, parent_layout):
+        """Crear tabla de datos integrada"""
+        from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView
+
+        # Contenedor para la tabla
+        # Contenedor para la tabla
+        table_container = QWidget()
+        table_container.setFixedWidth(350) # Ancho fijo para que sea "complemento"
+        table_layout = QVBoxLayout(table_container)
+        table_layout.setContentsMargins(0, 10, 10, 10) # Margen derecho y abajo
+        
+        # Título de la tabla
+        table_title = QLabel("Detalle de Datos")
+        table_title.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        table_title.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        table_layout.addWidget(table_title)
+
+        # Tabla
+        self.data_table = QTableWidget()
+        self.data_table.setColumnCount(2)
+        self.data_table.setHorizontalHeaderLabels(["Categoría", "Valor"])
+        self.data_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.data_table.setAlternatingRowColors(True)
+        self.data_table.setMinimumHeight(200)
+
+        # Estilo de la tabla
+        table_bg = "#1e1e1e" if is_dark else "#ffffff"
+        table_text = "#ffffff" if is_dark else "#000000"
+        table_alt = "#2d2d2d" if is_dark else "#f0f0f0"
+        table_header = "#002E6D"
+        
+        self.data_table.setStyleSheet(f"""
+            QTableWidget {{
+                background-color: {table_bg};
+                color: {table_text};
+                gridline-color: #444444;
+                border: 1px solid #002E6D;
+                border-radius: 8px;
+            }}
+            QTableWidget::item {{
+                padding: 8px;
+            }}
+            QTableWidget::item:alternate {{
+                background-color: {table_alt};
+            }}
+            QHeaderView::section {{
+                background-color: {table_header};
+                color: white;
+                padding: 10px;
+                border: none;
+                font-weight: bold;
+            }}
+        """)
+
+        # Poblar datos
+        if 'labels' in self.data and 'values' in self.data:
+            self.data_table.setRowCount(len(self.data['labels']))
+            for i, (label, value) in enumerate(zip(self.data['labels'], self.data['values'])):
+                self.data_table.setItem(i, 0, QTableWidgetItem(str(label)))
+                self.data_table.setItem(i, 1, QTableWidgetItem(str(value)))
+
+        table_layout.addWidget(self.data_table)
+        
+        # Agregar al layout de contenido (con stretch factor menor)
+        parent_layout.addWidget(table_container, 1) # Stretch 1 para tabla
 
     def _show_menu(self):
         """Mostrar menú de opciones con diseño bonito"""
@@ -231,8 +309,12 @@ class ExpandedChartView(QWidget):
         menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
 
     def _show_data_table(self):
-        """Mostrar datos en tabla"""
-        print(f"📊 Mostrando tabla de datos para '{self.title}'")
+        """Mostrar datos en tabla (Scroll hacia abajo)"""
+        # Ya está visible, solo hacer scroll si es necesario o dar foco
+        if hasattr(self, 'data_table'):
+            self.data_table.setFocus()
+            # Podríamos animar scroll aquí si fuera un scroll area
+            print(f"📊 Tabla de datos ya visible para '{self.title}'")
 
     def _copy_data_to_clipboard(self):
         """Copiar datos al portapapeles"""
@@ -415,40 +497,27 @@ class ChartCard(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # Header con título y botones de acción
-        header = QWidget()
-        header.setFixedHeight(40)
-        header.setStyleSheet("background: transparent; border: none;")
-        header_layout = QHBoxLayout(header)
-        header_layout.setContentsMargins(12, 3, 12, 3)
+        # Header MINIMALISTA FLOTANTE (fuera del gráfico)
+        header_container = QWidget()
+        header_container.setFixedHeight(30) # Altura mínima
+        header_container.setStyleSheet("background: transparent; border: none;")
+        
+        header_layout = QHBoxLayout(header_container)
+        header_layout.setContentsMargins(0, 0, 10, 0)
+        header_layout.setSpacing(8)
+        header_layout.setAlignment(Qt.AlignmentFlag.AlignRight) # Todo a la derecha
 
-        # Título del gráfico
-        self.title_label = QLabel(title)
-        is_dark = theme_manager.is_dark_mode() if theme_manager else (theme == 'dark')
-        title_color = "#ffffff" if is_dark else "#003087"
-        self.title_label.setStyleSheet(f"""
-            font-family: 'Montserrat';
-            font-size: 14px;
-            font-weight: bold;
-            color: {title_color};
-            background: transparent;
-            border: none;
-        """)
-        header_layout.addWidget(self.title_label)
-
-        header_layout.addStretch()
-
-        # Botón de expandir (FUERA del menú) con icono de flecha
+        # Botón de expandir (Diseño plano minimalista)
         self.expand_btn = QPushButton("↗")
-        self.expand_btn.setFixedSize(38, 38)
+        self.expand_btn.setFixedSize(28, 28)
         self.expand_btn.setToolTip("Expandir gráfico")
         self.expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.expand_btn.clicked.connect(self._toggle_fullscreen)
         header_layout.addWidget(self.expand_btn)
 
-        # Botón de menú (3 puntos) con icono mejorado
+        # Botón de menú (Diseño plano minimalista)
         self.menu_btn = QPushButton("⋯")
-        self.menu_btn.setFixedSize(38, 38)
+        self.menu_btn.setFixedSize(28, 28)
         self.menu_btn.setToolTip("Opciones del gráfico")
         self.menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.menu_btn.clicked.connect(self._show_menu)
@@ -457,11 +526,12 @@ class ChartCard(QFrame):
         # Aplicar estilos iniciales a botones
         self._update_button_styles()
 
-        layout.addWidget(header)
+        layout.addWidget(header_container)
 
         # Gráfico
         self.chart_widget = D3ChartWidget(self)
-        self.chart_widget.set_chart(chart_type, title, data, tema=theme)
+        # Modo 'summary' para ocultar detalles en dashboard
+        self.chart_widget.set_chart(chart_type, title, data, tema=theme, mode='summary')
         layout.addWidget(self.chart_widget)
 
     def _show_menu(self):
@@ -756,17 +826,13 @@ class ChartCard(QFrame):
             )
 
     def _apply_card_style(self):
-        """Aplicar estilo de borde a la tarjeta"""
-        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
-        bg_color = "#2d2d2d" if is_dark else "#ffffff"
-        border_color = "#003087"
-
-        self.setStyleSheet(f"""
-            ChartCard {{
-                background-color: {bg_color};
-                border: 2px solid {border_color};
-                border-radius: 12px;
-            }}
+        """Aplicar estilo de borde a la tarjeta - TRANSPARENTE"""
+        # Mantener transparente para que solo se vea el gráfico D3
+        self.setStyleSheet("""
+            ChartCard {
+                background-color: transparent;
+                border: none;
+            }
         """)
 
     def _update_button_styles(self):
@@ -786,12 +852,12 @@ class ChartCard(QFrame):
             self.expand_btn.setStyleSheet(f"""
                 QPushButton {{
                     font-family: 'Arial';
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: bold;
                     background-color: {btn_bg};
                     color: white;
                     border: none;
-                    border-radius: 19px;
+                    border-radius: 14px; /* Redondo */
                 }}
                 QPushButton:hover {{
                     background-color: {btn_hover};
@@ -803,12 +869,12 @@ class ChartCard(QFrame):
             self.menu_btn.setStyleSheet(f"""
                 QPushButton {{
                     font-family: 'Arial';
-                    font-size: 22px;
+                    font-size: 18px;
                     font-weight: bold;
                     background-color: {btn_bg};
                     color: white;
                     border: none;
-                    border-radius: 19px;
+                    border-radius: 14px; /* Redondo */
                 }}
                 QPushButton:hover {{
                     background-color: {btn_hover};
@@ -829,16 +895,8 @@ class ChartCard(QFrame):
         # Actualizar estilos de los botones
         self._update_button_styles()
 
-        # Actualizar color del título
-        if hasattr(self, 'title_label'):
-            self.title_label.setStyleSheet(f"""
-                font-family: 'Montserrat';
-                font-size: 14px;
-                font-weight: bold;
-                color: {title_color};
-                background: transparent;
-                border: none;
-            """)
+        # Actualizar estilos de los botones
+        self._update_button_styles()
 
 
 class DashboardPanel(QWidget):
@@ -879,8 +937,27 @@ class DashboardPanel(QWidget):
 
         main_layout = QVBoxLayout(scroll_widget)
         # SIN MÁRGENES GRISES
-        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(20)
+        main_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
+
+        # Header simple solo con título
+        header_layout = QHBoxLayout()
+        
+        # Título del Dashboard
+        dashboard_title = QLabel("Dashboards")
+        dashboard_title.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 24px;
+            font-weight: bold;
+            color: #003087; /* Se actualizará con el tema */
+        """)
+        # Guardar referencia para actualizar color
+        self.dashboard_title = dashboard_title
+        header_layout.addWidget(dashboard_title)
+        header_layout.addStretch()
+        
+        main_layout.addLayout(header_layout)
 
         # Métricas principales (3 métricas en fila) - CENTRADAS
         metrics_layout = QHBoxLayout()
@@ -962,9 +1039,37 @@ class DashboardPanel(QWidget):
         # Spacer al final
         main_layout.addStretch()
 
+        # Iniciar carga escalonada de gráficas
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(500, self.load_charts_staggered)
+
+    def load_charts_staggered(self):
+        """Cargar gráficas una por una para evitar congelamiento"""
+        from PyQt6.QtCore import QTimer
+        
+        delay = 0
+        for i, chart_card in enumerate(self.chart_cards):
+            # Recargar cada gráfica con un delay incremental
+            QTimer.singleShot(delay, lambda c=chart_card: c.chart_widget.set_chart(
+                c.chart_type, c.title, c.data, tema=c.theme, mode='summary'
+            ))
+            delay += 500  # 500ms entre cada gráfica para asegurar carga
+
     def _on_theme_changed(self, new_theme: str):
         """Callback cuando cambia el tema - SIN REINICIALIZAR GRÁFICAS"""
         print(f"🎨 Dashboard: Actualizando tema a {new_theme}")
+
+        is_dark = (new_theme == 'dark')
+        title_color = "#ffffff" if is_dark else "#003087"
+        
+        if hasattr(self, 'dashboard_title'):
+            self.dashboard_title.setStyleSheet(f"""
+                font-family: 'Montserrat';
+                font-size: 24px;
+                font-weight: bold;
+                color: {title_color};
+                background: transparent;
+            """)
 
         # Actualizar tema de los gráficos - SOLO ACTUALIZAR COLORES, NO REINICIALIZAR
         for chart_card in self.chart_cards:
@@ -975,6 +1080,10 @@ class DashboardPanel(QWidget):
 
             # NO reinicializar las gráficas - solo dejar que el tema cambie automáticamente
             # Las gráficas D3 se adaptan al tema mediante CSS
+            
+        # RECARGAR GRÁFICAS para aplicar nuevo tema (background D3)
+        # Usamos carga escalonada para evitar congelamiento
+        self.load_charts_staggered()
 
         # Actualizar métricas
         for metric_card in self.metric_cards:

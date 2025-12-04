@@ -527,6 +527,10 @@ class ReportesPanel(QWidget):
         self.theme_manager = theme_manager
         self.db_connection = db_connection
 
+        # Conectar signal de cambio de tema
+        if self.theme_manager:
+            self.theme_manager.theme_changed.connect(self._on_theme_changed)
+
         # Stack para navegación
         self.stack = QStackedWidget()
 
@@ -559,6 +563,7 @@ class ReportesPanel(QWidget):
         header_layout.setContentsMargins(5, 5, 5, 5)
 
         title = QLabel("Generación de Reportes")
+        self.title_label = title
         title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))  # Aumentado de 28 a 36
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#002E6D"
@@ -566,6 +571,7 @@ class ReportesPanel(QWidget):
         header_layout.addWidget(title)
 
         subtitle = QLabel("Selecciona el tipo de reporte que deseas generar")
+        self.subtitle_label = subtitle
         subtitle.setFont(QFont("Montserrat", 18))  # Aumentado de 13 a 18
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
         subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")
@@ -594,8 +600,10 @@ class ReportesPanel(QWidget):
 
         row = 0
         col = 0
+        self.report_cards = []
         for title, desc, icon in reports:
             card = ReportCard(title, desc, icon, self.theme_manager)
+            self.report_cards.append(card)
             card.clicked.connect(lambda t=title: self._open_report_generation(t))
             scroll_layout.addWidget(card, row, col)
 
@@ -634,3 +642,23 @@ class ReportesPanel(QWidget):
         if current_view != self.selection_view:
             self.stack.removeWidget(current_view)
             current_view.deleteLater()
+
+    def _on_theme_changed(self, new_theme: str):
+        """Actualizar tema"""
+        is_dark = (new_theme == 'dark')
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        subtitle_color = "#b0b0b0" if is_dark else "#666666"
+
+        if hasattr(self, 'title_label'):
+            self.title_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
+        
+        if hasattr(self, 'subtitle_label'):
+            self.subtitle_label.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")
+
+        for card in self.report_cards:
+            card._apply_theme()
+            # Actualizar textos internos de la card
+            children = card.findChildren(QLabel)
+            if len(children) >= 2:
+                children[0].setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
+                children[1].setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")

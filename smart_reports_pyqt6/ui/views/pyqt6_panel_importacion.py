@@ -19,6 +19,10 @@ class PanelImportacion(QWidget):
 
         self.theme_manager = theme_manager
 
+        # Conectar signal de cambio de tema
+        if self.theme_manager:
+            self.theme_manager.theme_changed.connect(self._on_theme_changed)
+
         # Variables
         self.archivo_training = None
         self.archivo_org = None
@@ -43,6 +47,7 @@ class PanelImportacion(QWidget):
         title_layout.setSpacing(5)
 
         title = QLabel("Cruce e Importación de Datos")
+        self.title_label = title
         title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))  # Aumentado de 28 a 36
         # Color según tema
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
@@ -51,6 +56,7 @@ class PanelImportacion(QWidget):
         title_layout.addWidget(title)
 
         subtitle = QLabel("Sistema de validación y matching de datos CSOD")
+        self.subtitle_label = subtitle
         subtitle.setFont(QFont("Montserrat", 16))  # Aumentado de 11 a 16
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
         subtitle.setStyleSheet(f"color: {subtitle_color}; border: none; background: transparent; padding: 0; margin: 0;")
@@ -63,6 +69,7 @@ class PanelImportacion(QWidget):
 
         # Sección de archivos - SIN EMOJI
         files_label = QLabel("Archivos a Importar")
+        self.files_label = files_label
         files_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Aumentado de 16 a 22
         files_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent; padding: 0; margin: 0;")
         layout.addWidget(files_label)
@@ -79,6 +86,7 @@ class PanelImportacion(QWidget):
             self._select_training_file,
             highlighted=True
         )
+        self.training_card = training_card
         files_grid.addWidget(training_card, 0, 0)
 
         # Archivo 2: Org Planning - CON CONTENEDOR NAVY
@@ -89,12 +97,14 @@ class PanelImportacion(QWidget):
             self._select_org_file,
             highlighted=True
         )
+        self.org_card = org_card
         files_grid.addWidget(org_card, 0, 1)
 
         layout.addLayout(files_grid)
 
         # Separador - adaptado al tema
         sep1 = QFrame()
+        self.sep1 = sep1
         sep1.setFrameShape(QFrame.Shape.HLine)
         sep1.setFixedHeight(1)
         sep_color = "#444444" if is_dark else "#d0d0d0"
@@ -103,6 +113,7 @@ class PanelImportacion(QWidget):
 
         # Sección de acciones - SIN EMOJI
         actions_label = QLabel("Acciones")
+        self.actions_label = actions_label
         actions_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Aumentado de 16 a 22
         actions_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent; padding: 0; margin: 0;")
         layout.addWidget(actions_label)
@@ -169,6 +180,7 @@ class PanelImportacion(QWidget):
 
         # Separador - adaptado al tema
         sep2 = QFrame()
+        self.sep2 = sep2
         sep2.setFrameShape(QFrame.Shape.HLine)
         sep2.setFixedHeight(1)
         sep_color = "#444444" if is_dark else "#d0d0d0"
@@ -177,6 +189,7 @@ class PanelImportacion(QWidget):
 
         # Sección de log - SIN EMOJI
         log_label = QLabel("Log de Operaciones")
+        self.log_label = log_label
         log_label.setFont(QFont("Montserrat", 22, QFont.Weight.Bold))  # Aumentado de 16 a 22
         log_label.setStyleSheet(f"color: {title_color}; border: none; background: transparent; padding: 0; margin: 0;")
         layout.addWidget(log_label)
@@ -370,3 +383,57 @@ class PanelImportacion(QWidget):
     def _log(self, message):
         """Agregar mensaje al log"""
         self.log_text.append(message)
+
+    def _on_theme_changed(self, new_theme: str):
+        """Actualizar tema"""
+        is_dark = (new_theme == 'dark')
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        subtitle_color = "#b0b0b0" if is_dark else "#666666"
+        sep_color = "#444444" if is_dark else "#d0d0d0"
+
+        # Labels
+        if hasattr(self, 'title_label'):
+            self.title_label.setStyleSheet(f"color: {text_color}; border: none; background: transparent; padding: 0; margin: 0;")
+        if hasattr(self, 'subtitle_label'):
+            self.subtitle_label.setStyleSheet(f"color: {subtitle_color}; border: none; background: transparent; padding: 0; margin: 0;")
+        if hasattr(self, 'files_label'):
+            self.files_label.setStyleSheet(f"color: {text_color}; border: none; background: transparent; padding: 0; margin: 0;")
+        if hasattr(self, 'actions_label'):
+            self.actions_label.setStyleSheet(f"color: {text_color}; border: none; background: transparent; padding: 0; margin: 0;")
+        if hasattr(self, 'log_label'):
+            self.log_label.setStyleSheet(f"color: {text_color}; border: none; background: transparent; padding: 0; margin: 0;")
+
+        # Separadores
+        if hasattr(self, 'sep1'):
+            self.sep1.setStyleSheet(f"background-color: {sep_color};")
+        if hasattr(self, 'sep2'):
+            self.sep2.setStyleSheet(f"background-color: {sep_color};")
+
+        # Log Text
+        log_bg = "#1e1e1e" if is_dark else "#ffffff"
+        log_text = "#00ff00" if is_dark else "#008000"
+        log_border = "#002E6D"
+        self.log_text.setStyleSheet(f"""
+            QTextEdit {{
+                background-color: {log_bg};
+                color: {log_text};
+                border: 2px solid {log_border};
+                border-radius: 8px;
+                padding: 10px;
+            }}
+        """)
+
+        # Cards (re-aplicar estilos)
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        border_color = "#002E6D" # Highlighted
+        
+        for card in [self.training_card, self.org_card]:
+            card.setStyleSheet(f"""
+                QFrame {{
+                    background-color: {bg_color};
+                    border: 3px solid {border_color};
+                    border-radius: 12px;
+                }}
+            """)
+            # Actualizar labels internos (simplificado)
+            card.findChild(QLabel).setStyleSheet(f"color: {text_color}; border: none; background: transparent;")

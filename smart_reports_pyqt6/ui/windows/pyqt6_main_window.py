@@ -11,7 +11,9 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
 # Importar ModernSidebar
+# Importar ModernSidebar y BarraSuperior
 from smart_reports_pyqt6.ui.components.navigation.pyqt6_modern_sidebar import ModernSidebar
+from smart_reports_pyqt6.ui.components.navigation.barra_superior import BarraSuperior
 
 
 class MainWindow(QMainWindow):
@@ -125,8 +127,13 @@ class MainWindow(QMainWindow):
         content_layout.setSpacing(0)
 
         # Top bar con info de usuario
-        top_bar = self._create_top_bar()
-        content_layout.addWidget(top_bar)
+        # Top bar con info de usuario (Componente reutilizable)
+        self.top_bar = BarraSuperior(
+            username=self.username,
+            user_role=self.role,
+            theme_manager=self.theme_manager
+        )
+        content_layout.addWidget(self.top_bar)
 
         # Scroll area para contener el stacked widget
         scroll = QScrollArea()
@@ -266,15 +273,9 @@ class MainWindow(QMainWindow):
         print(f"🎨 MainWindow: Actualizando tema a {new_theme}")
 
         # Actualizar el top bar
-        if hasattr(self, 'content_area'):
-            # Recrear el top bar con los nuevos colores
-            content_layout = self.content_area.layout()
-            if content_layout and content_layout.count() > 0:
-                old_top_bar = content_layout.itemAt(0).widget()
-                if old_top_bar:
-                    old_top_bar.deleteLater()
-                    new_top_bar = self._create_top_bar()
-                    content_layout.insertWidget(0, new_top_bar)
+        # Actualizar el top bar (ya se actualiza solo por signal, pero por si acaso)
+        if hasattr(self, 'top_bar'):
+            pass # BarraSuperior maneja su propio cambio de tema
 
     def _toggle_theme(self):
         """Cambiar tema"""

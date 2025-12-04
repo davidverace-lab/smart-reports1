@@ -25,16 +25,18 @@ class BarraSuperior(QFrame):
         self.theme_manager = theme_manager
 
         self.setObjectName("barraSuperior")
-        self.setFixedHeight(80)  # Igual que CustomTkinter
+        self.setFixedHeight(100)  # Aumentado de 80 a 100
+        # Borde inferior Navy
+        self.setStyleSheet("border-bottom: 2px solid #002E6D;")
 
         self._create_ui()
 
         # Conectar signal de cambio de tema
         if self.theme_manager:
-            self.theme_manager.theme_changed.connect(lambda new_theme: self._update_theme())
+            self.theme_manager.theme_changed.connect(self._on_theme_changed)
 
         # Aplicar tema inicial
-        self._update_theme()
+        self._on_theme_changed(self.theme_manager.current_theme if self.theme_manager else 'dark')
 
     def _create_ui(self):
         """Crear interfaz de la barra superior - SIMPLE Y LIMPIA"""
@@ -50,7 +52,7 @@ class BarraSuperior(QFrame):
         # Usar setStyleSheet para la fuente en lugar de setFont
         self.greeting_label.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 18px;
+            font-size: 24px;
             font-weight: bold;
             border: none;
             background: transparent;
@@ -66,7 +68,7 @@ class BarraSuperior(QFrame):
         # Usar setStyleSheet para la fuente en lugar de setFont
         self.brand_label.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 22px;
+            font-size: 28px;
             font-weight: bold;
             border: none;
             background: transparent;
@@ -89,44 +91,27 @@ class BarraSuperior(QFrame):
         self.user_role = user_role
         self.greeting_label.setText(f"¡Bienvenido, {username}!")
 
-    def _update_theme(self):
-        """Actualizar colores según tema actual - BASADO EN CUSTOMTKINTER"""
+    def _on_theme_changed(self, new_theme: str):
+        """Actualizar colores según tema actual"""
+        is_dark = (new_theme == 'dark')
 
-        if not self.theme_manager:
-            return
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        text_color = "#ffffff" if is_dark else "#002E6D"
+        brand_color = "#ffffff" if is_dark else "#002E6D"
+        border_color = "#002E6D"  # Navy corporativo siempre
 
-        is_dark = self.theme_manager.is_dark_mode()
-
-        # Colores basados en CustomTkinter
-        # Modo claro: Card background, texto oscuro, branding navy
-        # Modo oscuro: Card background oscuro, texto blanco, branding blanco
-
-        bg_color = "#2d2d2d" if is_dark else "#f5f5f5"  # Card background
-        text_color = "#ffffff" if is_dark else "#333333"  # Texto normal
-        brand_color = "#ffffff" if is_dark else "#002E6D"  # Branding: blanco en oscuro, navy en claro
-        border_color = "#383838" if is_dark else "#002E6D"  # Borde: gris en oscuro, navy corporativo en claro
-
-        # Actualizar estilos del frame principal y labels
+        # Actualizar estilo del frame
         self.setStyleSheet(f"""
             #barraSuperior {{
-                background-color: {bg_color} !important;
-                border: none !important;
-                border-bottom: 2px solid {border_color} !important;
-            }}
-            QWidget {{
-                background: transparent !important;
-                border: none !important;
-            }}
-            QLabel {{
-                border: none !important;
-                background: transparent !important;
+                background-color: {bg_color};
+                border-bottom: 3px solid {border_color};
             }}
         """)
 
-        # Actualizar colores de los labels manteniendo las fuentes definidas
+        # Actualizar labels
         self.greeting_label.setStyleSheet(f"""
             font-family: 'Montserrat';
-            font-size: 18px;
+            font-size: 24px;
             font-weight: bold;
             color: {text_color};
             border: none;
@@ -135,13 +120,9 @@ class BarraSuperior(QFrame):
 
         self.brand_label.setStyleSheet(f"""
             font-family: 'Montserrat';
-            font-size: 22px;
+            font-size: 28px;
             font-weight: bold;
             color: {brand_color};
             border: none;
             background: transparent;
         """)
-
-        # Forzar actualización visual
-        self.update()
-        self.repaint()

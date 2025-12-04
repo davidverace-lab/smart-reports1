@@ -54,16 +54,17 @@ class D3ChartWidget(QWidget):
 
         layout.addWidget(self.webview)
 
-    def set_chart(self, chart_type: str, title: str, datos: dict, subtitle: str = "", tema: str = 'dark'):
+    def set_chart(self, chart_type: str, title: str, datos: dict, subtitle: str = "", tema: str = 'dark', mode: str = 'summary'):
         """
         Establecer gráfico D3.js v7
 
         Args:
-            chart_type: 'bar', 'donut', 'line', 'area', 'scatter'
+            chart_type: 'bar', 'horizontal_bar', 'donut', 'line', 'area', 'scatter'
             title: Título del gráfico
             datos: {'labels': [...], 'values': [...]}
             subtitle: Subtítulo opcional
             tema: 'dark' o 'light'
+            mode: 'summary' (vista dashboard) o 'detail' (vista expandida)
         """
 
         print(f"📊 Cargando gráfico D3.js v7 - {chart_type}: {title}")
@@ -76,13 +77,13 @@ class D3ChartWidget(QWidget):
         self.webview.setHtml("")
 
         # Generar HTML
-        html = self._generate_html(chart_type, title, datos, subtitle, tema)
+        html = self._generate_html(chart_type, title, datos, subtitle, tema, mode)
 
         # Cargar en webview con delay para asegurar renderizado
         from PyQt6.QtCore import QTimer
-        QTimer.singleShot(50, lambda: self._load_html(html))
+        QTimer.singleShot(200, lambda: self._load_html(html))
 
-    def _generate_html(self, chart_type: str, title: str, datos: dict, subtitle: str, tema: str) -> str:
+    def _generate_html(self, chart_type: str, title: str, datos: dict, subtitle: str, tema: str, mode: str) -> str:
         """Generar HTML del gráfico usando D3.js v7"""
 
         labels = datos.get('labels', [])
@@ -286,8 +287,9 @@ class D3ChartWidget(QWidget):
         const data = {chart_data_json};
         const colors = {colors_json};
 
-        // Tipo de gráfico
+        // Tipo de gráfico y modo
         const chartType = '{chart_type}';
+        const mode = '{mode}'; // 'summary' o 'detail'
 
         // Tooltip
         const tooltip = d3.select('body')
@@ -640,6 +642,111 @@ class D3ChartWidget(QWidget):
         g.append('g')
             .attr('class', 'axis')
             .call(d3.axisLeft(y).tickFormat(d => d.toLocaleString()));
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            location.reload();
+        });
+            """
+
+        elif chart_type == 'horizontal_bar':
+            return """
+        // ===== GRÁFICO DE BARRAS HORIZONTALES D3.js v7 =====
+        const container = d3.select('#chart');
+        const containerNode = container.node();
+        const width = containerNode.clientWidth;
+        const height = containerNode.clientHeight;
+        // Márgenes ajustados según modo
+        const margin = mode === 'summary' 
+            ? {top: 20, right: 30, bottom: 20, left: 100} 
+            : {top: 40, right: 50, bottom: 50, left: 150};
+            
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
+
+        const svg = container.append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        // Escalas
+        const y = d3.scaleBand()
+            .domain(data.map(d => d.label))
+            .range([0, chartHeight])
+            .padding(0.3);
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.value) * 1.1])
+            .range([0, chartWidth]);
+
+        // Escala de colores
+        const colorScale = d3.scaleOrdinal()
+            .domain(data.map(d => d.label))
+            .range(colors);
+
+        // Grid vertical
+        g.append('g')
+            .attr('class', 'grid')
+            .call(d3.axisBottom(x)
+                .tickSize(chartHeight)
+                .tickFormat('')
+            );
+
+        // Barras
+        g.selectAll('.bar')
+            .data(data)
+            .join('rect')
+            .attr('class', 'bar')
+            .attr('y', d => y(d.label))
+            .attr('x', 0)
+            .attr('height', y.bandwidth())
+            .attr('width', 0)
+            .attr('fill', d => colorScale(d.label))
+            .on('mouseover', showTooltip)
+            .on('mousemove', showTooltip)
+            .on('mouseout', hideTooltip)
+            .transition()
+            .duration(800)
+            .ease(d3.easeCubicOut)
+            .attr('width', d => x(d.value));
+
+        // Etiquetas de valores (solo en detail o si hay espacio)
+        if (mode === 'detail' || data.length < 10) {
+            g.selectAll('.label')
+                .data(data)
+                .join('text')
+                .attr('class', 'label')
+                .attr('y', d => y(d.label) + y.bandwidth() / 2 + 4)
+                .attr('x', d => x(d.value) + 5)
+                .attr('text-anchor', 'start')
+                .attr('fill', '{text_color}')
+                .attr('font-size', '11px')
+                .attr('font-weight', '600')
+                .attr('opacity', 0)
+                .text(d => d.value.toLocaleString())
+                .transition()
+                .delay(800)
+                .duration(300)
+                .attr('opacity', 1);
+        }
+
+        // Ejes
+        g.append('g')
+            .attr('class', 'axis')
+            .call(d3.axisLeft(y))
+            .selectAll('text')
+            .style('text-anchor', 'end')
+            .style('font-size', mode === 'summary' ? '10px' : '12px');
+
+        // Ocultar eje X en summary para limpieza
+        if (mode === 'detail') {
+            g.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${chartHeight})`)
+                .call(d3.axisBottom(x).ticks(5));
+        }
 
         // Responsive
         window.addEventListener('resize', () => {

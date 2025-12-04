@@ -132,21 +132,21 @@ class ModernSidebar(QFrame):
         self.collapse_btn = QPushButton("☰")
         self.collapse_btn.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 32px;
+            font-size: 24px;
             font-weight: bold;
             border: none;
             background: transparent;
         """)
-        self.collapse_btn.setFixedSize(60, 50)
+        self.collapse_btn.setFixedSize(50, 40)
         self.collapse_btn.setObjectName("hamburgerBtn")
         self.collapse_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.collapse_btn.clicked.connect(self._toggle_collapse)
         layout.addWidget(self.collapse_btn, alignment=Qt.AlignmentFlag.AlignTop)
 
-        # Logo Frame (AUMENTADO DE 120 A 160 PARA QUE QUEPA EL TEXTO)
+        # Logo Frame (AJUSTADO)
         self.logo_frame = QWidget()
         self.logo_frame.setObjectName("logoFrame")
-        self.logo_frame.setFixedHeight(160)
+        self.logo_frame.setFixedHeight(120)
         logo_layout = QVBoxLayout(self.logo_frame)
         logo_layout.setContentsMargins(0,10,0,0)
 
@@ -155,7 +155,7 @@ class ModernSidebar(QFrame):
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.logo_label.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 32px;
+            font-size: 24px;
             font-weight: bold;
             border: none;
             background: transparent;
@@ -168,7 +168,7 @@ class ModernSidebar(QFrame):
         self.subtitle.setWordWrap(True)
         self.subtitle.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 12px;
+            font-size: 10px;
             font-weight: normal;
             border: none;
             background: transparent;
@@ -200,14 +200,14 @@ class ModernSidebar(QFrame):
             btn = QPushButton(text)
             btn.setStyleSheet("""
                 font-family: 'Montserrat';
-                font-size: 18px;
+                font-size: 14px;
                 font-weight: bold;
                 text-align: left;
                 padding-left: 20px;
                 border: none;
                 background: transparent;
             """)
-            btn.setFixedHeight(60)
+            btn.setFixedHeight(50)
             btn.setObjectName("navButton")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
@@ -310,7 +310,7 @@ class ModernSidebar(QFrame):
                 btn.setText(btn.property("iconOnly"))
                 btn.setStyleSheet("""
                     font-family: 'Segoe UI Emoji';
-                    font-size: 26px;
+                    font-size: 20px;
                     font-weight: normal;
                     text-align: center;
                     padding: 0px;
@@ -336,7 +336,7 @@ class ModernSidebar(QFrame):
                 btn.setText(btn.property("fullText"))
                 btn.setStyleSheet("""
                     font-family: 'Montserrat';
-                    font-size: 18px;
+                    font-size: 14px;
                     font-weight: bold;
                     text-align: left;
                     padding-left: 20px;
