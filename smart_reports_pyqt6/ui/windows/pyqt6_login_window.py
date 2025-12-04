@@ -148,35 +148,48 @@ class LoginWindow(QMainWindow):
         # Spacer superior para centrar verticalmente
         layout.addStretch(1)
 
-        # Título del formulario - EXTRA GRANDE para mejor visibilidad
+        # Título del formulario - MÁS GRANDE Y PROMINENTE
         form_title = QLabel("Iniciar Sesión")
-        form_title.setFont(QFont("Montserrat", 52, QFont.Weight.Bold))  # Aumentado de 40 a 52
+        form_title.setFont(QFont("Montserrat", 64, QFont.Weight.Bold))  # Aumentado de 52 a 64
         form_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        form_title.setStyleSheet("""
+            color: #003087;
+            border: none;
+            background: transparent;
+        """)
         layout.addWidget(form_title)
 
         layout.addSpacing(15)
 
-        # Subtítulo - MÁS GRANDE para mejor visibilidad
+        # Subtítulo - MÁS GRANDE Y LEGIBLE
         form_subtitle = QLabel("Ingresa tus credenciales")
-        form_subtitle.setFont(QFont("Montserrat", 26))  # Aumentado de 20 a 26
+        form_subtitle.setFont(QFont("Montserrat", 20))  # Aumentado de 26 a 20 (reducido para mejor proporción)
         form_subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        form_subtitle.setStyleSheet("color: #888888;")
+        form_subtitle.setStyleSheet("""
+            color: #888888;
+            border: none;
+            background: transparent;
+        """)
         layout.addWidget(form_subtitle)
 
         layout.addSpacing(40)
 
         # Campo de usuario
         user_label = QLabel("Usuario")
-        user_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        user_label.setStyleSheet("color: #003087;")
+        user_label.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # Aumentado de 12 a 14
+        user_label.setStyleSheet("""
+            color: #003087;
+            border: none;
+            background: transparent;
+        """)
         layout.addWidget(user_label)
 
         layout.addSpacing(5)
 
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Ingresa tu usuario")
-        self.username_input.setFixedHeight(50)
-        self.username_input.setFont(QFont("Montserrat", 12))
+        self.username_input.setFixedHeight(55)  # Aumentado de 50 a 55
+        self.username_input.setFont(QFont("Montserrat", 14))  # Aumentado de 12 a 14
         self.username_input.setStyleSheet("""
             QLineEdit {
                 border: 2px solid #e0e0e0;
@@ -196,8 +209,12 @@ class LoginWindow(QMainWindow):
 
         # Campo de contraseña
         pass_label = QLabel("Contraseña")
-        pass_label.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
-        pass_label.setStyleSheet("color: #003087;")
+        pass_label.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))  # Aumentado de 12 a 14
+        pass_label.setStyleSheet("""
+            color: #003087;
+            border: none;
+            background: transparent;
+        """)
         layout.addWidget(pass_label)
 
         layout.addSpacing(5)
@@ -205,8 +222,8 @@ class LoginWindow(QMainWindow):
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Ingresa tu contraseña")
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password_input.setFixedHeight(50)
-        self.password_input.setFont(QFont("Montserrat", 12))
+        self.password_input.setFixedHeight(55)  # Aumentado de 50 a 55
+        self.password_input.setFont(QFont("Montserrat", 14))  # Aumentado de 12 a 14
         self.password_input.setStyleSheet("""
             QLineEdit {
                 border: 2px solid #e0e0e0;
@@ -226,8 +243,8 @@ class LoginWindow(QMainWindow):
 
         # Botón de login
         self.login_button = QPushButton("INICIAR SESIÓN")
-        self.login_button.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
-        self.login_button.setFixedHeight(55)
+        self.login_button.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))  # Aumentado de 14 a 16
+        self.login_button.setFixedHeight(60)  # Aumentado de 55 a 60
         self.login_button.setStyleSheet("""
             QPushButton {
                 background-color: #003087 !important;
