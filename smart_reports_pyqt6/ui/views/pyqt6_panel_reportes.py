@@ -13,7 +13,7 @@ from PyQt6.QtGui import QFont
 
 
 class ReportCard(QFrame):
-    """Tarjeta clickeable para seleccionar tipo de reporte - MÁS CUADRADA Y CENTRADA"""
+    """Tarjeta clickeable para seleccionar tipo de reporte - COMPACTA Y ELEGANTE"""
 
     clicked = pyqtSignal()
 
@@ -22,22 +22,22 @@ class ReportCard(QFrame):
 
         self.theme_manager = theme_manager
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setMinimumHeight(220)  # MÁS CUADRADO
-        self.setMinimumWidth(280)   # MÁS CUADRADO
-        self.setMaximumWidth(320)   # MÁS CUADRADO
+        self.setMinimumHeight(180)  # MÁS COMPACTO
+        self.setMinimumWidth(240)   # MÁS COMPACTO
+        self.setMaximumWidth(300)   # MÁS COMPACTO
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         # Aplicar estilo
         self._apply_theme()
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(12)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(10)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # CENTRADO
 
         # Título - CENTRADO
         header_label = QLabel(f"{title}")
-        header_label.setFont(QFont("Montserrat", 20, QFont.Weight.Bold))
+        header_label.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
         is_dark = theme_manager.is_dark_mode() if theme_manager else False
         text_color = "#ffffff" if is_dark else "#002E6D"
         header_label.setStyleSheet(f"color: {text_color}; background: transparent; border: none; padding: 0; margin: 0;")
@@ -48,7 +48,7 @@ class ReportCard(QFrame):
         # Descripción - CENTRADA
         desc_label = QLabel(description)
         desc_label.setWordWrap(True)
-        desc_label.setFont(QFont("Montserrat", 12))
+        desc_label.setFont(QFont("Montserrat", 10))
         desc_color = "#b0b0b0" if is_dark else "#666666"
         desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; border: none; padding: 0; margin: 0;")
         desc_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # CENTRADO
@@ -58,8 +58,8 @@ class ReportCard(QFrame):
 
         # Botón - NAVY CORPORATIVO
         gen_btn = QPushButton("Generar Reporte")
-        gen_btn.setFont(QFont("Montserrat", 13, QFont.Weight.Bold))
-        gen_btn.setFixedHeight(42)
+        gen_btn.setFont(QFont("Montserrat", 12, QFont.Weight.Bold))
+        gen_btn.setFixedHeight(38)
         gen_btn.setStyleSheet("""
             QPushButton {
                 background-color: #002E6D;
@@ -564,7 +564,7 @@ class ReportesPanel(QWidget):
 
         title = QLabel("Generación de Reportes")
         self.title_label = title
-        title.setFont(QFont("Montserrat", 36, QFont.Weight.Bold))  # Aumentado de 28 a 36
+        title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))  # Reducido de 36 a 28
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else False
         title_color = "#ffffff" if is_dark else "#002E6D"
         title.setStyleSheet(f"color: {title_color}; background: transparent; border: none; padding: 0; margin: 0;")
@@ -572,7 +572,7 @@ class ReportesPanel(QWidget):
 
         subtitle = QLabel("Selecciona el tipo de reporte que deseas generar")
         self.subtitle_label = subtitle
-        subtitle.setFont(QFont("Montserrat", 18))  # Aumentado de 13 a 18
+        subtitle.setFont(QFont("Montserrat", 14))  # Reducido de 18 a 14
         subtitle_color = "#b0b0b0" if is_dark else "#666666"
         subtitle.setStyleSheet(f"color: {subtitle_color}; background: transparent; border: none; padding: 0; margin: 0;")
         header_layout.addWidget(subtitle)
@@ -586,7 +586,8 @@ class ReportesPanel(QWidget):
 
         scroll_widget = QWidget()
         scroll_layout = QGridLayout(scroll_widget)
-        scroll_layout.setSpacing(12)
+        scroll_layout.setSpacing(15)
+        scroll_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
         scroll.setWidget(scroll_widget)
 
         # Tipos de reportes
@@ -608,7 +609,7 @@ class ReportesPanel(QWidget):
             scroll_layout.addWidget(card, row, col)
 
             col += 1
-            if col > 1:  # 2 columnas
+            if col > 2:  # 3 columnas
                 col = 0
                 row += 1
 

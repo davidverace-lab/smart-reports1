@@ -58,7 +58,7 @@ class PanelDashboardModerno(QWidget):
         title_layout.setContentsMargins(0, 0, 0, 0)
         title_layout.setSpacing(5)
 
-        title = QLabel("🚀 Dashboard Moderno")
+        title = QLabel("Dashboard Moderno")
         title.setFont(QFont("Montserrat", 28, QFont.Weight.Bold))
         title_layout.addWidget(title)
 
@@ -70,7 +70,7 @@ class PanelDashboardModerno(QWidget):
         header_layout.addWidget(title_container)
         header_layout.addStretch()
 
-        refresh_btn = QPushButton("🔄 Actualizar")
+        refresh_btn = QPushButton("Actualizar")
         refresh_btn.setFixedHeight(40)
         refresh_btn.clicked.connect(self._refresh_data)
         header_layout.addWidget(refresh_btn)
@@ -100,7 +100,7 @@ class PanelDashboardModerno(QWidget):
 
         # Gráfica 1
         chart1 = self._create_chart_card(
-            "🕐 Usuarios Activos por Hora",
+            "Usuarios Activos por Hora",
             'bar',
             self.datos_modernos['usuarios_activos']
         )
@@ -108,7 +108,7 @@ class PanelDashboardModerno(QWidget):
 
         # Gráfica 2
         chart2 = self._create_chart_card(
-            "📚 Módulos Más Populares",
+            "Módulos Más Populares",
             'bar',
             self.datos_modernos['modulos_populares']
         )
@@ -116,7 +116,7 @@ class PanelDashboardModerno(QWidget):
 
         # Gráfica 3
         chart3 = self._create_chart_card(
-            "📊 Tasa de Completado",
+            "Tasa de Completado",
             'donut',
             self.datos_modernos['tasa_completado']
         )
@@ -124,7 +124,7 @@ class PanelDashboardModerno(QWidget):
 
         # Gráfica 4
         chart4 = self._create_chart_card(
-            "📈 Actividad Mensual",
+            "Actividad Mensual",
             'line',
             self.datos_modernos['actividad_mensual']
         )

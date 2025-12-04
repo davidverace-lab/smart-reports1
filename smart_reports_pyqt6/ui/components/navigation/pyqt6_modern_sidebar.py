@@ -98,8 +98,8 @@ class ModernSidebar(QFrame):
         self.nav_buttons = {}
 
         self.is_collapsed = False
-        self.expanded_width = 300
-        self.collapsed_width = 90
+        self.expanded_width = 250
+        self.collapsed_width = 70
 
         self.setFixedWidth(self.expanded_width)
         self.setObjectName("modernSidebar")
@@ -150,12 +150,12 @@ class ModernSidebar(QFrame):
         logo_layout = QVBoxLayout(self.logo_frame)
         logo_layout.setContentsMargins(0,10,0,0)
 
-        # --- TEXTO GIGANTE CON STYLESHEET EN LUGAR DE SETFONT ---
+        # --- TEXTO CON STYLESHEET ---
         self.logo_label = QLabel("SMART\nREPORTS")
         self.logo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.logo_label.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             border: none;
             background: transparent;
@@ -200,14 +200,14 @@ class ModernSidebar(QFrame):
             btn = QPushButton(text)
             btn.setStyleSheet("""
                 font-family: 'Montserrat';
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: bold;
                 text-align: left;
-                padding-left: 20px;
+                padding-left: 15px;
                 border: none;
                 background: transparent;
             """)
-            btn.setFixedHeight(50)
+            btn.setFixedHeight(42)
             btn.setObjectName("navButton")
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
@@ -336,10 +336,10 @@ class ModernSidebar(QFrame):
                 btn.setText(btn.property("fullText"))
                 btn.setStyleSheet("""
                     font-family: 'Montserrat';
-                    font-size: 14px;
+                    font-size: 13px;
                     font-weight: bold;
                     text-align: left;
-                    padding-left: 20px;
+                    padding-left: 15px;
                     border: none;
                     background: transparent;
                 """)

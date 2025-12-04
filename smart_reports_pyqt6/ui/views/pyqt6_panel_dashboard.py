@@ -155,48 +155,55 @@ class ExpandedChartView(QWidget):
         layout.addLayout(content_layout)
 
     def _create_data_table(self, parent_layout):
-        """Crear tabla de datos integrada"""
+        """Crear tabla de datos integrada - CENTRADA Y ELEGANTE"""
         from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView
 
-        # Contenedor para la tabla
-        # Contenedor para la tabla
-        table_container = QWidget()
-        table_container.setFixedWidth(350) # Ancho fijo para que sea "complemento"
+        # Contenedor para la tabla - MÁS ANCHO Y CENTRADO
+        table_container = QFrame()
+        table_container.setFixedWidth(400)  # Aumentado de 350 a 400
+        table_container.setStyleSheet("background: transparent; border: none;")  # Sin fondo
         table_layout = QVBoxLayout(table_container)
-        table_layout.setContentsMargins(0, 10, 10, 10) # Margen derecho y abajo
-        
-        # Título de la tabla
+        table_layout.setContentsMargins(15, 15, 15, 15)  # Márgenes uniformes
+        table_layout.setSpacing(12)
+        table_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)  # Centrado
+
+        # Título de la tabla - CENTRADO
         table_title = QLabel("Detalle de Datos")
-        table_title.setFont(QFont("Montserrat", 14, QFont.Weight.Bold))
+        table_title.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
         text_color = "#ffffff" if is_dark else "#002E6D"
         table_title.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        table_title.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Centrado
         table_layout.addWidget(table_title)
 
-        # Tabla
+        # Tabla - DISEÑO LIMPIO Y ELEGANTE
         self.data_table = QTableWidget()
         self.data_table.setColumnCount(2)
         self.data_table.setHorizontalHeaderLabels(["Categoría", "Valor"])
         self.data_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.data_table.setAlternatingRowColors(True)
-        self.data_table.setMinimumHeight(200)
+        self.data_table.setMinimumHeight(300)  # Aumentado de 200 a 300
 
-        # Estilo de la tabla
-        table_bg = "#1e1e1e" if is_dark else "#ffffff"
-        table_text = "#ffffff" if is_dark else "#000000"
-        table_alt = "#2d2d2d" if is_dark else "#f0f0f0"
+        # Estilo de la tabla - SIN FONDOS EXTRAÑOS
+        table_bg = "transparent" if is_dark else "transparent"  # Fondo transparente
+        table_text = "#ffffff" if is_dark else "#002E6D"
+        table_alt = "rgba(0, 181, 226, 0.1)" if is_dark else "rgba(0, 48, 135, 0.05)"
         table_header = "#002E6D"
-        
+        table_border = "#00B5E2" if is_dark else "#003087"
+
         self.data_table.setStyleSheet(f"""
             QTableWidget {{
                 background-color: {table_bg};
                 color: {table_text};
-                gridline-color: #444444;
-                border: 1px solid #002E6D;
-                border-radius: 8px;
+                gridline-color: {table_border};
+                border: 2px solid {table_border};
+                border-radius: 10px;
+                font-family: 'Montserrat';
+                font-size: 12px;
             }}
             QTableWidget::item {{
-                padding: 8px;
+                padding: 10px;
+                border: none;
             }}
             QTableWidget::item:alternate {{
                 background-color: {table_alt};
@@ -204,9 +211,11 @@ class ExpandedChartView(QWidget):
             QHeaderView::section {{
                 background-color: {table_header};
                 color: white;
-                padding: 10px;
+                padding: 12px;
                 border: none;
                 font-weight: bold;
+                font-family: 'Montserrat';
+                font-size: 13px;
             }}
         """)
 
@@ -218,9 +227,15 @@ class ExpandedChartView(QWidget):
                 self.data_table.setItem(i, 1, QTableWidgetItem(str(value)))
 
         table_layout.addWidget(self.data_table)
-        
+
+        # Agregar un widget separador visual si se desea (opcional)
+        # separator = QFrame()
+        # separator.setFrameShape(QFrame.Shape.VLine)
+        # separator.setStyleSheet(f"background-color: {table_border}; max-width: 2px;")
+        # parent_layout.addWidget(separator)
+
         # Agregar al layout de contenido (con stretch factor menor)
-        parent_layout.addWidget(table_container, 1) # Stretch 1 para tabla
+        parent_layout.addWidget(table_container, 1)  # Stretch 1 para tabla
 
     def _show_menu(self):
         """Mostrar menú de opciones con diseño bonito"""
@@ -497,27 +512,29 @@ class ChartCard(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # Header MINIMALISTA FLOTANTE (fuera del gráfico)
+        # Header ELEGANTE con botones flotantes en esquina superior derecha
         header_container = QWidget()
-        header_container.setFixedHeight(30) # Altura mínima
+        header_container.setFixedHeight(45)
         header_container.setStyleSheet("background: transparent; border: none;")
-        
-        header_layout = QHBoxLayout(header_container)
-        header_layout.setContentsMargins(0, 0, 10, 0)
-        header_layout.setSpacing(8)
-        header_layout.setAlignment(Qt.AlignmentFlag.AlignRight) # Todo a la derecha
 
-        # Botón de expandir (Diseño plano minimalista)
-        self.expand_btn = QPushButton("↗")
-        self.expand_btn.setFixedSize(28, 28)
-        self.expand_btn.setToolTip("Expandir gráfico")
+        header_layout = QHBoxLayout(header_container)
+        header_layout.setContentsMargins(10, 5, 10, 5)
+        header_layout.setSpacing(10)
+
+        # Spacer para empujar botones a la derecha
+        header_layout.addStretch()
+
+        # Botón de expandir (Diseño moderno con ícono más visible)
+        self.expand_btn = QPushButton("⛶")  # Ícono de pantalla completa
+        self.expand_btn.setFixedSize(36, 36)
+        self.expand_btn.setToolTip("Expandir gráfico a pantalla completa")
         self.expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.expand_btn.clicked.connect(self._toggle_fullscreen)
         header_layout.addWidget(self.expand_btn)
 
-        # Botón de menú (Diseño plano minimalista)
-        self.menu_btn = QPushButton("⋯")
-        self.menu_btn.setFixedSize(28, 28)
+        # Botón de menú (Diseño moderno con 3 puntos)
+        self.menu_btn = QPushButton("⋮")  # 3 puntos verticales
+        self.menu_btn.setFixedSize(36, 36)
         self.menu_btn.setToolTip("Opciones del gráfico")
         self.menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.menu_btn.clicked.connect(self._show_menu)
@@ -839,45 +856,53 @@ class ChartCard(QFrame):
         """Actualizar estilos de los botones según el tema"""
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
 
-        # Colores adaptados al tema
+        # Colores adaptados al tema - MÁS SUTILES Y ELEGANTES
         if is_dark:
-            btn_bg = "#00B5E2"  # Cyan brillante para modo oscuro
-            btn_hover = "#009BDE"
+            btn_bg = "rgba(0, 181, 226, 0.2)"  # Fondo semi-transparente
+            btn_hover = "rgba(0, 181, 226, 0.4)"
+            btn_border = "#00B5E2"
+            btn_color = "#00B5E2"
         else:
-            btn_bg = "#003087"  # Navy para modo claro
-            btn_hover = "#004ba0"
+            btn_bg = "rgba(0, 48, 135, 0.1)"  # Fondo semi-transparente
+            btn_hover = "rgba(0, 48, 135, 0.2)"
+            btn_border = "#003087"
+            btn_color = "#003087"
 
-        # Estilo del botón de expandir
+        # Estilo del botón de expandir - MODERNO Y ELEGANTE
         if hasattr(self, 'expand_btn'):
             self.expand_btn.setStyleSheet(f"""
                 QPushButton {{
-                    font-family: 'Arial';
-                    font-size: 16px;
-                    font-weight: bold;
+                    font-family: 'Segoe UI Symbol';
+                    font-size: 18px;
+                    font-weight: normal;
                     background-color: {btn_bg};
-                    color: white;
-                    border: none;
-                    border-radius: 14px; /* Redondo */
+                    color: {btn_color};
+                    border: 2px solid {btn_border};
+                    border-radius: 18px;
                 }}
                 QPushButton:hover {{
                     background-color: {btn_hover};
+                    border: 2px solid {btn_color};
+                    transform: scale(1.05);
                 }}
             """)
 
-        # Estilo del botón de menú
+        # Estilo del botón de menú - MODERNO Y ELEGANTE
         if hasattr(self, 'menu_btn'):
             self.menu_btn.setStyleSheet(f"""
                 QPushButton {{
-                    font-family: 'Arial';
-                    font-size: 18px;
+                    font-family: 'Segoe UI Symbol';
+                    font-size: 22px;
                     font-weight: bold;
                     background-color: {btn_bg};
-                    color: white;
-                    border: none;
-                    border-radius: 14px; /* Redondo */
+                    color: {btn_color};
+                    border: 2px solid {btn_border};
+                    border-radius: 18px;
                 }}
                 QPushButton:hover {{
                     background-color: {btn_hover};
+                    border: 2px solid {btn_color};
+                    transform: scale(1.05);
                 }}
             """)
 
@@ -1008,8 +1033,8 @@ class DashboardPanel(QWidget):
         charts_grid.setContentsMargins(10, 10, 10, 10)
 
         # FILA 1 (2 gráficas)
-        chart1 = ChartCard("📊 Usuarios por Unidad", "horizontal_bar", USUARIOS_POR_UNIDAD_DATA, tema, self.theme_manager)
-        chart2 = ChartCard("🍩 Progreso General por Unidad", "donut", PROGRESO_UNIDADES_DATA, tema, self.theme_manager)
+        chart1 = ChartCard("Usuarios por Unidad", "horizontal_bar", USUARIOS_POR_UNIDAD_DATA, tema, self.theme_manager)
+        chart2 = ChartCard("Progreso General por Unidad", "donut", PROGRESO_UNIDADES_DATA, tema, self.theme_manager)
 
         self.chart_cards.extend([chart1, chart2])
 
@@ -1017,8 +1042,8 @@ class DashboardPanel(QWidget):
         charts_grid.addWidget(chart2, 0, 1)
 
         # FILA 2 (2 gráficas)
-        chart3 = ChartCard("📈 Tendencia Semanal", "line", TENDENCIA_SEMANAL_DATA, tema, self.theme_manager)
-        chart4 = ChartCard("📊 Top 5 Unidades de Mayor Progreso", "bar", TOP_5_UNIDADES_DATA, tema, self.theme_manager)
+        chart3 = ChartCard("Tendencia Semanal", "line", TENDENCIA_SEMANAL_DATA, tema, self.theme_manager)
+        chart4 = ChartCard("Top 5 Unidades de Mayor Progreso", "bar", TOP_5_UNIDADES_DATA, tema, self.theme_manager)
 
         self.chart_cards.extend([chart3, chart4])
 
@@ -1026,8 +1051,8 @@ class DashboardPanel(QWidget):
         charts_grid.addWidget(chart4, 1, 1)
 
         # FILA 3 (2 gráficas)
-        chart5 = ChartCard("🎯 Cumplimiento de Objetivos", "donut", CUMPLIMIENTO_OBJETIVOS_DATA, tema, self.theme_manager)
-        chart6 = ChartCard("📉 Módulos con Menor Avance", "horizontal_bar", MODULOS_MENOR_AVANCE_DATA, tema, self.theme_manager)
+        chart5 = ChartCard("Cumplimiento de Objetivos", "donut", CUMPLIMIENTO_OBJETIVOS_DATA, tema, self.theme_manager)
+        chart6 = ChartCard("Módulos con Menor Avance", "horizontal_bar", MODULOS_MENOR_AVANCE_DATA, tema, self.theme_manager)
 
         self.chart_cards.extend([chart5, chart6])
 
