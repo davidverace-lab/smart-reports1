@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
-from smart_reports_pyqt6.ui.widgets.d3_chart_widget import D3ChartWidget
+from smart_reports_pyqt6.ui.widgets.pyqt6_d3_chart_widget import D3ChartWidget
 
 
 # Datos del dashboard

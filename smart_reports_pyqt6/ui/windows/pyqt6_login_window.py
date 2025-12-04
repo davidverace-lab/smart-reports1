@@ -289,7 +289,7 @@ class LoginWindow(QMainWindow):
         """Mostrar ventana principal"""
 
         try:
-            from smart_reports_pyqt6.ui.windows.main_window import MainWindow
+            from smart_reports_pyqt6.ui.windows.pyqt6_main_window import MainWindow
 
             # Crear ventana principal
             self.main_window = MainWindow(self.app, self.theme_manager, username, role)

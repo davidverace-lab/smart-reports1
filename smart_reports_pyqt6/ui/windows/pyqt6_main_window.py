@@ -11,7 +11,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 
 # Importar ModernSidebar
-from smart_reports_pyqt6.ui.components.navigation.modern_sidebar import ModernSidebar
+from smart_reports_pyqt6.ui.components.navigation.pyqt6_modern_sidebar import ModernSidebar
 
 
 class MainWindow(QMainWindow):
@@ -139,12 +139,12 @@ class MainWindow(QMainWindow):
         self.panels = {}
 
         # Importar paneles
-        from smart_reports_pyqt6.ui.views.panel_dashboard import DashboardPanel
-        from smart_reports_pyqt6.ui.views.panel_graficos import GraficosPanel
-        from smart_reports_pyqt6.ui.views.panel_consultas import ConsultasPanel
-        from smart_reports_pyqt6.ui.views.panel_reportes import ReportesPanel
-        from smart_reports_pyqt6.ui.views.panel_configuracion import ConfiguracionPanel
-        from smart_reports_pyqt6.ui.views.panel_importacion import PanelImportacion
+        from smart_reports_pyqt6.ui.views.pyqt6_panel_dashboard import DashboardPanel
+        from smart_reports_pyqt6.ui.views.pyqt6_panel_graficos import GraficosPanel
+        from smart_reports_pyqt6.ui.views.pyqt6_panel_consultas import ConsultasPanel
+        from smart_reports_pyqt6.ui.views.pyqt6_panel_reportes import ReportesPanel
+        from smart_reports_pyqt6.ui.views.pyqt6_panel_configuracion import ConfiguracionPanel
+        from smart_reports_pyqt6.ui.views.pyqt6_panel_importacion import PanelImportacion
 
         try:
             # Dashboard
@@ -291,7 +291,7 @@ class MainWindow(QMainWindow):
         self.close()
 
         # Mostrar ventana de login nuevamente
-        from smart_reports_pyqt6.ui.windows.login_window import LoginWindow
+        from smart_reports_pyqt6.ui.windows.pyqt6_login_window import LoginWindow
 
         self.login_window = LoginWindow(self.app, self.theme_manager)
         self.login_window.show()
@@ -300,7 +300,7 @@ class MainWindow(QMainWindow):
         """Mostrar ejemplo de gráfico D3.js (para testing)"""
 
         try:
-            from smart_reports_pyqt6.ui.widgets.d3_chart_widget import D3ChartWidget
+            from smart_reports_pyqt6.ui.widgets.pyqt6_d3_chart_widget import D3ChartWidget
             from PyQt6.QtWidgets import QDialog, QVBoxLayout
 
             # Crear diálogo con gráfico
