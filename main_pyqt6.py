@@ -28,7 +28,7 @@ except ImportError as e:
 
 # Importar configuración
 from smart_reports_pyqt6.config.themes import ThemeManager
-from smart_reports_pyqt6.ui.windows.login_window import LoginWindow
+from smart_reports_pyqt6.ui.windows.pyqt6_login_window import LoginWindow
 
 
 def main():

@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
-from smart_reports_pyqt6.ui.widgets.d3_chart_widget import D3ChartWidget
+from smart_reports_pyqt6.ui.widgets.pyqt6_d3_chart_widget import D3ChartWidget
 
 
 # Datos del dashboard
@@ -145,34 +145,88 @@ class ExpandedChartView(QWidget):
         layout.addWidget(self.chart_widget)
 
     def _show_menu(self):
-        """Mostrar menú de opciones"""
+        """Mostrar menú de opciones con diseño bonito"""
         from PyQt6.QtWidgets import QMenu
         from PyQt6.QtGui import QAction
 
         menu = QMenu(self)
 
-        # Opciones similares al ChartCard
-        table_action = QAction("Mostrar en Tabla", self)
+        # Aplicar estilo bonito al menú según el tema
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+
+        if is_dark:
+            # Estilo para modo oscuro
+            menu_bg = "#2d2d2d"
+            menu_text = "#ffffff"
+            menu_border = "#00B5E2"
+            hover_bg = "#004ba0"
+            separator_color = "#555555"
+        else:
+            # Estilo para modo claro
+            menu_bg = "#ffffff"
+            menu_text = "#002E6D"
+            menu_border = "#003087"
+            hover_bg = "#e3f2fd"
+            separator_color = "#cccccc"
+
+        menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {menu_bg};
+                color: {menu_text};
+                border: 2px solid {menu_border};
+                border-radius: 8px;
+                padding: 8px 0px;
+                font-family: 'Montserrat';
+                font-size: 13px;
+            }}
+            QMenu::item {{
+                padding: 10px 30px 10px 20px;
+                margin: 2px 8px;
+                border-radius: 5px;
+            }}
+            QMenu::item:selected {{
+                background-color: {hover_bg};
+                color: {menu_text if is_dark else '#ffffff'};
+            }}
+            QMenu::separator {{
+                height: 1px;
+                background-color: {separator_color};
+                margin: 6px 12px;
+            }}
+        """)
+
+        # Opciones con iconos
+        table_action = QAction("📊 Mostrar en Tabla", self)
         table_action.triggered.connect(self._show_data_table)
         menu.addAction(table_action)
 
-        copy_data_action = QAction("Copiar Datos al Portapapeles", self)
+        copy_data_action = QAction("📋 Copiar Datos al Portapapeles", self)
         copy_data_action.triggered.connect(self._copy_data_to_clipboard)
         menu.addAction(copy_data_action)
 
         menu.addSeparator()
 
-        export_pdf_action = QAction("Exportar como PDF", self)
+        export_pdf_action = QAction("📄 Exportar como PDF", self)
         export_pdf_action.triggered.connect(self._export_as_pdf)
         menu.addAction(export_pdf_action)
 
-        export_png_action = QAction("Exportar como PNG", self)
+        export_png_action = QAction("🖼️ Exportar como PNG", self)
         export_png_action.triggered.connect(lambda: self._export_chart("png"))
         menu.addAction(export_png_action)
 
-        copy_png_action = QAction("Copiar PNG al Portapapeles", self)
+        copy_png_action = QAction("📸 Copiar PNG al Portapapeles", self)
         copy_png_action.triggered.connect(self._copy_png_to_clipboard)
         menu.addAction(copy_png_action)
+
+        export_svg_action = QAction("🎨 Exportar como SVG", self)
+        export_svg_action.triggered.connect(lambda: self._export_chart("svg"))
+        menu.addAction(export_svg_action)
+
+        menu.addSeparator()
+
+        refresh_action = QAction("🔄 Actualizar", self)
+        refresh_action.triggered.connect(lambda: print(f"🔄 Actualizando '{self.title}'"))
+        menu.addAction(refresh_action)
 
         menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
 
@@ -198,7 +252,7 @@ class ExpandedChartView(QWidget):
 
 
 class MetricCard(QFrame):
-    """Tarjeta de métrica - Replicando diseño CustomTkinter"""
+    """Tarjeta de métrica - Cuadrada y centrada"""
 
     def __init__(self, title: str, value: str, subtitle: str = "", icon: str = "", theme_manager=None, parent=None):
         super().__init__(parent)
@@ -210,8 +264,10 @@ class MetricCard(QFrame):
         self.icon_text = icon
 
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setMinimumHeight(140)
-        self.setMinimumWidth(250)
+        # MÁS CUADRADO: tamaño similar en alto y ancho
+        self.setMinimumHeight(220)
+        self.setMinimumWidth(220)
+        self.setMaximumWidth(280)
 
         self._create_ui()
         self._update_theme()
@@ -221,41 +277,30 @@ class MetricCard(QFrame):
             self.theme_manager.theme_changed.connect(lambda: self._update_theme())
 
     def _create_ui(self):
-        """Crear interfaz de la tarjeta"""
+        """Crear interfaz de la tarjeta - TODO CENTRADO"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(5)
+        layout.setContentsMargins(25, 25, 25, 25)
+        layout.setSpacing(10)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # CENTRAR TODO
 
-        # Ícono (si existe)
+        # Ícono (si existe) - CENTRADO
         if self.icon_text:
             self.icon_label = QLabel(self.icon_text)
+            self.icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.icon_label.setStyleSheet("""
                 font-family: 'Segoe UI Emoji';
-                font-size: 32px;
+                font-size: 40px;
                 border: none;
                 background: transparent;
             """)
             layout.addWidget(self.icon_label)
 
-        # Título
-        self.title_label = QLabel(self.title_text)
-        self.title_label.setStyleSheet("""
-            font-family: 'Montserrat';
-            font-size: 13px;
-            font-weight: bold;
-            border: none;
-            background: transparent;
-        """)
-        self.title_label.setWordWrap(True)
-        layout.addWidget(self.title_label)
-
-        layout.addStretch()
-
-        # Valor
+        # Valor - CENTRADO Y MÁS GRANDE
         self.value_label = QLabel(self.value_text)
+        self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.value_label.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 28px;
+            font-size: 36px;
             font-weight: bold;
             border: none;
             background: transparent;
@@ -263,12 +308,26 @@ class MetricCard(QFrame):
         self.value_label.setWordWrap(True)
         layout.addWidget(self.value_label)
 
-        # Subtítulo (si existe)
+        # Título - CENTRADO
+        self.title_label = QLabel(self.title_text)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title_label.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+        """)
+        self.title_label.setWordWrap(True)
+        layout.addWidget(self.title_label)
+
+        # Subtítulo (si existe) - CENTRADO
         if self.subtitle_text:
             self.subtitle_label = QLabel(self.subtitle_text)
+            self.subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.subtitle_label.setStyleSheet("""
                 font-family: 'Montserrat';
-                font-size: 10px;
+                font-size: 11px;
                 font-weight: normal;
                 border: none;
                 background: transparent;
@@ -295,17 +354,7 @@ class MetricCard(QFrame):
         if hasattr(self, 'icon_label'):
             self.icon_label.setStyleSheet(f"""
                 font-family: 'Segoe UI Emoji';
-                font-size: 32px;
-                color: {text_color};
-                border: none;
-                background: transparent;
-            """)
-
-        if hasattr(self, 'title_label'):
-            self.title_label.setStyleSheet(f"""
-                font-family: 'Montserrat';
-                font-size: 13px;
-                font-weight: bold;
+                font-size: 40px;
                 color: {text_color};
                 border: none;
                 background: transparent;
@@ -314,7 +363,17 @@ class MetricCard(QFrame):
         if hasattr(self, 'value_label'):
             self.value_label.setStyleSheet(f"""
                 font-family: 'Montserrat';
-                font-size: 28px;
+                font-size: 36px;
+                font-weight: bold;
+                color: {text_color};
+                border: none;
+                background: transparent;
+            """)
+
+        if hasattr(self, 'title_label'):
+            self.title_label.setStyleSheet(f"""
+                font-family: 'Montserrat';
+                font-size: 14px;
                 font-weight: bold;
                 color: {text_color};
                 border: none;
@@ -324,7 +383,7 @@ class MetricCard(QFrame):
         if hasattr(self, 'subtitle_label'):
             self.subtitle_label.setStyleSheet(f"""
                 font-family: 'Montserrat';
-                font-size: 10px;
+                font-size: 11px;
                 font-weight: normal;
                 color: {text_color};
                 border: none;
@@ -344,10 +403,13 @@ class ChartCard(QFrame):
         self.theme = theme
         self.theme_manager = theme_manager
 
-        self.setFrameShape(QFrame.Shape.NoFrame)
-        self.setMinimumHeight(350)
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+        # ALTURA AUMENTADA para ver gráficas completas
+        self.setMinimumHeight(480)
         self.setSizePolicy(QWidget().sizePolicy().Policy.Expanding, QWidget().sizePolicy().Policy.Expanding)
-        self.setStyleSheet("border: none; background: transparent;")
+
+        # Aplicar estilo con borde
+        self._apply_card_style()
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -377,48 +439,23 @@ class ChartCard(QFrame):
         header_layout.addStretch()
 
         # Botón de expandir (FUERA del menú) con icono de flecha
-        expand_btn = QPushButton("↗")
-        expand_btn.setFixedSize(38, 38)
-        expand_btn.setStyleSheet("""
-            QPushButton {
-                font-family: 'Arial';
-                font-size: 18px;
-                font-weight: bold;
-                background-color: #003087;
-                color: white;
-                border: none;
-                border-radius: 19px;
-            }
-            QPushButton:hover {
-                background-color: #004ba0;
-            }
-        """)
-        expand_btn.setToolTip("Expandir gráfico")
-        expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        expand_btn.clicked.connect(self._toggle_fullscreen)
-        header_layout.addWidget(expand_btn)
+        self.expand_btn = QPushButton("↗")
+        self.expand_btn.setFixedSize(38, 38)
+        self.expand_btn.setToolTip("Expandir gráfico")
+        self.expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.expand_btn.clicked.connect(self._toggle_fullscreen)
+        header_layout.addWidget(self.expand_btn)
 
         # Botón de menú (3 puntos) con icono mejorado
-        menu_btn = QPushButton("⋯")
-        menu_btn.setFixedSize(38, 38)
-        menu_btn.setStyleSheet("""
-            QPushButton {
-                font-family: 'Arial';
-                font-size: 22px;
-                font-weight: bold;
-                background-color: #003087;
-                color: white;
-                border: none;
-                border-radius: 19px;
-            }
-            QPushButton:hover {
-                background-color: #004ba0;
-            }
-        """)
-        menu_btn.setToolTip("Opciones del gráfico")
-        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        menu_btn.clicked.connect(self._show_menu)
-        header_layout.addWidget(menu_btn)
+        self.menu_btn = QPushButton("⋯")
+        self.menu_btn.setFixedSize(38, 38)
+        self.menu_btn.setToolTip("Opciones del gráfico")
+        self.menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.menu_btn.clicked.connect(self._show_menu)
+        header_layout.addWidget(self.menu_btn)
+
+        # Aplicar estilos iniciales a botones
+        self._update_button_styles()
 
         layout.addWidget(header)
 
@@ -428,52 +465,96 @@ class ChartCard(QFrame):
         layout.addWidget(self.chart_widget)
 
     def _show_menu(self):
-        """Mostrar menú de opciones"""
+        """Mostrar menú de opciones con diseño bonito"""
         from PyQt6.QtWidgets import QMenu
         from PyQt6.QtGui import QAction
 
         menu = QMenu(self)
 
+        # Aplicar estilo bonito al menú según el tema
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+
+        if is_dark:
+            # Estilo para modo oscuro
+            menu_bg = "#2d2d2d"
+            menu_text = "#ffffff"
+            menu_border = "#00B5E2"
+            hover_bg = "#004ba0"
+            separator_color = "#555555"
+        else:
+            # Estilo para modo claro
+            menu_bg = "#ffffff"
+            menu_text = "#002E6D"
+            menu_border = "#003087"
+            hover_bg = "#e3f2fd"
+            separator_color = "#cccccc"
+
+        menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {menu_bg};
+                color: {menu_text};
+                border: 2px solid {menu_border};
+                border-radius: 8px;
+                padding: 8px 0px;
+                font-family: 'Montserrat';
+                font-size: 13px;
+            }}
+            QMenu::item {{
+                padding: 10px 30px 10px 20px;
+                margin: 2px 8px;
+                border-radius: 5px;
+            }}
+            QMenu::item:selected {{
+                background-color: {hover_bg};
+                color: {menu_text if is_dark else '#ffffff'};
+            }}
+            QMenu::separator {{
+                height: 1px;
+                background-color: {separator_color};
+                margin: 6px 12px;
+            }}
+        """)
+
         # Acción: Mostrar en Tabla
-        table_action = QAction("Mostrar en Tabla", self)
+        table_action = QAction("📊 Mostrar en Tabla", self)
         table_action.triggered.connect(self._show_data_table)
         menu.addAction(table_action)
 
         # Acción: Copiar Datos al Portapapeles
-        copy_data_action = QAction("Copiar Datos al Portapapeles", self)
+        copy_data_action = QAction("📋 Copiar Datos al Portapapeles", self)
         copy_data_action.triggered.connect(self._copy_data_to_clipboard)
         menu.addAction(copy_data_action)
 
         menu.addSeparator()
 
         # Acción: Exportar PDF
-        export_pdf_action = QAction("Exportar como PDF", self)
+        export_pdf_action = QAction("📄 Exportar como PDF", self)
         export_pdf_action.triggered.connect(self._export_as_pdf)
         menu.addAction(export_pdf_action)
 
         # Acción: Exportar PNG
-        export_png_action = QAction("Exportar como PNG", self)
+        export_png_action = QAction("🖼️ Exportar como PNG", self)
         export_png_action.triggered.connect(lambda: self._export_chart("png"))
         menu.addAction(export_png_action)
 
         # Acción: Copiar PNG al Portapapeles
-        copy_png_action = QAction("Copiar PNG al Portapapeles", self)
+        copy_png_action = QAction("📸 Copiar PNG al Portapapeles", self)
         copy_png_action.triggered.connect(self._copy_png_to_clipboard)
         menu.addAction(copy_png_action)
 
         # Acción: Exportar SVG
-        export_svg_action = QAction("Exportar como SVG", self)
+        export_svg_action = QAction("🎨 Exportar como SVG", self)
         export_svg_action.triggered.connect(lambda: self._export_chart("svg"))
         menu.addAction(export_svg_action)
 
         menu.addSeparator()
 
         # Acción: Actualizar
-        refresh_action = QAction("Actualizar", self)
+        refresh_action = QAction("🔄 Actualizar", self)
         refresh_action.triggered.connect(self._refresh_chart)
         menu.addAction(refresh_action)
 
-        # Mostrar menú
+        # Mostrar menú con posición ajustada
         menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
 
     def _toggle_fullscreen(self):
@@ -674,6 +755,66 @@ class ChartCard(QFrame):
                 f"Error al copiar imagen al portapapeles:\n{e}"
             )
 
+    def _apply_card_style(self):
+        """Aplicar estilo de borde a la tarjeta"""
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        border_color = "#003087"
+
+        self.setStyleSheet(f"""
+            ChartCard {{
+                background-color: {bg_color};
+                border: 2px solid {border_color};
+                border-radius: 12px;
+            }}
+        """)
+
+    def _update_button_styles(self):
+        """Actualizar estilos de los botones según el tema"""
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+
+        # Colores adaptados al tema
+        if is_dark:
+            btn_bg = "#00B5E2"  # Cyan brillante para modo oscuro
+            btn_hover = "#009BDE"
+        else:
+            btn_bg = "#003087"  # Navy para modo claro
+            btn_hover = "#004ba0"
+
+        # Estilo del botón de expandir
+        if hasattr(self, 'expand_btn'):
+            self.expand_btn.setStyleSheet(f"""
+                QPushButton {{
+                    font-family: 'Arial';
+                    font-size: 18px;
+                    font-weight: bold;
+                    background-color: {btn_bg};
+                    color: white;
+                    border: none;
+                    border-radius: 19px;
+                }}
+                QPushButton:hover {{
+                    background-color: {btn_hover};
+                }}
+            """)
+
+        # Estilo del botón de menú
+        if hasattr(self, 'menu_btn'):
+            self.menu_btn.setStyleSheet(f"""
+                QPushButton {{
+                    font-family: 'Arial';
+                    font-size: 22px;
+                    font-weight: bold;
+                    background-color: {btn_bg};
+                    color: white;
+                    border: none;
+                    border-radius: 19px;
+                }}
+                QPushButton:hover {{
+                    background-color: {btn_hover};
+                }}
+            """)
+
     def update_theme_colors(self):
         """Actualizar colores del tema"""
         if not self.theme_manager:
@@ -681,6 +822,12 @@ class ChartCard(QFrame):
 
         is_dark = self.theme_manager.is_dark_mode()
         title_color = "#ffffff" if is_dark else "#003087"
+
+        # Actualizar estilo de la tarjeta
+        self._apply_card_style()
+
+        # Actualizar estilos de los botones
+        self._update_button_styles()
 
         # Actualizar color del título
         if hasattr(self, 'title_label'):
@@ -731,12 +878,14 @@ class DashboardPanel(QWidget):
         layout.addWidget(scroll)
 
         main_layout = QVBoxLayout(scroll_widget)
-        main_layout.setContentsMargins(5, 5, 5, 5)
+        # SIN MÁRGENES GRISES
+        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(20)
 
-        # Métricas principales (3 métricas en fila)
+        # Métricas principales (3 métricas en fila) - CENTRADAS
         metrics_layout = QHBoxLayout()
         metrics_layout.setSpacing(20)
+        metrics_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Métrica 1: Total de Usuarios
         card1 = MetricCard(
@@ -773,35 +922,40 @@ class DashboardPanel(QWidget):
 
         main_layout.addLayout(metrics_layout)
 
-        # Gráficos en grid 3x2 (3 columnas, 2 filas como en CustomTkinter)
+        # Gráficos en grid 2x3 (2 COLUMNAS, 3 FILAS para verlas más grandes)
         tema = self.theme_manager.current_theme if self.theme_manager else 'dark'
 
-        # Grid de gráficos
+        # Grid de gráficos - 2 COLUMNAS
         charts_grid = QGridLayout()
-        charts_grid.setSpacing(20)
-        charts_grid.setContentsMargins(0, 0, 0, 0)
+        charts_grid.setSpacing(15)
+        charts_grid.setContentsMargins(10, 10, 10, 10)
 
-        # FILA 1
+        # FILA 1 (2 gráficas)
         chart1 = ChartCard("📊 Usuarios por Unidad", "horizontal_bar", USUARIOS_POR_UNIDAD_DATA, tema, self.theme_manager)
         chart2 = ChartCard("🍩 Progreso General por Unidad", "donut", PROGRESO_UNIDADES_DATA, tema, self.theme_manager)
-        chart3 = ChartCard("📈 Tendencia Semanal", "line", TENDENCIA_SEMANAL_DATA, tema, self.theme_manager)
 
-        self.chart_cards.extend([chart1, chart2, chart3])
+        self.chart_cards.extend([chart1, chart2])
 
         charts_grid.addWidget(chart1, 0, 0)
         charts_grid.addWidget(chart2, 0, 1)
-        charts_grid.addWidget(chart3, 0, 2)
 
-        # FILA 2
+        # FILA 2 (2 gráficas)
+        chart3 = ChartCard("📈 Tendencia Semanal", "line", TENDENCIA_SEMANAL_DATA, tema, self.theme_manager)
         chart4 = ChartCard("📊 Top 5 Unidades de Mayor Progreso", "bar", TOP_5_UNIDADES_DATA, tema, self.theme_manager)
+
+        self.chart_cards.extend([chart3, chart4])
+
+        charts_grid.addWidget(chart3, 1, 0)
+        charts_grid.addWidget(chart4, 1, 1)
+
+        # FILA 3 (2 gráficas)
         chart5 = ChartCard("🎯 Cumplimiento de Objetivos", "donut", CUMPLIMIENTO_OBJETIVOS_DATA, tema, self.theme_manager)
         chart6 = ChartCard("📉 Módulos con Menor Avance", "horizontal_bar", MODULOS_MENOR_AVANCE_DATA, tema, self.theme_manager)
 
-        self.chart_cards.extend([chart4, chart5, chart6])
+        self.chart_cards.extend([chart5, chart6])
 
-        charts_grid.addWidget(chart4, 1, 0)
-        charts_grid.addWidget(chart5, 1, 1)
-        charts_grid.addWidget(chart6, 1, 2)
+        charts_grid.addWidget(chart5, 2, 0)
+        charts_grid.addWidget(chart6, 2, 1)
 
         main_layout.addLayout(charts_grid)
 
@@ -809,27 +963,18 @@ class DashboardPanel(QWidget):
         main_layout.addStretch()
 
     def _on_theme_changed(self, new_theme: str):
-        """Callback cuando cambia el tema"""
+        """Callback cuando cambia el tema - SIN REINICIALIZAR GRÁFICAS"""
         print(f"🎨 Dashboard: Actualizando tema a {new_theme}")
 
-        # Actualizar tema de los gráficos
-        tema = self.theme_manager.current_theme if self.theme_manager else 'dark'
-
+        # Actualizar tema de los gráficos - SOLO ACTUALIZAR COLORES, NO REINICIALIZAR
         for chart_card in self.chart_cards:
-            chart_card.theme = tema
+            chart_card.theme = new_theme
+            # Solo actualizar los colores del contenedor (ChartCard)
             if hasattr(chart_card, 'update_theme_colors'):
                 chart_card.update_theme_colors()
 
-            if hasattr(chart_card, 'chart_widget'):
-                try:
-                    chart_card.chart_widget.set_chart(
-                        chart_card.chart_type,
-                        chart_card.title,
-                        chart_card.data,
-                        tema=tema
-                    )
-                except Exception as e:
-                    print(f"⚠️ Error actualizando gráfico: {e}")
+            # NO reinicializar las gráficas - solo dejar que el tema cambie automáticamente
+            # Las gráficas D3 se adaptan al tema mediante CSS
 
         # Actualizar métricas
         for metric_card in self.metric_cards:

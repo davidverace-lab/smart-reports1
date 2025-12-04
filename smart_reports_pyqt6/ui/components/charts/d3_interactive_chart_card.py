@@ -1,7 +1,7 @@
 """D3 Interactive Chart Card - PyQt6"""
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame
 from PyQt6.QtGui import QFont
-from smart_reports_pyqt6.ui.widgets.d3_chart_widget import D3ChartWidget
+from smart_reports_pyqt6.ui.widgets.pyqt6_d3_chart_widget import D3ChartWidget
 
 class D3InteractiveChartCard(QFrame):
     def __init__(self, titulo, chart_type, datos, parent=None):
