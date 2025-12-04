@@ -110,6 +110,8 @@ class D3ChartWidget(QWidget):
         card_bg = '#2d2d2d' if tema == 'dark' else '#ffffff'
         text_color = '#ffffff' if tema == 'dark' else '#003087'
         axis_color = '#b0b0b0' if tema == 'dark' else '#4a5c8a'
+        # Color de las etiquetas de valores (números en las gráficas)
+        label_color = '#ffffff' if tema == 'dark' else '#002E6D'
 
         # HTML completo con D3.js v7
         html = f"""
@@ -391,7 +393,7 @@ class D3ChartWidget(QWidget):
             .attr('x', d => x(d.label) + x.bandwidth() / 2)
             .attr('y', d => y(d.value) - 5)
             .attr('text-anchor', 'middle')
-            .attr('fill', '{text_color}')
+            .attr('fill', '{label_color}')
             .attr('font-size', '12px')
             .attr('font-weight', '600')
             .attr('opacity', 0)
@@ -721,7 +723,7 @@ class D3ChartWidget(QWidget):
                 .attr('y', d => y(d.label) + y.bandwidth() / 2 + 4)
                 .attr('x', d => x(d.value) + 5)
                 .attr('text-anchor', 'start')
-                .attr('fill', '{text_color}')
+                .attr('fill', '{label_color}')
                 .attr('font-size', '11px')
                 .attr('font-weight', '600')
                 .attr('opacity', 0)

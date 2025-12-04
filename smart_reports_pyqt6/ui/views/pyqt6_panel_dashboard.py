@@ -168,7 +168,7 @@ class ExpandedChartView(QWidget):
         table_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)  # Centrado
 
         # Título de la tabla - CENTRADO
-        table_title = QLabel("📊 Detalle de Datos")
+        table_title = QLabel("Detalle de Datos")
         table_title.setFont(QFont("Montserrat", 16, QFont.Weight.Bold))
         is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
         text_color = "#ffffff" if is_dark else "#002E6D"
@@ -1033,8 +1033,8 @@ class DashboardPanel(QWidget):
         charts_grid.setContentsMargins(10, 10, 10, 10)
 
         # FILA 1 (2 gráficas)
-        chart1 = ChartCard("📊 Usuarios por Unidad", "horizontal_bar", USUARIOS_POR_UNIDAD_DATA, tema, self.theme_manager)
-        chart2 = ChartCard("🍩 Progreso General por Unidad", "donut", PROGRESO_UNIDADES_DATA, tema, self.theme_manager)
+        chart1 = ChartCard("Usuarios por Unidad", "horizontal_bar", USUARIOS_POR_UNIDAD_DATA, tema, self.theme_manager)
+        chart2 = ChartCard("Progreso General por Unidad", "donut", PROGRESO_UNIDADES_DATA, tema, self.theme_manager)
 
         self.chart_cards.extend([chart1, chart2])
 
@@ -1042,8 +1042,8 @@ class DashboardPanel(QWidget):
         charts_grid.addWidget(chart2, 0, 1)
 
         # FILA 2 (2 gráficas)
-        chart3 = ChartCard("📈 Tendencia Semanal", "line", TENDENCIA_SEMANAL_DATA, tema, self.theme_manager)
-        chart4 = ChartCard("📊 Top 5 Unidades de Mayor Progreso", "bar", TOP_5_UNIDADES_DATA, tema, self.theme_manager)
+        chart3 = ChartCard("Tendencia Semanal", "line", TENDENCIA_SEMANAL_DATA, tema, self.theme_manager)
+        chart4 = ChartCard("Top 5 Unidades de Mayor Progreso", "bar", TOP_5_UNIDADES_DATA, tema, self.theme_manager)
 
         self.chart_cards.extend([chart3, chart4])
 
@@ -1051,8 +1051,8 @@ class DashboardPanel(QWidget):
         charts_grid.addWidget(chart4, 1, 1)
 
         # FILA 3 (2 gráficas)
-        chart5 = ChartCard("🎯 Cumplimiento de Objetivos", "donut", CUMPLIMIENTO_OBJETIVOS_DATA, tema, self.theme_manager)
-        chart6 = ChartCard("📉 Módulos con Menor Avance", "horizontal_bar", MODULOS_MENOR_AVANCE_DATA, tema, self.theme_manager)
+        chart5 = ChartCard("Cumplimiento de Objetivos", "donut", CUMPLIMIENTO_OBJETIVOS_DATA, tema, self.theme_manager)
+        chart6 = ChartCard("Módulos con Menor Avance", "horizontal_bar", MODULOS_MENOR_AVANCE_DATA, tema, self.theme_manager)
 
         self.chart_cards.extend([chart5, chart6])
 
