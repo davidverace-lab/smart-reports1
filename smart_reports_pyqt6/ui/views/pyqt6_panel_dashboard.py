@@ -841,27 +841,18 @@ class DashboardPanel(QWidget):
         main_layout.addStretch()
 
     def _on_theme_changed(self, new_theme: str):
-        """Callback cuando cambia el tema"""
+        """Callback cuando cambia el tema - SIN REINICIALIZAR GRÁFICAS"""
         print(f"🎨 Dashboard: Actualizando tema a {new_theme}")
 
-        # Actualizar tema de los gráficos
-        tema = self.theme_manager.current_theme if self.theme_manager else 'dark'
-
+        # Actualizar tema de los gráficos - SOLO ACTUALIZAR COLORES, NO REINICIALIZAR
         for chart_card in self.chart_cards:
-            chart_card.theme = tema
+            chart_card.theme = new_theme
+            # Solo actualizar los colores del contenedor (ChartCard)
             if hasattr(chart_card, 'update_theme_colors'):
                 chart_card.update_theme_colors()
 
-            if hasattr(chart_card, 'chart_widget'):
-                try:
-                    chart_card.chart_widget.set_chart(
-                        chart_card.chart_type,
-                        chart_card.title,
-                        chart_card.data,
-                        tema=tema
-                    )
-                except Exception as e:
-                    print(f"⚠️ Error actualizando gráfico: {e}")
+            # NO reinicializar las gráficas - solo dejar que el tema cambie automáticamente
+            # Las gráficas D3 se adaptan al tema mediante CSS
 
         # Actualizar métricas
         for metric_card in self.metric_cards:
