@@ -145,34 +145,88 @@ class ExpandedChartView(QWidget):
         layout.addWidget(self.chart_widget)
 
     def _show_menu(self):
-        """Mostrar menú de opciones"""
+        """Mostrar menú de opciones con diseño bonito"""
         from PyQt6.QtWidgets import QMenu
         from PyQt6.QtGui import QAction
 
         menu = QMenu(self)
 
-        # Opciones similares al ChartCard
-        table_action = QAction("Mostrar en Tabla", self)
+        # Aplicar estilo bonito al menú según el tema
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+
+        if is_dark:
+            # Estilo para modo oscuro
+            menu_bg = "#2d2d2d"
+            menu_text = "#ffffff"
+            menu_border = "#00B5E2"
+            hover_bg = "#004ba0"
+            separator_color = "#555555"
+        else:
+            # Estilo para modo claro
+            menu_bg = "#ffffff"
+            menu_text = "#002E6D"
+            menu_border = "#003087"
+            hover_bg = "#e3f2fd"
+            separator_color = "#cccccc"
+
+        menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {menu_bg};
+                color: {menu_text};
+                border: 2px solid {menu_border};
+                border-radius: 8px;
+                padding: 8px 0px;
+                font-family: 'Montserrat';
+                font-size: 13px;
+            }}
+            QMenu::item {{
+                padding: 10px 30px 10px 20px;
+                margin: 2px 8px;
+                border-radius: 5px;
+            }}
+            QMenu::item:selected {{
+                background-color: {hover_bg};
+                color: {menu_text if is_dark else '#ffffff'};
+            }}
+            QMenu::separator {{
+                height: 1px;
+                background-color: {separator_color};
+                margin: 6px 12px;
+            }}
+        """)
+
+        # Opciones con iconos
+        table_action = QAction("📊 Mostrar en Tabla", self)
         table_action.triggered.connect(self._show_data_table)
         menu.addAction(table_action)
 
-        copy_data_action = QAction("Copiar Datos al Portapapeles", self)
+        copy_data_action = QAction("📋 Copiar Datos al Portapapeles", self)
         copy_data_action.triggered.connect(self._copy_data_to_clipboard)
         menu.addAction(copy_data_action)
 
         menu.addSeparator()
 
-        export_pdf_action = QAction("Exportar como PDF", self)
+        export_pdf_action = QAction("📄 Exportar como PDF", self)
         export_pdf_action.triggered.connect(self._export_as_pdf)
         menu.addAction(export_pdf_action)
 
-        export_png_action = QAction("Exportar como PNG", self)
+        export_png_action = QAction("🖼️ Exportar como PNG", self)
         export_png_action.triggered.connect(lambda: self._export_chart("png"))
         menu.addAction(export_png_action)
 
-        copy_png_action = QAction("Copiar PNG al Portapapeles", self)
+        copy_png_action = QAction("📸 Copiar PNG al Portapapeles", self)
         copy_png_action.triggered.connect(self._copy_png_to_clipboard)
         menu.addAction(copy_png_action)
+
+        export_svg_action = QAction("🎨 Exportar como SVG", self)
+        export_svg_action.triggered.connect(lambda: self._export_chart("svg"))
+        menu.addAction(export_svg_action)
+
+        menu.addSeparator()
+
+        refresh_action = QAction("🔄 Actualizar", self)
+        refresh_action.triggered.connect(lambda: print(f"🔄 Actualizando '{self.title}'"))
+        menu.addAction(refresh_action)
 
         menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
 
@@ -411,52 +465,96 @@ class ChartCard(QFrame):
         layout.addWidget(self.chart_widget)
 
     def _show_menu(self):
-        """Mostrar menú de opciones"""
+        """Mostrar menú de opciones con diseño bonito"""
         from PyQt6.QtWidgets import QMenu
         from PyQt6.QtGui import QAction
 
         menu = QMenu(self)
 
+        # Aplicar estilo bonito al menú según el tema
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+
+        if is_dark:
+            # Estilo para modo oscuro
+            menu_bg = "#2d2d2d"
+            menu_text = "#ffffff"
+            menu_border = "#00B5E2"
+            hover_bg = "#004ba0"
+            separator_color = "#555555"
+        else:
+            # Estilo para modo claro
+            menu_bg = "#ffffff"
+            menu_text = "#002E6D"
+            menu_border = "#003087"
+            hover_bg = "#e3f2fd"
+            separator_color = "#cccccc"
+
+        menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {menu_bg};
+                color: {menu_text};
+                border: 2px solid {menu_border};
+                border-radius: 8px;
+                padding: 8px 0px;
+                font-family: 'Montserrat';
+                font-size: 13px;
+            }}
+            QMenu::item {{
+                padding: 10px 30px 10px 20px;
+                margin: 2px 8px;
+                border-radius: 5px;
+            }}
+            QMenu::item:selected {{
+                background-color: {hover_bg};
+                color: {menu_text if is_dark else '#ffffff'};
+            }}
+            QMenu::separator {{
+                height: 1px;
+                background-color: {separator_color};
+                margin: 6px 12px;
+            }}
+        """)
+
         # Acción: Mostrar en Tabla
-        table_action = QAction("Mostrar en Tabla", self)
+        table_action = QAction("📊 Mostrar en Tabla", self)
         table_action.triggered.connect(self._show_data_table)
         menu.addAction(table_action)
 
         # Acción: Copiar Datos al Portapapeles
-        copy_data_action = QAction("Copiar Datos al Portapapeles", self)
+        copy_data_action = QAction("📋 Copiar Datos al Portapapeles", self)
         copy_data_action.triggered.connect(self._copy_data_to_clipboard)
         menu.addAction(copy_data_action)
 
         menu.addSeparator()
 
         # Acción: Exportar PDF
-        export_pdf_action = QAction("Exportar como PDF", self)
+        export_pdf_action = QAction("📄 Exportar como PDF", self)
         export_pdf_action.triggered.connect(self._export_as_pdf)
         menu.addAction(export_pdf_action)
 
         # Acción: Exportar PNG
-        export_png_action = QAction("Exportar como PNG", self)
+        export_png_action = QAction("🖼️ Exportar como PNG", self)
         export_png_action.triggered.connect(lambda: self._export_chart("png"))
         menu.addAction(export_png_action)
 
         # Acción: Copiar PNG al Portapapeles
-        copy_png_action = QAction("Copiar PNG al Portapapeles", self)
+        copy_png_action = QAction("📸 Copiar PNG al Portapapeles", self)
         copy_png_action.triggered.connect(self._copy_png_to_clipboard)
         menu.addAction(copy_png_action)
 
         # Acción: Exportar SVG
-        export_svg_action = QAction("Exportar como SVG", self)
+        export_svg_action = QAction("🎨 Exportar como SVG", self)
         export_svg_action.triggered.connect(lambda: self._export_chart("svg"))
         menu.addAction(export_svg_action)
 
         menu.addSeparator()
 
         # Acción: Actualizar
-        refresh_action = QAction("Actualizar", self)
+        refresh_action = QAction("🔄 Actualizar", self)
         refresh_action.triggered.connect(self._refresh_chart)
         menu.addAction(refresh_action)
 
-        # Mostrar menú
+        # Mostrar menú con posición ajustada
         menu.exec(self.sender().mapToGlobal(self.sender().rect().bottomLeft()))
 
     def _toggle_fullscreen(self):
