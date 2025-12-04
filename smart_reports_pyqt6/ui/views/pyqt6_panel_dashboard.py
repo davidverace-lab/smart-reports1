@@ -385,48 +385,23 @@ class ChartCard(QFrame):
         header_layout.addStretch()
 
         # Botón de expandir (FUERA del menú) con icono de flecha
-        expand_btn = QPushButton("↗")
-        expand_btn.setFixedSize(38, 38)
-        expand_btn.setStyleSheet("""
-            QPushButton {
-                font-family: 'Arial';
-                font-size: 18px;
-                font-weight: bold;
-                background-color: #003087;
-                color: white;
-                border: none;
-                border-radius: 19px;
-            }
-            QPushButton:hover {
-                background-color: #004ba0;
-            }
-        """)
-        expand_btn.setToolTip("Expandir gráfico")
-        expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        expand_btn.clicked.connect(self._toggle_fullscreen)
-        header_layout.addWidget(expand_btn)
+        self.expand_btn = QPushButton("↗")
+        self.expand_btn.setFixedSize(38, 38)
+        self.expand_btn.setToolTip("Expandir gráfico")
+        self.expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.expand_btn.clicked.connect(self._toggle_fullscreen)
+        header_layout.addWidget(self.expand_btn)
 
         # Botón de menú (3 puntos) con icono mejorado
-        menu_btn = QPushButton("⋯")
-        menu_btn.setFixedSize(38, 38)
-        menu_btn.setStyleSheet("""
-            QPushButton {
-                font-family: 'Arial';
-                font-size: 22px;
-                font-weight: bold;
-                background-color: #003087;
-                color: white;
-                border: none;
-                border-radius: 19px;
-            }
-            QPushButton:hover {
-                background-color: #004ba0;
-            }
-        """)
-        menu_btn.setToolTip("Opciones del gráfico")
-        menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        menu_btn.clicked.connect(self._show_menu)
-        header_layout.addWidget(menu_btn)
+        self.menu_btn = QPushButton("⋯")
+        self.menu_btn.setFixedSize(38, 38)
+        self.menu_btn.setToolTip("Opciones del gráfico")
+        self.menu_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.menu_btn.clicked.connect(self._show_menu)
+        header_layout.addWidget(self.menu_btn)
+
+        # Aplicar estilos iniciales a botones
+        self._update_button_styles()
 
         layout.addWidget(header)
 
@@ -696,6 +671,52 @@ class ChartCard(QFrame):
             }}
         """)
 
+    def _update_button_styles(self):
+        """Actualizar estilos de los botones según el tema"""
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+
+        # Colores adaptados al tema
+        if is_dark:
+            btn_bg = "#00B5E2"  # Cyan brillante para modo oscuro
+            btn_hover = "#009BDE"
+        else:
+            btn_bg = "#003087"  # Navy para modo claro
+            btn_hover = "#004ba0"
+
+        # Estilo del botón de expandir
+        if hasattr(self, 'expand_btn'):
+            self.expand_btn.setStyleSheet(f"""
+                QPushButton {{
+                    font-family: 'Arial';
+                    font-size: 18px;
+                    font-weight: bold;
+                    background-color: {btn_bg};
+                    color: white;
+                    border: none;
+                    border-radius: 19px;
+                }}
+                QPushButton:hover {{
+                    background-color: {btn_hover};
+                }}
+            """)
+
+        # Estilo del botón de menú
+        if hasattr(self, 'menu_btn'):
+            self.menu_btn.setStyleSheet(f"""
+                QPushButton {{
+                    font-family: 'Arial';
+                    font-size: 22px;
+                    font-weight: bold;
+                    background-color: {btn_bg};
+                    color: white;
+                    border: none;
+                    border-radius: 19px;
+                }}
+                QPushButton:hover {{
+                    background-color: {btn_hover};
+                }}
+            """)
+
     def update_theme_colors(self):
         """Actualizar colores del tema"""
         if not self.theme_manager:
@@ -706,6 +727,9 @@ class ChartCard(QFrame):
 
         # Actualizar estilo de la tarjeta
         self._apply_card_style()
+
+        # Actualizar estilos de los botones
+        self._update_button_styles()
 
         # Actualizar color del título
         if hasattr(self, 'title_label'):
