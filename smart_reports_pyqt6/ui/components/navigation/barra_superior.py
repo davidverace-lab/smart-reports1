@@ -25,7 +25,7 @@ class BarraSuperior(QFrame):
         self.theme_manager = theme_manager
 
         self.setObjectName("barraSuperior")
-        self.setFixedHeight(100)  # Aumentado de 80 a 100
+        self.setFixedHeight(70)  # Reducido de 100 a 70
         # Borde inferior Navy
         self.setStyleSheet("border-bottom: 2px solid #002E6D;")
 
@@ -52,7 +52,7 @@ class BarraSuperior(QFrame):
         # Usar setStyleSheet para la fuente en lugar de setFont
         self.greeting_label.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
             border: none;
             background: transparent;
@@ -68,7 +68,7 @@ class BarraSuperior(QFrame):
         # Usar setStyleSheet para la fuente en lugar de setFont
         self.brand_label.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 28px;
+            font-size: 20px;
             font-weight: bold;
             border: none;
             background: transparent;
@@ -111,7 +111,7 @@ class BarraSuperior(QFrame):
         # Actualizar labels
         self.greeting_label.setStyleSheet(f"""
             font-family: 'Montserrat';
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
             color: {text_color};
             border: none;
@@ -120,7 +120,7 @@ class BarraSuperior(QFrame):
 
         self.brand_label.setStyleSheet(f"""
             font-family: 'Montserrat';
-            font-size: 28px;
+            font-size: 20px;
             font-weight: bold;
             color: {brand_color};
             border: none;
