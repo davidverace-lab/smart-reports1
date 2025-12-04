@@ -198,7 +198,7 @@ class ExpandedChartView(QWidget):
 
 
 class MetricCard(QFrame):
-    """Tarjeta de métrica - Replicando diseño CustomTkinter"""
+    """Tarjeta de métrica - Cuadrada y centrada"""
 
     def __init__(self, title: str, value: str, subtitle: str = "", icon: str = "", theme_manager=None, parent=None):
         super().__init__(parent)
@@ -210,8 +210,10 @@ class MetricCard(QFrame):
         self.icon_text = icon
 
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setMinimumHeight(140)
-        self.setMinimumWidth(250)
+        # MÁS CUADRADO: tamaño similar en alto y ancho
+        self.setMinimumHeight(220)
+        self.setMinimumWidth(220)
+        self.setMaximumWidth(280)
 
         self._create_ui()
         self._update_theme()
@@ -221,41 +223,30 @@ class MetricCard(QFrame):
             self.theme_manager.theme_changed.connect(lambda: self._update_theme())
 
     def _create_ui(self):
-        """Crear interfaz de la tarjeta"""
+        """Crear interfaz de la tarjeta - TODO CENTRADO"""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(5)
+        layout.setContentsMargins(25, 25, 25, 25)
+        layout.setSpacing(10)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # CENTRAR TODO
 
-        # Ícono (si existe)
+        # Ícono (si existe) - CENTRADO
         if self.icon_text:
             self.icon_label = QLabel(self.icon_text)
+            self.icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.icon_label.setStyleSheet("""
                 font-family: 'Segoe UI Emoji';
-                font-size: 32px;
+                font-size: 40px;
                 border: none;
                 background: transparent;
             """)
             layout.addWidget(self.icon_label)
 
-        # Título
-        self.title_label = QLabel(self.title_text)
-        self.title_label.setStyleSheet("""
-            font-family: 'Montserrat';
-            font-size: 13px;
-            font-weight: bold;
-            border: none;
-            background: transparent;
-        """)
-        self.title_label.setWordWrap(True)
-        layout.addWidget(self.title_label)
-
-        layout.addStretch()
-
-        # Valor
+        # Valor - CENTRADO Y MÁS GRANDE
         self.value_label = QLabel(self.value_text)
+        self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.value_label.setStyleSheet("""
             font-family: 'Montserrat';
-            font-size: 28px;
+            font-size: 36px;
             font-weight: bold;
             border: none;
             background: transparent;
@@ -263,12 +254,26 @@ class MetricCard(QFrame):
         self.value_label.setWordWrap(True)
         layout.addWidget(self.value_label)
 
-        # Subtítulo (si existe)
+        # Título - CENTRADO
+        self.title_label = QLabel(self.title_text)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title_label.setStyleSheet("""
+            font-family: 'Montserrat';
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+        """)
+        self.title_label.setWordWrap(True)
+        layout.addWidget(self.title_label)
+
+        # Subtítulo (si existe) - CENTRADO
         if self.subtitle_text:
             self.subtitle_label = QLabel(self.subtitle_text)
+            self.subtitle_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.subtitle_label.setStyleSheet("""
                 font-family: 'Montserrat';
-                font-size: 10px;
+                font-size: 11px;
                 font-weight: normal;
                 border: none;
                 background: transparent;
@@ -295,17 +300,7 @@ class MetricCard(QFrame):
         if hasattr(self, 'icon_label'):
             self.icon_label.setStyleSheet(f"""
                 font-family: 'Segoe UI Emoji';
-                font-size: 32px;
-                color: {text_color};
-                border: none;
-                background: transparent;
-            """)
-
-        if hasattr(self, 'title_label'):
-            self.title_label.setStyleSheet(f"""
-                font-family: 'Montserrat';
-                font-size: 13px;
-                font-weight: bold;
+                font-size: 40px;
                 color: {text_color};
                 border: none;
                 background: transparent;
@@ -314,7 +309,17 @@ class MetricCard(QFrame):
         if hasattr(self, 'value_label'):
             self.value_label.setStyleSheet(f"""
                 font-family: 'Montserrat';
-                font-size: 28px;
+                font-size: 36px;
+                font-weight: bold;
+                color: {text_color};
+                border: none;
+                background: transparent;
+            """)
+
+        if hasattr(self, 'title_label'):
+            self.title_label.setStyleSheet(f"""
+                font-family: 'Montserrat';
+                font-size: 14px;
                 font-weight: bold;
                 color: {text_color};
                 border: none;
@@ -324,7 +329,7 @@ class MetricCard(QFrame):
         if hasattr(self, 'subtitle_label'):
             self.subtitle_label.setStyleSheet(f"""
                 font-family: 'Montserrat';
-                font-size: 10px;
+                font-size: 11px;
                 font-weight: normal;
                 color: {text_color};
                 border: none;
@@ -344,10 +349,13 @@ class ChartCard(QFrame):
         self.theme = theme
         self.theme_manager = theme_manager
 
-        self.setFrameShape(QFrame.Shape.NoFrame)
-        self.setMinimumHeight(350)
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+        # ALTURA AUMENTADA para ver gráficas completas
+        self.setMinimumHeight(480)
         self.setSizePolicy(QWidget().sizePolicy().Policy.Expanding, QWidget().sizePolicy().Policy.Expanding)
-        self.setStyleSheet("border: none; background: transparent;")
+
+        # Aplicar estilo con borde
+        self._apply_card_style()
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -674,6 +682,20 @@ class ChartCard(QFrame):
                 f"Error al copiar imagen al portapapeles:\n{e}"
             )
 
+    def _apply_card_style(self):
+        """Aplicar estilo de borde a la tarjeta"""
+        is_dark = self.theme_manager.is_dark_mode() if self.theme_manager else (self.theme == 'dark')
+        bg_color = "#2d2d2d" if is_dark else "#ffffff"
+        border_color = "#003087"
+
+        self.setStyleSheet(f"""
+            ChartCard {{
+                background-color: {bg_color};
+                border: 2px solid {border_color};
+                border-radius: 12px;
+            }}
+        """)
+
     def update_theme_colors(self):
         """Actualizar colores del tema"""
         if not self.theme_manager:
@@ -681,6 +703,9 @@ class ChartCard(QFrame):
 
         is_dark = self.theme_manager.is_dark_mode()
         title_color = "#ffffff" if is_dark else "#003087"
+
+        # Actualizar estilo de la tarjeta
+        self._apply_card_style()
 
         # Actualizar color del título
         if hasattr(self, 'title_label'):
@@ -731,12 +756,14 @@ class DashboardPanel(QWidget):
         layout.addWidget(scroll)
 
         main_layout = QVBoxLayout(scroll_widget)
-        main_layout.setContentsMargins(5, 5, 5, 5)
+        # SIN MÁRGENES GRISES
+        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(20)
 
-        # Métricas principales (3 métricas en fila)
+        # Métricas principales (3 métricas en fila) - CENTRADAS
         metrics_layout = QHBoxLayout()
         metrics_layout.setSpacing(20)
+        metrics_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Métrica 1: Total de Usuarios
         card1 = MetricCard(
@@ -773,35 +800,40 @@ class DashboardPanel(QWidget):
 
         main_layout.addLayout(metrics_layout)
 
-        # Gráficos en grid 3x2 (3 columnas, 2 filas como en CustomTkinter)
+        # Gráficos en grid 2x3 (2 COLUMNAS, 3 FILAS para verlas más grandes)
         tema = self.theme_manager.current_theme if self.theme_manager else 'dark'
 
-        # Grid de gráficos
+        # Grid de gráficos - 2 COLUMNAS
         charts_grid = QGridLayout()
-        charts_grid.setSpacing(20)
-        charts_grid.setContentsMargins(0, 0, 0, 0)
+        charts_grid.setSpacing(15)
+        charts_grid.setContentsMargins(10, 10, 10, 10)
 
-        # FILA 1
+        # FILA 1 (2 gráficas)
         chart1 = ChartCard("📊 Usuarios por Unidad", "horizontal_bar", USUARIOS_POR_UNIDAD_DATA, tema, self.theme_manager)
         chart2 = ChartCard("🍩 Progreso General por Unidad", "donut", PROGRESO_UNIDADES_DATA, tema, self.theme_manager)
-        chart3 = ChartCard("📈 Tendencia Semanal", "line", TENDENCIA_SEMANAL_DATA, tema, self.theme_manager)
 
-        self.chart_cards.extend([chart1, chart2, chart3])
+        self.chart_cards.extend([chart1, chart2])
 
         charts_grid.addWidget(chart1, 0, 0)
         charts_grid.addWidget(chart2, 0, 1)
-        charts_grid.addWidget(chart3, 0, 2)
 
-        # FILA 2
+        # FILA 2 (2 gráficas)
+        chart3 = ChartCard("📈 Tendencia Semanal", "line", TENDENCIA_SEMANAL_DATA, tema, self.theme_manager)
         chart4 = ChartCard("📊 Top 5 Unidades de Mayor Progreso", "bar", TOP_5_UNIDADES_DATA, tema, self.theme_manager)
+
+        self.chart_cards.extend([chart3, chart4])
+
+        charts_grid.addWidget(chart3, 1, 0)
+        charts_grid.addWidget(chart4, 1, 1)
+
+        # FILA 3 (2 gráficas)
         chart5 = ChartCard("🎯 Cumplimiento de Objetivos", "donut", CUMPLIMIENTO_OBJETIVOS_DATA, tema, self.theme_manager)
         chart6 = ChartCard("📉 Módulos con Menor Avance", "horizontal_bar", MODULOS_MENOR_AVANCE_DATA, tema, self.theme_manager)
 
-        self.chart_cards.extend([chart4, chart5, chart6])
+        self.chart_cards.extend([chart5, chart6])
 
-        charts_grid.addWidget(chart4, 1, 0)
-        charts_grid.addWidget(chart5, 1, 1)
-        charts_grid.addWidget(chart6, 1, 2)
+        charts_grid.addWidget(chart5, 2, 0)
+        charts_grid.addWidget(chart6, 2, 1)
 
         main_layout.addLayout(charts_grid)
 

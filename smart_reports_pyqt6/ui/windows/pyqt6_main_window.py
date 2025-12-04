@@ -96,7 +96,8 @@ class MainWindow(QMainWindow):
         """)
 
         layout = QHBoxLayout(top_bar)
-        layout.setContentsMargins(30, 10, 30, 10)
+        # Reducir márgenes laterales
+        layout.setContentsMargins(20, 10, 20, 10)
 
         # Mensaje de bienvenida con rol
         welcome_label = QLabel(f"Bienvenido {self.role.upper()}")
